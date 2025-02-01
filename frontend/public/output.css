@@ -554,6 +554,9 @@
   .flex {
     display: flex;
   }
+  .w-full {
+    width: 100%;
+  }
   .items-center {
     align-items: center;
   }
@@ -562,12 +565,6 @@
   }
   .rounded-md {
     border-radius: var(--radius-md);
-  }
-  .bg-blue-500 {
-    background-color: var(--color-blue-500);
-  }
-  .bg-red-500 {
-    background-color: var(--color-red-500);
   }
   .bg-sky-500 {
     background-color: var(--color-sky-500);
@@ -581,13 +578,27 @@
   .text-center {
     text-align: center;
   }
+  .font-\[Flux\] {
+    font-family: Flux;
+  }
+  .text-3xl {
+    font-size: var(--text-3xl);
+    line-height: var(--tw-leading, var(--text-3xl--line-height));
+  }
   .text-4xl {
     font-size: var(--text-4xl);
     line-height: var(--tw-leading, var(--text-4xl--line-height));
   }
+  .text-xl {
+    font-size: var(--text-xl);
+    line-height: var(--tw-leading, var(--text-xl--line-height));
+  }
   .font-bold {
     --tw-font-weight: var(--font-weight-bold);
     font-weight: var(--font-weight-bold);
+  }
+  .text-red-500 {
+    color: var(--color-red-500);
   }
   .text-white {
     color: var(--color-white);
@@ -595,13 +606,59 @@
   .underline {
     text-decoration-line: underline;
   }
-  .hover\:opacity-10 {
+  .hover\:opacity-80 {
     &:hover {
       @media (hover: hover) {
-        opacity: 10%;
+        opacity: 80%;
       }
     }
   }
+}
+@font-face {
+  font-family: 'Flux';
+  src: url('/fonts/static/AfacadFlux-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Flux';
+  src: url('/fonts/static/AfacadFlux-Thin.ttf') format('truetype');
+  font-weight: 100;
+}
+@font-face {
+  font-family: 'Flux';
+  src: url('/fonts/static/AfacadFlux-ExtraLight.ttf') format('truetype');
+  font-weight: 200;
+}
+@font-face {
+  font-family: 'Flux';
+  src: url('/fonts/static/AfacadFlux-Light.ttf') format('truetype');
+  font-weight: 300;
+}
+@font-face {
+  font-family: 'Flux';
+  src: url('/fonts/static/AfacadFlux-Medium.ttf') format('truetype');
+  font-weight: 500;
+}
+@font-face {
+  font-family: 'Flux';
+  src: url('/fonts/static/AfacadFlux-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+}
+@font-face {
+  font-family: 'Flux';
+  src: url('/fonts/static/AfacadFlux-Bold.ttf') format('truetype');
+  font-weight: 700;
+}
+@font-face {
+  font-family: 'Flux';
+  src: url('/fonts/static/AfacadFlux-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+}
+@font-face {
+  font-family: 'Flux';
+  src: url('/fonts/static/AfacadFlux-Black.ttf') format('truetype');
+  font-weight: 900;
 }
 @keyframes spin {
   to {
