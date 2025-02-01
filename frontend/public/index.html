@@ -4,11 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./global.css">
+    <link rel="stylesheet" href="./output.css">
     <title>ft_transcendence</title>
 </head>
 <body>
     <div id="app"></div>
-    <script type="module" src="./src/main.js"></script>
+    <script type="module" src="../src/main.js"></script>
+    <script>
+      (function connectLiveReload() {
+        const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+        const ws = new WebSocket(protocol + '://' + location.host);
+        
+        ws.onopen = () => {
+          console.log('Live-reload WebSocket connected.');
+        };
+        
+        ws.onmessage = (event) => {
+          if (event.data === 'reload') {
+            console.log('Reloading due to changes...');
+            location.reload();
+          }
+        };
 
+        ws.onerror = (err) => {
+          console.error('WebSocket error:', err);
+        };
+
+        // Optionally try to reconnect when the connection is closed:
+        ws.onclose = () => {
+          console.log('WebSocket closed. Reconnecting in 1s...');
+          setTimeout(connectLiveReload, 1000);
+        };
+      })();
+      </script>    
 </body>
 </html>

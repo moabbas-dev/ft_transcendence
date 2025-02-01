@@ -9,7 +9,7 @@ const routes = {
 function router() {
   const path = window.location.pathname;
   const page = routes[path] || HomePage;
-
+	console.log("YYYYYY");
   const appContainer = document.getElementById('app');
   appContainer.innerHTML = '';
   page.render(appContainer);
@@ -22,3 +22,4 @@ export function navigate(path) {
 
 window.addEventListener('popstate', router);
 document.addEventListener('DOMContentLoaded', router);
+document.body.addEventListener('change', router);

@@ -10,7 +10,7 @@ export default {
 
     const aboutButton = Button({
       text: 'About Game',
-      classes: 'mx-auto',
+      classes: 'mx-auto hover:opacity-10',
       onClick: () => {
         navigate('/about');
       },
