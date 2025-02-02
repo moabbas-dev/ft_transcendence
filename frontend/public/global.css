@@ -1,4 +1,9 @@
 @import "tailwindcss";
+@import url('./boxicons/css/boxicons.min.css');
+
+:root {
+	--main-color: #04809F !important;
+}
 
 @font-face {
 	font-family: 'Flux';

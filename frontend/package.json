@@ -1,7 +1,6 @@
 {
   "dependencies": {
     "@tailwindcss/cli": "^4.0.3",
-    "boxicons": "^2.1.4",
     "tailwindcss": "^4.0.3"
   },
   "name": "frontend",
