@@ -4,9 +4,10 @@ import { navigate } from '../router.js';
 
 export const SignIn = createComponent((props) => {
   const form = document.createElement('div');
-  form.className = `w-[93vw] bg-white p-4 sm:p-8 rounded-lg shadow-md ${props.styles || ''}`;
+  form.className = `w-[93vw] sm:w-100 bg-white p-4 sm:p-8 rounded-lg shadow-md ${props.styles || ''}`;
   form.innerHTML = `
-    <h1 class="text-2xl font-bold text-center underline">Sign In</h1>
+  <div class="flex flex-col gap-5">
+    <h1 class="text-2xl font-bold text-center underline">Welcome Back!</h1>
     <form class="flex flex-col gap-2">
       <div>
         <label for="email" class="block text-base font-medium text-gray-700">Email</label>
@@ -21,11 +22,15 @@ export const SignIn = createComponent((props) => {
           </span>
         </div>
       </div>
-	  <div class="flex items-center justify-end w-full forgot">
-	  	<!-- Forgot Password Button -->
-	  </div>
-	  <!-- Sign In Button -->
+    <div class="flex items-center justify-end w-full forgot">
+      <!-- Forgot Password Button -->
+    </div>
+    <!-- Sign In Button -->
     </form>
+    <div class="w-full text-center pt-2">
+      Don't have an Account? <span class="signup-link hover:cursor-pointer hover:opacity-80 text-[var(--main-color)]">Let's SignUp</span>
+    </div>
+    </div>
   `;
   const formElement = form.querySelector('form');
   const emailInput = form.querySelector('#email');
@@ -38,7 +43,7 @@ export const SignIn = createComponent((props) => {
     eventType: 'click',
     onClick: (e) => {
       e.preventDefault();
-	  console.log('Input values:', emailInput.value, passwordInput.value);
+	  console.log('Input values:', emailInput.value);
     }
   });
   formElement.appendChild(signInButton);
@@ -55,6 +60,14 @@ export const SignIn = createComponent((props) => {
   })
   form.querySelector('.forgot').appendChild(forgotBtn)
 
+  const signupLink = form.querySelector('.signup-link');
+  signupLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (props.onSwitchToSignUp) {
+      props.onSwitchToSignUp();
+    }
+  });
+
   const togglePassword = form.querySelector('.toggle-password');
   const eyeIcon = togglePassword.querySelector('.hide-show');
   const handleTogglePassword = (e) => {
@@ -66,6 +79,6 @@ export const SignIn = createComponent((props) => {
   };
 
   togglePassword.addEventListener('click', handleTogglePassword);
-  useCleanup(handleTogglePassword)
+  useCleanup(() => togglePassword.removeEventListener('click', handleTogglePassword))
   return form;
 });

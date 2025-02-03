@@ -14,7 +14,7 @@ export function createComponent(renderFn) {
         const prevInstance = currentInstance;
         currentInstance = instance;
         hookIndices.set(instance, 0);
-        
+
         // Run cleanup before new render
         if (cleanupFns.has(instance)) {
           const cleanup = cleanupFns.get(instance);

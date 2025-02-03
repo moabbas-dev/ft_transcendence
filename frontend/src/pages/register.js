@@ -1,15 +1,43 @@
-import {SignIn} from '../components/SignIn.js';
+import { SignIn } from '../components/SignIn.js';
+import { SignUp } from '../components/SignUp.js';
 
 export default {
 	render: (container) => {
 		container.innerHTML = `
-			<div class="flex items-center justify-around">
-				<div class="form flex items-center justify-center h-screen">
+			<div class="flex items-center justify-center">
+				<section class="flex items-center justify-center h-screen transition-opacity duration-300">
 					<!-- Sign In Form -->
-				</div>
+				</section>
 			</div>
 		`;
-		const form = container.querySelector('.form');
-		form.appendChild(SignIn({styles: 'mx-auto'}));
+
+		const animateTransition = (newComponentFn) => {
+			section.classList.add('opacity-0');
+			setTimeout(() => {
+			  section.innerHTML = '';
+			  section.appendChild(newComponentFn());
+			  section.classList.remove('opacity-0');
+			}, 300);
+		};
+
+		const section = container.querySelector('section');
+		const renderSignIn = () => {
+			animateTransition(() =>
+			  SignIn({
+				styles: 'mx-auto',
+				onSwitchToSignUp: renderSignUp, 
+			  })
+			);
+		  };
+	  
+		  const renderSignUp = () => {
+			animateTransition(() =>
+			  SignUp({
+				styles: 'mx-auto',
+				onSwitchToSignIn: renderSignIn,
+			  })
+			);
+		  };
+		renderSignIn();
 	}
 }
