@@ -7,7 +7,7 @@ export default {
 		<div class="h-screen flex flex-col items-center justify-center bg-gray-900 text-white">
 		  <div class="text-center page-body">
 			<!-- 404 Icon -->
-			<i class='bx bx-ghost text-[--main-color] text-9xl mb-6'></i>
+			<i class='bx bx-ghost text-[--main-color] text-9xl mb-6 drop-shadow-[1px_1px_20px_white]'></i>
 			
 			<!-- Title -->
 			<h1 class="text-6xl font-bold mb-4">404</h1>

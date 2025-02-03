@@ -4,9 +4,9 @@ import { navigate } from '../router.js';
 
 export const SignIn = createComponent((props) => {
   const form = document.createElement('div');
-  form.className = `w-[93vw] sm:w-100 bg-white p-4 sm:p-8 rounded-lg shadow-md ${props.styles || ''}`;
+  form.className = `w-[93vw] sm:w-100 bg-white rounded-lg p-4 sm:p-8 ${props.styles || ''}`;
   form.innerHTML = `
-  <div class="flex flex-col gap-5">
+  <div class="flex flex-col gap-3">
     <h1 class="text-2xl font-bold text-center underline">Welcome Back!</h1>
     <form class="flex flex-col gap-2">
       <div>
@@ -27,7 +27,7 @@ export const SignIn = createComponent((props) => {
     </div>
     <!-- Sign In Button -->
     </form>
-    <div class="w-full text-center pt-2">
+    <div class="w-full text-center pt-1">
       Don't have an Account? <span class="signup-link hover:cursor-pointer hover:opacity-80 text-[var(--main-color)]">Let's SignUp</span>
     </div>
     </div>

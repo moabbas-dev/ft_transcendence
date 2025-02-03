@@ -3,7 +3,7 @@ import { Button } from "./Button.js";
 
 export const SignUp = createComponent((props) => {
 	const form = document.createElement('div')
-	form.className = `w-[93vw] sm:w-100 bg-white p-4 sm:p-8 rounded-lg shadow-md ${props.styles || ''}`;
+	form.className = `w-[93vw] sm:w-100 bg-white rounded-lg p-4 sm:p-8  ${props.styles || ''}`;
 	form.innerHTML = `
 	<div class="flex flex-col gap-5">
 	  <h1 class="text-2xl font-bold text-center underline">Create a new Account</h1>
@@ -32,7 +32,7 @@ export const SignUp = createComponent((props) => {
 	  	</div>
 		<!-- SignUp Button -->
 	  </form>
-	  <div class="w-full text-center pt-2">
+	  <div class="w-full text-center pt-1">
 	  	Already have an Account? <span class="signin-link hover:cursor-pointer hover:opacity-80 text-[var(--main-color)]">Let's Login</span>
 	  </div>
 	</div>
