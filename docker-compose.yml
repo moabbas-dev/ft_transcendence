@@ -1,0 +1,39 @@
+# version: '3.8'
+
+services:
+  # backend:
+  #   build: ./backend
+  #   container_name: ft_backend
+  #   restart: always
+  #   ports:
+  #     - "${BACKEND_PORT}:${BACKEND_PORT}"
+  #   env_file:
+  #     - .env
+  #   networks:
+  #     - ft_network
+  #   volumes:
+  #     - ./backend:/app
+  #     - /app/node_modules
+  #     - ./data:/app/data  # Persistent storage for SQLite database file
+
+  frontend:
+    build: ./frontend
+    container_name: ft_frontend
+    restart: always
+    ports:
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+    env_file:
+      - .env
+    networks:
+      - ft_network
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+
+networks:
+  ft_network:
+    driver: bridge
+
+volumes:
+  data:
