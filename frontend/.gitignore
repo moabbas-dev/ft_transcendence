@@ -5,6 +5,8 @@
 
 /public/boxicons
 
+/dist
+
 # debug
 npm-debug.log*
 yarn-debug.log*
