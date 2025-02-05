@@ -3,29 +3,23 @@ import { SignUp } from '../components/SignUp.js';
 import { PongAnimation } from '../components/PingPongAnimation.js';
 
 export default {
-	render: (container) => {
+	render: (container:HTMLElement) => {
 		container.innerHTML = `
-		<div class="fixed inset-0 overflow-hidden">
+		<div class="loaded-div fixed inset-0 overflow-hidden">
 			<canvas id="pongCanvas" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 sm:translate-x-0 sm:translate-y-0 sm:top-0 sm:left-0 z-0 w-[100vh] h-[100vw] sm:w-[100vw] sm:h-[100vh] inset-0 rotate-90 origin-center sm:rotate-0"></canvas>
 			<div class="relative z-10 flex items-center justify-center">
-				<section class="flex items-center justify-center h-screen">
+				<section class="flex items-center justify-center h-screen opacity-90">
 					<div class="bg-white shadow-[0_0_10px_rgba(0,0,0,0.15)] shadow-white rounded-lg">
 						<aside class="transition-opacity duration-400">
 						</aside>
 						<!-- SignIn, SignUp Forms Here -->
 						<div class="flex flex-col gap-3">
-							<div class="w-full">
+							<div class="w-full p-1">
 								<button type="button" class="w-full flex items-center justify-start p-2 text-white bg-[var(--main-color)] hover:cursor-pointer hover:opacity-80 rounded-md transition-all duration-300">
 									<i class='bx bxl-google text-2xl'></i>
 									<span class="flex-1 text-center">Continue with google</span>
 								</button>
-							</div>
-							<div class="shadow-md">
-								<button type="button" class="w-full flex items-center justify-start p-2 text-white bg-[var(--main-color)] hover:cursor-pointer hover:opacity-80 rounded-md transition-all duration-300">
-									<img src="/assets/42_Logo.png" class="w-6 h-6">
-									<span class="flex-1 text-center">Continue with 42 account</span>
-								</button>
-							</div>
+							</div>	
 						</div>
 					</div>
 				</section>
@@ -33,7 +27,7 @@ export default {
 		</div>
 		`;
 
-		const animateTransition = (newComponentFn) => {
+		const animateTransition = (newComponentFn:any) => {
 			section.classList.add('opacity-0');
 			setTimeout(() => {
 			  section.innerHTML = '';
@@ -42,7 +36,7 @@ export default {
 			}, 400);
 		};
 
-		const section = container.querySelector('aside');
+		const section:HTMLElement = container.querySelector('aside')!;
 		const renderSignIn = () => {
 			animateTransition(() =>
 			  SignIn({
@@ -63,12 +57,11 @@ export default {
 		renderSignIn();
 
 		console.log('Script loaded');
-		const canvas = document.getElementById('pongCanvas');
+		const canvas = document.getElementById('pongCanvas') as HTMLCanvasElement;
 		console.log('Canvas element:', canvas);
 		if (canvas) {
 			const pong = new PongAnimation(canvas);
 			console.log('PongAnimation instantiated:', pong);
-			
 		}
 	}
 }

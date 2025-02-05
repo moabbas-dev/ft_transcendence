@@ -2,8 +2,8 @@ import { Button } from '../components/Button.js';
 import { navigate } from '../router.js';
 
 export default {
-  render: (container) => {
-    const add = (component) => {
+  render: (container:HTMLElement) => {
+    const add = (component:any) => {
       container.appendChild(component);
     }
 

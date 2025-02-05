@@ -1,5 +1,7 @@
-@import "tailwindcss";
 @import url('./boxicons/css/boxicons.min.css');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
 	--main-color: #04809F !important;
@@ -7,55 +9,55 @@
 
 @font-face {
 	font-family: 'Flux';
-	src: url('/fonts/static/AfacadFlux-Regular.ttf') format('truetype');
+	src: url('./fonts/static/AfacadFlux-Regular.ttf') format('truetype');
 	font-weight: normal;
 	font-style: normal;
 }
 
 @font-face {
 	font-family: 'Flux';
-	src: url('/fonts/static/AfacadFlux-Thin.ttf') format('truetype');
+	src: url('./fonts/static/AfacadFlux-Thin.ttf') format('truetype');
 	font-weight: 100;
 }
 
 @font-face {
 	font-family: 'Flux';
-	src: url('/fonts/static/AfacadFlux-ExtraLight.ttf') format('truetype');
+	src: url('./fonts/static/AfacadFlux-ExtraLight.ttf') format('truetype');
 	font-weight: 200;
 }
   
 @font-face {
 	font-family: 'Flux';
-	src: url('/fonts/static/AfacadFlux-Light.ttf') format('truetype');
+	src: url('./fonts/static/AfacadFlux-Light.ttf') format('truetype');
 	font-weight: 300;
 }
 
 @font-face {
 	font-family: 'Flux';
-	src: url('/fonts/static/AfacadFlux-Medium.ttf') format('truetype');
+	src: url('./fonts/static/AfacadFlux-Medium.ttf') format('truetype');
 	font-weight: 500;
 }
   
 @font-face {
 	font-family: 'Flux';
-	src: url('/fonts/static/AfacadFlux-SemiBold.ttf') format('truetype');
+	src: url('./fonts/static/AfacadFlux-SemiBold.ttf') format('truetype');
 	font-weight: 600;
 }
 
 @font-face {
 	font-family: 'Flux';
-	src: url('/fonts/static/AfacadFlux-Bold.ttf') format('truetype');
+	src: url('./fonts/static/AfacadFlux-Bold.ttf') format('truetype');
 	font-weight: 700;
 }
   
 @font-face {
 	font-family: 'Flux';
-	src: url('/fonts/static/AfacadFlux-ExtraBold.ttf') format('truetype');
+	src: url('./fonts/static/AfacadFlux-ExtraBold.ttf') format('truetype');
 	font-weight: 800;
 }
 
 @font-face {
 	font-family: 'Flux';
-	src: url('/fonts/static/AfacadFlux-Black.ttf') format('truetype');
+	src: url('./fonts/static/AfacadFlux-Black.ttf') format('truetype');
 	font-weight: 900;
 }

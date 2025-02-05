@@ -1,11 +1,11 @@
 // STATE MANAGER IMPROVEMENTS
-let currentInstance = null;
+let currentInstance: { id: symbol; props: {}; render: () => any; } | null = null;
 const componentStates = new WeakMap();
 const hookStates = new WeakMap();
 const hookIndices = new WeakMap();
 const cleanupFns = new WeakMap();
 
-export function createComponent(renderFn) {
+export function createComponent(renderFn: any) {
   return (props = {}) => {
     const instance = {
       id: Symbol('component'),
@@ -40,7 +40,7 @@ export function createComponent(renderFn) {
   };
 }
 
-export function useCleanup(cleanupFn) {
+export function useCleanup(cleanupFn: any) {
   if (!currentInstance) {
     throw new Error('useCleanup must be called within a component');
   }
@@ -48,7 +48,7 @@ export function useCleanup(cleanupFn) {
 }
 
 export const StateManager = {
-  useState(initialValue) {
+  useState(initialValue: any) {
     if (!currentInstance) {
       throw new Error('Hooks must be called within a component');
     }
@@ -70,7 +70,7 @@ export const StateManager = {
           ? initialValue(instance.props) 
           : initialValue,
         // In StateManager's setState
-        setState: (newValue) => {
+        setState: (newValue: any) => {
           const prevState = hooks[hookIndex].state;
           const nextState = typeof newValue === 'function' 
             ? newValue(prevState) 

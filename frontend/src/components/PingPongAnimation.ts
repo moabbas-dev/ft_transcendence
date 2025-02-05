@@ -1,5 +1,21 @@
 export class PongAnimation {
-	constructor(canvas) {
+
+	canvas: HTMLCanvasElement;
+	ctx: CanvasRenderingContext2D | null;
+	ball: {
+		x: number;
+		y: number;
+		radius: number;
+		dx: number;
+		dy: number;
+	};
+	paddles: {
+		left: { y: number; height: number };
+		right: { y: number; height: number };
+	};
+	animationFrame: number | null;
+
+	constructor(canvas: HTMLCanvasElement) {
 		this.canvas = canvas;
 		this.ctx = canvas.getContext('2d');
 		this.resize();
@@ -7,14 +23,14 @@ export class PongAnimation {
 		this.ball = {
 			x: this.canvas.width / 2,
 			y: this.canvas.height / 2,
-			radius: 8,
+			radius: 12,
 			dx: 4,
 			dy: 4
 		};
 
 		this.paddles = {
-			left: { y: this.canvas.height / 2 - 50, height: 100 },
-			right: { y: this.canvas.height / 2 - 50, height: 100 }
+			left: { y: this.canvas.height / 2 - 50, height: 120 },
+			right: { y: this.canvas.height / 2 - 50, height: 120 }
 		};
 
 		// Animation frame reference
@@ -24,14 +40,13 @@ export class PongAnimation {
 
 	resize() {
 		if (window.matchMedia("(max-width: 640px)").matches) {
-			// Mobile: Swap width and height
 			this.canvas.width = window.innerHeight;
 			this.canvas.height = window.innerWidth;
 		} else {
-			// Desktop: Normal width and height
 			this.canvas.width = window.innerWidth;
 			this.canvas.height = window.innerHeight;
-		}	}
+		}
+	}
 
 	init() {
 		// Add resize listener
@@ -42,6 +57,8 @@ export class PongAnimation {
 	}
 
 	draw() {
+		if (this.ctx === null)
+			return
 		// Clear canvas
 		this.ctx.fillStyle = 'rgba(17, 24, 39, 0.9)'; // Match bg-gray-900 with opacity
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -55,17 +72,24 @@ export class PongAnimation {
 		this.ctx.lineWidth = 2;
 		this.ctx.stroke();
 
-		// Draw ball
+		// Enable glow effect
+		this.ctx.shadowBlur = 15;
+		this.ctx.shadowColor = 'rgba(255, 255, 255, 0.8)'; // White glow
+
+		// Draw ball with glow
 		this.ctx.beginPath();
 		this.ctx.arc(this.ball.x, this.ball.y, this.ball.radius, 0, Math.PI * 2);
-		this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+		this.ctx.fillStyle = 'white'; // Ball color
 		this.ctx.fill();
 
-		// Draw paddles
-		this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-		this.ctx.fillRect(20, this.paddles.left.y, 10, this.paddles.left.height);
-		this.ctx.fillRect(this.canvas.width - 30, this.paddles.right.y, 10, this.paddles.right.height);
+		// Draw paddles with glow
+		this.ctx.fillRect(20, this.paddles.left.y, 20, this.paddles.left.height);
+		this.ctx.fillRect(this.canvas.width - 30, this.paddles.right.y, 20, this.paddles.right.height);
+
+		// Reset glow effect after drawing
+		this.ctx.shadowBlur = 0;
 	}
+
 
 	update() {
 		// Update ball position
@@ -108,8 +132,9 @@ export class PongAnimation {
 	}
 
 	destroy() {
-		cancelAnimationFrame(this.animationFrame);
+		if (this.animationFrame !== null) {
+			cancelAnimationFrame(this.animationFrame);
+		}
 		window.removeEventListener('resize', this.resize);
 	}
 }
-
