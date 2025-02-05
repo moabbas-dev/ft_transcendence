@@ -1,4 +1,4 @@
-@import url('./boxicons/css/boxicons.min.css');
+@import url('/node_modules/boxicons/css/boxicons.min.css');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
