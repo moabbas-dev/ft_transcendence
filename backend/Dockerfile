@@ -1,5 +1,5 @@
 # backend/Dockerfile
-FROM node:18
+FROM node:18-alpine
 
 # Create app directory
 WORKDIR /app
@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm install && npm install fastify
 
 # Copy the rest of the application code
 COPY . .
