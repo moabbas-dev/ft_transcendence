@@ -57,12 +57,9 @@ export default {
 		  };
 		renderSignIn();
 
-		console.log('Script loaded');
 		const canvas = document.getElementById('pongCanvas') as HTMLCanvasElement;
-		console.log('Canvas element:', canvas);
 		if (canvas) {
 			const pong = new PongAnimation(canvas);
-			console.log('PongAnimation instantiated:', pong);
 		}
 	}
 }

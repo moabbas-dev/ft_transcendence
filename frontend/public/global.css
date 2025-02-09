@@ -5,7 +5,8 @@
 
 :root {
 	--main-color: #04809F !important;
-	--bg-color: rgb(17, 24, 39);
+	--bg-color: rgb(17, 24, 39) !important;
+	--bg-hover: rgb(26, 36, 58) !important;
 }
 
 @font-face {
@@ -61,4 +62,30 @@
 	font-family: 'Flux';
 	src: url('./fonts/static/AfacadFlux-Black.ttf') format('truetype');
 	font-weight: 900;
+}
+
+.styled-scrollbar {
+    scrollbar-width: thin;
+	scrollbar-color: white var(--bg-color);
+}
+
+  /* WebKit browsers */
+.styled-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+	scrollbar-color: var(--bg-hover) var(--bg-color);
+}
+
+.styled-scrollbar::-webkit-scrollbar-track {
+    background: var(--bg-hover);
+    border-radius: 4px;
+}
+
+.styled-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--bg-color);
+    border-radius: 4px;
+}
+
+.styled-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #2d3748;
 }
