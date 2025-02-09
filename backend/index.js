@@ -1,8 +1,24 @@
+require('dotenv').config();
 const fastify = require('fastify')({ logger: true });
 const sqlite3 = require('sqlite3').verbose();
 
 // Create a new SQLite database connection
 const db = new sqlite3.Database('./data/database.sqlite');
+module.exports = { db };
+
+
+const { createTables } = require('./src/db/initDb');
+createTables(db);
+
+fastify.register(require('fastify-jwt'), {
+  secret: process.env.JWT_SECRET_KEY,
+});
+
+
+fastify.register(require('./src/routes/AuthRoutes'));
+fastify.register(require('./src/routes/UserRoutes'));
+fastify.register(require('./src/routes/FriendRoutes'));
+fastify.register(require('./src/routes/BlockedUserRoutes'));
 
 // Test route
 fastify.get('/', async (request, reply) => {
@@ -28,7 +44,7 @@ const closeDatabase = () => {
 const handleShutdown = async (signal) => {
   fastify.log.info(`Received signal: ${signal}`);
   fastify.log.info('Shutting down server...');
-
+  
   try {
     await closeDatabase();
     fastify.log.info('Server shutdown complete.');
