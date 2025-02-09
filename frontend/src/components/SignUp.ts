@@ -1,6 +1,7 @@
 import { createComponent, useCleanup } from "../utils/StateManager.js";
 import { Button } from "./Button.js";
 import {validateConfirmPassword, validateEmail, validatePassword} from "../utils/FormValidation.js";
+import { msg } from "../languages/LanguageController.js";
 
 interface SignUpProps {
 	styles: string,
@@ -12,19 +13,19 @@ export const SignUp = createComponent((props: SignUpProps) => {
 	form.className = `w-[93vw] sm:w-96 bg-white rounded-lg p-4 sm:p-8  ${props.styles || ''}`;
 	form.innerHTML = `
 	<div class="flex flex-col gap-5">
-	  <h1 class="text-2xl font-bold text-center underline">Create a new Account</h1>
+	  <h1 class="text-2xl font-bold text-center underline">${msg('register.signup.title')}</h1>
 	  <form class="flex flex-col gap-3">
 		<div>
 		  <label for="email" class="block text-base font-medium text-gray-700">Email</label>
 		  <div>
-		  	<input type="email" id="email" placeholder="Enter an email: user@example.com" autocomplete="email" name="email" class="relative w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--main-color)] focus:border-[var(--main-color)] sm:text-base">
+		  	<input type="email" id="email" placeholder="${msg('register.signup.emailPlaceholder')}" autocomplete="email" name="email" class="relative w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--main-color)] focus:border-[var(--main-color)] sm:text-base">
 		  </div> 
 		</div>
 		<div>
 		  <label for="password" class="block text-base font-medium text-gray-700">Password</label>
 		  <div class="relative mt-1">
 		  	<div>
-				<input type="password" id="password" placeholder="Enter a strong Password" autocomplete="current-password" name="password" class="relative w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--main-color)] focus:border-[var(--main-color)] sm:text-base pr-10">
+				<input type="password" id="password" placeholder="${msg('register.signup.passwordPlaceholder')}" autocomplete="current-password" name="password" class="relative w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--main-color)] focus:border-[var(--main-color)] sm:text-base pr-10">
 			</div>
 			<span class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer toggle-password text-lg">
 			  <i class='bx bx-hide hide-show pointer-events-none'></i>
@@ -32,10 +33,10 @@ export const SignUp = createComponent((props: SignUpProps) => {
 		  </div>
 		</div>
 		<div>
-			<label for="conf-password" class="block text-base font-medium text-gray-700">Confirm Password</label>
+			<label for="conf-password" class="block text-base font-medium text-gray-700">${msg('register.signup.passwordConfirmTitle')}</label>
 			<div class="relative mt-1">
 			<div>
-				<input type="password" id="conf-password" placeholder="Retype your password" autocomplete="current-password" name="password" class="relative w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--main-color)] focus:border-[var(--main-color)] sm:text-base pr-10">
+				<input type="password" id="conf-password" placeholder="${msg('register.signup.passwordConfirm')}" autocomplete="current-password" name="password" class="relative w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--main-color)] focus:border-[var(--main-color)] sm:text-base pr-10">
 			</div>
 			<span class="absolute inset-y-0 right-0 flex items-center h-fit py-3 pr-3 cursor-pointer toggle-password text-lg">
 				<i class='bx bx-hide hide-show pointer-events-none'></i>
@@ -45,11 +46,13 @@ export const SignUp = createComponent((props: SignUpProps) => {
 		<!-- SignUp Button -->
 	  </form>
 	  <div class="w-full text-center pt-1">
-	  	Already have an Account? <span class="signin-link hover:cursor-pointer hover:opacity-80 text-[var(--main-color)]">Let's Login</span>
+	  	${msg('register.signup.acc_question')} <span class="signin-link hover:cursor-pointer hover:opacity-80 text-[var(--main-color)]">${msg('register.signup.signin_btn')}</span>
 	  </div>
 	</div>
 	`;
-
+	// signup_btn
+	// acc_question
+	// signin_btn
 	const formElement:HTMLFormElement = form.querySelector('form')!;
 	const emailInput:HTMLInputElement = form.querySelector('#email')!;
 	const passwordInput:HTMLInputElement = form.querySelector('#password')!;
@@ -57,7 +60,7 @@ export const SignUp = createComponent((props: SignUpProps) => {
 
 	const signUpButton = Button({
 	  type: 'submit',
-	  text: 'Sign Up',
+	  text: msg('register.signup.signup_btn'),
 	  styles: 'w-full font-semibold p-2 text-base text-white',
 	  eventType: 'click',
 	  onClick: (e: MouseEvent) => {
@@ -96,6 +99,6 @@ export const SignUp = createComponent((props: SignUpProps) => {
 	togglePassword[1].addEventListener('click', handleTogglePassword);
 	useCleanup(() => togglePassword[0].removeEventListener('click', handleTogglePassword))
 	useCleanup(() => togglePassword[1].removeEventListener('click', handleTogglePassword))
-	
+
 	return form;
 })

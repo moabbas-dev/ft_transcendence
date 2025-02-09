@@ -5,6 +5,7 @@
 
 :root {
 	--main-color: #04809F !important;
+	--bg-color: rgb(17, 24, 39);
 }
 
 @font-face {
