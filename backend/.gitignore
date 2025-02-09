@@ -1,6 +1,5 @@
 # dependencies
 /node_modules
-/data
 
 # debug
 npm-debug.log*

@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install && npm install fastify
+RUN npm install
 
 # Copy the rest of the application code
 COPY . .
