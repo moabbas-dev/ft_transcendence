@@ -1,6 +1,7 @@
 import { SignIn } from '../components/SignIn.js';
 import { SignUp } from '../components/SignUp.js';
 import { PongAnimation } from '../components/PingPongAnimation.js';
+import { msg } from '../languages/LanguageController.js';
 
 export default {
 	render: (container:HTMLElement) => {
@@ -17,7 +18,7 @@ export default {
 							<div class="w-full p-1">
 								<button type="button" class="w-full flex items-center justify-start p-2 text-white bg-[var(--main-color)] hover:cursor-pointer hover:opacity-80 rounded-md transition-all duration-300">
 									<i class='bx bxl-google text-2xl'></i>
-									<span class="flex-1 text-center">Continue with google</span>
+									<span class="flex-1 text-center">${msg('register.continueGoogle')}</span>
 								</button>
 							</div>	
 						</div>
