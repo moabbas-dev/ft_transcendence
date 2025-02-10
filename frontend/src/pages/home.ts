@@ -6,7 +6,7 @@ import { PongAnimation } from '../components/PingPongAnimation.js';
 export default {
   render: (container: HTMLElement) => {
     container.innerHTML = `
-      <div class="w-screen bg-[var(--bg-color)] h-screen">
+      <div class="w-screen bg-[var(--bg-color)] h-[100dvh]">
         <div class="container mx-auto w-full p-4 flex justify-end gap-4">
             <select id="languages" name="languages_options" title="Select your language" class="text-lg bg-[var(--bg-color)] text-white focus:outline-none hover:opacity-80 hover:cursor-pointer">
               <option value="en" selected>en</option>
