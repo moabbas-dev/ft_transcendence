@@ -11,7 +11,7 @@ const { createTables } = require('./src/db/initDb');
 createTables(db);
 
 fastify.register(require('fastify-jwt'), {
-  secret: process.env.JWT_SECRET_KEY,
+  secret: 'uPdPHqezhZFFXwJLSOvEqLx86EaJsBgVazod8spCxqJ0LBOIXQCK3+vqJ210kD3hmOe0FIgDqU2iA6eNmelf2Q==',
 });
 
 
@@ -19,6 +19,8 @@ fastify.register(require('./src/routes/AuthRoutes'));
 fastify.register(require('./src/routes/UserRoutes'));
 fastify.register(require('./src/routes/FriendRoutes'));
 fastify.register(require('./src/routes/BlockedUserRoutes'));
+fastify.register(require('./src/routes/SessionRoutes'));
+fastify.register(require('./src/routes/TwoFactorCodeRoutes'));
 
 // Test route
 fastify.get('/', async (request, reply) => {
