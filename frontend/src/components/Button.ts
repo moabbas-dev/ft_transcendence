@@ -6,7 +6,6 @@ interface ButtonProps {
 	styles: string,
 	eventType: string,
 	onClick: () => void,
-
 }
 
 export const Button = createComponent((props: ButtonProps) => {
