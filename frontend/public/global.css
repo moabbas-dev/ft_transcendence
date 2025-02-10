@@ -89,3 +89,33 @@
 .styled-scrollbar::-webkit-scrollbar-thumb:hover {
     background: #2d3748;
 }
+
+@keyframes slideUp {
+    from {
+	  display: fixed;
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+}
+
+.animate-slideUp {
+    animation: slideUp 0.5s ease-out forwards;
+	animation-duration: 200ms;
+}
+
+@keyframes slideDown {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(100%);
+	  display: none;
+    }
+}
+
+.animate-slideDown {
+    animation: slideDown 0.5s ease-out forwards;
+	animation-duration: 200ms;
+}
