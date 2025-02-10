@@ -1,34 +1,20 @@
-const { db } = require("../../index");
+const { db } = require('../../index');
 
-class BlockedUser {
+class TwoFactorCode {
 
-    static async create({ userId, blockedUserId }) {
-        const query = `INSERT INTO Blocked_Users (user_id, blocked_user_id)
+    static async create({ userId, code }) {
+        const query = `INSERT INTO Two_Factor_Codes (user_id, code)
                         VALUES (?, ?)`;
         return new Promise((resolve, reject) => {
-            db.run(query, [userId, blockedUserId], (err) => {
+            db.run(query, [userId, code], (err) => {
                 if (err) reject(err);
                 else resolve(this.lastID);
             });
         });
     }
 
-    static async getUserBlocks(userId) {
-        const query = `
-            SELECT u.id, u.nickname, u.avatar_url
-            FROM Blocked_Users b
-            JOIN Users u ON b.blocked_user_id = u.id
-            WHERE b.user_id = ?`;
-        return new Promise((resolve, reject) => {
-            db.all(query, [userId], (err, rows) => {
-                if (err) reject(err);
-                else resolve(rows);
-            });
-        });
-    }
-
     static async getAll() {
-        const query = `SELECT * FROM Blocked_Users`;
+        const query = `SELECT * FROM Two_Factor_Codes`;
         return new Promise((resolve, reject) => {
             db.all(query, (err, rows) => {
                 if (err) reject(err);
@@ -38,7 +24,7 @@ class BlockedUser {
     }
 
     static async getById(id) {
-        const query = `SELECT * FROM Blocked_Users WHERE id = ?`;
+        const query = `SELECT * FROM Two_Factor_Codes WHERE id = ?`;
         return new Promise((resolve, reject) => {
             db.get(query, [id], (err, row) => {
                 if (err) reject(err);
@@ -48,7 +34,7 @@ class BlockedUser {
     }
 
     static async delete(id) {
-        const query = `DELETE FROM Blocked_Users WHERE id = ?`;
+        const query = `DELETE FROM Two_Factor_Codes WHERE id = ?`;
         return new Promise((resolve, reject) => {
             db.run(query, [id], (err) => {
                 if (err) reject(err);
@@ -58,4 +44,4 @@ class BlockedUser {
     }
 }
 
-module.exports = BlockedUser;
+module.exports = TwoFactorCode;
