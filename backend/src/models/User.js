@@ -3,14 +3,13 @@ const { hashPassword, verifyPassword } = require('../utils/auth');
 
 class User {
 
-  static async create({ email, password, nickname, googleId = null }) {
-    const passwordHash = await hashPassword(password);
+  static async create({ email, password, nickname, full_name, google_id = null }) {
     const query = `
-      INSERT INTO Users (email, password_hash, nickname, google_id)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO Users (email, password, nickname, full_name, google_id)
+      VALUES (?, ?, ?, ?, ?)
     `;
     return new Promise((resolve, reject) => {
-      db.run(query, [email, passwordHash, nickname, googleId], function (err) {
+      db.run(query, [email, password, nickname, full_name, google_id], function (err) {
         if (err) reject(err);
         else resolve(this.lastID); // Return the new user ID
       });
@@ -47,14 +46,14 @@ class User {
     });
   }
 
-  static async update(id, { nickname, avatarUrl }) {
+  static async update(id, { nickname, full_name, avatar_url }) {
     const query = `
       UPDATE Users
-      SET nickname = ?, avatar_url = ?, updated_at = CURRENT_TIMESTAMP
+      SET nickname = ?, full_name = ?, avatar_url = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `;
     return new Promise((resolve, reject) => {
-      db.run(query, [nickname, avatarUrl, id], function (err) {
+      db.run(query, [nickname, full_name, avatar_url, id], function (err) {
         if (err) reject(err);
         else resolve(this.changes);
       });
