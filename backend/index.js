@@ -1,14 +1,27 @@
 require('dotenv').config();
 const fastify = require('fastify')({ logger: true });
 const sqlite3 = require('sqlite3').verbose();
+const cors = require('@fastify/cors');
+const { createServer } = require('http');
+const { Server } = require('socket.io');
+
+
+// Enable CORS on fastify
+fastify.register(cors, {
+  origin: '*',
+  methods: ['GET', 'POST'],
+});
+
+
 
 // Create a new SQLite database connection
 const db = new sqlite3.Database('./data/database.sqlite');
-module.exports = { db };
-
-
 const { createTables } = require('./src/db/initDb');
+const { Socket } = require('dgram');
 createTables(db);
+// module.exports = { db };
+
+
 
 fastify.register(require('fastify-jwt'), {
   secret: 'uPdPHqezhZFFXwJLSOvEqLx86EaJsBgVazod8spCxqJ0LBOIXQCK3+vqJ210kD3hmOe0FIgDqU2iA6eNmelf2Q==',
@@ -21,6 +34,36 @@ fastify.register(require('./src/routes/FriendRoutes'));
 fastify.register(require('./src/routes/BlockedUserRoutes'));
 fastify.register(require('./src/routes/SessionRoutes'));
 fastify.register(require('./src/routes/TwoFactorCodeRoutes'));
+
+
+// Create the HTTP server explicitly for Socket.io
+const server = createServer(fastify);
+
+//Attach Socket.io to the server 
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+  },
+});
+
+// Handle socket events
+io.on('connection', (socket) => {
+  console.log(`user connected: ${socket.id}`);
+
+  socket.on('send-chat-message', (message) => {
+    console.log(`Received message from ${socket.id}: ${message}`);
+
+    //broadcast the message to all clients except the sender
+    socket.broadcast.emit('chat-message', message)
+  });
+
+
+  socket.on('disconnect', () => {
+    console.log(`user disconnected: ${socket.id}`)
+  });
+});
+
 
 // Test route
 fastify.get('/', async (request, reply) => {
