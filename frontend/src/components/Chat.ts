@@ -19,14 +19,16 @@ export const Chat = createComponent((props: ChatProps) => {
 					</div>
 				</div>
 			</div>
-			<section class="chat_core overflow-y-auto flex-1">
+			<section id="message-container" class="chat_core overflow-y-auto flex-1">
 			
 			</section>
-			<div class="flex items-center h-fit bg-[var(--bg-color)] gap-2 w-full rounded-full mb-16 sm:mb-4">
-				<input type="text" placeholder="Type your message..." class="focus:outline-none rounded-full bg-[var(--bg-color)] p-3 text-lg text-white flex-1">
-				<button class="flex pr-3 items-center justify-center hover:cursor-pointer hover:opacity-80 rounded-full h-8 w-8 sm:w-12 sm:h-12 text-2xl text-white bg-[var(--bg-color)]">
-					<i class='bx bx-send'></i>
-				</button>
+			<div id="message-container" class="flex items-center h-fit bg-[var(--bg-color)] gap-2 w-full rounded-full mb-16 sm:mb-4">
+				<form id="send-container">
+					<input id="message-input" type="text" placeholder="Type your message..." class="focus:outline-none rounded-full bg-[var(--bg-color)] p-3 text-lg text-white flex-1">
+					<button id="send-button" class="flex pr-3 items-center justify-center hover:cursor-pointer hover:opacity-80 rounded-full h-8 w-8 sm:w-12 sm:h-12 text-2xl text-white bg-[var(--bg-color)]">
+						<i class='bx bx-send'></i>
+					</button>
+				</form>
 			</div>
 		</div>
 	`;

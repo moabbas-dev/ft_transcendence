@@ -1,25 +1,20 @@
 require('dotenv').config();
 const fastify = require('fastify')({ logger: true });
-const sqlite3 = require('sqlite3').verbose();
 const cors = require('@fastify/cors');
-const { createServer } = require('http');
+const sqlite3 = require('sqlite3').verbose();
+const { createServer } = require('http'); // Use http server
 const { Server } = require('socket.io');
 
-
-// Enable CORS on fastify
+// Enable CORS on Fastify
 fastify.register(cors, {
-  origin: '*',
+  origin: '*', // Set this to your specific frontend domain for production
   methods: ['GET', 'POST'],
 });
 
-
-
 // Create a new SQLite database connection
-const db = new sqlite3.Database('./data/database.sqlite');
+const db = new sqlite3.Database('../data/database.sqlite');
 const { createTables } = require('./src/db/initDb');
-const { Socket } = require('dgram');
 createTables(db);
-// module.exports = { db };
 
 
 
@@ -36,10 +31,10 @@ fastify.register(require('./src/routes/SessionRoutes'));
 fastify.register(require('./src/routes/TwoFactorCodeRoutes'));
 
 
-// Create the HTTP server explicitly for Socket.io
-const server = createServer(fastify);
+// Create the HTTP server explicitly for Socket.IO
+const server = createServer(fastify.server);
 
-//Attach Socket.io to the server 
+// Attach Socket.IO to the server
 const io = new Server(server, {
   cors: {
     origin: '*',
@@ -49,21 +44,25 @@ const io = new Server(server, {
 
 // Handle socket events
 io.on('connection', (socket) => {
-  console.log(`user connected: ${socket.id}`);
+  console.log(`User connected: ${socket.id}`);
+  // socket.emit('chat-message', 'Hello World');
+
+  // socket.on('send-chat-message', (data) => {
+  //   console.log(Message from ${data.sender}: ${data.message});
+  //   io.emit('receiveMessage', data);
+  // });
 
   socket.on('send-chat-message', (message) => {
     console.log(`Received message from ${socket.id}: ${message}`);
-
-    //broadcast the message to all clients except the sender
-    socket.broadcast.emit('chat-message', message)
+    
+    // Broadcast the message to all clients except the sender
+    socket.broadcast.emit('chat-message', message);
   });
-
 
   socket.on('disconnect', () => {
-    console.log(`user disconnected: ${socket.id}`)
+    console.log(`User disconnected: ${socket.id}`);
   });
 });
-
 
 // Test route
 fastify.get('/', async (request, reply) => {
