@@ -2,8 +2,8 @@ const User = require('../models/User');
 
 class UserService {
 
-    static async createUser({email, passwordHash, nickname, googleId}) {
-        return await User.create({email, passwordHash, nickname, googleId});
+    static async createUser({email, password, nickname, full_name, google_id}) {
+        return await User.create({email, password, nickname, full_name, google_id});
     }
 
     static async getAllUsers() {
@@ -18,8 +18,8 @@ class UserService {
         return await User.findById(id);
     }
 
-    static async updateUser(id, { nickname, avatarUrl }) {
-        return await User.update(id, { nickname, avatarUrl });
+    static async updateUser(id, { nickname, full_name, avatar_url }) {
+        return await User.update(id, { nickname, full_name, avatar_url });
     }
 
     static async deleteUser(id) {
