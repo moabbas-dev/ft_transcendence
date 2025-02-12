@@ -14,10 +14,6 @@ export const setLanguage = (lang: Lang) => {
 	}
 };
 
-export const getLanguage = (lang: Lang) => {
-	return translations[currentLanguage]
-};
-
 export const msg = (key:string) => {
 	return key.split('.').reduce((obj, keyPart) => {
 	  return obj ? obj[keyPart] : null;
