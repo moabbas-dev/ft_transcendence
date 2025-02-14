@@ -28,9 +28,13 @@ export const Header = createComponent((props: ChatProps) => {
                 <i class="fa-solid fa-comments text-[2rem]"></i>
                 <a href="#" class="">Chat</a>
             </div>
+            <div class="flex flex-col justify-center w-24 items-center text-[white] hover:cursor-pointer hover:text-[var(--bg-hover)]">
+                <i class="fa-solid fa-circle-info text-[2rem]"></i>
+                <a href="#" class="">About Us</a>
+            </div>
         </nav>
 
-        <div class="container mx-auto w-full p-4 flex justify-end gap-4">
+        <div class="container mx-auto w-full flex justify-end gap-4">
             <div class="p-4">
                 <i class="fas fa-search text-white text-[2rem] hover:cursor-pointer hover:text-[var(--bg-hover)]" id="search-btn"></i>
                 <i class="fa-solid fa-bell pl-6 text-white text-[2rem] hover:cursor-pointer hover:text-[var(--bg-hover)]"></i>
@@ -50,8 +54,8 @@ export const Header = createComponent((props: ChatProps) => {
                     <div class="flex items-center justify-center text-lg font-bold">
                         <p>Guest</p>
                     </div>
-                        <div class="w-10 h-10 bg-slate-400 rounded-full bg-[url('./assets/guest.png')] bg-cover"><!-- Logo Here as background image --></div>
-                    </div>
+                    <div class="mt-3 w-10 h-10 bg-slate-400 rounded-full bg-[url('./assets/guest.png')] bg-cover"><!-- Logo Here as background image --></div>
+                    
                     <ul class="account-list py-4 rounded-md shadow-md shadow-white right-0 text-nowrap absolute z-10 bottom-[-114px] bg-white text-[var(--bg-color)] hidden flex-col gap-1">
                         <li class="px-4 hover:text-[var(--main-color)] hover:cursor-pointer hover:bg-slate-100">
                             ${msg("home.register")}
@@ -64,6 +68,7 @@ export const Header = createComponent((props: ChatProps) => {
                         </li>
                     </ul>
                 </div>
+            </div>
             <div class="close-list hidden z-0 absolute top-0 left-0 w-full h-full"></div>
         </div>
     `;
