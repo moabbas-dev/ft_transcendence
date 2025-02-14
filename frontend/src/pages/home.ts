@@ -3,12 +3,13 @@ import { Lang, msg, setLanguage } from "../languages/LanguageController.js";
 import { createComponent } from "../utils/StateManager.js";
 import { PongAnimation } from "../components/PingPongAnimation.js";
 import { Header } from "../components/header";
+import { Footer } from "../components/footer";
 
 export default {
   render: (container: HTMLElement) => {
     container.innerHTML = `
       <div class="header"> </div>
-      <div class="w-screen bg-[var(--bg-color)] h-[100dvh]">
+      <div class="w-screen bg-[var(--bg-color)] pt-11">
         
         <div class="container mx-auto grid place-content-center h-[calc(100vh-72px)]">
           <div class="grid grid-cols-2 place-content-center gap-3">
@@ -31,7 +32,9 @@ export default {
           </div>
         </div>
       </div>
+      <div class="footer"> </div>
     `;
+    //header
     const headerNav = container.querySelector(".header");
     const header = Header();
     headerNav?.appendChild(header);
@@ -42,6 +45,11 @@ export default {
       searchBtn.classList.toggle("fa-times");
       searchBar?.classList.toggle("hidden");
     });
+    //footer
+    const footerSection = container.querySelector(".footer");
+    const footer = Footer();
+    footerSection?.appendChild(footer);
+    //
     const account = container.querySelector(".account")!;
     const account_list = container.querySelector(".account-list")!;
     const close_list = container.querySelector(".close-list")!;
