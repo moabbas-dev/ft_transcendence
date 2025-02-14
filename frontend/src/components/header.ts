@@ -16,25 +16,31 @@ export const Header = createComponent((props: ChatProps) => {
         <img src="${logoUrl}" alt="Logo" class="w-16">
 
         <nav class="navbar flex ml-16">
-            <div class="flex flex-col justify-center items-center mx-[0.8rem] text-[white] hover:cursor-pointer">
+            <div class="flex flex-col justify-center items-center mx-[0.8rem] text-[white] hover:cursor-pointer hover:text-[var(--bg-hover)]">
                 <i class="fa-solid fa-play text-[2rem]"></i>
-                <a href="#" class="hover:underline hover:text-[var(--bg-hover)]">Play</a>
+                <a href="#" class="">Play</a>
             </div>
-            <div class="flex flex-col justify-center items-center mx-[0.8rem] text-[white] hover:cursor-pointer">
+            <div class="flex flex-col justify-center items-center mx-[0.8rem] text-[white] hover:cursor-pointer hover:text-[var(--bg-hover)]">
                 <i class="fa-solid fa-ranking-star text-[2rem]"></i>
-                <a href="#" class="text-[white] mx-[0.8rem] hover:underline hover:text-[var(--bg-hover)]">Leaderboard</a>
+                <a href="#" class="">Leaderboard</a>
             </div>
-            <div class="flex flex-col justify-center items-center mx-[0.8rem] text-[white] hover:cursor-pointer">
+            <div class="flex flex-col justify-center items-center mx-[0.8rem] text-[white] hover:cursor-pointer hover:text-[var(--bg-hover)]">
                 <i class="fa-solid fa-comments text-[2rem]"></i>
-                <a href="#" class="text-[white]  mx-[0.8rem] hover:underline hover:text-[var(--bg-hover)]">Chat</a>
+                <a href="#" class="">Chat</a>
             </div>
         </nav>
 
         <div class="container mx-auto w-full p-4 flex justify-end gap-4">
             <div class="p-4">
-                <i class="fas fa-search text-white text-[2rem]" id="search-btn"></i>
-                <i class="fa-solid fa-bell text-white text-[2rem]"></i>
+                <i class="fas fa-search text-white text-[2rem] hover:cursor-pointer hover:text-[var(--bg-hover)]" id="search-btn"></i>
+                <i class="fa-solid fa-bell pl-6 text-white text-[2rem] hover:cursor-pointer hover:text-[var(--bg-hover)]"></i>
             </div>
+
+            <form action="" id="search-bar-container" class="search-bar-container absolute top-full left-0 right-0 py-4 px-8 bg-[var(--main-color)] border-t-[0.1rem] border-t-[#ffffff33] flex duration-300 ease-in-out items-center z-[10001] hidden">
+                <input type="search" name="" id="search-bar" placeholder="search here..." class="w-full p-1 text-[1.7rem] text-[var(--main-color)] rounded-md">
+                <label for="search-bar" class="fas fa-search ml-6 text-white text-3xl cursor-pointer"></label>
+            </form>
+
             <select id="languages" name="languages_options" title="Select your language" class="text-lg bg-[var(--main-color)] text-white text-[2.5rem] focus:outline-none hover:opacity-80 hover:cursor-pointer">
                 <option value="en" selected>en</option>
                 <option value="fr">fr</option>

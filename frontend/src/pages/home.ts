@@ -35,6 +35,13 @@ export default {
     const headerNav = container.querySelector(".header");
     const header = Header();
     headerNav?.appendChild(header);
+    let searchBtn = document.querySelector("#search-btn");
+    let searchBar = document.querySelector("#search-bar-container");
+
+    searchBtn?.addEventListener("click", () => {
+      searchBtn.classList.toggle("fa-times");
+      searchBar?.classList.toggle("hidden");
+    });
     const account = container.querySelector(".account")!;
     const account_list = container.querySelector(".account-list")!;
     const close_list = container.querySelector(".close-list")!;
