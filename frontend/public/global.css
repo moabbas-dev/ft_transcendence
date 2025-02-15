@@ -1,4 +1,6 @@
 @import url('/node_modules/boxicons/css/boxicons.min.css');
+@import url('/node_modules/@fortawesome/fontawesome-free/css/all.min.css');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,6 +10,17 @@
 	--bg-color: rgb(17, 24, 39) !important;
 	--bg-hover: rgb(26, 36, 58) !important;
 }
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	outline: none;
+	text-decoration: none;
+}
+
+
+
 
 @font-face {
 	font-family: 'Flux';
