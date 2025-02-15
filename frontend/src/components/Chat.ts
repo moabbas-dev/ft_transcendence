@@ -8,19 +8,21 @@ export const Chat = createComponent((props: ChatProps) => {
     const container = document.createElement('div')
     container.innerHTML = `
         <div  class="flex flex-col bg-[var(--main-color)] bg-custom-gradient justify-between px-1 sm:px-2 h-screen z-20">
-            <div class="flex gap-1 rounded-full h-fit items-center justify-between py-3 px-2 bg-white">
-                <div class="back_arrow sm:hidden text-black text-3xl flex items-center justify-center hover:cursor-pointer hover:opacity-80">
-                    <i class='bx bx-left-arrow-alt'></i>
-                </div>
-                <div class="flex items-center justify-center gap-2">
-                    <div class="friend_icon w-10 h-10 2xl:w-12 2xl:h-12 bg-black rounded-full"></div> <!-- Icon Here -->
-                    <div>
-                        <p class="friend_name text-lg sm:text-xl">Test User<!-- Name of the Friend Here --></p>
+            <div class="flex rounded-full h-fit items-center justify-between py-3 px-2 bg-white">
+                <div class="flex">
+                    <div class="back_arrow sm:hidden text-black text-3xl flex items-center justify-center hover:cursor-pointer hover:opacity-80">
+                        <i class='bx bx-left-arrow-alt'></i>
+                    </div>
+                    <div class="flex items-center justify-center gap-1 sm:gap-2">
+                        <div class="friend_icon w-10 h-10 2xl:w-12 2xl:h-12 bg-black rounded-full"></div> <!-- Icon Here -->
+                        <div>
+                            <p class="friend_name text-base sm:text-xl">Test User<!-- Name of the Friend Here --></p>
+                        </div>
                     </div>
                 </div>
                 <div class="flex items-center gap-2 justify-center">
-                    <button type="button">Block</button>
-                    <button type="button">Invite</button>
+                    <button type="button" class="text-base sm:text-lg text-white bg-[var(--bg-color)] rounded-full px-3 py-2 hover:opacity-80" >Block</button>
+                    <button type="button" class="text-base sm:text-lg text-white bg-[var(--main-color)] rounded-full px-3 py-2 hover:opacity-80">Invite</button>
                 </div>
             </div>
             <section id ="message-container" class="chat_core overflow-y-auto styled-scrollbar h-fit flex-1 flex flex-col-reverse">
