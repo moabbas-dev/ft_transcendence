@@ -1,6 +1,12 @@
 const UserService = require('../services/UserService');
 const bcrypt = require('bcrypt');
+const sendEmail = require('../utils/emailUtils');
 const saltRounds = 10;
+
+// const generate2FACode = async () => {
+// 	// Generate a random number between 100000 and 999999
+// 	return Math.floor(100000 + Math.random() * 900000).toString();
+// }
 
 class UserController {
 
@@ -9,9 +15,15 @@ class UserController {
 		try {
 			const passwordHash = await bcrypt.hash(password, saltRounds);
 			const userId = await UserService.createUser({ email, password: passwordHash, nickname, full_name, google_id });
-			reply.code(201).send({ userId });
+			try {
+				const html = "<h1 style='color:blue'>Welcome!</h1>"
+				await sendEmail(email, "New account is here!", "Welcome to our website!", html);
+			} catch (error) {
+				return reply.code(500).send({ error: error.message });
+			}
+			return reply.code(201).send({ userId });
 		} catch (err) {
-			reply.code(500).send({ message: 'Error creating user', error: err.message });
+			return reply.code(500).send({ message: 'Error creating user', error: err.message });
 		}
 	}
 
