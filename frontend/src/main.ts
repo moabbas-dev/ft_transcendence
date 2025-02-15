@@ -41,16 +41,17 @@ window.addEventListener('load', () => {
     messageElement.innerText = message;
   
     messageWrapper.classList.add('flex', 'w-full', 'mb-2'); // Message container with flex
-  
     // Common styles for both sender and receiver
     messageElement.classList.add(
       'p-3',         // Padding
       'rounded-lg',  // Rounded corners
       'max-w-[250px]',
       'md:max-w-sm',    // Limit width
+      'break-words',
       '2xl:max-w-xl',
-      'break-words', // Handle long messages
       'text-white',
+      '[direction:ltr]',
+      'min-w-0'
     );
 
     // Apply conditional styles for sender and receiver
