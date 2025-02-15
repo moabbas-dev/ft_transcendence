@@ -7,14 +7,16 @@ const { Server } = require('socket.io');
 
 // Enable CORS on Fastify
 fastify.register(cors, {
-  origin: '*', // Set this to your specific frontend domain for production
-  methods: ['GET', 'POST'],
+	origin: '*', // Set this to your specific frontend domain for production
+	methods: ['GET', 'POST'],
 });
 
 // Create a new SQLite database connection
-const db = new sqlite3.Database('../data/database.sqlite');
+const db = new sqlite3.Database('./data/database.sqlite');
 const { createTables } = require('./src/db/initDb');
 createTables(db);
+
+module.exports = { db };
 
 
 fastify.register(require('fastify-jwt'), {
@@ -30,7 +32,7 @@ fastify.register(require('./src/routes/TwoFactorCodeRoutes'));
 
 // Test route
 fastify.get('/', async (request, reply) => {
-  return { message: 'Hello from the backend!' };
+	return { message: 'Hello from the backend!' };
 });
 
 // Graceful shutdown
@@ -67,13 +69,13 @@ process.on('SIGTERM', () => handleShutdown('SIGTERM'));
 
 // Start the server
 const start = async () => {
-  try {
-    await fastify.listen({ port: 8000, host: '0.0.0.0' });
-    fastify.log.info(`Server listening on http://localhost:${fastify.server.address().port}`);
-  } catch (err) {
-    fastify.log.error(err);
-    process.exit(1);
-  }
+	try {
+		await fastify.listen({ port: 8000, host: '0.0.0.0' });
+		fastify.log.info(`Server listening on http://localhost:${fastify.server.address().port}`);
+	} catch (err) {
+		fastify.log.error(err);
+		process.exit(1);
+	}
 };
 
 start();
