@@ -8,5 +8,5 @@
 	  "esModuleInterop": true,
 	  "skipLibCheck": true,
 	},
-	"include": ["src/**/*"]
+	"include": ["src/**/*", "public/modules/images.d.ts", "public/modules/type.d.ts"]
 }
