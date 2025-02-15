@@ -1,16 +1,14 @@
 import { navigate, refreshRouter } from "../router.js";
 import { Lang, msg, setLanguage } from "../languages/LanguageController.js";
-import { createComponent } from "../utils/StateManager.js";
 import { PongAnimation } from "../components/PingPongAnimation.js";
-import { Header } from "../components/header";
+import {Header}  from "../components/header";
 import { Footer } from "../components/footer";
 
 export default {
   render: (container: HTMLElement) => {
     container.innerHTML = `
-      <div class="header"> </div>
-      <div class="w-screen bg-[var(--bg-color)] pt-11">
-        
+      <div class="header bg-[var(--main-color)] w-full h-fit"> </div>
+      <div class="w-screen overflow-x-none bg-[var(--bg-color)]">
         <div class="container mx-auto grid place-content-center h-[calc(100vh-72px)]">
           <div class="grid grid-cols-2 place-content-center gap-3">
             <div class="h-full bg-[var(--bg-color)] hidden sm:flex items-center">
@@ -38,41 +36,14 @@ export default {
     const headerNav = container.querySelector(".header");
     const header = Header();
     headerNav?.appendChild(header);
-    let searchBtn = document.querySelector("#search-btn");
-    let searchBar = document.querySelector("#search-bar-container");
 
-    searchBtn?.addEventListener("click", () => {
-      searchBtn.classList.toggle("fa-times");
-      searchBar?.classList.toggle("hidden");
-    });
-    //footer
-    const footerSection = container.querySelector(".footer");
-    const footer = Footer();
-    footerSection?.appendChild(footer);
-    //
-    const account = container.querySelector(".account")!;
-    const account_list = container.querySelector(".account-list")!;
-    const close_list = container.querySelector(".close-list")!;
-    account.addEventListener("click", () => {
-      account_list.classList.toggle("hidden");
-      close_list.classList.toggle("hidden");
-      account_list.classList.toggle("flex");
-    });
+    const footer = container.querySelector('.footer')!
+    const footerComp = Footer()
+    footer.appendChild(footerComp)
 
-    close_list.addEventListener("click", () => {
-      account_list.classList.toggle("hidden");
-      close_list.classList.toggle("hidden");
-    });
-    const register_btn = document.querySelector(".register-btn")!;
-    register_btn.addEventListener("click", (e: Event) => {
-      navigate("/register");
-    });
-
-    const languageSelect = document.getElementById(
-      "languages"
-    ) as HTMLSelectElement;
-
+    const languageSelect = document.getElementById("languages") as HTMLSelectElement;
     const savedLanguage = localStorage.getItem("selectedLanguage");
+
     if (savedLanguage) {
       languageSelect.value = savedLanguage;
       setLanguage(languageSelect.value as Lang);
@@ -83,6 +54,11 @@ export default {
       localStorage.setItem("selectedLanguage", selectedLanguage);
       setLanguage(selectedLanguage as Lang);
       refreshRouter();
+    });
+
+    const register_btn = document.querySelector(".register-btn")!;
+    register_btn.addEventListener("click", (e: Event) => {
+      navigate("/register");
     });
 
     const canvas = document.getElementById("pongCanvas") as HTMLCanvasElement;
