@@ -11,7 +11,7 @@ const { createTables } = require('./src/db/initDb');
 createTables(db);
 
 fastify.register(require('fastify-jwt'), {
-  secret: 'uPdPHqezhZFFXwJLSOvEqLx86EaJsBgVazod8spCxqJ0LBOIXQCK3+vqJ210kD3hmOe0FIgDqU2iA6eNmelf2Q==',
+	secret: process.env.JWT_SECRET_KEY,
 });
 
 
@@ -24,37 +24,37 @@ fastify.register(require('./src/routes/TwoFactorCodeRoutes'));
 
 // Test route
 fastify.get('/', async (request, reply) => {
-  return { message: 'Hello from the backend!' };
+	return { message: 'Hello from the backend!' };
 });
 
 // Graceful shutdown
 const closeDatabase = () => {
-  return new Promise((resolve, reject) => {
-    db.close((err) => {
-      if (err) {
-        fastify.log.error('Error closing database:', err);
-        reject(err);
-      } else {
-        fastify.log.info('Database connection closed.');
-        resolve();
-      }
-    });
-  });
+	return new Promise((resolve, reject) => {
+		db.close((err) => {
+			if (err) {
+				fastify.log.error('Error closing database:', err);
+				reject(err);
+			} else {
+				fastify.log.info('Database connection closed.');
+				resolve();
+			}
+		});
+	});
 };
 
 // Handle shutdown signals
 const handleShutdown = async (signal) => {
-  fastify.log.info(`Received signal: ${signal}`);
-  fastify.log.info('Shutting down server...');
-  
-  try {
-    await closeDatabase();
-    fastify.log.info('Server shutdown complete.');
-    process.exit(0);
-  } catch (err) {
-    fastify.log.error('Error during shutdown:', err);
-    process.exit(1);
-  }
+	fastify.log.info(`Received signal: ${signal}`);
+	fastify.log.info('Shutting down server...');
+
+	try {
+		await closeDatabase();
+		fastify.log.info('Server shutdown complete.');
+		process.exit(0);
+	} catch (err) {
+		fastify.log.error('Error during shutdown:', err);
+		process.exit(1);
+	}
 };
 
 // Attach signal handlers
@@ -63,13 +63,13 @@ process.on('SIGTERM', () => handleShutdown('SIGTERM'));
 
 // Start the server
 const start = async () => {
-  try {
-    await fastify.listen({ port: 8000, host: '0.0.0.0' });
-    fastify.log.info(`Server listening on http://localhost:${fastify.server.address().port}`);
-  } catch (err) {
-    fastify.log.error(err);
-    process.exit(1);
-  }
+	try {
+		await fastify.listen({ port: 8000, host: '0.0.0.0' });
+		fastify.log.info(`Server listening on http://localhost:${fastify.server.address().port}`);
+	} catch (err) {
+		fastify.log.error(err);
+		process.exit(1);
+	}
 };
 
 start();
