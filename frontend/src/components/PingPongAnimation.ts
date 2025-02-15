@@ -122,7 +122,7 @@ export class PongAnimation {
 
 		// Move paddles
 		this.paddles.left.y += (this.ball.y - (this.paddles.left.y + 50)) * 0.1;
-		this.paddles.right.y += (this.ball.y - (this.paddles.right.y + 50)) * 0.1;
+		this.paddles.right.y += (this.ball.y - (this.paddles.right.y + 50)) * 0.1;	
 	}
 
 	animate() {
