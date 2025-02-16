@@ -77,7 +77,7 @@ export default {
 					chatContainer.classList.add('fixed', 'bottom-0', 'left-0', 'w-full', 'h-[100dvh]', 'animate-slideUp', 'z-90');
 					chatContainer.classList.remove('animate-slideDown');
 				}
-			)};
+			)}
 		});
 
 		container.querySelector('.back_arrow')?.addEventListener('click', () => {
