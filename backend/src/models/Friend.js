@@ -18,13 +18,13 @@ class Friend {
 	// List all Friends for a user
 	static async getUserFriends(userId) {
 		const query = `
-      SELECT u.id, u.nickname, u.avatar_url
+      SELECT u.id, u.nickname, u.avatar_url, u.full_name, u.status
       FROM Friends f
       JOIN Users u ON f.friend_id = u.id
-      WHERE f.user_id = ? AND f.status = 'accepted'
+      WHERE f.user_id = ?
     `;
 		return new Promise((resolve, reject) => {
-			db.all(query, [userId], (err, rows) => {
+			db.all(query, [userId], function(err, rows) {
 				if (err) reject(err);
 				else resolve(rows);
 			});
@@ -34,7 +34,7 @@ class Friend {
 	static async getAll() {
 		const query = 'SELECT * FROM Friends';
 		return new Promise((resolve, reject) => {
-			db.all(query, (err, rows) => {
+			db.all(query, function(err, rows) {
 				if (err) reject(err);
 				else resolve(rows);
 			});
@@ -44,7 +44,7 @@ class Friend {
 	static async getById(id) {
 		const query = 'SELECT * FROM Friends WHERE id = ?';
 		return new Promise((resolve, reject) => {
-			db.get(query, [id], (err, row) => {
+			db.get(query, [id], function(err, row) {
 				if (err) reject(err);
 				else resolve(row);
 			});
@@ -56,7 +56,7 @@ class Friend {
                     SET status = ?, updated_at = CURRENT_TIMESTAMP
                     WHERE id = ?`;
 		return new Promise((resolve, reject) => {
-			db.run(query, [status, id], (err) => {
+			db.run(query, [status, id], function(err) {
 				if (err) reject(err);
 				else resolve(this.changes);
 			});
@@ -66,26 +66,12 @@ class Friend {
 	static async delete(id) {
 		const query = 'DELETE FROM Friends WHERE id = ?';
 		return new Promise((resolve, reject) => {
-			db.run(query, [id], (err) => {
+			db.run(query, [id], function(err) {
 				if (err) reject(err);
 				else resolve(this.changes);
 			});
 		});
 	}
-
-	//   // Block a user
-	//   static async blockUser(userId, blockedUserId) {
-	//     const query = `
-	//       INSERT INTO Blocked_Users (user_id, blocked_user_id)
-	//       VALUES (?, ?)
-	//     `;
-	//     return new Promise((resolve, reject) => {
-	//       db.run(query, [userId, blockedUserId], function (err) {
-	//         if (err) reject(err);
-	//         else resolve(this.lastID); // Return the new blocked relationship ID
-	//       });
-	//     });
-	//   }
 }
 
 module.exports = Friend;

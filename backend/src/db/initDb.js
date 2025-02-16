@@ -37,8 +37,8 @@ const createTables = (db) => {
 		`CREATE TABLE IF NOT EXISTS Sessions (
 					id INTEGER PRIMARY KEY AUTOINCREMENT,
 					user_id INTEGER NOT NULL,
-					access_token TEXT NOT NULL,
-					refresh_token TEXT NOT NULL,
+					access_token TEXT,
+					refresh_token TEXT,
 					expires_at TIMESTAMP NOT NULL DEFAULT (DATETIME('now', '+1 hour')),
 					refresh_expires_at TIMESTAMP NOT NULL DEFAULT (DATETIME('now', '+30 days')),
 					created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

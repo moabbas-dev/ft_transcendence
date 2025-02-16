@@ -18,12 +18,16 @@ class UserService {
 		return await User.findById(id);
 	}
 
+	static async getUserByNickname(nickname) {
+		return await User.findByNickname(nickname);
+	}
+
 	static async updateUser(id, { nickname, full_name, avatar_url }) {
 		return await User.update(id, { nickname, full_name, avatar_url });
 	}
 
-	static async activateUser(id) {
-		return await User.activateUser(id);
+	static async update2fa(id, { value }) {
+		return await User.update2fa(id, { value });
 	}
 
 	static async updateUserStatus(id, { status }) {

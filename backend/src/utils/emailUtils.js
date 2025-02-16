@@ -15,8 +15,9 @@ const transporter = nodemailer.createTransport({
  * @param {string} to Recipient email
  * @param {string} subject Email subject
  * @param {string} text Plain text body
+ * @param {string} html html HTML body
  */
-async function sendEmail(to, subject, text, html = null) {
+async function sendEmail(to, subject, text, html) {
 	try {
 		const info = await transporter.sendMail({
 			from: process.env.EMAIL_FROM,
@@ -33,4 +34,13 @@ async function sendEmail(to, subject, text, html = null) {
 	}
 }
 
-module.exports = sendEmail;
+const TwoFactorCodehtmlContent = (user, code) => {
+	return `<div>
+				<h1> Welcome again, ${user.full_name} <h1>
+				<p> here is your two factor code : ${code} </p>
+				<p> have a nice day! </p>
+			</div>
+			`;
+}
+
+module.exports = { sendEmail, TwoFactorCodehtmlContent };

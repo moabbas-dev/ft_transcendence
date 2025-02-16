@@ -25,12 +25,6 @@ const generateTokens = async (user, fastify) => {
 	return { accessToken, refreshToken };
 }
 
-const decodeRefreshToken = async (refreshToken, fastify) => {
-	const decoded = fastify.jwt.verify(refreshToken, SECRET_KEY);
-	const { userId, exp } = decoded;
-	return { userId, exp };
-}
-
 const generateNewAccessToken = async (user, fastify) => {
 	const accessTokenExpiry = Math.floor(Date.now() / 1000) + (60 * 60); // the access token expires after one hour
 	const newAccessToken = fastify.jwt.sign(
@@ -46,4 +40,4 @@ const generateNewAccessToken = async (user, fastify) => {
 	return newAccessToken;
 }
 
-module.exports = { generateTokens, decodeRefreshToken, generateNewAccessToken };
+module.exports = { generateTokens, generateNewAccessToken };

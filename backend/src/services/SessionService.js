@@ -18,6 +18,10 @@ class SessionService {
 		return await Session.getByUserIdAndRefresh(userId, refreshToken);
 	}
 
+	static async updateAccessAndRefresh(id, { refreshToken, accessToken }) {
+		return await Session.updateAccessAndRefresh(id, { refreshToken, accessToken });
+	}
+
 	static async updateAccessToken(userId, { refreshToken, newAccessToken }) {
 		return await Session.updateAccess(userId, { refreshToken, newAccessToken });
 	}
