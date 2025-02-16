@@ -3,10 +3,12 @@ import { Lang, msg, setLanguage } from "../languages/LanguageController.js";
 import { PongAnimation } from "../components/PingPongAnimation.js";
 import {Header}  from "../components/header";
 import { Footer } from "../components/footer";
+import { Profile } from "../components/UserProfile.js";
 
 export default {
   render: (container: HTMLElement) => {
     container.innerHTML = `
+      <div class="profile"> </div>
       <div class="header bg-[var(--main-color)] w-full h-fit"> </div>
       <div class="w-screen overflow-x-none bg-[var(--bg-color)]">
         <div class="container mx-auto grid place-content-center h-[calc(100vh-72px)]">
@@ -36,6 +38,10 @@ export default {
     const headerNav = container.querySelector(".header");
     const header = Header();
     headerNav?.appendChild(header);
+    //profile 
+    const profielPopUp = container.querySelector(".profile");
+    const profile = Profile();
+    profielPopUp?.appendChild(profile);
 
     const footer = container.querySelector('.footer')!
     const footerComp = Footer()
