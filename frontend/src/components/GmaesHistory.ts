@@ -6,7 +6,6 @@ interface GamesHistoryProps {}
 export const GamesHistory = createComponent(() => {
     const container = document.createElement("div");
     container.innerHTML = `
-        <h2 class="text-lg font-bold mb-2">History</h2>
     <div class="max-h-64 overflow-y-auto">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">

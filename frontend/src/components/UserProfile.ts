@@ -7,6 +7,10 @@ import bronzeRank from "../../public/assets/bronze-medal.png";
 import { navigate, refreshRouter } from "../router.js";
 import { GamesHistory } from "./GmaesHistory";
 import { UserInfo } from "./UserInfo";
+import { UserStatistics } from "./UserStatistics";
+import Chart from 'chart.js/auto';
+
+
 
 export const Profile = createComponent(() => {
   // A wrapper for our popup + overlay
@@ -98,16 +102,93 @@ export const Profile = createComponent(() => {
     infoTab?.classList.remove("bg-[var(--main-color)]");
   }
 
-  // Update content when tabs are clicked and set the active background
   statisticsTab?.addEventListener("click", () => {
     if (!contentContainer) return;
     clearActiveTabs();
     statisticsTab.classList.add("bg-[var(--main-color)]");
-    contentContainer.innerHTML = `
-      <h2 class="text-lg font-bold mb-2">Statistics</h2>
-      <p>Here you could display user statistics (e.g., games won, lost, Elo rating, etc.).</p>
-    `;
+    
+    // Set up the content with three canvases
+    contentContainer.innerHTML = "";
+    contentContainer?.appendChild(UserStatistics());
+
+    // Initialize the Elo Rating Line Chart
+    const statsCtx = document.getElementById("statsChart") as HTMLCanvasElement | null;
+    if (statsCtx) {
+      const lineData = {
+        labels: ["January", "February", "March", "April", "May", "June"],
+        datasets: [
+          {
+            label: "Elo Rating",
+            data: [1500, 1520, 1510, 1530, 1540, 1550],
+            fill: false,
+            borderColor: "rgb(75, 192, 192)",
+            tension: 0.1,
+          },
+        ],
+      };
+      const lineConfig = {
+        type: "line" as const,
+        data: lineData,
+        options: {},
+      };
+      new Chart(statsCtx, lineConfig);
+    }
+  
+    // Initialize the Wins/Losses Bar Chart
+    const barCtx = document.getElementById("barChart") as HTMLCanvasElement | null;
+    if (barCtx) {
+      const barData = {
+        labels: ["January", "February", "March", "April", "May", "June"],
+        datasets: [
+          {
+            label: "Wins",
+            data: [5, 7, 8, 6, 9, 10],
+            backgroundColor: "rgb(75, 192, 192)",
+          },
+          {
+            label: "Losses",
+            data: [2, 3, 1, 4, 3, 2],
+            backgroundColor: "rgb(255, 99, 132)",
+          },
+        ],
+      };
+      const barConfig = {
+        type: "bar" as const,
+        data: barData,
+        options: {},
+      };
+      new Chart(barCtx, barConfig);
+    }
+  
+    // Initialize the Win Rate Pie Chart
+    const pieCtx = document.getElementById("pieChart") as HTMLCanvasElement | null;
+    if (pieCtx) {
+      const pieData = {
+        labels: ["Wins", "Losses"],
+        datasets: [
+          {
+            label: "Win Rate",
+            data: [70, 30], // For example: 70% wins, 30% losses
+            backgroundColor: [
+              "rgb(75, 192, 192)",
+              "rgb(255, 99, 132)"
+            ],
+            hoverOffset: 4,
+          },
+        ],
+      };
+      const pieConfig = {
+        type: "pie" as const,
+        data: pieData,
+        options: {},
+      };
+      new Chart(pieCtx, pieConfig);
+    }
   });
+
+
+  
+  
 
   historyTab?.addEventListener("click", () => {
     if (!contentContainer) return;
