@@ -2,6 +2,8 @@ import { SignIn } from '../components/SignIn.js';
 import { SignUp } from '../components/SignUp.js';
 import { PongAnimation } from '../components/PingPongAnimation.js';
 import { msg } from '../languages/LanguageController.js';
+import { SendEmail } from '../components/SendEmail.js';
+import { ResetPass } from '../components/ResetPass.js';
 
 export default {
 	render: (container:HTMLElement) => {
@@ -16,7 +18,7 @@ export default {
 						<!-- SignIn, SignUp Forms Here -->
 						<div class="flex flex-col gap-3">
 							<div class="w-full p-1">
-								<button type="button" class="w-full flex items-center justify-start p-2 text-white bg-[var(--main-color)] hover:cursor-pointer hover:opacity-80 rounded-md transition-all duration-300">
+								<button type="button" class="w-full flex items-center justify-start p-1 sm:p-2 text-white bg-[var(--main-color)] hover:cursor-pointer hover:opacity-80 rounded-md transition-all duration-300">
 									<i class='bx bxl-google text-2xl'></i>
 									<span class="flex-1 text-center">${msg('register.continueGoogle')}</span>
 								</button>
@@ -43,6 +45,7 @@ export default {
 			  SignIn({
 				styles: 'mx-auto',
 				onSwitchToSignUp: renderSignUp, 
+				onSwitchToResetPass: renderSendEmaiForReset,
 			  })
 			);
 		  };
@@ -55,6 +58,20 @@ export default {
 			  })
 			);
 		  };
+
+		const renderSendEmaiForReset = () => {
+			animateTransition(() => 
+				SendEmail({
+					onSwitchToSignIn: renderSignIn,
+				})
+			)
+		}
+
+		const renderResetPass = () => {
+			animateTransition(() => 
+				ResetPass()
+			)
+		}
 		renderSignIn();
 
 		const canvas = document.getElementById('pongCanvas') as HTMLCanvasElement;

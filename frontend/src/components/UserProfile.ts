@@ -14,29 +14,20 @@ import Chart from 'chart.js/auto';
 
 export const Profile = createComponent(() => {
   // A wrapper for our popup + overlay
-  const overlay = document.createElement("div");
-  overlay.className = `
-    fixed inset-0 z-[9999]
-    flex items-center justify-center
-    bg-black/50
-  `;
-
   // The actual modal container
   const container = document.createElement("div");
-  container.className = `
-    relative w-3/6 max-w-full h-auto p-4
-    bg-white border rounded-lg border-gray-300 shadow-md
-  `;
-
   // Insert modal HTML
   container.innerHTML = `
-    <!-- Close Button (X) -->
-    <div class="flex justify-start mb-2">
-        <i class="fas fa-times text-2xl cursor-pointer hover:text-red-600" id="close-button"></i>
-    </div>
+    <!-- Overlay -->
+    <div class="overlay absolute top-0 left-0 w-full h-full z-[80] bg-black/50"></div>
+    <div class="absolute top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%] z-[90] w-full md:w-1/2 2xl:w-3/6 h-[100dvh] md:h-full max-h-[90dvh] p-4 bg-white border rounded-lg border-gray-300 shadow-md flex flex-col gap-2">
+      <!-- Close Button (X) -->
+      <div class="flex justify-start">
+          <i class="fas fa-times text-2xl cursor-pointer hover:text-red-600" id="close-button"></i>
+      </div>
 
-    <!-- Header (Nickname, Online, Avatar, Rank) -->
-    <div class="flex items-center justify-end gap-4 mb-4">
+      <!-- Header (Nickname, Online, Avatar, Rank) -->
+      <div class="flex items-center justify-end gap-4">
         <div>
             <p class="font-bold text-lg">afarachi</p>
             <p class="text-green-500">Online 🟢</p>
@@ -48,64 +39,69 @@ export const Profile = createComponent(() => {
         <img 
             src="${logoUrl}" 
             alt="profile picture" 
-            class="w-20 h-20 object-cover rounded border border-blue-800"
+            class="w-20 h-20 object-cover rounded-full border-2 border-[var(--main-color)]"
         >
-    </div>
+      </div>
 
-    <!-- Tabs (Statistics, History, Info) -->
-    <div class="flex space-x-4 border-b border-gray-300 mb-4">
-    <button 
-        id="info-tab" 
-        class="flex-1 py-2 text-center  focus:outline-none bg-[var(--main-color)]"
-      >
-        Info
-      </button>
-      <button 
-        id="statistics-tab" 
-        class="flex-1 py-2 text-center  focus:outline-none"
-      >
-        Statistics
-      </button>
-      <button 
-        id="history-tab" 
-        class="flex-1 py-2 text-center  focus:outline-none"
-      >
-        History
-      </button>
-    </div>
+      <!-- Tabs (Statistics, History, Info) -->
+        <div class="flex space-x-4 border-b border-gray-300">
+          <button 
+              id="info-tab" 
+              class="flex-1 py-2 text-white text-center transition-all  focus:outline-none bg-[var(--main-color)]"
+            >
+              Info
+          </button>
+          <button 
+            id="statistics-tab" 
+            class="flex-1 py-2 text-center transition-all focus:outline-none"
+          >
+            Statistics
+          </button>
+          <button 
+            id="history-tab" 
+            class="flex-1 py-2 text-center transition-all focus:outline-none"
+          >
+            History
+          </button>
+        </div>
 
-    <!-- Content Container -->
-    <div id="content-container" class="text-gray-700">
-    
+        <!-- Content Container -->
+        <div id="content-container" class="text-gray-700 h-fit overflow-auto">
+        
+        </div>
     </div>
-  `;
-
-  // Insert container into overlay
-  overlay.appendChild(container);
+  `;  
 
   // Query elements
-  const closeButton = container.querySelector("#close-button") as HTMLElement | null;
-  const statisticsTab = container.querySelector("#statistics-tab") as HTMLElement | null;
-  const historyTab = container.querySelector("#history-tab") as HTMLElement | null;
-  const infoTab = container.querySelector("#info-tab") as HTMLElement | null;
-  const contentContainer = container.querySelector("#content-container") as HTMLElement | null;
+  const closeButton = container.querySelector("#close-button")!
+  const statisticsTab = container.querySelector("#statistics-tab")!
+  const historyTab = container.querySelector("#history-tab")!
+  const infoTab = container.querySelector("#info-tab")!
+  const contentContainer = container.querySelector("#content-container")!
+  const overlay = container.querySelector('.overlay')!
 
   // Close the modal on X click
   closeButton?.addEventListener("click", () => {
-    overlay.remove();
+    container.remove()
   });
 
   // Helper function to clear active background from all tabs
   function clearActiveTabs() {
     statisticsTab?.classList.remove("bg-[var(--main-color)]");
+    statisticsTab?.classList.remove("text-white");
     historyTab?.classList.remove("bg-[var(--main-color)]");
+    historyTab?.classList.remove("text-white");
     infoTab?.classList.remove("bg-[var(--main-color)]");
+    infoTab?.classList.remove("text-white");
   }
+
+  // User Profile by default
+  contentContainer?.appendChild(UserInfo());
 
   statisticsTab?.addEventListener("click", () => {
     if (!contentContainer) return;
     clearActiveTabs();
-    statisticsTab.classList.add("bg-[var(--main-color)]");
+    statisticsTab.classList.add("bg-[var(--main-color)]", "text-white");
     
     // Set up the content with three canvases
     contentContainer.innerHTML = "";
@@ -180,20 +176,19 @@ export const Profile = createComponent(() => {
       const pieConfig = {
         type: "pie" as const,
         data: pieData,
-        options: {},
+        options: {
+          responsive: false,
+          maintainAspectRatio: false
+        },
       };
       new Chart(pieCtx, pieConfig);
     }
   });
 
-
-  
-  
-
   historyTab?.addEventListener("click", () => {
     if (!contentContainer) return;
     clearActiveTabs();
-    historyTab.classList.add("bg-[var(--main-color)]");
+    historyTab.classList.add("bg-[var(--main-color)]", "text-white");
     contentContainer.innerHTML = "";
     contentContainer?.appendChild(GamesHistory());
   });
@@ -201,7 +196,7 @@ export const Profile = createComponent(() => {
   infoTab?.addEventListener("click", () => {
     if (!contentContainer) return;
     clearActiveTabs();
-    infoTab.classList.add("bg-[var(--main-color)]");
+    infoTab.classList.add("bg-[var(--main-color)]", "text-white");
     contentContainer.innerHTML = "";
     contentContainer?.appendChild(UserInfo());
 
@@ -215,5 +210,5 @@ export const Profile = createComponent(() => {
     }
   });
 
-  return overlay;
+  return container;
 });

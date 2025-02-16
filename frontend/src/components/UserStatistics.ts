@@ -5,22 +5,23 @@ interface UserStatisticsProps {}
 
 export const UserStatistics = createComponent(() => {
     const container = document.createElement("div");
+    container.className = 'flex flex-col gap-2'
     container.innerHTML = `
-        <div class="flex flex-col max-h-64 overflow-y-auto">
-        <p class="mb-4">Overview</p> 
-        <div class="flex space-x-4">
-          <div>🏆 Wins: 7</div>
-          <div>👎 Losses: 3</div>
-        </div>
-        <!-- Elo Rating Line Chart -->
-        <canvas id="statsChart" class="mt-4" width="400" height="200"></canvas>
+      <p>Overview</p> 
+      <div class="flex gap-4">
+        <div>🏆 Wins: 7</div>
+        <div>👎 Losses: 3</div>
+      </div>
+      <!-- Elo Rating Line Chart -->
+      <div class="flex flex-col gap-4 justify-center">
+        <canvas id="statsChart" class="w-full flex justify-center" height="250"></canvas>
         <!-- Bar Chart for Wins/Losses per Month -->
-        <canvas id="barChart" class="mt-4" width="400" height="200"></canvas>
+        <canvas id="barChart" class="w-full flex justify-center" height="250"></canvas>
         <!-- Pie Chart for Win Rate Percentage -->
-        <canvas id="pieChart" class="mt-4" width="400" height="200"></canvas>
+        <div class="w-full flex justify-center ">
+          <canvas id="pieChart" class="w-[250px] h-[250px]"></canvas>
+        </div>
       </div>
     `;
-
-    
     return container;
 });

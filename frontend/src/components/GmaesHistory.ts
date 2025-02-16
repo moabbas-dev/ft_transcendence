@@ -6,7 +6,7 @@ interface GamesHistoryProps {}
 export const GamesHistory = createComponent(() => {
     const container = document.createElement("div");
     container.innerHTML = `
-    <div class="max-h-64 overflow-y-auto">
+    <div class="">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
@@ -38,6 +38,27 @@ export const GamesHistory = createComponent(() => {
             <td class="px-6 py-4 whitespace-nowrap">Win</td>
             <td class="px-6 py-4 whitespace-nowrap">1mo ago</td>
             <td class="px-6 py-4 whitespace-nowrap">5 min</td>
+          </tr>
+          <tr class="bg-red-100">
+            <td class="px-6 py-4 whitespace-nowrap">User5 vs User6</td>
+            <td class="px-6 py-4 whitespace-nowrap">6 - 10</td>
+            <td class="px-6 py-4 whitespace-nowrap">Lose</td>
+            <td class="px-6 py-4 whitespace-nowrap">2y ago</td>
+            <td class="px-6 py-4 whitespace-nowrap">7 min</td>
+          </tr>
+          <tr class="bg-red-100">
+            <td class="px-6 py-4 whitespace-nowrap">User5 vs User6</td>
+            <td class="px-6 py-4 whitespace-nowrap">6 - 10</td>
+            <td class="px-6 py-4 whitespace-nowrap">Lose</td>
+            <td class="px-6 py-4 whitespace-nowrap">2y ago</td>
+            <td class="px-6 py-4 whitespace-nowrap">7 min</td>
+          </tr>
+          <tr class="bg-red-100">
+            <td class="px-6 py-4 whitespace-nowrap">User5 vs User6</td>
+            <td class="px-6 py-4 whitespace-nowrap">6 - 10</td>
+            <td class="px-6 py-4 whitespace-nowrap">Lose</td>
+            <td class="px-6 py-4 whitespace-nowrap">2y ago</td>
+            <td class="px-6 py-4 whitespace-nowrap">7 min</td>
           </tr>
           <tr class="bg-red-100">
             <td class="px-6 py-4 whitespace-nowrap">User5 vs User6</td>

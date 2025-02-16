@@ -20,14 +20,14 @@ export function createComponent(renderFn: any) {
           const cleanup = cleanupFns.get(instance);
           cleanup();
         }
-        
+
         const dom = renderFn(instance.props);
-        
+
         // Store/update DOM reference
         if (!componentStates.has(instance)) {
           componentStates.set(instance, dom);
         }
-        
+
         currentInstance = prevInstance;
         return dom;
       }
