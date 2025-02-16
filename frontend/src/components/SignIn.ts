@@ -6,7 +6,8 @@ import { msg } from '../languages/LanguageController.js';
 
 interface SignInProps {
   styles: string,
-  onSwitchToSignUp: () => void
+  onSwitchToSignUp: () => void,
+  onSwitchToResetPass: () => void,
 }
 
 export const SignIn = createComponent((props: SignInProps) => {
@@ -68,7 +69,8 @@ export const SignIn = createComponent((props: SignInProps) => {
 	eventType: 'click',
 	onClick: (e: Event) => {
 		e.preventDefault()
-		navigate('/resetpass')
+		if (props.onSwitchToResetPass)
+      props.onSwitchToResetPass()
 	}
   })
   form.querySelector('.forgot')!.appendChild(forgotBtn)
