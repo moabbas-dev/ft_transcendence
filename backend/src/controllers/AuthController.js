@@ -3,7 +3,10 @@ const bcrypt = require('bcrypt');
 const SessionService = require('../services/SessionService');
 const UserService = require('../services/UserService');
 const SECRET_KEY = process.env.JWT_SECRET_KEY;
-const { generateTokens, decodeRefreshToken, generateNewAccessToken } = require('../utils/jwtUtils')
+const { generateTokens, generateNewAccessToken } = require('../utils/jwtUtils');
+const TwoFactorCodeService = require('../services/TwoFactorCodeService');
+const { sendEmail, TwoFactorCodehtmlContent} = require('../utils/emailUtils');
+const { generate2FACode } = require('../utils/codeUtils');
 
 const authenticateUser = async (email, password) => {
 	const query = `SELECT * FROM Users WHERE email = ?`;
@@ -37,11 +40,24 @@ class AuthController {
 		const { email, password } = request.body;
 		try {
 			const user = await authenticateUser(email, password);
-			const { accessToken, refreshToken } = await generateTokens(user, reply.server);
 			const userId = user.id;
-			await SessionService.createSession({ userId, accessToken, refreshToken });
-			await UserService.updateUserStatus(userId, { status: "online" });
-			return reply.code(201).send({ accessToken: accessToken, refreshToken: refreshToken });
+			if (!user.is_2fa_enabled) {
+				const { accessToken, refreshToken } = await generateTokens(user, reply.server);
+				const sessId = await SessionService.createSession({ userId, accessToken, refreshToken });
+				await UserService.updateUserStatus(userId, { status: "online" });
+				return reply.code(200).send({ sessionId: sessId, accessToken: accessToken, refreshToken: refreshToken });
+			} else {
+				const sessId = await SessionService.createSession({ userId, accessToken: null, refreshToken: null });
+				reply.server.log.info(`sessId: ${sessId}`);
+				const tfaCode = generate2FACode();
+				const tfCodeId = await TwoFactorCodeService.createTwoFactorCode({ userId, code: tfaCode });
+				try {
+					await sendEmail(user.email, "Two Factor code for login", null, TwoFactorCodehtmlContent(user, tfaCode));
+				} catch (err) {
+					return reply.code(500).send({ error: err.message });
+				}
+				return reply.code(200).send({ sessionId: sessId, twoFactorCodeId: tfCodeId });
+			}
 		} catch (err) {
 			// Handle specific error messages
 			if (err.message === "User not found" || err.message === "Invalid password") {
@@ -66,7 +82,7 @@ class AuthController {
 				else {
 					await SessionService.deleteSessionByUserId(user.id, refreshToken);
 					await UserService.updateUserStatus(user.id, { status: "offline" });
-					return reply.code(201).send({ message: "User logged out successfully!" });
+					return reply.code(200).send({ message: "User logged out successfully!" });
 				}
 			}
 		} catch (err) {
@@ -78,10 +94,6 @@ class AuthController {
 	static async refresh(request, reply) {
 		const { refreshToken } = request.body;
 		try {
-			// const { userId, exp } = await decodeRefreshToken(refreshToken, request.server);
-			// if (Date.now() >= exp * 1000) {
-			// 	return reply.code(401).send({ message: "Refresh token expired!" });
-			// }
 			let decoded;
 			try {
 				decoded = request.server.jwt.verify(refreshToken, SECRET_KEY);
@@ -99,7 +111,7 @@ class AuthController {
 				return reply.code(404).send({ message: "User not found!" });
 			const newAccessToken = await generateNewAccessToken(user, reply.server);
 			await SessionService.updateAccessToken(user.id, { refreshToken, newAccessToken });
-			return reply.code(201).send({ accessToken: newAccessToken });
+			return reply.code(200).send({ accessToken: newAccessToken });
 		} catch (err) {
 			return reply.code(500).send({ message: "Error refreshing the token!", error: err.message });
 		}

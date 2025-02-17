@@ -18,7 +18,7 @@ class User {
 	static async getAll() {
 		const query = 'SELECT * FROM Users';
 		return new Promise((resolve, reject) => {
-			db.all(query, (err, rows) => {
+			db.all(query, function(err, rows) {
 				if (err) reject(err);
 				else resolve(rows);
 			});
@@ -28,7 +28,7 @@ class User {
 	static async findByEmail(email) {
 		const query = 'SELECT * FROM Users WHERE email = ?';
 		return new Promise((resolve, reject) => {
-			db.get(query, [email], (err, row) => {
+			db.get(query, [email], function(err, row) {
 				if (err) reject(err);
 				else resolve(row);
 			});
@@ -38,7 +38,17 @@ class User {
 	static async findById(id) {
 		const query = 'SELECT * FROM Users WHERE id = ?';
 		return new Promise((resolve, reject) => {
-			db.get(query, [id], (err, row) => {
+			db.get(query, [id], function(err, row) {
+				if (err) reject(err);
+				else resolve(row);
+			});
+		});
+	}
+
+	static async findByNickname(nickname) {
+		const query = 'SELECT * FROM Users WHERE nickname = ?';
+		return new Promise((resolve, reject) => {
+			db.get(query, [nickname], function(err, row) {
 				if (err) reject(err);
 				else resolve(row);
 			});
@@ -59,14 +69,14 @@ class User {
 		});
 	}
 
-	static async activateUser(id) {
+	static async update2fa(id, { value }) {
 		const query = `
 			UPDATE Users
-			SET is_2fa_enabled = 1, updated_at = CURRENT_TIMESTAMP
+			SET is_2fa_enabled = ?, updated_at = CURRENT_TIMESTAMP
 			WHERE id = ?
 		`;
 		return new Promise((resolve, reject) => {
-			db.run(query, [id], (err) => {
+			db.run(query, [value, id], function(err) {
 				if (err) reject(err);
 				else resolve(this.changes);
 			});
@@ -80,7 +90,7 @@ class User {
 			WHERE id = ?
 		`;
 		return new Promise((resolve, reject) => {
-			db.run(query, [status, id], (err) => {
+			db.run(query, [status, id], function(err) {
 				if (err) reject(err);
 				else resolve(this.changes);
 			});
