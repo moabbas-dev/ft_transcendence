@@ -114,7 +114,7 @@ export const Header = createComponent(() => {
     const navChildren = container.querySelectorAll('.nav-child')!
 
     navBtn.addEventListener('click', () => {
-        const navStyles = 'max-sm:flex max-sm:flex-col max-sm:absolute max-sm:top-full max-sm:left-0 max-sm:w-fit max-sm:gap-0'
+        const navStyles = 'max-sm:flex max-sm:z-50 max-sm:flex-col max-sm:absolute max-sm:top-full max-sm:left-0 max-sm:w-fit max-sm:gap-0'
         navStyles.split(' ').forEach(style => navbar.classList.toggle(style))
         navbar.classList.toggle('hidden')
 
