@@ -1,0 +1,134 @@
+@import url('/node_modules/boxicons/css/boxicons.min.css');
+@import url('/node_modules/@fortawesome/fontawesome-free/css/all.min.css');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+	--main-color: #04809F !important;
+	--bg-color: rgb(17, 24, 39) !important;
+	--bg-hover: rgb(26, 36, 58) !important;
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	outline: none;
+	text-decoration: none;
+}
+
+
+
+
+@font-face {
+	font-family: 'Flux';
+	src: url('./fonts/static/AfacadFlux-Regular.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Flux';
+	src: url('./fonts/static/AfacadFlux-Thin.ttf') format('truetype');
+	font-weight: 100;
+}
+
+@font-face {
+	font-family: 'Flux';
+	src: url('./fonts/static/AfacadFlux-ExtraLight.ttf') format('truetype');
+	font-weight: 200;
+}
+  
+@font-face {
+	font-family: 'Flux';
+	src: url('./fonts/static/AfacadFlux-Light.ttf') format('truetype');
+	font-weight: 300;
+}
+
+@font-face {
+	font-family: 'Flux';
+	src: url('./fonts/static/AfacadFlux-Medium.ttf') format('truetype');
+	font-weight: 500;
+}
+  
+@font-face {
+	font-family: 'Flux';
+	src: url('./fonts/static/AfacadFlux-SemiBold.ttf') format('truetype');
+	font-weight: 600;
+}
+
+@font-face {
+	font-family: 'Flux';
+	src: url('./fonts/static/AfacadFlux-Bold.ttf') format('truetype');
+	font-weight: 700;
+}
+  
+@font-face {
+	font-family: 'Flux';
+	src: url('./fonts/static/AfacadFlux-ExtraBold.ttf') format('truetype');
+	font-weight: 800;
+}
+
+@font-face {
+	font-family: 'Flux';
+	src: url('./fonts/static/AfacadFlux-Black.ttf') format('truetype');
+	font-weight: 900;
+}
+
+.styled-scrollbar {
+    scrollbar-width: thin;
+	scrollbar-color: white var(--bg-color);
+}
+
+  /* WebKit browsers */
+.styled-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+	scrollbar-color: var(--bg-hover) var(--bg-color);
+}
+
+.styled-scrollbar::-webkit-scrollbar-track {
+    background: var(--bg-hover);
+    border-radius: 4px;
+}
+
+.styled-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--bg-color);
+    border-radius: 4px;
+}
+
+.styled-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #2d3748;
+}
+
+@keyframes slideUp {
+    from {
+	  display: fixed;
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+}
+
+.animate-slideUp {
+    animation: slideUp 0.5s ease-out forwards;
+	animation-duration: 200ms;
+}
+
+@keyframes slideDown {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(100%);
+	  display: none;
+    }
+}
+
+.animate-slideDown {
+    animation: slideDown 0.5s ease-out forwards;
+	animation-duration: 200ms;
+}
