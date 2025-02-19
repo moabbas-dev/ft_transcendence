@@ -30,7 +30,7 @@ export const Header = createComponent(() => {
                 <i class="fa-solid fa-bars-staggered text-xl"></i>
             </nav>
         </div>
-        <div class="flex items-center justify-end gap-4 w-1/2">
+        <div class="flex items-center justify-end gap-3 sm:gap-4 w-1/2">
             <div class="md:flex-1">
                 <form action="" id="search-bar-container" class="search-bar-container bg-[var(--main-color)] flex justify-center items-center gap-2 rounded-md md:p-2 md:bg-white">
                     <input type="text" name="" id="search-bar" autocomplete="off" placeholder="${msg('home.header.search')}" class="w-full hidden md:block text-lg text-[var(--bg-hover)] rounded-md">

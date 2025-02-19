@@ -38,12 +38,43 @@ window.addEventListener('load', () => {
   function appendMessage(message: string, isSender: boolean = false) {
     const messageWrapper = document.createElement('div');
     const messageElement = document.createElement('div');
-    messageElement.innerText = message;
+    const messageText = document.createTextNode(message);
+    const currentDate = new Date();
+    const messageDate = currentDate.toLocaleTimeString([], {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+
+    const formattedDate = currentDate.toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric'
+    });
+    let dateHeader = document.querySelector(`.date-header[data-date="${formattedDate}"]`);
   
-    messageWrapper.classList.add('flex', 'w-full', 'mb-2'); // Message container with flex
+    if (!dateHeader) {
+      // Create a new date header
+      const dateWrapper = document.createElement('div');
+      dateWrapper.className = 'flex justify-center items-center w-full bg-slate-500 bg-opacity-30 my-2 py-1 rounded-md';
+      dateHeader = document.createElement('div');
+      dateHeader.classList.add('date-header', 'text-center', 'bg-[var(--bg-color)]', 'text-white', 'rounded-md', 'px-2', 'py-1');
+      dateHeader.setAttribute('data-date', formattedDate);
+      dateHeader.textContent = formattedDate;
+      dateWrapper.appendChild(dateHeader);
+      messageContainer.appendChild(dateWrapper);
+    }
+
+    messageElement.appendChild(messageText);
+    messageElement.innerHTML += `<span class="text-xs text-gray-400">${messageDate}</span>`;
+
+    messageWrapper.classList.add('flex', 'w-full'); // Message container with flex
     // Common styles for both sender and receiver
     messageElement.classList.add(
-      'p-3',         // Padding
+      'flex',
+      'flex-col',
+      'justify-center',
+      'px-2',         // Padding
+      'py-1',
       'rounded-lg',  // Rounded corners
       'max-w-[250px]',
       'md:max-w-sm',    // Limit width
@@ -51,7 +82,8 @@ window.addEventListener('load', () => {
       '2xl:max-w-xl',
       'text-white',
       '[direction:ltr]',
-      'min-w-0'
+      'min-w-0',
+      'text-[17px]'
     );
 
     // Apply conditional styles for sender and receiver

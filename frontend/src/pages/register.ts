@@ -4,6 +4,7 @@ import { PongAnimation } from '../components/PingPongAnimation.js';
 import { msg } from '../languages/LanguageController.js';
 import { SendEmail } from '../components/SendEmail.js';
 import { ResetPass } from '../components/ResetPass.js';
+import { UserInfoForm } from '../components/UserInfoForm.js';
 
 export default {
 	render: (container:HTMLElement) => {
@@ -72,7 +73,14 @@ export default {
 				ResetPass()
 			)
 		}
+
+		const renderUserInfo = () => {
+			animateTransition(() => 
+				UserInfoForm()
+			)
+		}
 		renderSignIn();
+		// renderUserInfo();
 
 		const canvas = document.getElementById('pongCanvas') as HTMLCanvasElement;
 		if (canvas)

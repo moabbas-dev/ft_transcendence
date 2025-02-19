@@ -16,7 +16,7 @@ export const ResetPass = createComponent(() => {
 		<div>
 		  <div class="relative mt-1">
 		  	<div>
-				<input type="password" id="password" placeholder="${msg('register.signup.passwordPlaceholder')}" autocomplete="current-password" name="password" class="relative w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--main-color)] focus:border-[var(--main-color)] sm:text-base pr-10">
+				<input type="password" id="password" placeholder="${msg('register.signup.passwordPlaceholder')}" autocomplete="current-password" name="password" class="relative w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--main-color)] focus:border-[var(--main-color)] focus:shadow-[0_0_5px_var(--main-color)] sm:text-base pr-10">
 			</div>
 			<span class="absolute inset-y-0 h-[42px] right-0 flex items-center pr-3 cursor-pointer toggle-password text-lg">
 			  <i class='bx bx-hide hide-show pointer-events-none'></i>
@@ -26,7 +26,7 @@ export const ResetPass = createComponent(() => {
 		<div>
 			<div class="relative mt-1">
 			<div>
-				<input type="password" id="conf-password" placeholder="${msg('register.signup.passwordConfirm')}" autocomplete="current-password" name="password" class="relative w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--main-color)] focus:border-[var(--main-color)] sm:text-base pr-10">
+				<input type="password" id="conf-password" placeholder="${msg('register.signup.passwordConfirm')}" autocomplete="current-password" name="password" class="relative w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--main-color)] focus:shadow-[0_0_5px_var(--main-color)] focus:border-[var(--main-color)] sm:text-base pr-10">
 			</div>
 			<span class="absolute inset-y-0 right-0 flex items-center h-fit py-3 pr-3 cursor-pointer toggle-password text-lg">
 				<i class='bx bx-hide hide-show pointer-events-none'></i>

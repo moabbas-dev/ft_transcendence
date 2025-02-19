@@ -7,7 +7,7 @@ interface ChatProps {
 export const Chat = createComponent((props: ChatProps) => {
     const container = document.createElement('div')
     container.innerHTML = `
-        <div  class="flex flex-col bg-[var(--main-color)] bg-custom-gradient justify-between px-1 sm:px-2 h-screen z-20">
+        <div  class="flex flex-col bg-[var(--main-color)] bg-custom-gradient justify-between px-1 sm:px-2 h-screen z-20 gap-2">
             <div class="flex rounded-full h-fit items-center justify-between py-3 px-2 bg-white">
                 <div class="flex">
                     <div class="back_arrow sm:hidden text-black text-3xl flex items-center justify-center hover:cursor-pointer hover:opacity-80">
@@ -25,7 +25,7 @@ export const Chat = createComponent((props: ChatProps) => {
                     <button type="button" class="text-base sm:text-lg text-white bg-[var(--main-color)] rounded-full px-3 py-2 hover:opacity-80">Invite</button>
                 </div>
             </div>
-            <section id ="message-container" class="chat_core overflow-y-auto styled-scrollbar h-fit flex-1 flex flex-col-reverse">
+            <section id ="message-container" class="chat_core overflow-y-auto styled-scrollbar h-fit flex-1 flex flex-col-reverse gap-0.5">
             
             </section>
             <div id="message-container" class="flex items-center h-fit bg-[var(--bg-color)] gap-2 w-full rounded-full mb-16 sm:mb-4">
