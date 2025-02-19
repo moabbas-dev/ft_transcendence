@@ -20,7 +20,7 @@ export const Profile = createComponent(() => {
   container.innerHTML = `
     <!-- Overlay -->
     <div class="overlay absolute top-0 left-0 w-full h-full z-[80] bg-black/50"></div>
-    <div class="absolute top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%] z-[90] w-full md:w-1/2 2xl:w-3/6 h-[100dvh] md:h-full max-h-[90dvh] p-4 bg-white border rounded-lg border-gray-300 shadow-md flex flex-col gap-2">
+    <div class="user-container absolute top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%] z-[90] w-full md:w-1/2 2xl:w-3/6 h-[100dvh] md:h-full max-h-[90dvh] p-4 bg-white border rounded-lg border-gray-300 shadow-md flex flex-col gap-2">
       <!-- Close Button (X) -->
       <div class="flex justify-start">
           <i class="fas fa-times text-2xl cursor-pointer hover:text-red-600" id="close-button"></i>
@@ -79,6 +79,10 @@ export const Profile = createComponent(() => {
   const infoTab = container.querySelector("#info-tab")!
   const contentContainer = container.querySelector("#content-container")!
   const overlay = container.querySelector('.overlay')!
+
+  overlay.addEventListener("click", () => {
+    container.remove()
+  })
 
   // Close the modal on X click
   closeButton?.addEventListener("click", () => {

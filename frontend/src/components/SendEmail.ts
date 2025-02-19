@@ -13,8 +13,8 @@ export const SendEmail = createComponent((props: SendEmailProps) => {
 	form.innerHTML = `
 		<div class="flex flex-col gap-3">
 			<div class="flex flex-col gap-2">
-				<h1 class="text-2xl font-bold text-center underline">Reset Your Password</h1>
-				<p class="">Enter the email associated with your account and will send you password reset instructions.</p>
+				<h1 class="text-2xl font-bold text-center underline">${msg('register.sendEmail.resetPass')}</h1>
+				<p class="">${msg('register.sendEmail.info')}</p>
 			</div>
 			<form class="flex flex-col gap-2">
 				<div>
@@ -25,8 +25,8 @@ export const SendEmail = createComponent((props: SendEmailProps) => {
 				</div>
 			</form>
 			<div class="w-full text-center pt-1">
-				<span class="signin-link hover:cursor-pointer hover:opacity-80 text-[var(--main-color)]">Back to signin </span>|
-				<span class="resend-email hover:cursor-pointer hover:opacity-80 text-[var(--main-color)]"> Resend Email</span>
+				<span class="signin-link hover:cursor-pointer hover:opacity-80 text-[var(--main-color)]">${msg('register.sendEmail.backToSignin')} </span>|
+				<span class="resend-email hover:cursor-pointer hover:opacity-80 text-[var(--main-color)]"> ${msg('register.sendEmail.resendEmail')}</span>
 			</div>
 		</div>
 	`;
@@ -34,7 +34,7 @@ export const SendEmail = createComponent((props: SendEmailProps) => {
 	const emailInput:HTMLInputElement = form.querySelector('#email')!;
 	const signInButton = Button({
 		type: 'submit',
-		text: 'Send Email',
+		text: msg('register.sendEmail.sendEmailBtn'),
 		styles: 'w-full font-semibold p-2 text-base text-white',
 		eventType: 'click',
 		onClick: (e: Event) => {
