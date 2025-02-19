@@ -16,10 +16,20 @@ export const ChatItem = createComponent((props: ChatItemProps) => {
 			<div class="text-white text-base sm:text-lg 2xl:text-xl">${props.firstname} ${props.lastname}</div>
 		</div>
 		${!props.isFriend? `
-		<div class="text-white pr-4">
-			<i class="fa-solid fa-user-plus text-lg hover:text-[var(--main-color)]"></i>
+		<div class="add-friend text-white mr-4 hover:bg-slate-700 w-fit h-fit rounded-lg">
+			<i title="Add Friend" class="fa-solid fa-user-plus p-2 text-lg hover:text-[var(--main-color)]"></i>
 		</div>
 		` : ''}
 	`
+
+	const addFriend = chatItem.querySelector('.add-friend');
+	addFriend?.addEventListener('click', (e) => {
+		e.stopPropagation();
+		if (addFriend.firstChild instanceof Element && addFriend.firstChild.classList.contains('fa-user-clock'))
+			return;
+		console.log('Add Friend Clicked');
+		addFriend.firstChild?.remove()
+		addFriend.innerHTML = `<i title="Pending..." class="fa-solid fa-user-clock p-2 text-lg hover:text-[var(--main-color)]"></i>`;
+	})
 	return chatItem
 })

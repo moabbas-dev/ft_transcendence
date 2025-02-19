@@ -75,8 +75,7 @@ export default {
 		renderSignIn();
 
 		const canvas = document.getElementById('pongCanvas') as HTMLCanvasElement;
-		if (canvas) {
-			const pong = new PongAnimation(canvas);
-		}
+		if (canvas)
+			new PongAnimation(canvas);
 	}
 }
