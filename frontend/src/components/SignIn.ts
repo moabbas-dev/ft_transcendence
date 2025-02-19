@@ -17,17 +17,15 @@ export const SignIn = createComponent((props: SignInProps) => {
   <div class="flex flex-col gap-3">
     <h1 class="text-2xl font-bold text-center underline">${msg('register.signin.title')}</h1>
     <form class="flex flex-col gap-2">
-      <div>
+      <div class="flex flex-col gap-1">
         <label for="email" class="block text-base font-medium text-gray-700">Email</label>
-        <div>
-          <input type="email" id="email" placeholder="${msg('register.signin.emailPlaceholder')}" autocomplete="email" name="email" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--main-color)] focus:border-[var(--main-color)] sm:text-base">
-        </div>
+        <input type="email" id="email" placeholder="${msg('register.signin.emailPlaceholder')}" autocomplete="email" name="email" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--main-color)] focus:shadow-[0_0_5px_var(--main-color)] focus:border-[var(--main-color)] sm:text-base">
       </div>
       <div>
         <label for="password" class="block text-base font-medium text-gray-700">${msg('register.signin.password')}</label>
         <div class="relative mt-1">
           <div>
-            <input type="password" id="password" placeholder="${msg('register.signin.passwordPlaceholder')}" autocomplete="current-password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--main-color)] focus:border-[var(--main-color)] sm:text-base pr-10">
+            <input type="password" id="password" placeholder="${msg('register.signin.passwordPlaceholder')}" autocomplete="current-password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--main-color)] focus:shadow-[0_0_5px_var(--main-color)] focus:border-[var(--main-color)] sm:text-base pr-10">
           </div>
           <span class="absolute inset-y-0 right-0 flex items-center h-fit py-3 pr-3 cursor-pointer toggle-password text-lg">
             <i class='bx bx-hide hide-show pointer-events-none'></i>

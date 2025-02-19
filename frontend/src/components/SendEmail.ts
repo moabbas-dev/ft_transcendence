@@ -17,14 +17,12 @@ export const SendEmail = createComponent((props: SendEmailProps) => {
 				<p class="">${msg('register.sendEmail.info')}</p>
 			</div>
 			<form class="flex flex-col gap-2">
-				<div>
+				<div class="flex flex-col gap-1">
 					<label for="email" class="block text-base font-medium text-gray-700">Email</label>
-					<div>
-						<input type="email" id="email" placeholder="${msg('register.signin.emailPlaceholder')}" autocomplete="email" name="email" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--main-color)] focus:border-[var(--main-color)] sm:text-base">
-					</div>
+					<input type="email" id="email" placeholder="${msg('register.signin.emailPlaceholder')}" autocomplete="email" name="email" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--main-color)] focus:shadow-[0_0_5px_var(--main-color)] focus:border-[var(--main-color)] sm:text-base">
 				</div>
 			</form>
-			<div class="w-full text-center pt-1">
+			<div class="w-full text-center">
 				<span class="signin-link hover:cursor-pointer hover:opacity-80 text-[var(--main-color)]">${msg('register.sendEmail.backToSignin')} </span>|
 				<span class="resend-email hover:cursor-pointer hover:opacity-80 text-[var(--main-color)]"> ${msg('register.sendEmail.resendEmail')}</span>
 			</div>
