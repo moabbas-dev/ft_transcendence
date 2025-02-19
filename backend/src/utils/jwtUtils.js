@@ -1,5 +1,3 @@
-const SECRET_KEY = process.env.JWT_SECRET_KEY;
-
 const generateTokens = async (user, fastify) => {
 
 	const accessTokenExpiry = Math.floor(Date.now() / 1000) + (60 * 60); // the access token expires after one hour

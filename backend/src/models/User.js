@@ -1,3 +1,4 @@
+const { resolveContent } = require('nodemailer/lib/shared');
 const { db } = require('../../index');
 
 class User {
@@ -77,6 +78,20 @@ class User {
 		`;
 		return new Promise((resolve, reject) => {
 			db.run(query, [value, id], function(err) {
+				if (err) reject(err);
+				else resolve(this.changes);
+			});
+		});
+	}
+
+	static async update2faSecret(id, { twoFASecret }) {
+		const query = `
+			UPDATE USERS
+			SET two_factor_secret = ?, updated_at = CURRENT_TIMESTAMP
+			WHERE id = ?
+		`;
+		return new Promise((resolve, reject) => {
+			db.run(query, [twoFASecret, id], function(err) {
 				if (err) reject(err);
 				else resolve(this.changes);
 			});

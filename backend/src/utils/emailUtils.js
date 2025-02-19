@@ -34,13 +34,4 @@ async function sendEmail(to, subject, text, html) {
 	}
 }
 
-const TwoFactorCodehtmlContent = (user, code) => {
-	return `<div>
-				<h1> Welcome again, ${user.full_name} <h1>
-				<p> here is your two factor code : ${code} </p>
-				<p> have a nice day! </p>
-			</div>
-			`;
-}
-
-module.exports = { sendEmail, TwoFactorCodehtmlContent };
+module.exports = { sendEmail };

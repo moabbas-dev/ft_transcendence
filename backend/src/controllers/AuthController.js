@@ -4,9 +4,7 @@ const SessionService = require('../services/SessionService');
 const UserService = require('../services/UserService');
 const SECRET_KEY = process.env.JWT_SECRET_KEY;
 const { generateTokens, generateNewAccessToken } = require('../utils/jwtUtils');
-const TwoFactorCodeService = require('../services/TwoFactorCodeService');
-const { sendEmail, TwoFactorCodehtmlContent} = require('../utils/emailUtils');
-const { generate2FACode } = require('../utils/codeUtils');
+const speakeasy = require('speakeasy');
 
 const authenticateUser = async (email, password) => {
 	const query = `SELECT * FROM Users WHERE email = ?`;
@@ -49,14 +47,7 @@ class AuthController {
 			} else {
 				const sessId = await SessionService.createSession({ userId, accessToken: null, refreshToken: null });
 				reply.server.log.info(`sessId: ${sessId}`);
-				const tfaCode = generate2FACode();
-				const tfCodeId = await TwoFactorCodeService.createTwoFactorCode({ userId, code: tfaCode });
-				try {
-					await sendEmail(user.email, "Two Factor code for login", null, TwoFactorCodehtmlContent(user, tfaCode));
-				} catch (err) {
-					return reply.code(500).send({ error: err.message });
-				}
-				return reply.code(200).send({ sessionId: sessId, twoFactorCodeId: tfCodeId });
+				return reply.code(200).send({ sessionId: sessId });
 			}
 		} catch (err) {
 			// Handle specific error messages

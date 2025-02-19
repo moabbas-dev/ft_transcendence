@@ -30,6 +30,10 @@ class UserService {
 		return await User.update2fa(id, { value });
 	}
 
+	static async update2faSecret(id, { twoFASecret }) {
+		return await User.update2faSecret(id, { twoFASecret });
+	}
+
 	static async updateUserStatus(id, { status }) {
 		return await User.updateUserStatus(id, { status });
 	}
