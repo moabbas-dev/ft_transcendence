@@ -24,7 +24,7 @@ export const SignIn = createComponent((props: SignInProps) => {
         </div>
       </div>
       <div>
-        <label for="password" class="block text-base font-medium text-gray-700">Password</label>
+        <label for="password" class="block text-base font-medium text-gray-700">${msg('register.signin.password')}</label>
         <div class="relative mt-1">
           <div>
             <input type="password" id="password" placeholder="${msg('register.signin.passwordPlaceholder')}" autocomplete="current-password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--main-color)] focus:border-[var(--main-color)] sm:text-base pr-10">

@@ -2,6 +2,8 @@ import { createComponent } from "../utils/StateManager";
 import { msg } from "../languages/LanguageController.js";
 import logoUrl from "../../public/assets/ft_transcendencee.png";
 import { navigate, refreshRouter } from "../router.js";
+import { Notification } from "./Notification.js";
+import { Profile } from "./UserProfile";
 
 export const Header = createComponent(() => {
     const container = document.createElement("header");
@@ -13,15 +15,15 @@ export const Header = createComponent(() => {
             <nav class="navbar items-center gap-4 hidden sm:flex">
                 <div class="nav-child flex flex-col justify-center items-center hover:cursor-pointer hover:text-[var(--bg-hover)]">
                     <i class="fa-solid fa-play text-lg sm:text-xl"></i>
-                    <a href="#" class="">Play</a>
+                    <span>${msg('home.header.play')}</span>
                 </div>
                 <div class="nav-child flex flex-col justify-center items-center hover:cursor-pointer hover:text-[var(--bg-hover)]">
                     <i class="fa-solid fa-ranking-star text-lg sm:text-xl"></i>
-                    <a href="#" class="">Leaderboard</a>
+                    <span>${msg('home.header.leaderBoard')}</span>
                 </div>
-                <div class="nav-child flex flex-col justify-center items-center hover:cursor-pointer hover:text-[var(--bg-hover)]" onClick="${() => navigate('/chat')}">
+                <div class="nav-child nav-chat flex flex-col justify-center items-center hover:cursor-pointer hover:text-[var(--bg-hover)]" onClick="${() => navigate('/chat')}">
                     <i class="fa-solid fa-comments text-lg sm:text-xl"></i>
-                    <a href="#" class="">Chat</a>
+                    <span>${msg('home.header.chat')}</span>
                 </div>
             </nav>
             <nav class="nav-btn sm:hidden hover:cursor-pointer hover:opacity-80">
@@ -31,51 +33,16 @@ export const Header = createComponent(() => {
         <div class="flex items-center justify-end gap-4 w-1/2">
             <div class="md:flex-1">
                 <form action="" id="search-bar-container" class="search-bar-container bg-[var(--main-color)] flex justify-center items-center gap-2 rounded-md md:p-2 md:bg-white">
-                    <input type="text" name="" id="search-bar" placeholder="search here..." class="w-full hidden md:block text-lg text-[var(--bg-hover)] rounded-md">
+                    <input type="text" name="" id="search-bar" autocomplete="off" placeholder="${msg('home.header.search')}" class="w-full hidden md:block text-lg text-[var(--bg-hover)] rounded-md">
                     <label for="search-bar" class="fas fa-search text-[var(--bg-hover)] text-xl cursor-pointer max-md:text-white max-md:bg-[var(--main-color)]"></label>
                 </form>
             </div>
             <div class="notification-bell relative">
                 <i class="fa-solid fa-bell text-white text-2xl hover:cursor-pointer hover:text-[var(--bg-hover)]"></i>
-                <span class="absolute -top-2 -right-2 rounded-full bg-red-600 text-white w-5 h-5 flex items-center justify-center text-sm">0</span>
+                <span class="absolute -top-2 -right-2 rounded-full bg-red-600 text-white hover:cursor-pointer w-5 h-5 flex items-center justify-center text-sm">0</span>
             </div>
             <div class="notification hidden absolute overflow-y-auto top-full right-0 z-50 bg-white w-[300px] p-2 max-h-[300px]">
-                <li class="w-full flex flex-col gap-2 text-black border-b">
-                    <div class="flex justify-between items-center">
-                        <span class="user-visit text-lg font-bold underline hover:cursor-pointer hover:text-[var(--main-color)]">username</span>
-                        <span class="">21m</span>
-                    </div>
-                    <div>
-                        <p>Sent to you an invitation request! Let's play with him!</p>
-                    </div>
-                </li>
-                <li class="w-full flex flex-col gap-2 text-black">
-                    <div class="flex justify-between items-center">
-                        <span class="user-visit text-lg font-bold underline hover:cursor-pointer hover:text-[var(--main-color)]">username</span>
-                        <span class="">21m</span>
-                    </div>
-                    <div>
-                        <p>Sent to you an invitation request! Let's play with him!</p>
-                    </div>
-                </li>
-                <li class="w-full flex flex-col gap-2 text-black">
-                    <div class="flex justify-between items-center">
-                        <span class="user-visit text-lg font-bold underline hover:cursor-pointer hover:text-[var(--main-color)]">username</span>
-                        <span class="">21m</span>
-                    </div>
-                    <div>
-                        <p>Sent to you an invitation request! Let's play with him!</p>
-                    </div>
-                </li>
-                <li class="w-full flex flex-col gap-2 text-black">
-                    <div class="flex justify-between items-center">
-                        <span class="user-visit text-lg font-bold underline hover:cursor-pointer hover:text-[var(--main-color)]">username</span>
-                        <span class="">21m</span>
-                    </div>
-                    <div>
-                        <p>Sent to you an invitation request! Let's play with him!</p>
-                    </div>
-                </li>
+
             </div>
             <select id="languages" name="languages_options" title="Select your language" class="text-xl bg-[var(--main-color)] text-white text-[2.5rem] focus:outline-none hover:opacity-80 hover:cursor-pointer">
                 <option value="en" selected>en</option>
@@ -83,11 +50,12 @@ export const Header = createComponent(() => {
             </select>
             <div class="account relative flex gap-3 text-white">
                 <div class="flex gap-3 hover:cursor-pointer hover:underline hover:text-[var(--bg-hover)]">
-                    <div class="flex items-center justify-center text-lg font-bold">
-                        <p>Guest</p>
+                    <div class="profile-section flex items-center justify-center gap-2">
+                        <div class="flex items-center justify-center text-lg font-bold">
+                            <p>Guest</p>
+                        </div>
+                        <div class="w-10 h-10 bg-slate-400 rounded-full bg-[url('./assets/guest.png')] bg-cover"><!-- Logo Here as background image --></div>
                     </div>
-                    <div class="w-10 h-10 bg-slate-400 rounded-full bg-[url('./assets/guest.png')] bg-cover"><!-- Logo Here as background image --></div>
-
                     <ul class="account-list py-4 rounded-md shadow-md shadow-white right-0 text-nowrap absolute z-10 bottom-[-114px] bg-white text-[var(--bg-color)] hidden flex-col gap-1">
                         <li class="px-4 hover:text-[var(--main-color)] hover:cursor-pointer hover:bg-slate-100">
                             ${msg("home.register")}
@@ -112,6 +80,25 @@ export const Header = createComponent(() => {
     const navbar = container.querySelector('.navbar')!
     const navBtn = container.querySelector('.nav-btn')!
     const navChildren = container.querySelectorAll('.nav-child')!
+    const profileSection = container.querySelector('.profile-section')!
+    const navChat = container.querySelector('.nav-chat')!
+
+    navChat.addEventListener('click', () => {
+        navigate('/chat')
+    })
+
+    profileSection.addEventListener('click', () => {
+        const profielPopUp = document.querySelector(".profile");
+        const profile = Profile();
+        profielPopUp?.appendChild(profile);    
+    })
+
+    // For testing purposes
+    notificationContainer.appendChild(Notification({username: 'Test User', message: 'Hello World!'}))
+    notificationContainer.appendChild(Notification({username: 'Test User', message: 'Hello World!'}))
+    notificationContainer.appendChild(Notification({username: 'Test User', message: 'Hello World!'}))
+    notificationContainer.appendChild(Notification({username: 'Test User', message: 'Hello World!'}))
+    notificationContainer.appendChild(Notification({username: 'Test User', message: 'Hello World!'}))
 
     navBtn.addEventListener('click', () => {
         const navStyles = 'max-sm:flex max-sm:z-50 max-sm:flex-col max-sm:absolute max-sm:top-full max-sm:left-0 max-sm:w-fit max-sm:gap-0'
