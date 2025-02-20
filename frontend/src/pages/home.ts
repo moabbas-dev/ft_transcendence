@@ -20,11 +20,11 @@ export default {
               <h1 class="text-5xl max-sm:text-center max-sm:font-bold sm:text-6xl lg:text-9xl text-white text-start drop-shadow-[1px_1px_20px_white] animate-fade-right animate-once animate-duration-700 animate-ease-linear">
                 ${msg("home.title")}
               </h1>
-              <p class="text-white text-2xl max-sm:text-center lg:text-4xl animate-fade-right animate-once animate-duration-700 animate-delay-700 animate-ease-linear">
+              <p class="text-white text-2xl max-sm:text-center lg:text-4xl animate-fade-left sm:animate-fade-right animate-once animate-duration-700 animate-delay-700 animate-ease-linear">
                 ${msg("home.tagline")}
               </p>
               <div class="flex justify-center sm:justify-start items-center">
-                <button class="text-lg register-btn rounded-ss-lg rounded-ee-xl transition-all duration-200 text-white hover:opacity-80 flex justify-center items-center bg-[var(--main-color)] px-3 py-2 ">${msg(
+                <button class="text-lg register-btn rounded-ss-lg rounded-ee-xl transition-all duration-200 text-white hover:opacity-80 flex justify-center items-center bg-[var(--main-color)] px-3 py-2 animate-fade-up animate-once animate-duration-700 animate-delay-1000 animate-ease-linear">${msg(
                   "home.register"
                 )}</button>
               </div>

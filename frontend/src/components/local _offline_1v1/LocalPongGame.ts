@@ -1,4 +1,4 @@
-import { createComponent } from "../utils/StateManager";
+import { createComponent } from "../../utils/StateManager";
 
 export const LocalPongGame = createComponent(() => {
   let animationFrameId: number;
@@ -23,6 +23,12 @@ export const LocalPongGame = createComponent(() => {
     countdown: COUNTDOWN_DURATION,
   };
 
+    // Load scores from Local Storage if available
+    const savedScores = localStorage.getItem("pongScores");
+    if (savedScores) {
+      state.scores = JSON.parse(savedScores);
+    }
+
   // Create game container
   const container = document.createElement("div");
   container.className =
@@ -33,7 +39,21 @@ export const LocalPongGame = createComponent(() => {
     countdownOverlay.className = "fixed  flex items-center justify-center bg-opacity-75 text-black text-9xl font-bold";
     countdownOverlay.textContent = COUNTDOWN_DURATION.toString();
     container.appendChild(countdownOverlay);
-  
+    
+      // Function to update and save scores
+  const saveScores = () => {
+    localStorage.setItem("pongScores", JSON.stringify(state.scores));
+  };
+
+    // Dispatch event to update UI and save scores
+    const dispatchScoreUpdate = () => {
+      saveScores();
+      const scoreEvent = new CustomEvent("scoreUpdate", {
+        detail: { player1: state.scores.player1, player2: state.scores.player2 },
+      });
+      document.dispatchEvent(scoreEvent);
+    };
+
     // Add countdown logic
     const startCountdown = () => {
       state.gameStarted = false;
@@ -88,6 +108,7 @@ export const LocalPongGame = createComponent(() => {
     popup.classList.add("hidden");
     resetBall("player1");
     gameLoop();
+    saveScores();
   });
   popupContent.appendChild(restartButton);
   container.appendChild(popup);
@@ -162,11 +183,13 @@ export const LocalPongGame = createComponent(() => {
         state.scores.player2++;
         checkGameOver("player2");
         resetBall("player2");
+        dispatchScoreUpdate();
       }
       if (state.ballX > canvas.width) {
         state.scores.player1++;
         checkGameOver("player1");
         resetBall("player1");
+        dispatchScoreUpdate();
       }
   };
 
