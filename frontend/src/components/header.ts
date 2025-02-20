@@ -1,9 +1,9 @@
 import { createComponent } from "../utils/StateManager";
 import { msg } from "../languages/LanguageController.js";
-import logoUrl from "../../public/assets/ft_transcendencee.png";
-import { navigate, refreshRouter } from "../router.js";
+import logoUrl from "/src/assets/ft_transcendencee.png";
+import { navigate } from "../router.js";
 import { Notification } from "./Notification.js";
-import { Profile } from "./UserProfile";
+import { Profile } from "./UserProfile.js";
 
 export const Header = createComponent(() => {
     const container = document.createElement("header");
@@ -41,7 +41,7 @@ export const Header = createComponent(() => {
                 <i class="fa-solid fa-bell text-white text-2xl hover:cursor-pointer hover:text-[var(--bg-hover)]"></i>
                 <span class="absolute -top-2 -right-2 rounded-full bg-red-600 text-white hover:cursor-pointer w-5 h-5 flex items-center justify-center text-sm">0</span>
             </div>
-            <div class="notification hidden absolute overflow-y-auto top-full right-0 z-50 bg-white w-[300px] p-2 max-h-[300px]">
+            <div class="notification hidden absolute overflow-y-auto top-full right-0 z-50 bg-white w-[300px] p-2 max-h-[300px] animate-fade-down animate-once animate-duration-300">
 
             </div>
             <select id="languages" name="languages_options" title="Select your language" class="text-xl bg-[var(--main-color)] text-white text-[2.5rem] focus:outline-none hover:opacity-80 hover:cursor-pointer">
@@ -56,7 +56,7 @@ export const Header = createComponent(() => {
                         </div>
                         <div class="w-10 h-10 bg-slate-400 rounded-full bg-[url('./assets/guest.png')] bg-cover"><!-- Logo Here as background image --></div>
                     </div>
-                    <ul class="account-list py-4 rounded-md shadow-md shadow-white right-0 text-nowrap absolute z-10 bottom-[-114px] bg-white text-[var(--bg-color)] hidden flex-col gap-1">
+                    <ul class="account-list py-4 rounded-md shadow-md shadow-white right-0 text-nowrap absolute z-10 bottom-[-114px] bg-white text-[var(--bg-color)] hidden flex-col gap-1 animate-fade-down animate-once animate-duration-300">
                         <li class="px-4 hover:text-[var(--main-color)] hover:cursor-pointer hover:bg-slate-100">
                             ${msg("home.register")}
                         </li>
@@ -107,28 +107,27 @@ export const Header = createComponent(() => {
     notificationContainer.appendChild(Notification({username: 'Test User', message: 'Hello World!'}))
 
     navBtn.addEventListener('click', () => {
-        const navStyles = 'max-sm:flex max-sm:z-50 max-sm:flex-col max-sm:absolute max-sm:top-full max-sm:left-0 max-sm:w-fit max-sm:gap-0'
+        const navStyles = 'max-sm:animate-fade-down max-sm:animate-once max-sm:animate-duration-[600ms] max-sm:flex max-sm:z-50 max-sm:flex-col max-sm:absolute max-sm:top-full max-sm:left-0 max-sm:w-fit max-sm:gap-0'
         navStyles.split(' ').forEach(style => navbar.classList.toggle(style))
         navbar.classList.toggle('hidden')
-
         const childrenStyles = 'max-sm:flex-row max-sm:w-full max-sm:max-w-full max-sm:justify-start max-sm:gap-2 max-sm:bg-[var(--main-color)] max-sm:py-3 max-sm:px-5 max-sm:transition-all max-sm:hover:pl-7 max-sm:hover:pr-3'
         navChildren.forEach(nav => 
             childrenStyles.split(' ').forEach(style => nav.classList.toggle(style))
         )
     })
 
-    searchIcon.addEventListener('click', (e:Event) => {
+    searchIcon.addEventListener('click', () => {
         const styles = 'max-md:block max-md:absolute max-md:top-full max-md:left-0 max-md:p-2 max-md:h-fit'
         styles.split(' ').forEach(style  => searchBar.classList.toggle(style))
         searchBar.classList.toggle('hidden')
     })
 
 
-    notificationBell.addEventListener('click', (e:Event) => {
+    notificationBell.addEventListener('click', () => {
       notificationContainer.classList.toggle('hidden')
     })
 
-    account.addEventListener("click", (e:Event) => {
+    account.addEventListener("click", () => {
       account_list.classList.toggle("hidden");
       account_list.classList.toggle("flex");
     });
@@ -152,7 +151,7 @@ export const Header = createComponent(() => {
             && !path.includes(navbar)
             && !path.includes(navBtn)) {
             navbar.classList.add('hidden')
-            const navStyles = 'max-sm:flex max-sm:flex-col max-sm:absolute max-sm:top-full max-sm:left-0 max-sm:w-fit max-sm:gap-0'
+            const navStyles = 'max-sm:animate-fade-down max-sm:animate-once max-sm:animate-duration-[600ms] max-sm:flex max-sm:flex-col max-sm:absolute max-sm:top-full max-sm:left-0 max-sm:w-fit max-sm:gap-0'
             navStyles.split(' ').forEach(style => navbar.classList.remove(style))
             const childrenStyles = 'max-sm:flex-row max-sm:w-full max-sm:max-w-full max-sm:justify-start max-sm:gap-2 max-sm:bg-[var(--main-color)] max-sm:py-3 max-sm:px-5 max-sm:transition-all max-sm:hover:pl-7 max-sm:hover:pr-3'
             navChildren.forEach(nav => 
