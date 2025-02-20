@@ -57,7 +57,7 @@ window.addEventListener('load', () => {
       const dateWrapper = document.createElement('div');
       dateWrapper.className = 'flex justify-center items-center w-full bg-slate-500 bg-opacity-30 my-2 py-1 rounded-md';
       dateHeader = document.createElement('div');
-      dateHeader.classList.add('date-header', 'text-center', 'bg-[var(--bg-color)]', 'text-white', 'rounded-md', 'px-2', 'py-1');
+      dateHeader.classList.add('date-header', 'text-center', 'bg-[var(--bg-hover)]', 'text-white', 'rounded-md', 'px-2', 'py-1');
       dateHeader.setAttribute('data-date', formattedDate);
       dateHeader.textContent = formattedDate;
       dateWrapper.appendChild(dateHeader);
@@ -73,8 +73,7 @@ window.addEventListener('load', () => {
       'flex',
       'flex-col',
       'justify-center',
-      'px-2',         // Padding
-      'py-1',
+      'px-2',
       'rounded-lg',  // Rounded corners
       'max-w-[250px]',
       'md:max-w-sm',    // Limit width

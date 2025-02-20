@@ -11,17 +11,17 @@ export const Header = createComponent(() => {
     container.innerHTML = `
         <!-- <div id="menu-bar" class="fas fa-bars"></div> -->
         <div class="flex items-center justify-start w-1/2 gap-2 sm:gap-8">
-            <img src="${logoUrl}" alt="Logo" class="w-10 sm:w-12">
+            <img src="${logoUrl}" alt="Logo" class="w-10 sm:w-12 hover:drop-shadow-[1px_1px_20px_white]">
             <nav class="navbar items-center gap-4 hidden sm:flex">
-                <div class="nav-child flex flex-col justify-center items-center hover:cursor-pointer hover:text-[var(--bg-hover)]">
+                <div class="nav-child flex flex-col justify-center items-center transition-all hover:cursor-pointer hover:text-[var(--bg-hover)]">
                     <i class="fa-solid fa-play text-lg sm:text-xl"></i>
                     <span>${msg('home.header.play')}</span>
                 </div>
-                <div class="nav-child flex flex-col justify-center items-center hover:cursor-pointer hover:text-[var(--bg-hover)]">
+                <div class="nav-child flex flex-col justify-center items-center transition-all hover:cursor-pointer hover:text-[var(--bg-hover)]">
                     <i class="fa-solid fa-ranking-star text-lg sm:text-xl"></i>
                     <span>${msg('home.header.leaderBoard')}</span>
                 </div>
-                <div class="nav-child nav-chat flex flex-col justify-center items-center hover:cursor-pointer hover:text-[var(--bg-hover)]" onClick="${() => navigate('/chat')}">
+                <div class="nav-child nav-chat flex flex-col justify-center items-center transition-all hover:cursor-pointer hover:text-[var(--bg-hover)]" onClick="${() => navigate('/chat')}">
                     <i class="fa-solid fa-comments text-lg sm:text-xl"></i>
                     <span>${msg('home.header.chat')}</span>
                 </div>
