@@ -4,10 +4,9 @@ interface ChatProps {}
 
 export const Footer = createComponent((props: ChatProps) => {
     const container = document.createElement("footer");
-    container.className = "text-center w-full h-[68px] flex flex-col items-center justify-center text-lg font-normal text-white bg-[var(--main-color)]";
-
+    container.className = "fixed bottom-0 left-0 w-full h-[68px] flex flex-col items-center justify-center text-center text-lg font-normal text-white bg-[var(--main-color)]";
     container.innerHTML = `
-        <h1>created by <span class="text-[var(--bg-color)]">afarachi🐰  moabbas🐰  jfatfat🐰</span> | all rights reserved! </h1>
+        <h1>created by <span class="text-[var(--bg-color)]">afarachi🐰  moabbas🐰  jfatfat🐰</span> | all rights reserved!</h1>
     `;
     return container;
 });

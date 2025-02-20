@@ -39,8 +39,8 @@ export default {
     const header = Header();
     headerNav?.appendChild(header);
 
-    //profile 
-
+    
+    //footer
     const footer = container.querySelector('.footer')!
     const footerComp = Footer()
     footer.appendChild(footerComp)
