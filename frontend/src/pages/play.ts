@@ -17,7 +17,7 @@ export default {
                 </h1>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                 <!-- Buttons will be inserted here -->
-                    <button class="game-mode-btn" data-route="/local-ai">
+                    <button class="game-mode-btn" data-route="/play/ai">
                         <span>🕹️</span>
                         <div>
                             <h2>VS AI</h2>
