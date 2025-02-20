@@ -1,13 +1,9 @@
 import { createComponent } from "../utils/StateManager";
-import { msg } from "../languages/LanguageController.js";
-import logoUrl from "../../public/assets/profile.jpeg";
-import goldRank from "../../public/assets/gold-medal.png";
-import silverRank from "../../public/assets/silver-medal.png";
-import bronzeRank from "../../public/assets/bronze-medal.png";
-import { navigate, refreshRouter } from "../router.js";
-import { GamesHistory } from "./GmaesHistory";
-import { UserInfo } from "./UserInfo";
-import { UserStatistics } from "./UserStatistics";
+import logoUrl from "/src/assets/profile.jpeg";
+import goldRank from "/src/assets/gold-medal.png";
+import { GamesHistory } from "./GmaesHistory.js";
+import { UserInfo } from "./UserInfo.js";
+import { UserStatistics } from "./UserStatistics.js";
 import Chart from 'chart.js/auto';
 
 

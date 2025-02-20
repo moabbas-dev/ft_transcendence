@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Expose the frontend port (1234)
-EXPOSE 1234
+EXPOSE 5173
 
 # Start the frontend application
 CMD ["npm", "start"]

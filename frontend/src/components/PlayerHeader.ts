@@ -1,6 +1,6 @@
-import { createComponent } from "../utils/StateManager";
-import  player1Pic  from "../../public/assets/afarachi.jpg";
-import  player2Pic  from "../../public/assets/moabbas.jpg";
+import { createComponent } from "../utils/StateManager.js";
+import  player1Pic  from "/src/assets/afarachi.jpg";
+import  player2Pic  from "/src/assets/moabbas.jpg";
  
 export const PlayerHeader = createComponent(() => {
   const container = document.createElement("div");
