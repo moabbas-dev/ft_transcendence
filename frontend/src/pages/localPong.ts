@@ -1,7 +1,7 @@
-import { LocalPongGame } from "../components/LocalPongGame";
+import { LocalPongGame } from "../components/local _offline_1v1/LocalPongGame";
 import { Header } from "../components/header";
 import { Footer } from "../components/footer";
-import { PlayerHeader } from "../components/PlayerHeader";
+import { PlayerHeader } from "../components/local _offline_1v1/offline_1v1_Header";
 
 export default {
   render: (container: HTMLElement) => {
