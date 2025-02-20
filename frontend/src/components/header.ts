@@ -11,7 +11,7 @@ export const Header = createComponent(() => {
         <div class="flex items-center justify-start w-1/2 gap-2 sm:gap-8">
             <img src="${logoUrl}" alt="Logo" class="w-10 sm:w-12">
             <nav class="navbar items-center gap-4 hidden sm:flex">
-                <div class="nav-child flex flex-col justify-center items-center hover:cursor-pointer hover:text-[var(--bg-hover)]">
+                <div class="nav-child playPage flex flex-col justify-center items-center hover:cursor-pointer hover:text-[var(--bg-hover)]" onClick="${() => navigate('/play')}">
                     <i class="fa-solid fa-play text-lg sm:text-xl"></i>
                     <a href="#" class="">Play</a>
                 </div>
@@ -31,7 +31,7 @@ export const Header = createComponent(() => {
         <div class="flex items-center justify-end gap-4 w-1/2">
             <div class="md:flex-1">
                 <form action="" id="search-bar-container" class="search-bar-container bg-[var(--main-color)] flex justify-center items-center gap-2 rounded-md md:p-2 md:bg-white">
-                    <input type="text" name="" id="search-bar" placeholder="search here..." class="w-full hidden md:block text-lg text-[var(--bg-hover)] rounded-md">
+                    <input type="text" name="" id="search-bar" autocomplete="off" placeholder="${msg('home.header.search')}" class="w-full hidden md:block text-lg text-[var(--bg-hover)] rounded-md">
                     <label for="search-bar" class="fas fa-search text-[var(--bg-hover)] text-xl cursor-pointer max-md:text-white max-md:bg-[var(--main-color)]"></label>
                 </form>
             </div>
@@ -112,6 +112,25 @@ export const Header = createComponent(() => {
     const navbar = container.querySelector('.navbar')!
     const navBtn = container.querySelector('.nav-btn')!
     const navChildren = container.querySelectorAll('.nav-child')!
+    const profileSection = container.querySelector('.profile-section')!
+    const navChat = container.querySelector('.nav-chat')!
+
+    navChat.addEventListener('click', () => {
+        navigate('/chat')
+    })
+
+    profileSection.addEventListener('click', () => {
+        const profielPopUp = document.querySelector(".profile");
+        const profile = Profile();
+        profielPopUp?.appendChild(profile);    
+    })
+
+    // For testing purposes
+    notificationContainer.appendChild(Notification({username: 'Test User', message: 'Hello World!'}))
+    notificationContainer.appendChild(Notification({username: 'Test User', message: 'Hello World!'}))
+    notificationContainer.appendChild(Notification({username: 'Test User', message: 'Hello World!'}))
+    notificationContainer.appendChild(Notification({username: 'Test User', message: 'Hello World!'}))
+    notificationContainer.appendChild(Notification({username: 'Test User', message: 'Hello World!'}))
 
     navBtn.addEventListener('click', () => {
         const navStyles = 'max-sm:flex max-sm:flex-col max-sm:absolute max-sm:top-full max-sm:left-0 max-sm:w-fit max-sm:gap-0'

@@ -38,10 +38,8 @@ export default {
     const headerNav = container.querySelector(".header");
     const header = Header();
     headerNav?.appendChild(header);
+
     //profile 
-    const profielPopUp = container.querySelector(".profile");
-    const profile = Profile();
-    profielPopUp?.appendChild(profile);
 
     const footer = container.querySelector('.footer')!
     const footerComp = Footer()
