@@ -5,12 +5,14 @@ import LocalPongPage from "./pages/localPong";
 import NotFound from "./pages/notfound.js";
 import ChatPage from "./pages/chat.js";
 import { Page } from "./types/types.js";
+import PlayVsAI from "./pages/PlayVsAI.js"
 import { Lang, setLanguage } from "./languages/LanguageController.js";
 
 const routes: { [key: string]: Page } = {
   "/": HomePage,
   "/register": RegisterPage,
   "/play": PlayPage,
+  "/play/local-ai": PlayVsAI,
   "/play/local-multi": LocalPongPage,
   "/chat": ChatPage,
 };
