@@ -13,7 +13,7 @@ export const Header = createComponent(() => {
         <div class="flex items-center justify-start w-1/2 gap-2 sm:gap-8">
             <img src="${logoUrl}" alt="Logo" class="w-10 sm:w-12 hover:drop-shadow-[1px_1px_20px_white]">
             <nav class="navbar items-center gap-4 hidden sm:flex">
-                <div class="nav-child flex flex-col justify-center items-center transition-all hover:cursor-pointer hover:text-[var(--bg-hover)]">
+                <div class="nav-child playPage flex flex-col justify-center items-center transition-all hover:cursor-pointer hover:text-[var(--bg-hover)]" onClick="${() => navigate('/play')}">
                     <i class="fa-solid fa-play text-lg sm:text-xl"></i>
                     <span>${msg('home.header.play')}</span>
                 </div>
@@ -32,7 +32,7 @@ export const Header = createComponent(() => {
         </div>
         <div class="flex items-center justify-end gap-3 sm:gap-4 w-1/2">
             <div class="md:flex-1">
-                <form action="" id="search-bar-container" class="search-bar-container bg-[var(--main-color)] flex justify-center items-center gap-2 rounded-md md:p-2 md:bg-white">
+                <form action="" id="search-bar-container" class="search-bar-container bg-[var(--main-color)] flex justify-center items-center gap-2 rounded-md md:p-2 md:bg-white z-50">
                     <input type="text" name="" id="search-bar" autocomplete="off" placeholder="${msg('home.header.search')}" class="w-full hidden md:block text-lg text-[var(--bg-hover)] rounded-md">
                     <label for="search-bar" class="fas fa-search text-[var(--bg-hover)] text-xl cursor-pointer max-md:text-white max-md:bg-[var(--main-color)]"></label>
                 </form>
@@ -82,10 +82,16 @@ export const Header = createComponent(() => {
     const navChildren = container.querySelectorAll('.nav-child')!
     const profileSection = container.querySelector('.profile-section')!
     const navChat = container.querySelector('.nav-chat')!
-
+    const playPage = container.querySelector('.playPage')!
+    
     navChat.addEventListener('click', () => {
-        navigate('/chat')
-    })
+        navigate('/chat');
+    });
+
+    playPage.addEventListener('click', () => {
+        navigate('/play');
+    });
+
 
     profileSection.addEventListener('click', () => {
         const profielPopUp = document.querySelector(".profile");
