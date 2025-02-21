@@ -1,8 +1,8 @@
 import { navigate } from "../router.js";
 import { msg} from "../languages/LanguageController.js";
-import { PongAnimation } from "../components/PingPongAnimation.js";
-import { Header } from "../components/header.js";
-import { Footer } from "../components/footer.js";
+import { PongAnimation } from "../components/partials/PingPongAnimation.js";
+import { Header } from "../components/header_footer/header.js";
+import { Footer } from "../components/header_footer/footer.js";
 
 export default {
     render: (container: HTMLElement) => {
@@ -18,7 +18,7 @@ export default {
                 <!-- Buttons will be inserted here -->
                     <button class="game-mode-btn max-sm:size-[150px] max-sm:justify-center p-2 sm:p-8 border-none rounded-2xl group bg-gradient-to-br from-[var(--main-color)] to-[rgba(100,100,255,0.8)] hover:from-[rgba(100,100,255,0.9)] hover:to-[var(--main-color)] text-white flex max-sm:flex-col items-center gap-3 sm:gap-6 cursor-pointer transition-all duration-300 ease-in-out transform translate-y-0 shadow-md active:translate-y-0 animate-fade-up animate-once" data-route="/play/local-ai">
                         <span class="group-hover:scale-[1.2] text-[2.5rem] transition-transform duration-300 ease-in-out">
-                          <i class="fa-solid fa-robot"></i>
+                          <i class="fa-solid fa-robot drop-shadow-[0_5px_black] group-hover:drop-shadow-[0] "></i>
                         </span>
                         <div class="flex flex-col gap-1 text-center sm:text-left">
                             <h2 class="text-2xl">VS AI</h2>
@@ -27,7 +27,7 @@ export default {
                     </button>
                     <button class="game-mode-btn max-sm:size-[150px] max-sm:justify-center p-2 sm:p-8 border-none rounded-2xl group bg-gradient-to-br from-[var(--main-color)] to-[rgba(100,100,255,0.8)] hover:from-[rgba(100,100,255,0.9)] hover:to-[var(--main-color)] text-white flex max-sm:flex-col items-center gap-3 sm:gap-6 cursor-pointer transition-all duration-300 ease-in-out transform translate-y-0 shadow-md active:translate-y-0 animate-fade-up animate-once" data-route="/play/local-multi">
                         <span class="group-hover:scale-[1.2] text-[2.5rem] transition-transform duration-300 ease-in-out">
-                          <i class="fa-solid fa-user-group"></i>
+                          <i class="fa-solid fa-user-group drop-shadow-[0_5px_black] group-hover:drop-shadow-[0]"></i>
                         </span>
                         <div class="flex flex-col gap-1 text-center sm:text-left">
                             <h2 class="text-2xl">Local Multiplayer</h2>
@@ -36,7 +36,7 @@ export default {
                     </button>
                     <button class="game-mode-btn max-sm:size-[150px] max-sm:justify-center p-2 sm:p-8 border-none rounded-2xl group bg-gradient-to-br from-[var(--main-color)] to-[rgba(100,100,255,0.8)] hover:from-[rgba(100,100,255,0.9)] hover:to-[var(--main-color)] text-white flex max-sm:flex-col items-center gap-3 sm:gap-6 cursor-pointer transition-all duration-300 ease-in-out transform translate-y-0 shadow-md active:translate-y-0 animate-fade-up animate-once" data-route="/play/online-tournament">
                         <span class="group-hover:scale-[1.2] text-[2.5rem] transition-transform duration-300 ease-in-out">
-                          <i class="fa-solid fa-trophy"></i>
+                          <i class="fa-solid fa-trophy drop-shadow-[0_5px_black] group-hover:drop-shadow-[0]"></i>
                         </span>
                         <div class="flex flex-col gap-1 text-center sm:text-left">
                             <h2 class="text-2xl">Online Tournament</h2>
@@ -45,7 +45,7 @@ export default {
                     </button>
                     <button class="game-mode-btn max-sm:size-[150px] max-sm:justify-center p-2 sm:p-8 border-none rounded-2xl group bg-gradient-to-br from-[var(--main-color)] to-[rgba(100,100,255,0.8)] hover:from-[rgba(100,100,255,0.9)] hover:to-[var(--main-color)] text-white flex max-sm:flex-col items-center gap-3 sm:gap-6 cursor-pointer transition-all duration-300 ease-in-out transform translate-y-0 shadow-md active:translate-y-0 animate-fade-up animate-once" data-route="/play/online-multi">
                         <span class="group-hover:scale-[1.2] text-[2.5rem] transition-transform duration-300 ease-in-out">
-                          <i class="fa-solid fa-globe"></i>
+                          <i class="fa-solid fa-globe drop-shadow-[0_5px_black] group-hover:drop-shadow-[0]"></i>
                         </span>
                         <div class="flex flex-col gap-1 text-center sm:text-left">
                             <h2 class="text-2xl">Online Multiplayer</h2>

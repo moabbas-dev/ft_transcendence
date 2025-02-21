@@ -1,8 +1,7 @@
-import { Button } from './Button.js';
-import { createComponent, useCleanup } from '../utils/StateManager.js';
-import { navigate } from '../router.js';
-import { validateEmail, validatePassword } from '../utils/FormValidation.js';
-import { msg } from '../languages/LanguageController.js';
+import { Button } from '../partials/Button.js';
+import { createComponent, useCleanup } from '../../utils/StateManager.js';
+import { validateEmail, validatePassword } from '../../utils/FormValidation.js';
+import { msg } from '../../languages/LanguageController.js';
 
 interface SignInProps {
   styles: string,

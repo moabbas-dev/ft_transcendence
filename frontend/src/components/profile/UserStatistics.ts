@@ -1,7 +1,4 @@
-import { createComponent } from "../utils/StateManager";
-
-
-interface UserStatisticsProps {}
+import { createComponent } from "../../utils/StateManager.js";
 
 export const UserStatistics = createComponent(() => {
     const container = document.createElement("div");

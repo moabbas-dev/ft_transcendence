@@ -1,7 +1,7 @@
 import HomePage from "./pages/home.js";
 import RegisterPage from "./pages/register.js";
 import PlayPage from "./pages/play.js";
-import LocalPongPage from "./pages/localPong";
+import LocalPongPage from "./pages/localMultiplayer.js";
 import NotFound from "./pages/notfound.js";
 import ChatPage from "./pages/chat.js";
 import { Page } from "./types/types.js";

@@ -1,7 +1,4 @@
-import { createComponent } from "../utils/StateManager";
-
-
-interface GamesHistoryProps {}
+import { createComponent } from "../../utils/StateManager.js";
 
 export const GamesHistory = createComponent(() => {
     const container = document.createElement("div");

@@ -1,5 +1,5 @@
-import { Header } from "../components/header.js";
-import { Footer } from "../components/footer.js";
+import { Header } from "../components/header_footer/header.js";
+import { Footer } from "../components/header_footer/footer.js";
 import { AIDifficultyPopup } from "../components/local_VS_AI/AIDifficultyPopup.js";
 import { AIPongGame } from "../components/local_VS_AI/AIPongGame.js";
 import { PlayerHeader } from "../components/local_VS_AI/offline_1vAi_Header.js";

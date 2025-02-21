@@ -1,9 +1,8 @@
 import { navigate, refreshRouter } from "../router.js";
 import { Lang, msg, setLanguage } from "../languages/LanguageController.js";
-import { PongAnimation } from "../components/PingPongAnimation.js";
-import {Header}  from "../components/header";
-import { Footer } from "../components/footer";
-import { Profile } from "../components/UserProfile.js";
+import { PongAnimation } from "../components/partials/PingPongAnimation.js";
+import {Header}  from "../components/header_footer/header.js";
+import { Footer } from "../components/header_footer/footer.js";
 
 export default {
   render: (container: HTMLElement) => {
@@ -53,7 +52,7 @@ export default {
       setLanguage(languageSelect.value as Lang);
     }
 
-    languageSelect.addEventListener("change", function (e: Event) {
+    languageSelect.addEventListener("change", function() {
       const selectedLanguage = this.value;
       localStorage.setItem("selectedLanguage", selectedLanguage);
       setLanguage(selectedLanguage as Lang);
@@ -61,7 +60,7 @@ export default {
     });
 
     const register_btn = document.querySelector(".register-btn")!;
-    register_btn.addEventListener("click", (e: Event) => {
+    register_btn.addEventListener("click", () => {
       navigate("/register");
     });
 

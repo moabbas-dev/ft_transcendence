@@ -1,5 +1,5 @@
-import { Chat } from "../components/Chat";
-import { ChatItem } from "../components/ChatItem";
+import { Chat } from "../components/chat/Chat";
+import { ChatItem } from "../components/chat/ChatItem";
 
 export default {
 	render: (container:HTMLElement) => {

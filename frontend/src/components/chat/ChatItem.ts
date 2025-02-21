@@ -1,4 +1,4 @@
-import { createComponent } from "../utils/StateManager";
+import { createComponent } from "../../utils/StateManager.js";
 
 interface ChatItemProps {
 	username: string,
@@ -16,7 +16,7 @@ export const ChatItem = createComponent((props: ChatItemProps) => {
 			<div class="text-white text-base sm:text-lg 2xl:text-xl">${props.firstname} ${props.lastname}</div>
 		</div>
 		${!props.isFriend? `
-		<div class="add-friend text-white mr-4 hover:bg-slate-700 w-fit h-fit rounded-lg">
+		<div class="add-friend transition-all text-white mr-4 hover:bg-slate-700 w-fit h-fit rounded-lg">
 			<i title="Add Friend" class="fa-solid fa-user-plus p-2 text-lg hover:text-[var(--main-color)]"></i>
 		</div>
 		` : ''}

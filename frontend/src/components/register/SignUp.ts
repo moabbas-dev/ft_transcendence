@@ -1,7 +1,7 @@
-import { createComponent, useCleanup } from "../utils/StateManager.js";
-import { Button } from "./Button.js";
-import {validateConfirmPassword, validateEmail, validatePassword} from "../utils/FormValidation.js";
-import { msg } from "../languages/LanguageController.js";
+import { createComponent, useCleanup } from "../../utils/StateManager.js";
+import { Button } from "../partials/Button.js";
+import {validateConfirmPassword, validateEmail, validatePassword} from "../../utils/FormValidation.js";
+import { msg } from "../../languages/LanguageController.js";
 
 interface SignUpProps {
 	styles: string,
