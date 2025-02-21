@@ -1,4 +1,4 @@
-const { db } = require('../../index');
+const { db } = require('../db/initDb');
 const bcrypt = require('bcrypt');
 const SessionService = require('../services/SessionService');
 const UserService = require('../services/UserService');

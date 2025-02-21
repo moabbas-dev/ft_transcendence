@@ -4,6 +4,7 @@ const cors = require('@fastify/cors');
 const sqlite3 = require('sqlite3').verbose();
 const { createServer } = require('http'); // Use `http` server
 const { Server } = require('socket.io');
+const { createTables, closeDatabase } = require('./src/db/initDb');
 
 // Enable CORS on Fastify
 fastify.register(cors, {
@@ -11,12 +12,7 @@ fastify.register(cors, {
 	methods: ['GET', 'POST'],
 });
 
-// Create a new SQLite database connection
-const db = new sqlite3.Database('./data/database.sqlite');
-const { createTables } = require('./src/db/initDb');
-createTables(db);
-
-module.exports = { db };
+createTables();
 
 
 fastify.register(require('fastify-jwt'), {
@@ -34,21 +30,6 @@ fastify.register(require('./src/routes/TwoFactorCodeRoutes'));
 fastify.get('/', async (request, reply) => {
 	return { message: 'Hello from the backend!' };
 });
-
-// Graceful shutdown
-const closeDatabase = () => {
-	return new Promise((resolve, reject) => {
-		db.close((err) => {
-			if (err) {
-				fastify.log.error('Error closing database:', err);
-				reject(err);
-			} else {
-				fastify.log.info('Database connection closed.');
-				resolve();
-			}
-		});
-	});
-};
 
 const handleShutdown = async (signal) => {
 	fastify.log.info(`Received signal: ${signal}`);

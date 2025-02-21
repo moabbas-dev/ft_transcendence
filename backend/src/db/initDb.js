@@ -1,4 +1,8 @@
-const createTables = (db) => {
+const sqlite3 = require('sqlite3').verbose();
+
+const db = new sqlite3.Database('./data/database.sqlite');
+
+const createTables = () => {
 	const queries = [
 		`CREATE TABLE IF NOT EXISTS Users (
 					id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,14 +49,6 @@ const createTables = (db) => {
 					updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 					FOREIGN KEY (user_id) REFERENCES Users(id)
 				);`,
-		`CREATE TABLE IF NOT EXISTS Two_Factor_Codes (
-					id INTEGER PRIMARY KEY AUTOINCREMENT,
-					user_id INTEGER NOT NULL,
-					code TEXT NOT NULL,
-					expires_at TIMESTAMP NOT NULL DEFAULT (DATETIME('now', '+1 hour')),
-					created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-					FOREIGN KEY (user_id) REFERENCES Users(id)
-				);`
 	];
 	queries.forEach((query) => {
 		db.run(query, (err) => {
@@ -62,4 +58,19 @@ const createTables = (db) => {
 	});
 };
 
-module.exports = { createTables };
+// Graceful shutdown handling
+const closeDatabase = () => {
+    return new Promise((resolve, reject) => {
+        db.close(err => {
+            if (err) {
+                console.error('Error closing database:', err);
+                reject(err);
+            } else {
+                console.log('Database connection closed.');
+                resolve();
+            }
+        });
+    });
+};
+
+module.exports = { db, createTables, closeDatabase };

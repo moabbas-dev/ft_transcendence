@@ -1,5 +1,4 @@
-const { resolveContent } = require('nodemailer/lib/shared');
-const { db } = require('../../index');
+const { db } = require('../db/initDb');
 
 class User {
 

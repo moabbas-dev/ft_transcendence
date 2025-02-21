@@ -1,4 +1,4 @@
-const { db } = require('../../index');
+const { db } = require('../db/initDb');
 
 class Session {
 
