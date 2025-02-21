@@ -1,7 +1,6 @@
-import { msg } from "../languages/LanguageController.js";
-import { validateAge, validateFullName, validateNickname } from "../utils/FormValidation.js";
-import { createComponent } from "../utils/StateManager.js";
-import { Button } from "./Button.js";
+import { validateAge, validateFullName, validateNickname } from "../../utils/FormValidation.js";
+import { createComponent } from "../../utils/StateManager.js";
+import { Button } from "../partials/Button.js";
 
 export const UserInfoForm = createComponent(() => {
 	const form = document.createElement('div')

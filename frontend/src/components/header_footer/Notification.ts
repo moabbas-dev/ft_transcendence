@@ -1,4 +1,4 @@
-import { createComponent } from "../utils/StateManager";
+import { createComponent } from "../../utils/StateManager";
 
 interface NotificationProps {
 	username: string,

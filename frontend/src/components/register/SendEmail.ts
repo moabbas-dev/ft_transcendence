@@ -1,7 +1,7 @@
-import { createComponent } from "../utils/StateManager.js";
-import { msg } from "../languages/LanguageController.js";
-import { Button } from "./Button.js";
-import { validateEmail } from "../utils/FormValidation.js";
+import { createComponent } from "../../utils/StateManager.js";
+import { msg } from "../../languages/LanguageController.js";
+import { Button } from "../partials/Button.js";
+import { validateEmail } from "../../utils/FormValidation.js";
 
 interface SendEmailProps {
 	onSwitchToSignIn: () => void,
@@ -53,7 +53,7 @@ export const SendEmail = createComponent((props: SendEmailProps) => {
 	});
 
 	const resendEmail = form.querySelector('.resend-email')!
-	resendEmail.addEventListener('click', (e:Event) => {
+	resendEmail.addEventListener('click', () => {
 		// Resend Email Here
 	})
 	return form;

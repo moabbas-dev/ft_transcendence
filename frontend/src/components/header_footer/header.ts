@@ -1,9 +1,9 @@
-import { createComponent } from "../utils/StateManager";
-import { msg } from "../languages/LanguageController.js";
+import { createComponent } from "../../utils/StateManager.js";
+import { msg } from "../../languages/LanguageController.js";
 import logoUrl from "/src/assets/ft_transcendencee.png";
-import { navigate } from "../router.js";
+import { navigate } from "../../router.js";
 import { Notification } from "./Notification.js";
-import { Profile } from "./UserProfile.js";
+import { Profile } from "../profile/UserProfile.js";
 
 export const Header = createComponent(() => {
     const container = document.createElement("header");
@@ -38,7 +38,7 @@ export const Header = createComponent(() => {
                 </form>
             </div>
             <div class="notification-bell relative">
-                <i class="fa-solid fa-bell text-white text-2xl hover:cursor-pointer hover:text-[var(--bg-hover)]"></i>
+                <i class="fa-solid fa-bell text-white text-2xl transition-all hover:cursor-pointer hover:text-[var(--bg-hover)]"></i>
                 <span class="absolute -top-2 -right-2 rounded-full bg-red-600 text-white hover:cursor-pointer w-5 h-5 flex items-center justify-center text-sm">0</span>
             </div>
             <div class="notification hidden absolute overflow-y-auto top-full right-0 z-50 bg-white w-[300px] p-2 max-h-[300px] animate-fade-down animate-once animate-duration-300">

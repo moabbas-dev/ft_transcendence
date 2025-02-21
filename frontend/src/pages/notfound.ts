@@ -1,4 +1,4 @@
-import { Button } from "../components/Button.js";
+import { Button } from "../components/partials/Button.js";
 import { msg } from "../languages/LanguageController.js";
 import { navigate } from "../router.js";
 
@@ -26,7 +26,7 @@ export default {
 		styles: 'inline-flex px-6 2xl:px-8 py-3 2xl:py-5 text-white bg-[var(--main-color)] font-semibold sm:text-lg 2xl:text-xl rounded-lg',
 		type: 'button',
 		eventType: 'click',
-		onClick: (e: Event) => navigate('/')
+		onClick: () => navigate('/')
 	  })
 
 	  container.querySelector('.page-body')!.appendChild(HomeBtn)

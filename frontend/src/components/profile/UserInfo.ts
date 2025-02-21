@@ -1,6 +1,4 @@
-import { createComponent } from "../utils/StateManager";
-
-interface UserInfoProps {}
+import { createComponent } from "../../utils/StateManager.js";
 
 export const UserInfo = createComponent(() => {
     const container = document.createElement("div");

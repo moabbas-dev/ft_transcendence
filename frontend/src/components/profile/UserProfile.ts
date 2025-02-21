@@ -1,4 +1,4 @@
-import { createComponent } from "../utils/StateManager";
+import { createComponent } from "../../utils/StateManager.js";
 import logoUrl from "/src/assets/profile.jpeg";
 import goldRank from "/src/assets/gold-medal.png";
 import { GamesHistory } from "./GmaesHistory.js";

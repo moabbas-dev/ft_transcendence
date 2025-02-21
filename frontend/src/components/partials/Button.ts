@@ -1,4 +1,4 @@
-import { createComponent, useCleanup } from "../utils/StateManager.js";
+import { createComponent, useCleanup } from "../../utils/StateManager.js";
 
 interface ButtonProps {
 	text: string, 

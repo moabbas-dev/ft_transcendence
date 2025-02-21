@@ -1,10 +1,6 @@
-import { createComponent } from "../utils/StateManager";
+import { createComponent } from "../../utils/StateManager.js";
 
-interface ChatProps {
-
-}
-
-export const Chat = createComponent((props: ChatProps) => {
+export const Chat = createComponent(() => {
     const container = document.createElement('div')
     container.innerHTML = `
         <div  class="flex flex-col bg-[var(--main-color)] bg-custom-gradient justify-between px-1 sm:px-2 h-screen z-20 gap-2">

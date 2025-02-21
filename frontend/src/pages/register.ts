@@ -1,10 +1,10 @@
-import { SignIn } from '../components/SignIn.js';
-import { SignUp } from '../components/SignUp.js';
-import { PongAnimation } from '../components/PingPongAnimation.js';
+import { SignIn } from '../components/register/SignIn.js';
+import { SignUp } from '../components/register/SignUp.js';
+import { PongAnimation } from '../components/partials/PingPongAnimation.js';
 import { msg } from '../languages/LanguageController.js';
-import { SendEmail } from '../components/SendEmail.js';
-import { ResetPass } from '../components/ResetPass.js';
-import { UserInfoForm } from '../components/UserInfoForm.js';
+import { SendEmail } from '../components/register/SendEmail.js';
+import { ResetPass } from '../components/register/ResetPass.js';
+import { UserInfoForm } from '../components/register/UserInfoForm.js';
 
 export default {
 	render: (container:HTMLElement) => {

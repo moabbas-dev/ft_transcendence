@@ -1,7 +1,7 @@
-import { msg } from "../languages/LanguageController.js";
-import { validateConfirmPassword, validateEmail, validatePassword } from "../utils/FormValidation";
-import { createComponent, useCleanup } from "../utils/StateManager.js";
-import { Button } from "./Button.js";
+import { msg } from "../../languages/LanguageController.js";
+import { validateConfirmPassword, validatePassword } from "../../utils/FormValidation.js";
+import { createComponent, useCleanup } from "../../utils/StateManager.js";
+import { Button } from "../partials/Button.js";
 
 export const ResetPass = createComponent(() => {
 	const form = document.createElement('div')
