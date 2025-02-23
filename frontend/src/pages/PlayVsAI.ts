@@ -4,6 +4,9 @@ import { AIDifficultyPopup } from "../components/local_VS_AI/AIDifficultyPopup.j
 import { AIPongGame } from "../components/local_VS_AI/AIPongGame.js";
 import { PlayerHeader } from "../components/local_VS_AI/offline_1vAi_Header.js";
 
+// Global variable to hold the current game instance
+let currentGame: (HTMLElement & { destroy?: () => void }) | null = null;
+
 export default {
   render: (container: HTMLElement) => {
     container.innerHTML = `
@@ -32,13 +35,49 @@ export default {
       playerHeaderContainer.appendChild(playerHeader);
     }
 
+    // // Show difficulty popup and start game after selection
+    // const popup = AIDifficultyPopup({
+    //   onSelect: (difficulty: string) => {
+    //     console.log("Difficulty selected:", difficulty);
+    //     const gameContainer = container.querySelector("#pongCanvas");
+    //     gameContainer!.innerHTML = ""; // Clear previous instances
+    //     gameContainer?.appendChild(AIPongGame(difficulty));
+    //   },
+    // });
+
+    // If a game is already running, clean it up immediately before showing the popup
+    const gameContainer = container.querySelector("#pongCanvas");
+    if (currentGame && typeof currentGame.destroy === "function") {
+      currentGame.destroy();
+      currentGame.remove();
+      currentGame = null;
+      if (gameContainer) gameContainer.innerHTML = "";
+    }
+
     // Show difficulty popup and start game after selection
     const popup = AIDifficultyPopup({
       onSelect: (difficulty: string) => {
         console.log("Difficulty selected:", difficulty);
+
+        // Reset header scores to 0 and update the header to 50% blue and 50% red
+        localStorage.setItem(
+          "aiPongScores",
+          JSON.stringify({ player: 0, ai: 0 })
+        );
+        document.dispatchEvent(
+          new CustomEvent("aiScoreUpdate", {
+            detail: { player: 0, ai: 0 },
+          })
+        );
+
         const gameContainer = container.querySelector("#pongCanvas");
-        gameContainer!.innerHTML = ""; // Clear previous instances
-        gameContainer?.appendChild(AIPongGame(difficulty));
+        if (gameContainer) {
+          gameContainer.innerHTML = "";
+        }
+        currentGame = AIPongGame(difficulty);
+        if (gameContainer && currentGame) {
+          gameContainer.appendChild(currentGame);
+        }
       },
     });
 

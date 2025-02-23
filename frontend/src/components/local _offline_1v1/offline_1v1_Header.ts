@@ -1,6 +1,7 @@
 import { createComponent } from "../../utils/StateManager.js";
 import player1Pic from "/src/assets/p1.jpg";
 import player2Pic from "/src/assets/p2.jpg";
+import pongPic from "/src/assets/pong.png";
 
 export const PlayerHeader = createComponent(() => {
   const container = document.createElement("div");
@@ -29,8 +30,9 @@ export const PlayerHeader = createComponent(() => {
       </div>
     </div>
 
-    <div class="text-2xl font-bold uppercase tracking-wider">
-      Pong Game 🏓
+    <div class="flex flex-row gap-1 text-2xl font-bold uppercase tracking-wider">
+      <p><span class="font-mono text-yellow-400">Pong</span> Game<p> 
+      <i class="fa-solid fa-table-tennis-paddle-ball"></i>
     </div>
 
     <div class="flex items-center gap-4">
