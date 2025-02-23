@@ -21,6 +21,10 @@ class FriendController {
 			}
 			if (decoded.userId != userId)
 				return reply.code(403).send({ message: "Token does not belong to this user!" });
+			const user = await UserService.getUserById(userId);
+			const friend = await UserService.getUserById(friendId);
+			if (!user || !friend)
+				return reply.code(404).send({ message: "User or friend user not exists!" });
 			const newFriendId = await FriendService.createFriendRequest({ userId, friendId });
 			reply.code(201).send({ newFriendId });
 		} catch (err) {
@@ -51,6 +55,8 @@ class FriendController {
 			const user = await UserService.getUserById(userId);
 			if (!user)
 				reply.code(404).send({ message: 'User not found!' });
+			if (user && !user.is_active)
+				return reply.code(403).send({ message: "User not active!" });
 			else {
 				const friends = await FriendService.getAllUserFriends(userId);
 				reply.code(200).send(friends);
@@ -96,11 +102,15 @@ class FriendController {
 					return reply.code(401).send({ message: "Access token expired!" });
 				return reply.code(401).send({ message: "Invalid access token" });
 			}
-			const changes = await FriendService.updateFriendStatus(id, { status });
-			if (changes == 0) reply.code(404).send({ message: 'Friend not found!' });
-			else reply.code(200).send({ message: "Friend updated successfully!" });
+			const friend = await FriendService.getFriendRequestById(id);
+			if (!friend)
+				return reply.code(404).send({ message: "Friend request not found!" });
+			if (decoded.userId != friend.friend_id)
+				return reply.code(403).send({ message: "Token does not belong to this user!" });
+			await FriendService.updateFriendStatus(id, { status });
+			return reply.code(200).send({ message: "Friend updated successfully!" });
 		} catch (err) {
-			reply.code(500).send({ message: 'Error updating the friend!', error: err.message });
+			return reply.code(500).send({ message: 'Error updating the friend!', error: err.message });
 		}
 	}
 
@@ -119,11 +129,15 @@ class FriendController {
 					return reply.code(401).send({ message: "Access token expired!" });
 				return reply.code(401).send({ message: "Invalid access token" });
 			}
-			const changes = await FriendService.deleteFriend(id);
-			if (changes == 0) reply.code(404).send({ message: 'Friend not found!' });
-			else reply.code(200).send({ message: 'Friend deleted successfully!' });
+			const friend = await FriendService.getFriendRequestById(id);
+			if (!friend)
+				return reply.code(404).send({ message: "Friend not found!" });
+			if (decoded.userId !== friend.user_id || decoded.userId !== friend.friend_id)
+				return reply.code(403).send({ message: "Token does not belong to this user!" });
+			await FriendService.deleteFriend(id);
+			return reply.code(200).send({ message: 'Friend deleted successfully!' });
 		} catch (err) {
-			reply.code(500).send({ message: 'Error deleting the friend!', error: err.message });
+			return reply.code(500).send({ message: 'Error deleting the friend!', error: err.message });
 		}
 	}
 }

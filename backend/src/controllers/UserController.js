@@ -1,6 +1,9 @@
 const UserService = require('../services/UserService');
 const bcrypt = require('bcrypt');
 const { sendEmail } = require('../utils/emailUtils');
+const SessionService = require('../services/SessionService');
+const FriendService = require('../services/FriendService');
+const BlockedUserService = require('../services/BlockedUserService');
 const saltRounds = 10;
 const SECRET_KEY = process.env.JWT_SECRET_KEY;
 
@@ -8,18 +11,31 @@ class UserController {
 
 	static async createUser(request, reply) {
 		const { email, password, nickname, full_name, google_id } = request.body;
+		const activationEmailHtml = (userId, full_name) => {
+			return `
+				<div>
+					<h1>Welcome ${full_name} to our website!</h1>
+					<p>Please click on the link below to activate your account</p>
+					<p>${process.env.BACKEND_DOMAIN}/activate/${userId}</p>
+					<p>Have a nice day!</p>
+				</div>
+			`;
+		}
 		try {
 			const passwordHash = await bcrypt.hash(password, saltRounds);
 			const userId = await UserService.createUser({ email, password: passwordHash, nickname, full_name, google_id });
 			try {
-				const html = "<h1 style='color:blue'>Welcome!</h1>"
-				await sendEmail(email, "New account is here!", html);
+				await sendEmail(email, "New account is here!", null, activationEmailHtml(userId, full_name));
 			} catch (error) {
 				return reply.code(500).send({ error: error.message });
 			}
 			return reply.code(201).send({ userId });
 		} catch (err) {
-			return reply.code(500).send({ message: 'Error creating user', error: err.message });
+			if (err.message.includes('Users.nickname'))
+				return reply.code(409).send({ key: "nickname", message: "Nickname is already in use!", error: err.message });
+			if (err.message.includes('Users.email'))
+				return reply.code(409).send({ key: "email", message: "Email is already in use!", error: err.message });
+			return reply.code(500).send({ key: "database", message: 'Error creating user', error: err.message });
 		}
 	}
 
@@ -72,6 +88,8 @@ class UserController {
 			const user = await UserService.getUserByNickname(nickname);
 			if (!user)
 				return reply.code(404).send({ message: "User not found!" });
+			if (user && !user.is_active)
+				return reply.code(403).send({ message: "User not active!" });
 			return reply.code(200).send(user);
 		} catch (err) {
 			return reply.code(500).send({ message: "Error getting user by nickname!", error: err.message });
@@ -100,7 +118,9 @@ class UserController {
 			if (changes == 0) reply.code(404).send({ message: 'User not found!' });
 			else reply.code(200).send({ message: 'User updated successfully!' });
 		} catch (err) {
-			reply.code(500).send({ message: 'Error updating the user', error: err.message });
+			if (err.message.includes('Users.nickname'))
+				return reply.code(409).send({ key: "nickname", message: "Nickname is already in use!", error: err.message });
+			reply.code(500).send({ key: "database", message: 'Error updating the user', error: err.message });
 		}
 	}
 
@@ -135,7 +155,12 @@ class UserController {
 				return reply.code(403).send({ message: "Token does not belong to this user!" });
 			const changes = await UserService.deleteUser(id);
 			if (changes == 0) reply.code(404).send({ message: 'User not found!' });
-			else reply.code(200).send({ message: 'User deleted successfully!' });
+			else {
+				await SessionService.deleteUserSessions(id);
+				await FriendService.deleteUserFriends(id);
+				await BlockedUserService.deleteUserBlocks(id);
+				reply.code(200).send({ message: 'User deleted successfully!' });
+			}
 		} catch (err) {
 			reply.code(500).send({ message: 'Error deleting the user', error: err.message });
 		}

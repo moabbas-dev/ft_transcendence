@@ -21,6 +21,10 @@ class BlockedUserController {
 			}
 			if (decoded.userId != userId)
 				return reply.code(403).send({ message: "Token does not belong to this user!" });
+			const user = await UserService.getUserById(userId);
+			const blockedUser = await UserService.getUserById(blockedUserId);
+			if (!user || !blockedUser)
+				return reply.code(404).send({ message: "User or blocked user not found!" });
 			const newblockId = await BlockedUserService.createBlockedUser({ userId, blockedUserId });
 			reply.code(201).send(newblockId);
 		} catch (err) {
@@ -48,6 +52,8 @@ class BlockedUserController {
 			const user = await UserService.getUserById(userId);
 			if (!user)
 				reply.code(404).send({ message: 'User not found!' });
+			if (user && !user.is_active)
+				return reply.code(403).send({ message: "User not active!" });
 			else {
 				const blocks = await BlockedUserService.getAllUserBlocks(userId);
 				reply.code(200).send(blocks);
@@ -92,9 +98,13 @@ class BlockedUserController {
 					return reply.code(401).send({ message: "Access token expired!" });
 				return reply.code(401).send({ message: "Invalid access token" });
 			}
-			const changes = await BlockedUserService.deleteBlock(id);
-			if (changes == 0) reply.code(404).send({ message: 'Block not found!' });
-			else reply.code(200).send({ message: 'Block deleted successfully!' });
+			const block = await BlockedUserService.getBlockById(id);
+			if (!block)
+				return reply.code(404).send({ message: 'Block not found!' });
+			if (decoded.userId != block.user_id)
+				return reply.code(403).send({ message: 'Token does not belong to this user!' });
+			await BlockedUserService.deleteBlock(id);
+			return reply.code(200).send({ message: 'Block deleted successfully!' });
 		} catch (err) {
 			reply.code(500).send({ message: 'Error deleting the block!', error: err.message });
 		}

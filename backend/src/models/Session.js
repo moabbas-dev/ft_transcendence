@@ -33,16 +33,6 @@ class Session {
 		});
 	}
 
-	static async getByUserIdAndRefresh(userId, refresh_token) {
-		const query = `SELECT * FROM Sessions WHERE user_id = ? AND refresh_token = ?`;
-		return new Promise((resolve, reject) => {
-			db.get(query, [userId, refresh_token], function(err, row) {
-				if (err) reject(err);
-				else resolve(row);
-			});
-		});
-	}
-
 	static async updateAccessAndRefresh(id, { refreshToken, accessToken }) {
 		const query = `
 			UPDATE Sessions
@@ -87,10 +77,12 @@ class Session {
 		});
 	}
 
-	static async deletebyUserId(userId, refreshToken) {
-		const query = `DELETE FROM Sessions WHERE user_id = ? AND refresh_token = ?`;
+	static async deleteUserSessions(userId) {
+		const query = `
+			DELETE FROM Sessions WHERE user_id = ?
+		`;
 		return new Promise((resolve, reject) => {
-			db.run(query, [userId, refreshToken], function(err) {
+			db.run(query, [userId], function(err) {
 				if (err) reject(err);
 				else resolve(this.changes);
 			});

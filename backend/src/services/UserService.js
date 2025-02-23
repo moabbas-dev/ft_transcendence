@@ -38,6 +38,18 @@ class UserService {
 		return await User.updateUserStatus(id, { status });
 	}
 
+	static async updateUserNickname(id, { nickname }) {
+		return await User.updateUserNickname(id, { nickname });
+	}
+
+	static async updateUserPassword(id, { password }) {
+		return await User.updateUserPassword(id, { password });
+	}
+
+	static async activateUser(id) {
+		return await User.activateUser(id);
+	}
+
 	static async deleteUser(id) {
 		return await User.delete(id);
 	}

@@ -21,6 +21,10 @@ class BlockedUserService {
 	static async deleteBlock(id) {
 		return await BlockedUser.delete(id);
 	}
+
+	static async deleteUserBlocks(userId) {
+		return await BlockedUser.deleteUserBlocks(userId);
+	}
 }
 
 module.exports = BlockedUserService;

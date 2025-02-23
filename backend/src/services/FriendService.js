@@ -25,6 +25,10 @@ class FriendService {
 	static async deleteFriend(id) {
 		return await Friend.delete(id);
 	}
+
+	static async deleteUserFriends(userId) {
+		return await Friend.deleteUserFriends(userId);
+	}
 }
 
 module.exports = FriendService;

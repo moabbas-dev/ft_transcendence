@@ -7,13 +7,14 @@ const createTables = () => {
 		`CREATE TABLE IF NOT EXISTS Users (
 					id INTEGER PRIMARY KEY AUTOINCREMENT,
 					email TEXT NOT NULL UNIQUE,
-					password TEXT NOT NULL,
-					nickname TEXT NOT NULL UNIQUE,
+					password TEXT,
+					nickname TEXT UNIQUE,
 					full_name TEXT NOT NULL,
 					status TEXT NOT NULL DEFAULT 'offline',
 					avatar_url TEXT DEFAULT 'default_avatar.png',
 					google_id TEXT UNIQUE,
 					is_2fa_enabled BOOLEAN DEFAULT 0,
+					is_active BOOLEAN DEFAULT 0,
 					two_factor_secret TEXT,
 					created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 					updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

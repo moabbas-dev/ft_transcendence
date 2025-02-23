@@ -111,6 +111,48 @@ class User {
 		});
 	}
 
+	static async updateUserNickname(id, { nickname }) {
+		const query = `
+			UPDATE Users
+			SET nickname = ?, updated_at = CURRENT_TIMESTAMP
+			WHERE id = ?
+		`;
+		return new Promise((resolve, reject) => {
+			db.run(query, [nickname, id], function(err) {
+				if (err) reject(err);
+				else resolve(this.changes);
+			});
+		});
+	}
+
+	static async updateUserPassword(id, { password }) {
+		const query = `
+			UPDATE Users
+			SET password = ?, updated_at = CURRENT_TIMESTAMP
+			WHERE id = ?
+		`;
+		return new Promise((resolve, reject) => {
+			db.run(query, [password, id], function(err) {
+				if (err) reject(err);
+				else resolve(this.changes);
+			});
+		});
+	}
+
+	static async activateUser(id) {
+		const query = `
+			UPDATE Users
+			SET is_active = 1, updated_at = CURRENT_TIMESTAMP
+			WHERE id = ?
+		`;
+		return new Promise((resolve, reject) => {
+			db.run(query, [id], function(err) {
+				if (err) reject(err);
+				else resolve(this.changes);
+			});
+		});
+	}
+
 	static async delete(id) {
 		const query = 'DELETE FROM Users WHERE id = ?';
 		return new Promise((resolve, reject) => {

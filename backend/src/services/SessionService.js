@@ -14,10 +14,6 @@ class SessionService {
 		return await Session.getById(id);
 	}
 
-	static async getSessionByUserIdAndRefreshToken(userId, refreshToken) {
-		return await Session.getByUserIdAndRefresh(userId, refreshToken);
-	}
-
 	static async updateAccessAndRefresh(id, { refreshToken, accessToken }) {
 		return await Session.updateAccessAndRefresh(id, { refreshToken, accessToken });
 	}
@@ -26,12 +22,12 @@ class SessionService {
 		return await Session.updateAccess(userId, { refreshToken, newAccessToken });
 	}
 
-	static async deleteSessionByUserId(userId, refresh_token) {
-		return await Session.deletebyUserId(userId, refresh_token);
-	}
-
 	static async deleteSessionById(id) {
 		return await Session.deleteById(id);
+	}
+
+	static async deleteUserSessions(userId) {
+		return await Session.deleteUserSessions(userId);
 	}
 }
 

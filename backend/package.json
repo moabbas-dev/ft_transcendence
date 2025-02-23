@@ -10,7 +10,10 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^10.0.2",
+    "@fastify/oauth2": "^8.1.2",
+    "@fastify/session": "^11.1.0",
     "backend": "file:",
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.7",

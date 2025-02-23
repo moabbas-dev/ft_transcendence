@@ -5,6 +5,9 @@ const sqlite3 = require('sqlite3').verbose();
 const { createServer } = require('http'); // Use `http` server
 const { Server } = require('socket.io');
 const { createTables, closeDatabase } = require('./src/db/initDb');
+const fastifyOauth2 = require('@fastify/oauth2');
+const fastifyCookie = require('@fastify/cookie');
+const fastifySession = require('@fastify/session');
 
 // Enable CORS on Fastify
 fastify.register(cors, {
@@ -14,6 +17,32 @@ fastify.register(cors, {
 
 createTables();
 
+// Register cookie plugin
+fastify.register(fastifyCookie);
+
+// Register session plugin (must be before oauth2)
+fastify.register(fastifySession, {
+	secret: process.env.FASTIFY_SESSION_SECRET_KEY,
+	cookie: { secure: false }, // Set secure: true when using HTTPS
+	saveUninitialized: false,
+});
+
+// Register fastify-oauth2
+fastify.register(fastifyOauth2, {
+	name: 'googleOAuth2', // will be available as fastify.googleOAuth2
+	scope: ['profile', 'email'],
+	credentials: {
+		client: {
+			id: process.env.CLIENT_ID,
+			secret: process.env.CLIENT_SECRET,
+		},
+		auth: fastifyOauth2.GOOGLE_CONFIGURATION,
+	},
+	// This is the path that starts the OAuth flow
+	startRedirectPath: '/auth/google',
+	// The callback URL registered in Google Cloud Console
+	callbackUri: `${process.env.BACKEND_DOMAIN}/auth/google/callback`,
+});
 
 fastify.register(require('fastify-jwt'), {
 	secret: process.env.JWT_SECRET_KEY,

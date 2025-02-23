@@ -19,6 +19,8 @@ class TwoFactorCodeController {
 			const user = await UserService.getUserById(userId);
 			if (!user)
 				return reply.code(404).send({ key: "user", message: "User not found!" });
+			if (user && !user.is_active)
+				return reply.code(403).send({ message: "User not active!" });
 
 			// Retrieve the secret key from the user's database
 			const secret = user.two_factor_secret;
@@ -65,6 +67,8 @@ class TwoFactorCodeController {
 			const user = await UserService.getUserById(userId);
 			if (!user)
 				return reply.code(404).send({ message: "User not found!" });
+			if (user && !user.is_active)
+				return reply.code(403).send({ message: "User not active!" });
 			const secret = speakeasy.generateSecret({ length: 20 });
 			await UserService.update2faSecret(userId, { twoFASecret: secret.base32 });
 			const otpauthUrl = secret.otpauth_url; // URL for the QR code
@@ -100,6 +104,8 @@ class TwoFactorCodeController {
 			const user = await UserService.getUserById(userId);
 			if (!user)
 				return reply.code(404).send({ key: "user", message: "User not found!" });
+			if (user && !user.is_active)
+				return reply.code(403).send({ message: "User not active!" });
 			const secret = user.two_factor_secret;
 			const verified = speakeasy.totp.verify({
 				secret: secret,
@@ -136,6 +142,8 @@ class TwoFactorCodeController {
 			const user = await UserService.getUserById(userId);
 			if (!user)
 				return reply.code(404).send({ message: "User not found!" });
+			if (user && !user.is_active)
+				return reply.code(403).send({ message: "User not active!" });
 			await UserService.update2fa(userId, { value: 0 });
 			await UserService.update2faSecret(userId, { twoFASecret: null });
 			return reply.code(200).send({ message: "Two Factor Authentication for user has been disabled!" });

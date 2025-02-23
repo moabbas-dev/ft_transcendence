@@ -56,6 +56,19 @@ class BlockedUser {
 			});
 		});
 	}
+
+	static async deleteUserBlocks(userId) {
+		const query = `
+			DELETE FROM Blocked_Users
+			WHERE user_id = ?
+		`;
+		return new Promise((resolve, reject) => {
+			db.run(query, [userId], function(err) {
+				if (err) reject(err);
+				else resolve(this.changes);
+			});
+		});
+	}
 }
 
 module.exports = BlockedUser;
