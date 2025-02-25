@@ -139,6 +139,20 @@ class User {
 		});
 	}
 
+	static async updateUserGoogleID(id, { googleId }) {
+		const query = `
+			UPDATE Users
+			SET google_id = ?, updated_at = CURRENT_TIMESTAMP
+			WHERE id = ?
+		`;
+		return new Promise((resolve, reject) => {
+			db.run(query, [googleId, id], function(err) {
+				if (err) reject(err);
+				else resolve(this.changes);
+			});
+		});
+	}
+
 	static async activateUser(id) {
 		const query = `
 			UPDATE Users

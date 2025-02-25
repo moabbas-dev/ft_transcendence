@@ -1,9 +1,6 @@
 require('dotenv').config();
 const fastify = require('fastify')({ logger: true });
 const cors = require('@fastify/cors');
-const sqlite3 = require('sqlite3').verbose();
-const { createServer } = require('http'); // Use `http` server
-const { Server } = require('socket.io');
 const { createTables, closeDatabase } = require('./src/db/initDb');
 const fastifyOauth2 = require('@fastify/oauth2');
 const fastifyCookie = require('@fastify/cookie');
@@ -50,14 +47,12 @@ fastify.register(require('fastify-jwt'), {
 
 fastify.register(require('./src/routes/AuthRoutes'));
 fastify.register(require('./src/routes/UserRoutes'));
-fastify.register(require('./src/routes/FriendRoutes'));
-fastify.register(require('./src/routes/BlockedUserRoutes'));
 fastify.register(require('./src/routes/SessionRoutes'));
-fastify.register(require('./src/routes/TwoFactorCodeRoutes'));
+fastify.register(require('./src/routes/TwoFactorRoutes'));
 
 // Test route
 fastify.get('/', async (request, reply) => {
-	return { message: 'Hello from the backend!' };
+	return { message: 'Hello from the authentication service!' };
 });
 
 const handleShutdown = async (signal) => {
@@ -80,7 +75,7 @@ process.on('SIGTERM', () => handleShutdown('SIGTERM'));
 // Start the server
 const start = async () => {
 	try {
-		await fastify.listen({ port: 8000, host: '0.0.0.0' });
+		await fastify.listen({ port: 8001, host: '0.0.0.0' });
 		fastify.log.info(`Server listening on http://localhost:${fastify.server.address().port}`);
 	} catch (err) {
 		fastify.log.error(err);
@@ -89,4 +84,3 @@ const start = async () => {
 };
 
 start();
-

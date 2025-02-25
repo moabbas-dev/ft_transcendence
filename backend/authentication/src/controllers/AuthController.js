@@ -1,7 +1,7 @@
 const { db } = require('../db/initDb');
 const bcrypt = require('bcrypt');
-const SessionService = require('../services/SessionService');
-const UserService = require('../services/UserService');
+const Session = require('../models/Session');
+const User = require('../models/User');
 const SECRET_KEY = process.env.JWT_SECRET_KEY;
 const { generateTokens, generateNewAccessToken } = require('../utils/jwtUtils');
 const speakeasy = require('speakeasy');
@@ -45,11 +45,11 @@ class AuthController {
 			const userId = user.id;
 			if (!user.is_2fa_enabled) {
 				const { accessToken, refreshToken } = await generateTokens(user, reply.server);
-				const sessId = await SessionService.createSession({ userId, accessToken, refreshToken });
-				await UserService.updateUserStatus(userId, { status: "online" });
+				const sessId = await Session.create({ userId, accessToken, refreshToken });
+				await User.updateUserStatus(userId, { status: "online" });
 				return reply.code(200).send({ require2FA: false, sessionId: sessId, accessToken: accessToken, refreshToken: refreshToken });
 			} else {
-				const sessId = await SessionService.createSession({ userId, accessToken: null, refreshToken: null });
+				const sessId = await Session.create({ userId, accessToken: null, refreshToken: null });
 				reply.server.log.info(`sessId: ${sessId}`);
 				return reply.code(200).send({ require2FA: true, sessionId: sessId });
 			}
@@ -69,12 +69,12 @@ class AuthController {
 	static async logout(request, reply) {
 		const { sessionId } = request.params;
 		try {
-			const session = await SessionService.getSessionById(sessionId);
+			const session = await Session.getById(sessionId);
 			if (!session)
 				return reply.code(404).send({ message: "Session not found!" });
 			else {
-				await SessionService.deleteSessionById(session.id);
-				await UserService.updateUserStatus(session.user_id, { status: "offline" });
+				await Session.deleteById(session.id);
+				await User.updateUserStatus(session.user_id, { status: "offline" });
 				return reply.code(200).send({ message: "User logged out successfully!" });
 			}
 		} catch (err) {
@@ -84,6 +84,7 @@ class AuthController {
 
 	// refresh an expired access token
 	static async refresh(request, reply) {
+        const { sessionId } = request.params;
 		const { refreshToken } = request.body;
 		try {
 			let decoded;
@@ -95,16 +96,16 @@ class AuthController {
 				return reply.code(401).send({ message: "Invalid refresh token!" });
 			}
 			const userId = decoded.userId;
-			const session = await SessionService.getSessionByUserIdAndRefreshToken(userId, refreshToken);
+			const session = await Session.getById(sessionId);
 			if (!session)
 				return reply.code(404).send({ message: "No session found!" });
-			const user = await UserService.getUserById(userId);
+			const user = await User.findById(userId);
 			if (!user)
 				return reply.code(404).send({ message: "User not found!" });
 			if (user && !user.is_active)
 				return reply.code(403).send({ message: "User not active!" });
 			const newAccessToken = await generateNewAccessToken(user, reply.server);
-			await SessionService.updateAccessToken(user.id, { refreshToken, newAccessToken });
+			await Session.updateAccess(user.id, { refreshToken, newAccessToken });
 			return reply.code(200).send({ accessToken: newAccessToken });
 		} catch (err) {
 			return reply.code(500).send({ message: "Error refreshing the token!", error: err.message });
@@ -124,7 +125,7 @@ class AuthController {
 			`;
 		}
 		try {
-			const user = await UserService.getUserByEmail(email);
+			const user = await User.findByEmail(email);
 			if (!user)
 				return reply.code(404).send({ message: "User not found!" });
 			if (user && !user.is_active)
@@ -144,7 +145,7 @@ class AuthController {
 		const { id } = request.params;
 		const { password, verifyPassword } = request.body;
 		try {
-			const user = await UserService.getUserById(id);
+			const user = await User.findById(id);
 			if (!user)
 				return reply.code(404).send({ message: "User not found!" });
 			if (user && !user.is_active)
@@ -152,7 +153,7 @@ class AuthController {
 			if (password !== verifyPassword)
 				return reply.code(400).send({ message: "passwords didn't match!" });
 			const hashedPassword = await bcrypt.hash(password, 10);
-			await UserService.updateUserPassword(id, { password: hashedPassword });
+			await User.updateUserPassword(id, { password: hashedPassword });
 			return reply.code(200).send({ message: "password changed successfully!" });
 		} catch (err) {
 			return reply.code(500).send({ message: "Error resetting password!", error: err.message });
@@ -162,10 +163,10 @@ class AuthController {
 	static async activateUser(request, reply) {
 		const { id } = request.params;
 		try {
-			const user = await UserService.getUserById(id);
+			const user = await User.findById(id);
 			if (!user)
 				return reply.code(404).send({ message: "User not found!" });
-			await UserService.activateUser(id);
+			await User.activateUser(id);
 			return reply.code(200).send({ message: "Account activation complete!" });
 		} catch (err) {
 			return reply.code(500).send({ message: "Error activating the account!", error: err.message });
@@ -186,7 +187,7 @@ class AuthController {
 			const userInfo = await userInfoResponse.json();
 
 			// Send response with user info
-			let user = await UserService.getUserByEmail(userInfo.email);
+			let user = await User.findByEmail(userInfo.email);
 			if (!user) {
 				const userData = {
 					email: userInfo.email,
@@ -195,23 +196,24 @@ class AuthController {
 					full_name: userInfo.name,
 					google_id: userInfo.id
 				}
-				const newUserId = await UserService.createUser(userData);
+				const newUserId = await User.create(userData);
 				if (!newUserId) {
 					throw new Error("Failed to create user");
 				}
 				const nickname = `user${newUserId}`;
-				await UserService.updateUserNickname(newUserId, { nickname: nickname });
-				user = await UserService.getUserById(newUserId);
+				await User.updateUserNickname(newUserId, { nickname: nickname });
+				user = await User.findById(newUserId);
 			}
 			const userId = user.id;
-			await UserService.activateUser(userId);
+			await User.updateUserGoogleID(userId, { googleId: userInfo.id });
+			await User.activateUser(userId);
 			if (!user.is_2fa_enabled) {
 				const { accessToken, refreshToken } = await generateTokens(user, request.server);
-				const sessId = await SessionService.createSession({ userId, accessToken, refreshToken });
-				await UserService.updateUserStatus(userId, { status: "online" });
+				const sessId = await Session.create({ userId, accessToken, refreshToken });
+				await User.updateUserStatus(userId, { status: "online" });
 				return reply.code(200).send({ require2FA: false, sessionId: sessId, accessToken, refreshToken });
 			} else {
-				const sessId = await SessionService.createSession({ userId, accessToken: null, refreshToken: null });
+				const sessId = await Session.create({ userId, accessToken: null, refreshToken: null });
 				return reply.code(200).send({ require2FA: true, sessionId: sessId });
 			}
 		} catch (err) {

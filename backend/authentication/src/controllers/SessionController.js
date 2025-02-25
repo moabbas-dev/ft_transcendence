@@ -1,10 +1,10 @@
-const SessionService = require('../services/SessionService');
+const Session = require('../models/Session');
 
 class SessionController {
 
 	static async getAllSessions(request, reply) {
 		try {
-			const sessions = await SessionService.getAllSessions();
+			const sessions = await Session.getAll();
 			reply.code(200).send(sessions);
 		} catch (err) {
 			reply.code(500).send({ message: 'Error getting all the sessions', error: err.message });
@@ -14,7 +14,7 @@ class SessionController {
 	static async getSessionById(request, reply) {
 		const { id } = request.params;
 		try {
-			const session = await SessionService.getSessionById(id);
+			const session = await Session.getById(id);
 			if (!session) reply.code(404).send({ message: 'Session not found!' });
 			else reply.code(200).send(session);
 		} catch (err) {
@@ -25,7 +25,7 @@ class SessionController {
 	static async deleteSession(request, reply) {
 		const { id } = request.params;
 		try {
-			const changes = await SessionService.deleteSessionById(id);
+			const changes = await Session.deleteById(id);
 			if (changes == 0) reply.code(404).send({ message: 'Session not found!' });
 			else reply.code(200).send({ message: 'Session deleted succesfully!' });
 		} catch (err) {

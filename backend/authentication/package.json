@@ -1,5 +1,5 @@
 {
-  "name": "backend",
+  "name": "authentication",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -11,10 +11,10 @@
   "description": "",
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
-    "@fastify/cors": "^10.0.2",
+    "@fastify/cors": "^10.1.0",
     "@fastify/oauth2": "^8.1.2",
     "@fastify/session": "^11.1.0",
-    "backend": "file:",
+    "backend": "^0.0.0",
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.7",
     "fastify": "^5.2.1",
@@ -22,7 +22,6 @@
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^6.10.0",
     "qrcode": "^1.5.4",
-    "socket.io": "^4.8.1",
     "speakeasy": "^2.0.0",
     "sqlite3": "^5.1.7"
   }

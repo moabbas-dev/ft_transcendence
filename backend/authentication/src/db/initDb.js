@@ -1,6 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
 
-const db = new sqlite3.Database('./data/database.sqlite');
+const db = new sqlite3.Database('./data/auth.sqlite');
 
 const createTables = () => {
 	const queries = [
@@ -19,26 +20,6 @@ const createTables = () => {
 					created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 					updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 				);`,
-		`CREATE TABLE IF NOT EXISTS Friends (
-					id INTEGER PRIMARY KEY AUTOINCREMENT,
-					user_id INTEGER NOT NULL,
-					friend_id INTEGER NOT NULL,
-					status TEXT DEFAULT 'pending',
-					created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-					updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-					FOREIGN KEY (user_id) REFERENCES Users(id),
-					FOREIGN KEY (friend_id) REFERENCES Users(id),
-					UNIQUE(user_id, friend_id)
-				);`,
-		`CREATE TABLE IF NOT EXISTS Blocked_Users (
-					id INTEGER PRIMARY KEY AUTOINCREMENT,
-					user_id INTEGER NOT NULL,
-					blocked_user_id INTEGER NOT NULL,
-					created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-					FOREIGN KEY (user_id) REFERENCES Users(id),
-					FOREIGN KEY (blocked_user_id) REFERENCES Users(id),
-					UNIQUE(user_id, blocked_user_id)
-				);`,
 		`CREATE TABLE IF NOT EXISTS Sessions (
 					id INTEGER PRIMARY KEY AUTOINCREMENT,
 					user_id INTEGER NOT NULL,
@@ -49,10 +30,10 @@ const createTables = () => {
 					created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 					updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 					FOREIGN KEY (user_id) REFERENCES Users(id)
-				);`,
+				);`
 	];
 	queries.forEach((query) => {
-		db.run(query, (err) => {
+		db.run(query, function (err) {
 			if (err) console.error('Error creating table:', err);
 			else console.log('Table created or already exists');
 		});

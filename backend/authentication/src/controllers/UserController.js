@@ -1,9 +1,7 @@
-const UserService = require('../services/UserService');
+const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const { sendEmail } = require('../utils/emailUtils');
-const SessionService = require('../services/SessionService');
-const FriendService = require('../services/FriendService');
-const BlockedUserService = require('../services/BlockedUserService');
+const Session = require('../models/Session');
 const saltRounds = 10;
 const SECRET_KEY = process.env.JWT_SECRET_KEY;
 
@@ -23,7 +21,7 @@ class UserController {
 		}
 		try {
 			const passwordHash = await bcrypt.hash(password, saltRounds);
-			const userId = await UserService.createUser({ email, password: passwordHash, nickname, full_name, google_id });
+			const userId = await User.create({ email, password: passwordHash, nickname, full_name, google_id });
 			try {
 				await sendEmail(email, "New account is here!", null, activationEmailHtml(userId, full_name));
 			} catch (error) {
@@ -41,7 +39,7 @@ class UserController {
 
 	static async getAllUsers(request, reply) {
 		try {
-			const users = await UserService.getAllUsers();
+			const users = await User.getAll();
 			reply.code(200).send(users);
 		} catch (err) {
 			reply.code(500).send({ message: 'Error getting users', error: err.message });
@@ -51,7 +49,7 @@ class UserController {
 	static async getUserByEmail(request, reply) {
 		const { email } = request.params;
 		try {
-			const user = await UserService.getUserByEmail(email);
+			const user = await User.findByEmail(email);
 			if (!user) reply.code(404).send({ message: 'User not found!' });
 			else reply.code(200).send(user);
 		} catch (err) {
@@ -62,7 +60,7 @@ class UserController {
 	static async getUserById(request, reply) {
 		const { id } = request.params;
 		try {
-			const user = await UserService.getUserById(id);
+			const user = await User.findById(id);
 			if (!user) reply.code(404).send({ message: 'User not found!' });
 			else reply.code(200).send(user);
 		} catch (err) {
@@ -85,11 +83,9 @@ class UserController {
 					return reply.code(401).send({ message: "Access token expired!" });
 				return reply.code(401).send({ message: "Invalid access token" });
 			}
-			const user = await UserService.getUserByNickname(nickname);
+			const user = await User.findByNickname(nickname);
 			if (!user)
 				return reply.code(404).send({ message: "User not found!" });
-			if (user && !user.is_active)
-				return reply.code(403).send({ message: "User not active!" });
 			return reply.code(200).send(user);
 		} catch (err) {
 			return reply.code(500).send({ message: "Error getting user by nickname!", error: err.message });
@@ -114,25 +110,13 @@ class UserController {
 			}
 			if (decoded.userId != id)
 				return reply.code(403).send({ message: "Token does not belong to this user!" });
-			const changes = await UserService.updateUser(id, { nickname, full_name, avatar_url });
+			const changes = await User.update(id, { nickname, full_name, avatar_url });
 			if (changes == 0) reply.code(404).send({ message: 'User not found!' });
 			else reply.code(200).send({ message: 'User updated successfully!' });
 		} catch (err) {
 			if (err.message.includes('Users.nickname'))
 				return reply.code(409).send({ key: "nickname", message: "Nickname is already in use!", error: err.message });
 			reply.code(500).send({ key: "database", message: 'Error updating the user', error: err.message });
-		}
-	}
-
-	static async enable2faUser(request, reply) {
-		const { id } = request.params;
-		try {
-			const changes = await UserService.enable2fa(id);
-			if (changes == 0)
-				return reply.code(404).send({ message: "User not found!" });
-			return reply.code(200).send({ message: "2fa is enabled now!" });
-		} catch (err) {
-			return reply.code(500).send({ message: "Error enabling 2fa for the user!", error: err.message });
 		}
 	}
 
@@ -153,12 +137,10 @@ class UserController {
 			}
 			if (decoded.userId != id)
 				return reply.code(403).send({ message: "Token does not belong to this user!" });
-			const changes = await UserService.deleteUser(id);
+			const changes = await User.delete(id);
 			if (changes == 0) reply.code(404).send({ message: 'User not found!' });
 			else {
-				await SessionService.deleteUserSessions(id);
-				await FriendService.deleteUserFriends(id);
-				await BlockedUserService.deleteUserBlocks(id);
+				await Session.deleteUserSessions(id);
 				reply.code(200).send({ message: 'User deleted successfully!' });
 			}
 		} catch (err) {

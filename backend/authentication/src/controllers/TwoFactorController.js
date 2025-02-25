@@ -1,5 +1,5 @@
-const SessionService = require('../services/SessionService');
-const UserService = require('../services/UserService');
+const Session = require('../models/Session');
+const User = require('../models/User');
 const { generateTokens } = require('../utils/jwtUtils');
 const SECRET_KEY = process.env.JWT_SECRET_KEY;
 const speakeasy = require('speakeasy');
@@ -11,12 +11,12 @@ class TwoFactorCodeController {
 		const { sessionId } = request.params;
 		const { code } = request.body;
 		try {
-			const session = await SessionService.getSessionById(sessionId);
+			const session = await Session.getById(sessionId);
 			if (!session)
 				return reply.code(404).send({ key: "session", message: "Session not found!" });
 
 			const userId = session.user_id;
-			const user = await UserService.getUserById(userId);
+			const user = await User.findById(userId);
 			if (!user)
 				return reply.code(404).send({ key: "user", message: "User not found!" });
 			if (user && !user.is_active)
@@ -38,8 +38,8 @@ class TwoFactorCodeController {
 
 			// Generate tokens and update session
 			const { accessToken, refreshToken } = await generateTokens(user, reply.server);
-			await SessionService.updateAccessAndRefresh(sessionId, { refreshToken, accessToken });
-			await UserService.updateUserStatus(userId, { status: "online" });
+			await Session.updateAccessAndRefresh(sessionId, { refreshToken, accessToken });
+			await User.updateUserStatus(userId, { status: "online" });
 
 			return reply.code(200).send({ sessionId, accessToken, refreshToken });
 		} catch (err) {
@@ -64,13 +64,13 @@ class TwoFactorCodeController {
 			}
 			if (decoded.userId != userId)
 				return reply.code(403).send({ message: "Token does not belong to this user!" });
-			const user = await UserService.getUserById(userId);
+			const user = await User.findById(userId);
 			if (!user)
 				return reply.code(404).send({ message: "User not found!" });
 			if (user && !user.is_active)
 				return reply.code(403).send({ message: "User not active!" });
 			const secret = speakeasy.generateSecret({ length: 20 });
-			await UserService.update2faSecret(userId, { twoFASecret: secret.base32 });
+			await User.update2faSecret(userId, { twoFASecret: secret.base32 });
 			const otpauthUrl = secret.otpauth_url; // URL for the QR code
 			const qrCodeDataUrl = await qrcode.toDataURL(otpauthUrl);
 			return reply.code(200).send({
@@ -101,7 +101,7 @@ class TwoFactorCodeController {
 			}
 			if (decoded.userId != userId)
 				return reply.code(403).send({ message: "Token does not belong to this user!" });
-			const user = await UserService.getUserById(userId);
+			const user = await User.findById(userId);
 			if (!user)
 				return reply.code(404).send({ key: "user", message: "User not found!" });
 			if (user && !user.is_active)
@@ -115,7 +115,7 @@ class TwoFactorCodeController {
 			});
 			if (!verified)
 				return reply.code(400).send({ key: "wrong", message: "Invalid code!" });
-			await UserService.update2fa(userId, { value: 1 });
+			await User.update2fa(userId, { value: 1 });
 			return reply.code(200).send({ message: "Two factor authentication successfully enabled!" });
 		} catch (err) {
 			return reply.code(500).send({ message: "Error activating 2fa!", error: err.message });
@@ -139,13 +139,13 @@ class TwoFactorCodeController {
 			}
 			if (decoded.userId != userId)
 				return reply.code(403).send({ message: "Token does not belong to this user!" });
-			const user = await UserService.getUserById(userId);
+			const user = await User.findById(userId);
 			if (!user)
 				return reply.code(404).send({ message: "User not found!" });
 			if (user && !user.is_active)
 				return reply.code(403).send({ message: "User not active!" });
-			await UserService.update2fa(userId, { value: 0 });
-			await UserService.update2faSecret(userId, { twoFASecret: null });
+			await User.update2fa(userId, { value: 0 });
+			await User.update2faSecret(userId, { twoFASecret: null });
 			return reply.code(200).send({ message: "Two Factor Authentication for user has been disabled!" });
 		} catch (err) {
 			return reply.code(500).send({ message: "Error disabling the 2fa!", error: err.message });
