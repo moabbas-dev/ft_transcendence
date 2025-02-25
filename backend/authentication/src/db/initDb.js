@@ -1,7 +1,14 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-const db = new sqlite3.Database('./data/auth.sqlite');
+const dbPath = './data/auth.sqlite';
+
+const db = new sqlite3.Database(dbPath, (err) => {
+	if (err)
+		console.log(`Error creating the database!`);
+	else
+		console.log(`The database created successfully at ${path.resolve(dbPath)}`);
+});
 
 const createTables = () => {
 	const queries = [
