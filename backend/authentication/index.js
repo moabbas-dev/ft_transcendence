@@ -46,6 +46,7 @@ fastify.register(require('fastify-jwt'), {
 });
 
 fastify.register(require('./src/routes/AuthRoutes'));
+fastify.register(require('./src/routes/JwtRoutes'));
 fastify.register(require('./src/routes/UserRoutes'));
 fastify.register(require('./src/routes/SessionRoutes'));
 fastify.register(require('./src/routes/TwoFactorRoutes'));

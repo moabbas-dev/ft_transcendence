@@ -51,16 +51,16 @@ class Session {
 		});
 	}
 
-	static async updateAccess(userId, { refreshToken, newAccessToken }) {
+	static async updateAccess(id, { newAccessToken }) {
 		const query = `
 			UPDATE Sessions
 			SET access_token = ?,
 			expires_at = DATETIME('now', '+1 hour'),
 			updated_at = CURRENT_TIMESTAMP
-			WHERE user_id = ? AND refresh_token = ?
+			WHERE id = ?
 		`;
 		return new Promise((resolve, reject) => {
-			db.run(query, [newAccessToken, userId, refreshToken], function(err) {
+			db.run(query, [newAccessToken, id], function(err) {
 				if (err) reject(err);
 				else resolve(this.changes);
 			});
