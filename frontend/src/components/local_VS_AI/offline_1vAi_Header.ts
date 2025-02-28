@@ -21,12 +21,26 @@ export const PlayerHeader = createComponent(() => {
 
   const container = document.createElement("div");
   container.className = `
-    flex mt-6 justify-between items-center
-    px-8 text-white text-lg
-    bg-pongblue shadow-md
+    relative flex items-center text-white text-lg shadow-md w-full overflow-hidden rounded-2xl mt-4
   `;
 
-  container.innerHTML = `
+
+  const leftBg = document.createElement("div");
+  leftBg.className = "absolute inset-y-0 left-0 bg-blue-600 transition-all duration-500 ";
+  const rightBg = document.createElement("div");
+  rightBg.className = "absolute inset-y-0 right-0 bg-red-600 transition-all duration-500 ";
+
+  leftBg.style.width = "50%";
+  rightBg.style.width = "50%";
+
+  container.appendChild(leftBg);
+  container.appendChild(rightBg);
+
+  const content = document.createElement("div");
+  content.className = "rounded-2xl relative z-10 flex justify-between items-center w-full px-8 py-2";
+
+
+  content.innerHTML = `
     <!-- Player 1 Info -->
     <div class="flex items-center gap-4">
       <img src="${playerPic}" alt="Player 1" class="w-12 h-12 rounded-full border border-white">
@@ -36,9 +50,9 @@ export const PlayerHeader = createComponent(() => {
       </div>
     </div>
 
-    <!-- Game Title -->
-    <div class="text-2xl font-bold uppercase tracking-wider">
-      Pong Game 🏓
+    <div class="flex flex-row gap-1 text-2xl font-bold uppercase tracking-wider">
+      <p><span class="font-mono text-yellow-400">Pong</span> Game<p> 
+      <i class="fa-solid fa-table-tennis-paddle-ball"></i>
     </div>
 
     <!-- Player 2 Info -->
@@ -50,6 +64,33 @@ export const PlayerHeader = createComponent(() => {
       <img src="${aiPic}" alt="Player 2" class="w-12 h-12 rounded-full border border-white">
     </div>
   `;
+  container.appendChild(content);
+
+  function updateBackgrounds(playerScore: number, aiScore: number) {
+    const total = playerScore + aiScore;
+    let leftWidth = 50;
+    let rightWidth = 50;
+    if (total > 0) {
+      leftWidth = (playerScore / total) * 100;
+      rightWidth = 100 - leftWidth;
+    }
+    leftBg.style.transition = "width 0.5s ease-in-out";
+    rightBg.style.transition = "width 0.5s ease-in-out";
+    leftBg.style.width = `${leftWidth}%`;
+    rightBg.style.width = `${rightWidth}%`;
+  }
+
+    // Load scores from Local Storage
+    const savedScores = localStorage.getItem("aiPongScores");
+    if (savedScores) {
+      const { player, ai } = JSON.parse(savedScores);
+      updateBackgrounds(player, ai);
+    }
+
+  document.addEventListener("aiScoreUpdate", (e: Event) => {
+    const event = e as CustomEvent<{ player: number; ai: number }>;
+    updateBackgrounds(event.detail.player, event.detail.ai);
+  });
 
   return container;
 });

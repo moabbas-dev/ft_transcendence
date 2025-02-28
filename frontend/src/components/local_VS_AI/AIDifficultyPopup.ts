@@ -32,5 +32,16 @@ export const AIDifficultyPopup = createComponent((props: AIDifficultyPopupProps)
   container.querySelector("#difficulty-medium")!.addEventListener("click", () => selectDifficulty("medium"));
   container.querySelector("#difficulty-hard")!.addEventListener("click", () => selectDifficulty("hard"));
 
+
+    const scores = {player: 0, ai: 0};
+    // Function to update and save scores
+    const saveScores = () => {
+      localStorage.setItem("aiPongScores", JSON.stringify(scores));
+    };
+
+    saveScores();
+
+    // localStorage.removeItem("aiPongScores");
+
   return container;
 });
