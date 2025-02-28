@@ -1,10 +1,11 @@
 import { createComponent } from "../../utils/StateManager.js";
 import player1Pic from "/src/assets/p1.jpg";
 import player2Pic from "/src/assets/p2.jpg";
+import pongPic from "/src/assets/pong.png";
 
 export const PlayerHeader = createComponent(() => {
   const container = document.createElement("div");
-  container.className = "relative flex items-center text-white text-lg shadow-md w-full overflow-hidden rounded-full mt-4";
+  container.className = "relative flex items-center text-white text-lg shadow-md w-full overflow-hidden rounded-2xl mt-4";
 
   const leftBg = document.createElement("div");
   leftBg.className = "absolute inset-y-0 left-0 bg-blue-600 transition-all duration-500 ";

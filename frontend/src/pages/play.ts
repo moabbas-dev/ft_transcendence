@@ -73,7 +73,6 @@ export default {
       button.addEventListener("click", (e: Event) => {
         const target = e.currentTarget as HTMLElement;
         console.log(target.dataset.route);
-
         navigate(target.dataset.route!);
       });
     });
