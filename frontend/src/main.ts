@@ -1,5 +1,6 @@
 import './router.js';
 import  io  from "socket.io-client";
+import { navigate } from './router.js';
 
 // const messageForm = document.getElementById('send-container');
 // const messageInput = document.getElementById('message-input') as HTMLInputElement | null;;
@@ -11,26 +12,62 @@ const socket = io('http://localhost:8000');
 // Attach event listeners after rendering
 window.addEventListener('load', () => {
   const messageContainer = document.getElementById('message-container')!;
-  const messageForm = document.getElementById('send-container');
-  const messageInput = document.getElementById('message-input') as HTMLInputElement | null;
+  const messageInput = document.getElementById('message-input')!; // This is now a div
+  const sendButton = document.getElementById('send-button')!;
 
-  messageForm?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    if (messageInput && messageInput.value.trim().length > 0) {
-      const message = messageInput.value;
+  // Function to send the message
+  const sendMessage = () => {
+    const message: string = messageInput.textContent?.trim() || '';
+    if (message.length > 0) {
       appendMessage(message, true);
       console.log('Message:', message);
       socket.emit('send-chat-message', message);
-      messageInput.value = '';
-      messageInput.focus()
+
+      // Clear the contenteditable div and restore the placeholder
+      messageInput.innerHTML = '';
+      messageInput.focus();
+    }
+  };
+
+  // Click event for the send button
+  sendButton?.addEventListener('click', sendMessage);
+
+  // Keydown event for Enter key inside the contenteditable div
+  messageInput?.addEventListener('keydown', (e) => {
+    // If Enter is pressed without Shift, send the message
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault(); // Prevent newline insertion
+      sendMessage();
     }
   });
+
+  // Ensure that if the user clears the input (which may leave behind <br> or whitespace),
+  // we truly empty the element so the placeholder shows up.
+  messageInput?.addEventListener('input', () => {
+    if (messageInput.textContent?.trim() === '') {
+      messageInput.innerHTML = '';
+    }
+  });
+
+  // sendButton?.addEventListener('click', () => {
+  //   // Use textContent to get the text from a contenteditable div
+  //   const message = messageInput?.textContent?.trim();
+  //   if (message && message.length > 0) {
+  //     appendMessage(message, true);
+  //     console.log('Message:', message);
+  //     socket.emit('send-chat-message', message);
+
+  //     // Clear the contenteditable div
+  //     messageInput.textContent = '';
+  //     messageInput.focus();
+  //   }
+  // });
 
   socket.on('connect', () => {
     console.log('Connected to server:', socket.id);
   });
 
-  socket.on('chat-message', (data: any) => {
+  socket.on('chat-message', (data:any) => {
     console.log('Received message:', data);
     appendMessage(data, false);
   });
@@ -57,7 +94,7 @@ window.addEventListener('load', () => {
       const dateWrapper = document.createElement('div');
       dateWrapper.className = 'flex justify-center items-center w-full bg-slate-500 bg-opacity-30 my-2 py-1 rounded-md';
       dateHeader = document.createElement('div');
-      dateHeader.classList.add('date-header', 'text-center', 'bg-[var(--bg-hover)]', 'text-white', 'rounded-md', 'px-2', 'py-1');
+      dateHeader.classList.add('date-header', 'text-center', 'bg-ponghover', 'text-white', 'rounded-md', 'px-2', 'py-1');
       dateHeader.setAttribute('data-date', formattedDate);
       dateHeader.textContent = formattedDate;
       dateWrapper.appendChild(dateHeader);
@@ -73,6 +110,7 @@ window.addEventListener('load', () => {
       'flex',
       'flex-col',
       'justify-center',
+      'pt-1',
       'px-2',
       'rounded-lg',  // Rounded corners
       'max-w-[250px]',
@@ -82,16 +120,17 @@ window.addEventListener('load', () => {
       'text-white',
       '[direction:ltr]',
       'min-w-0',
-      'text-[17px]'
+      'text-[17px]',
+      'text-left'
     );
 
     // Apply conditional styles for sender and receiver
     if (isSender) {
       messageWrapper.classList.add('justify-end'); // Align sender messages to the right
-      messageElement.classList.add('bg-blue-900', 'text-right');
+      messageElement.classList.add('bg-blue-900');
     } else {
       messageWrapper.classList.add('justify-start'); // Align receiver messages to the left
-      messageElement.classList.add('bg-[var(--bg-color)]', 'text-left');
+      messageElement.classList.add('bg-pongdark');
     }
   
     messageWrapper.appendChild(messageElement);

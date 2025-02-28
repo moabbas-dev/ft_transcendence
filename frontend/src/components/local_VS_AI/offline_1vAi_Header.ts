@@ -23,7 +23,7 @@ export const PlayerHeader = createComponent(() => {
   container.className = `
     flex mt-6 justify-between items-center
     px-8 text-white text-lg
-    bg-[var(--main-color)] shadow-md
+    bg-pongblue shadow-md
   `;
 
   container.innerHTML = `

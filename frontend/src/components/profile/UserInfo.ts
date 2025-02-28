@@ -43,12 +43,12 @@ export const UserInfo = createComponent(() => {
                 after:content-[''] after:absolute after:top-0.5 after:left-[2px] 
                 after:bg-white after:border-gray-300 after:border 
                 after:rounded-full after:h-5 after:w-5 after:transition-all
-                peer-checked:bg-[var(--main-color)]"></div>
+                peer-checked:bg-pongblue"></div>
             </label>
         </div>
         <!-- Save Button on the right side -->
         <div class="flex justify-end">
-            <button type="submit" class="bg-[var(--main-color)] p-1 w-40 text-white">Save</button>
+            <button type="submit" class="bg-pongblue p-1 w-40 text-white">Save</button>
         </div>
     </div>
     `;

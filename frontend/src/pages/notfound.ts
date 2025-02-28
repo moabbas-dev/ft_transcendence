@@ -23,7 +23,7 @@ export default {
 	  `;
 	  const HomeBtn = Button({
 		text: `<i class="bx bx-home text-xl mr-2"></i> ${msg('notfound.homeBtn')}`,
-		styles: 'inline-flex px-6 2xl:px-8 py-3 2xl:py-5 text-white bg-[var(--main-color)] font-semibold sm:text-lg 2xl:text-xl rounded-lg',
+		styles: 'inline-flex px-6 2xl:px-8 py-3 2xl:py-5 text-white bg-pongblue font-semibold sm:text-lg 2xl:text-xl rounded-lg',
 		type: 'button',
 		eventType: 'click',
 		onClick: () => navigate('/')

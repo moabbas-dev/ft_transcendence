@@ -6,7 +6,7 @@ import { PlayerHeader } from "../components/local _offline_1v1/offline_1v1_Heade
 export default {
   render: (container: HTMLElement) => {
     container.innerHTML = `
-      <div class="header bg-[var(--main-color)] w-full h-fit"></div>
+      <div class="header bg-pongblue w-full h-fit"></div>
       <div class="content relative flex flex-col items-center justify-center h-[calc(100vh-136px)]">
         <div class="player-header w-3/5"></div>
         <div class="game-container w-full h-full flex items-center justify-center"></div>

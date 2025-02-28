@@ -19,7 +19,7 @@ export default {
 						<!-- SignIn, SignUp Forms Here -->
 						<div class="flex flex-col gap-3">
 							<div class="w-full p-1">
-								<button type="button" class="w-full flex items-center justify-start p-1 sm:p-2 text-white bg-[var(--main-color)] hover:cursor-pointer hover:opacity-80 rounded-md transition-all duration-300">
+								<button type="button" class="w-full flex items-center justify-start p-1 sm:p-2 text-white bg-pongblue hover:cursor-pointer hover:opacity-80 rounded-md transition-all duration-300">
 									<i class='bx bxl-google text-2xl'></i>
 									<span class="flex-1 text-center">${msg('register.continueGoogle')}</span>
 								</button>
