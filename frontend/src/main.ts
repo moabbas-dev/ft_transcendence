@@ -1,5 +1,6 @@
 import './router.js';
 import  io  from "socket.io-client";
+import { navigate } from './router.js';
 
 // const messageForm = document.getElementById('send-container');
 // const messageInput = document.getElementById('message-input') as HTMLInputElement | null;;
