@@ -1,0 +1,53 @@
+# version: '3.8'
+
+services:
+  authentication:
+    build: ./backend/authentication
+    container_name: ft_authentication
+    restart: always
+    ports:
+      - "8001:8001"
+    networks:
+      - ft_network
+    volumes:
+      - ./backend/authentication:/app
+      - /app/node_modules
+      - auth_data:/app/data  # Persistent storage for authentication database
+
+  social:
+    build: ./backend/social
+    container_name: ft_social
+    restart: always
+    ports:
+      - "8002:8002"
+    networks:
+      - ft_network
+    volumes:
+      - ./backend/social:/app
+      - /app/node_modules
+      - social_data:/app/data  # Persistent storage for social database
+    depends_on:
+      - authentication
+
+  frontend:
+    build: ./frontend
+    container_name: ft_frontend
+    restart: always
+    ports:
+      - "1234:1234"
+    networks:
+      - ft_network
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - authentication
+      - social
+
+networks:
+  ft_network:
+    driver: bridge
+
+volumes:
+  auth_data:
+  social_data:

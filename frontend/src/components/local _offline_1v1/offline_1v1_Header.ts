@@ -19,28 +19,22 @@ export const PlayerHeader = createComponent(() => {
   container.appendChild(rightBg);
 
   const content = document.createElement("div");
-  content.className = "rounded-2xl relative z-10 flex justify-between items-center w-full px-8 py-2";
+  content.className = "rounded-full relative z-10 flex justify-between items-center w-full";
 
   content.innerHTML = `
     <div class="flex items-center gap-4">
-      <img src="${player1Pic}" alt="Player 1" class="w-12 h-12 rounded-full border border-white">
-      <div>
-        <p class="font-bold">Player 1</p>
-        <p id="player1-score" class="text-xl font-semibold">0</p>
-      </div>
+      <img src="${player1Pic}" alt="Player 1" class="w-12 h-12 rounded-full">
+      <p class="font-bold text-lg">Player 1</p>
     </div>
 
-    <div class="flex flex-row gap-1 text-2xl font-bold uppercase tracking-wider">
-      <p><span class="font-mono text-yellow-400">Pong</span> Game<p> 
-      <i class="fa-solid fa-table-tennis-paddle-ball"></i>
+    <div class="flex gap-20">
+      <p id="player1-score" class="text-4xl font-semibold">0</p>
+      <p id="player2-score" class="text-4xl font-semibold">0</p>
     </div>
 
     <div class="flex items-center gap-4">
-      <div class="text-right">
-        <p class="font-bold">Player 2</p>
-        <p id="player2-score" class="text-xl font-semibold">0</p>
-      </div>
-      <img src="${player2Pic}" alt="Player 2" class="w-12 h-12 rounded-full border border-white">
+      <p class="font-bold text-lg">Player 2</p>
+      <img src="${player2Pic}" alt="Player 2" class="w-12 h-12 rounded-full">
     </div>
   `;
   container.appendChild(content);

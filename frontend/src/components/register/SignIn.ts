@@ -18,13 +18,13 @@ export const SignIn = createComponent((props: SignInProps) => {
     <form class="flex flex-col gap-2">
       <div class="flex flex-col gap-1">
         <label for="email" class="block text-base font-medium text-gray-700">Email</label>
-        <input type="email" id="email" placeholder="${msg('register.signin.emailPlaceholder')}" autocomplete="email" name="email" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--main-color)] focus:shadow-[0_0_5px_var(--main-color)] focus:border-[var(--main-color)] sm:text-base">
+        <input type="email" id="email" placeholder="${msg('register.signin.emailPlaceholder')}" autocomplete="email" name="email" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pongblue focus:shadow-[0_0_5px_pongblue] focus:border-pongblue sm:text-base">
       </div>
       <div>
         <label for="password" class="block text-base font-medium text-gray-700">${msg('register.signin.password')}</label>
         <div class="relative mt-1">
           <div>
-            <input type="password" id="password" placeholder="${msg('register.signin.passwordPlaceholder')}" autocomplete="current-password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--main-color)] focus:shadow-[0_0_5px_var(--main-color)] focus:border-[var(--main-color)] sm:text-base pr-10">
+            <input type="password" id="password" placeholder="${msg('register.signin.passwordPlaceholder')}" autocomplete="current-password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pongblue focus:shadow-[0_0_5px_pongblue] focus:border-pongblue sm:text-base pr-10">
           </div>
           <span class="absolute inset-y-0 right-0 flex items-center h-fit py-3 pr-3 cursor-pointer toggle-password text-lg">
             <i class='bx bx-hide hide-show pointer-events-none'></i>
@@ -37,7 +37,7 @@ export const SignIn = createComponent((props: SignInProps) => {
     <!-- Sign In Button -->
     </form>
     <div class="w-full text-center pt-1">
-      ${msg('register.signin.acc_question')} <span class="signup-link hover:cursor-pointer hover:opacity-80 text-[var(--main-color)]">${msg('register.signin.signup_btn')}</span>
+      ${msg('register.signin.acc_question')} <span class="signup-link hover:cursor-pointer hover:opacity-80 text-pongblue">${msg('register.signin.signup_btn')}</span>
     </div>
     </div>
   `;
@@ -62,7 +62,7 @@ export const SignIn = createComponent((props: SignInProps) => {
   const forgotBtn = Button({
 	type: 'button',
 	text: msg('register.signin.forgotpass'),
-	styles: 'bg-white text-[var(--main-color)] p-0 rounded-none',
+	styles: 'bg-white text-pongblue p-0 rounded-none',
 	eventType: 'click',
 	onClick: (e: Event) => {
 		e.preventDefault()

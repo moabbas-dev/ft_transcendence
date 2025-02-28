@@ -395,7 +395,6 @@ export const AIPongGame = createComponent((difficulty: string) => {
     medium: 4,
     hard: 6,
   };
-
   // AI logic for Player 2
   const updateAI = () => {
     if (state.ballSpeedX > 0) {

@@ -16,7 +16,7 @@ export const Profile = createComponent(() => {
   container.innerHTML = `
     <!-- Overlay -->
     <div class="overlay absolute top-0 left-0 w-full h-full z-[80] bg-black/50"></div>
-    <div class="user-container absolute top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%] z-[90] w-full md:w-1/2 2xl:w-3/6 h-[100dvh] md:h-full max-h-[90dvh] p-4 bg-white border rounded-lg border-gray-300 shadow-md flex flex-col gap-2">
+    <div class="user-container absolute top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%] z-[90] w-full md:w-[70%] 2xl:w-3/6 h-[100dvh] md:h-full max-h-[90dvh] p-4 bg-white border rounded-lg border-gray-300 shadow-md flex flex-col gap-2">
       <!-- Close Button (X) -->
       <div class="flex justify-start">
           <i class="fas fa-times text-2xl cursor-pointer hover:text-red-600" id="close-button"></i>
@@ -35,7 +35,7 @@ export const Profile = createComponent(() => {
         <img 
             src="${logoUrl}" 
             alt="profile picture" 
-            class="w-20 h-20 object-cover rounded-full border-2 border-[var(--main-color)]"
+            class="w-20 h-20 object-cover rounded-full border-2 border-pongblue"
         >
       </div>
 
@@ -43,7 +43,7 @@ export const Profile = createComponent(() => {
         <div class="flex space-x-4 border-b border-gray-300">
           <button 
               id="info-tab" 
-              class="flex-1 py-2 text-white text-center transition-all  focus:outline-none bg-[var(--main-color)]"
+              class="flex-1 py-2 text-white text-center transition-all  focus:outline-none bg-pongblue"
             >
               Info
           </button>
@@ -87,11 +87,11 @@ export const Profile = createComponent(() => {
 
   // Helper function to clear active background from all tabs
   function clearActiveTabs() {
-    statisticsTab?.classList.remove("bg-[var(--main-color)]");
+    statisticsTab?.classList.remove("bg-pongblue");
     statisticsTab?.classList.remove("text-white");
-    historyTab?.classList.remove("bg-[var(--main-color)]");
+    historyTab?.classList.remove("bg-pongblue");
     historyTab?.classList.remove("text-white");
-    infoTab?.classList.remove("bg-[var(--main-color)]");
+    infoTab?.classList.remove("bg-pongblue");
     infoTab?.classList.remove("text-white");
   }
 
@@ -101,7 +101,7 @@ export const Profile = createComponent(() => {
   statisticsTab?.addEventListener("click", () => {
     if (!contentContainer) return;
     clearActiveTabs();
-    statisticsTab.classList.add("bg-[var(--main-color)]", "text-white");
+    statisticsTab.classList.add("bg-pongblue", "text-white");
     
     // Set up the content with three canvases
     contentContainer.innerHTML = "";
@@ -188,7 +188,7 @@ export const Profile = createComponent(() => {
   historyTab?.addEventListener("click", () => {
     if (!contentContainer) return;
     clearActiveTabs();
-    historyTab.classList.add("bg-[var(--main-color)]", "text-white");
+    historyTab.classList.add("bg-pongblue", "text-white");
     contentContainer.innerHTML = "";
     contentContainer?.appendChild(GamesHistory());
   });
@@ -196,7 +196,7 @@ export const Profile = createComponent(() => {
   infoTab?.addEventListener("click", () => {
     if (!contentContainer) return;
     clearActiveTabs();
-    infoTab.classList.add("bg-[var(--main-color)]", "text-white");
+    infoTab.classList.add("bg-pongblue", "text-white");
     contentContainer.innerHTML = "";
     contentContainer?.appendChild(UserInfo());
 

@@ -17,13 +17,13 @@ export const SignUp = createComponent((props: SignUpProps) => {
 	  <form class="flex flex-col gap-2 sm:gap-3">
 		<div class="flex flex-col gap-1">
 		  <label for="email" class="block text-base font-medium text-gray-700">Email</label>
-		  <input type="email" id="email" placeholder="${msg('register.signup.emailPlaceholder')}" autocomplete="email" name="email" class="relative w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--main-color)] focus:shadow-[0_0_5px_var(--main-color)] focus:border-[var(--main-color)] sm:text-base">
+		  <input type="email" id="email" placeholder="${msg('register.signup.emailPlaceholder')}" autocomplete="email" name="email" class="relative w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pongblue focus:shadow-[0_0_5px_pongblue] focus:border-pongblue sm:text-base">
 		</div>
 		<div>
 		  <label for="password" class="block text-base font-medium text-gray-700">Password</label>
 		  <div class="relative sm:mt-1">
 		  	<div>
-				<input type="password" id="password" placeholder="${msg('register.signup.passwordPlaceholder')}" autocomplete="current-password" name="password" class="relative w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--main-color)] focus:shadow-[0_0_5px_var(--main-color)] focus:border-[var(--main-color)] sm:text-base pr-10">
+				<input type="password" id="password" placeholder="${msg('register.signup.passwordPlaceholder')}" autocomplete="current-password" name="password" class="relative w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pongblue focus:shadow-[0_0_5px_pongblue] focus:border-pongblue sm:text-base pr-10">
 			</div>
 			<span class="absolute inset-y-0 right-0 h-[42px] flex items-center pr-3 cursor-pointer toggle-password text-lg">
 			  <i class='bx bx-hide hide-show pointer-events-none'></i>
@@ -34,7 +34,7 @@ export const SignUp = createComponent((props: SignUpProps) => {
 			<label for="conf-password" class="block text-base font-medium text-gray-700">${msg('register.signup.passwordConfirmTitle')}</label>
 			<div class="relative sm:mt-1">
 			<div>
-				<input type="password" id="conf-password" placeholder="${msg('register.signup.passwordConfirm')}" autocomplete="current-password" name="password" class="relative w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--main-color)] focus:border-[var(--main-color)] focus:shadow-[0_0_5px_var(--main-color)] sm:text-base pr-10">
+				<input type="password" id="conf-password" placeholder="${msg('register.signup.passwordConfirm')}" autocomplete="current-password" name="password" class="relative w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pongblue focus:border-pongblue focus:shadow-[0_0_5px_pongblue] sm:text-base pr-10">
 			</div>
 			<span class="absolute inset-y-0 right-0 flex items-center h-fit py-3 pr-3 cursor-pointer toggle-password text-lg">
 				<i class='bx bx-hide hide-show pointer-events-none'></i>
@@ -44,7 +44,7 @@ export const SignUp = createComponent((props: SignUpProps) => {
 		<!-- SignUp Button -->
 	  </form>
 	  <div class="w-full text-center sm:pt-1">
-	  	${msg('register.signup.acc_question')} <span class="signin-link hover:cursor-pointer hover:opacity-80 text-[var(--main-color)]">${msg('register.signup.signin_btn')}</span>
+	  	${msg('register.signup.acc_question')} <span class="signin-link hover:cursor-pointer hover:opacity-80 text-pongblue">${msg('register.signup.signin_btn')}</span>
 	  </div>
 	</div>
 	`;

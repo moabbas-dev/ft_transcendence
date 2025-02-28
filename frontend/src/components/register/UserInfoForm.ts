@@ -11,15 +11,15 @@ export const UserInfoForm = createComponent(() => {
 	  <form class="flex flex-col gap-2 sm:gap-3">
 		<div class="flex flex-col gap-1">
 			<label for="nickname" class="block text-base font-medium text-gray-700">Nickname</label>
-			<input type="text" id="nickname" placeholder="Your Nickname here" autocomplete="off" class="nickname relative w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--main-color)] focus:border-[var(--main-color)] sm:text-base focus:shadow-[0_0_5px_var(--main-color)]">
+			<input type="text" id="nickname" placeholder="Your Nickname here" autocomplete="off" class="nickname relative w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pongblue focus:border-pongblue sm:text-base focus:shadow-[0_0_5px_pongblue]">
 		</div>
 		<div class="flex flex-col gap-1">
 			<label for="fullname" class="block text-base font-medium text-gray-700">Full name</label>
-			<input type="text" id="fullname" placeholder="Your Name here (first last)" autocomplete="off" class="full-name relative w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--main-color)] focus:border-[var(--main-color)] sm:text-base focus:shadow-[0_0_5px_var(--main-color)]">
+			<input type="text" id="fullname" placeholder="Your Name here (first last)" autocomplete="off" class="full-name relative w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pongblue focus:border-pongblue sm:text-base focus:shadow-[0_0_5px_pongblue]">
 		</div>
 		<div class="flex flex-col gap-1">
 			<label for="age" class="block text-base font-medium text-gray-700">Age</label>
-			<input type="age" id="age" placeholder="Your Age here" autocomplete="off" class="age relative w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--main-color)] focus:border-[var(--main-color)] sm:text-base focus:shadow-[0_0_5px_var(--main-color)]">
+			<input type="age" id="age" placeholder="Your Age here" autocomplete="off" class="age relative w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pongblue focus:border-pongblue sm:text-base focus:shadow-[0_0_5px_pongblue]">
 	  	</div>
 		<!-- Register Button -->
 	  </form>

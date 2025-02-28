@@ -11,17 +11,17 @@ export const Header = createComponent(() => {
     container.innerHTML = `
         <!-- <div id="menu-bar" class="fas fa-bars"></div> -->
         <div class="flex items-center justify-start w-1/2 gap-2 sm:gap-8">
-            <img src="${logoUrl}" alt="Logo" class="w-10 sm:w-12 hover:drop-shadow-[1px_1px_20px_white]">
+            <img src="${logoUrl}" alt="Logo" class="logo w-10 sm:w-12 hover:cursor-pointer hover:drop-shadow-[1px_1px_20px_white]">
             <nav class="navbar items-center gap-4 hidden sm:flex">
-                <div class="nav-child playPage flex flex-col justify-center items-center transition-all hover:cursor-pointer hover:text-[var(--bg-hover)]" onClick="${() => navigate('/play')}">
+                <div class="nav-child playPage flex flex-col justify-center items-center transition-all hover:cursor-pointer hover:text-ponghover" onClick="${() => navigate('/play')}">
                     <i class="fa-solid fa-play text-lg sm:text-xl"></i>
                     <span>${msg('home.header.play')}</span>
                 </div>
-                <div class="nav-child flex flex-col justify-center items-center transition-all hover:cursor-pointer hover:text-[var(--bg-hover)]">
+                <div class="nav-child flex flex-col justify-center items-center transition-all hover:cursor-pointer hover:text-ponghover">
                     <i class="fa-solid fa-ranking-star text-lg sm:text-xl"></i>
                     <span>${msg('home.header.leaderBoard')}</span>
                 </div>
-                <div class="nav-child nav-chat flex flex-col justify-center items-center transition-all hover:cursor-pointer hover:text-[var(--bg-hover)]" onClick="${() => navigate('/chat')}">
+                <div class="nav-child nav-chat flex flex-col justify-center items-center transition-all hover:cursor-pointer hover:text-ponghover" onClick="${() => navigate('/chat')}">
                     <i class="fa-solid fa-comments text-lg sm:text-xl"></i>
                     <span>${msg('home.header.chat')}</span>
                 </div>
@@ -32,38 +32,38 @@ export const Header = createComponent(() => {
         </div>
         <div class="flex items-center justify-end gap-3 sm:gap-4 w-1/2">
             <div class="md:flex-1">
-                <form action="" id="search-bar-container" class="search-bar-container bg-[var(--main-color)] flex justify-center items-center gap-2 rounded-md md:p-2 md:bg-white z-50">
-                    <input type="text" name="" id="search-bar" autocomplete="off" placeholder="${msg('home.header.search')}" class="w-full hidden md:block text-lg text-[var(--bg-hover)] rounded-md">
-                    <label for="search-bar" class="fas fa-search text-[var(--bg-hover)] text-xl cursor-pointer max-md:text-white max-md:bg-[var(--main-color)]"></label>
+                <form action="" id="search-bar-container" class="search-bar-container bg-pongblue flex justify-center items-center gap-2 rounded-md md:p-2 md:bg-white z-50">
+                    <input type="text" name="" id="search-bar" autocomplete="off" placeholder="${msg('home.header.search')}" class="w-full hidden md:block text-lg text-ponghover rounded-md">
+                    <label for="search-bar" class="fas fa-search text-ponghover text-xl cursor-pointer max-md:text-white max-md:bg-pongblue"></label>
                 </form>
             </div>
             <div class="notification-bell relative">
-                <i class="fa-solid fa-bell text-white text-2xl transition-all hover:cursor-pointer hover:text-[var(--bg-hover)]"></i>
+                <i class="fa-solid fa-bell text-white text-2xl transition-all hover:cursor-pointer hover:text-ponghover"></i>
                 <span class="absolute -top-2 -right-2 rounded-full bg-red-600 text-white hover:cursor-pointer w-5 h-5 flex items-center justify-center text-sm">0</span>
             </div>
             <div class="notification hidden absolute overflow-y-auto top-full right-0 z-50 bg-white w-[300px] p-2 max-h-[300px] animate-fade-down animate-once animate-duration-300">
 
             </div>
-            <select id="languages" name="languages_options" title="Select your language" class="text-xl bg-[var(--main-color)] text-white text-[2.5rem] focus:outline-none hover:opacity-80 hover:cursor-pointer">
+            <select id="languages" name="languages_options" title="Select your language" class="text-xl bg-pongblue text-white text-[2.5rem] focus:outline-none hover:opacity-80 hover:cursor-pointer">
                 <option value="en" selected>en</option>
                 <option value="fr">fr</option>
             </select>
             <div class="account relative flex gap-3 text-white">
-                <div class="flex gap-3 hover:cursor-pointer hover:underline hover:text-[var(--bg-hover)]">
+                <div class="flex gap-3 hover:cursor-pointer hover:underline hover:text-ponghover">
                     <div class="profile-section flex items-center justify-center gap-2">
                         <div class="flex items-center justify-center text-lg font-bold">
                             <p>Guest</p>
                         </div>
                         <div class="w-10 h-10 bg-slate-400 rounded-full bg-[url('./assets/guest.png')] bg-cover"><!-- Logo Here as background image --></div>
                     </div>
-                    <ul class="account-list py-4 rounded-md shadow-md shadow-white right-0 text-nowrap absolute z-10 bottom-[-114px] bg-white text-[var(--bg-color)] hidden flex-col gap-1 animate-fade-down animate-once animate-duration-300">
-                        <li class="px-4 hover:text-[var(--main-color)] hover:cursor-pointer hover:bg-slate-100">
+                    <ul class="account-list py-4 rounded-md shadow-md shadow-white right-0 text-nowrap absolute z-10 bottom-[-114px] bg-white text-pongdark hidden flex-col gap-1 animate-fade-down animate-once animate-duration-300">
+                        <li class="px-4 hover:text-pongblue hover:cursor-pointer hover:bg-slate-100">
                             ${msg("home.register")}
                         </li>
-                        <li class="px-4 hover:text-[var(--main-color)] hover:cursor-pointer hover:bg-slate-100">
+                        <li class="px-4 hover:text-pongblue hover:cursor-pointer hover:bg-slate-100">
                             ${msg("home.register")}
                         </li>
-                        <li class="font-bold px-4 hover:text-[var(--main-color)] hover:cursor-pointer hover:bg-slate-100">
+                        <li class="font-bold px-4 hover:text-pongblue hover:cursor-pointer hover:bg-slate-100">
                             ${msg("home.register")}
                         </li>
                     </ul>
@@ -110,7 +110,7 @@ export const Header = createComponent(() => {
         const navStyles = 'max-sm:animate-fade-down max-sm:animate-once max-sm:animate-duration-[600ms] max-sm:flex max-sm:z-50 max-sm:flex-col max-sm:absolute max-sm:top-full max-sm:left-0 max-sm:w-fit max-sm:gap-0'
         navStyles.split(' ').forEach(style => navbar.classList.toggle(style))
         navbar.classList.toggle('hidden')
-        const childrenStyles = 'max-sm:flex-row max-sm:w-full max-sm:max-w-full max-sm:justify-start max-sm:gap-2 max-sm:bg-[var(--main-color)] max-sm:py-3 max-sm:px-5 max-sm:transition-all max-sm:hover:pl-7 max-sm:hover:pr-3'
+        const childrenStyles = 'max-sm:flex-row max-sm:w-full max-sm:max-w-full max-sm:justify-start max-sm:gap-2 max-sm:bg-pongblue max-sm:py-3 max-sm:px-5 max-sm:transition-all max-sm:hover:pl-7 max-sm:hover:pr-3'
         navChildren.forEach(nav => 
             childrenStyles.split(' ').forEach(style => nav.classList.toggle(style))
         )
@@ -153,7 +153,7 @@ export const Header = createComponent(() => {
             navbar.classList.add('hidden')
             const navStyles = 'max-sm:animate-fade-down max-sm:animate-once max-sm:animate-duration-[600ms] max-sm:flex max-sm:flex-col max-sm:absolute max-sm:top-full max-sm:left-0 max-sm:w-fit max-sm:gap-0'
             navStyles.split(' ').forEach(style => navbar.classList.remove(style))
-            const childrenStyles = 'max-sm:flex-row max-sm:w-full max-sm:max-w-full max-sm:justify-start max-sm:gap-2 max-sm:bg-[var(--main-color)] max-sm:py-3 max-sm:px-5 max-sm:transition-all max-sm:hover:pl-7 max-sm:hover:pr-3'
+            const childrenStyles = 'max-sm:flex-row max-sm:w-full max-sm:max-w-full max-sm:justify-start max-sm:gap-2 max-sm:bg-pongblue max-sm:py-3 max-sm:px-5 max-sm:transition-all max-sm:hover:pl-7 max-sm:hover:pr-3'
             navChildren.forEach(nav => 
                 childrenStyles.split(' ').forEach(style => nav.classList.remove(style))
             )
@@ -169,9 +169,14 @@ export const Header = createComponent(() => {
 
     });
 
+    const logoContainer = container.querySelector('.logo')!;
+    logoContainer.addEventListener('click', () => {
+        navigate('/')
+    });
+
     return container;
 });
-// <div class="flex flex-col justify-center w-24 items-center hover:cursor-pointer hover:text-[var(--bg-hover)]">
+// <div class="flex flex-col justify-center w-24 items-center hover:cursor-pointer hover:text-ponghover">
 // <i class="fa-solid fa-circle-info text-lg sm:text-xl"></i>
 // <a href="#" class="">About Us</a>
 // </div>
