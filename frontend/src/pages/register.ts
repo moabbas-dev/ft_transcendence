@@ -5,6 +5,7 @@ import { msg } from '../languages/LanguageController.js';
 import { SendEmail } from '../components/register/SendEmail.js';
 import { ResetPass } from '../components/register/ResetPass.js';
 import { UserInfoForm } from '../components/register/UserInfoForm.js';
+import { TwoFactorSend } from '../components/register/TwoFactor.js';
 
 export default {
 	render: (container:HTMLElement) => {
@@ -79,7 +80,16 @@ export default {
 				UserInfoForm()
 			)
 		}
-		renderSignIn();
+
+		const renderTwoFactor = () => {
+			animateTransition(() => 
+				TwoFactorSend(
+					{onSwitchToSignIn: renderSignIn}
+				)
+			)
+		}
+		renderTwoFactor()
+		// renderSignIn();
 		// renderUserInfo();
 
 		const canvas = document.getElementById('pongCanvas') as HTMLCanvasElement;
