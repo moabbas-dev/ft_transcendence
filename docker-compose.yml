@@ -34,7 +34,7 @@ services:
     container_name: ft_frontend
     restart: always
     ports:
-      - "1234:1234"
+      - "5173:5173"
     networks:
       - ft_network
     volumes:

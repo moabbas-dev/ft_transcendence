@@ -9,7 +9,7 @@ const fastifySession = require('@fastify/session');
 // Enable CORS on Fastify
 fastify.register(cors, {
 	origin: '*', // Set this to your specific frontend domain for production
-	methods: ['GET', 'POST'],
+	methods: ['GET', 'POST', 'PUT', 'DELETE'],
 });
 
 createTables();
