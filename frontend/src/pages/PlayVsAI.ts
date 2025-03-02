@@ -1,6 +1,6 @@
 import { AIDifficultyPopup } from "../components/local_VS_AI/AIDifficultyPopup.js";
 import { AIPongGame } from "../components/local_VS_AI/AIPongGame.js";
-import { PlayerHeader } from "../components/offline_games_header/offline_1vAi_Header.js";
+import { PlayerHeader } from "../components/offline_games_header/OfflineGames_Header.js";
 
 // Global variable to hold the current game instance
 let currentGame: (HTMLElement & { destroy?: () => void }) | null = null;

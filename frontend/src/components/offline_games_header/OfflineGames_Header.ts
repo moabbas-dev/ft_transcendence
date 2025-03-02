@@ -6,7 +6,7 @@ import {
   createParticles,
   updateBackgrounds,
   initBackgrounds,
-} from "./animations.js";
+} from "./HeaderAnimations_utils.js";
 
 // Explicitly import all AI images
 import aiPic1 from "/src/assets/ai/pic1.jpg";
