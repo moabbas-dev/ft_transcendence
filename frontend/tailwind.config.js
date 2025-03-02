@@ -6,9 +6,12 @@ module.exports = {
         pongblue: "#04809F",
         pongdark: "rgb(17, 24, 39)",
         ponghover: "rgb(26, 36, 58)",
+        // Podium colors
+        gold: '#FFD700',
+        silver: '#C0C0C0',
+        bronze: '#CD7F32',
       },
       boxShadow: {
-
       },
       fontFamily: {
         flux: ["Flux", "sans-serif"],

@@ -17,7 +17,7 @@ export const Header = createComponent(() => {
                     <i class="fa-solid fa-play text-lg sm:text-xl"></i>
                     <span>${msg('home.header.play')}</span>
                 </div>
-                <div class="nav-child flex flex-col justify-center items-center transition-all hover:cursor-pointer hover:text-ponghover">
+                <div class="nav-child leaderBoard-page flex flex-col justify-center items-center transition-all hover:cursor-pointer hover:text-ponghover">
                     <i class="fa-solid fa-ranking-star text-lg sm:text-xl"></i>
                     <span>${msg('home.header.leaderBoard')}</span>
                 </div>
@@ -83,6 +83,7 @@ export const Header = createComponent(() => {
     const profileSection = container.querySelector('.profile-section')!
     const navChat = container.querySelector('.nav-chat')!
     const playPage = container.querySelector('.playPage')!
+    const leaderBoardPage = container.querySelector('.leaderBoard-page')!
     
     navChat.addEventListener('click', () => {
         navigate('/chat');
@@ -92,6 +93,9 @@ export const Header = createComponent(() => {
         navigate('/play');
     });
 
+    leaderBoardPage.addEventListener('click', () =>{
+        navigate('/leader-board');
+    });
 
     profileSection.addEventListener('click', () => {
         const profielPopUp = document.querySelector(".profile");
