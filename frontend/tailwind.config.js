@@ -8,7 +8,7 @@ module.exports = {
         ponghover: "rgb(26, 36, 58)",
       },
       boxShadow: {
-        "white-glow": "0 0 50px rgba(255, 255, 255, 0.7)",
+
       },
       fontFamily: {
         flux: ["Flux", "sans-serif"],
@@ -23,6 +23,9 @@ module.exports = {
         borderFlash: "borderFlash 1.5s infinite",
         dividerPulse: "dividerPulse 2s ease-in-out infinite",
         shimmer: "shimmer 2s infinite linear",
+        fadeIn: 'fadeIn 0.5s ease-out',
+        fadeOut: 'fadeOut 0.3s ease-out forwards',
+        floatIn: 'floatIn 0.5s ease-out forwards',
       },
       keyframes: {
         slideUp: {
@@ -72,10 +75,51 @@ module.exports = {
           "0%": { backgroundPosition: "-200% 0" },
           "100%": { backgroundPosition: "200% 0" },
         },
+        fadeIn: {
+          'from': { opacity: '0' },
+          'to': { opacity: '1' }
+        },
+        floatIn: {
+          '0%': { transform: 'translateY(20px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' }
+        },
+        fadeOut: {
+          'from': { opacity: '1' },
+          'to': { opacity: '0' }
+        },
       },
     },
   },
   plugins: [
+    function({ addComponents }) {
+      const components = {
+        '.btn-shine': {
+          '&::after': {
+            content: "''",
+            position: 'absolute',
+            top: '-50%',
+            left: '-50%',
+            width: '200%',
+            height: '200%',
+            background: 'linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent)',
+            transform: 'rotate(45deg)',
+            transition: 'all 0.3s ease',
+          },
+          '&:hover::after': {
+            left: '100%',
+          }
+        }
+      }
+      addComponents(components)
+    },
+    function ({ addUtilities }) {
+      const newUtilities = {
+        '.animation-delay-100': { 'animation-delay': '0.1s' },
+        '.animation-delay-200': { 'animation-delay': '0.2s' },
+        '.animation-delay-300': { 'animation-delay': '0.3s' },
+      };
+      addUtilities(newUtilities, ['responsive']);
+    },
     require("tailwindcss-animated"),
     // require('tailwind-scrollbar')
   ],
