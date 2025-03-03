@@ -16,13 +16,13 @@ export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
 				<p class="text-center">Enter the 6-digits code from your authenticator app</p>
 			</div>
 			<form class="flex flex-col gap-4">
-				<div id="auth-code" class="flex gap-4">
-					<input type="text" class="size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
-					<input type="text" class="size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
-					<input type="text" class="size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
-					<input type="text" class="size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
-					<input type="text" class="size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
-					<input type="text" class="size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+				<div id="auth-code" class="flex gap-4 justify-center">
+					<input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+					<input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+					<input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+					<input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+					<input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+					<input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
 				</div>
 			</form>
 			<div class="w-full text-center">
@@ -38,8 +38,12 @@ export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
 		eventType: 'click',
 		onClick: (e: Event) => {
 			e.preventDefault();
+			let code = Array.from(inputs).map(input => input.value).join('');
+			console.log("Entered code:", code);
+			inputs.forEach(input => {input.value = ""});
+			requestAnimationFrame(() => {inputs[0].focus()});
 		}
-	  });
+	});
 	formElement.appendChild(verifyButton);
 
 	const signinLink = form.querySelector('.signin-link')!;
@@ -50,47 +54,49 @@ export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
 		}
 	});
 
-	document.addEventListener('DOMContentLoaded', () => {
-		const inputs: NodeListOf<HTMLInputElement> = document.querySelectorAll("#auth-code input");
+	const inputs: NodeListOf<HTMLInputElement> = form.querySelectorAll("#auth-code input");
 
-		// Auto-focus the first input on page load
-		if (inputs.length) {
-			inputs[0].focus();
-		}
+	// Auto-focus the first input on page load
+	if (inputs.length) {
+		requestAnimationFrame(() => {
+		  inputs[0].focus();
+		  inputs[0].select(); // Optional: highlight text for better UX
+		});
+	}
 
-		inputs.forEach((input, index) => {
-			// Handle input to move to next field
-			input.addEventListener("input", (e: Event) => {
-				const value = (e.target as HTMLInputElement).value;
-				if (value.length >= 1 && index < inputs.length - 1) {
-					inputs[index + 1].focus();
-				}
-			});
+	inputs.forEach((input, index) => {
+		// Handle input to move to next field
+		input.addEventListener("input", (e: Event) => {
+			const target = e.target as HTMLInputElement;
+			const value = target.value;
 
-			// Handle backspace to move to previous field
-			input.addEventListener("keydown", (e: KeyboardEvent) => {
-				if (e.key === "Backspace" && input.value === "") {
-					if (index == inputs.length - 1) {
-						inputs[0].focus();
-						console.log("FFFFFF");
-					}
-					else if (index > 0)
-						inputs[index - 1].focus();
-				}
-			});
+			if (!/^\d$/.test(value)) {
+				target.value = "";
+				return;
+			}
+
+			if (value.length >= 1 && index < inputs.length - 1) {
+				inputs[index + 1].focus();
+			}
+
+			const allFilled = Array.from(inputs).every(input => input.value.length === 1);
+			if (allFilled)
+			  formElement.requestSubmit();
 		});
 
-		form.addEventListener("submit", (e) => {
-			e.preventDefault();
-			let code = "";
-			inputs.forEach(input => {
-			  code += input.value;
-			});
-			console.log("Entered code:", code);
-			// TODO: Send the 'code' to your server for verification
+		// Handle backspace to move to previous field
+		input.addEventListener("keydown", (e: KeyboardEvent) => {
+			if (e.key === "Backspace" && input.value === "" && index > 0)
+				inputs[index - 1].focus();
 		});
 	});
 
+	form.addEventListener("submit", (e:Event) => {
+		e.preventDefault();
+		let code = Array.from(inputs).map(input => input.value).join('');
+		console.log("Entered code:", code);
+		// TODO: Send the 'code' to your server for verification
+	});
 
 	return form;
 })

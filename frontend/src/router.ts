@@ -4,6 +4,7 @@ import PlayPage from "./pages/play.js";
 import LocalPongPage from "./pages/localMultiplayer.js";
 import NotFound from "./pages/notfound.js";
 import ChatPage from "./pages/chat.js";
+import AboutPage from "./pages/about.js";
 import { Page } from "./types/types.js";
 import PlayVsAI from "./pages/PlayVsAI.js"
 import { Lang, setLanguage } from "./languages/LanguageController.js";
@@ -15,6 +16,7 @@ const routes: { [key: string]: Page } = {
   "/play/local-ai": PlayVsAI,
   "/play/local-multi": LocalPongPage,
   "/chat": ChatPage,
+  "/about-us": AboutPage,
 };
 
 export function refreshRouter() {

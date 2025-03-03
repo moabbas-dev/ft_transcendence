@@ -1,8 +1,68 @@
+import moabbasImg from '/src/assets/moabbas.jpg';
+import afarachiImg from '/src/assets/afarachi.jpg';
+import jfatfatImg from '/src/assets/jfatfat.jpg';
+
 export default {
-	render: (container:HTMLElement) => {
-		container.innerHTML = `
-		<h1 class="text-4xl font-bold text-center mt-8">About Page</h1>
-		<p class="text-center mt-4">This is the about page of ft_transcendence!</p>
+	render: (container: HTMLElement) => {
+	  container.innerHTML = `
+		<section class="min-h-screen bg-pongdark py-12 px-4 sm:px-6 lg:px-8">
+		  <div class="max-w-4xl mx-auto text-center">
+			<h2 class="text-3xl font-extrabold text-white sm:text-4xl mb-12">
+			  Development Team
+			</h2>
+			
+			<div class="flex flex-col md:flex-row justify-center items-center gap-8 lg:gap-12">
+			  <!-- Moabbas - Frontend -->
+			  <div class="flex flex-col items-center bg-white p-6 rounded-2xl shadow-[0_0_30px_rgba(255,255,255)] hover:shadow-[0_0_60px_rgba(255,255,255)] transition-shadow duration-300 animate-fade-left">
+				<img 
+				  src="${moabbasImg}" 
+				  alt="Moabbas - Frontend Developer"
+				  class="w-32 h-32 rounded-full object-cover ring-4 ring-pongblue mb-4"
+				>
+				<h3 class="text-2xl font-bold text-gray-900 mb-1">Moabbas</h3>
+				<p class="text-pongblue font-medium mb-2">Frontend Developer</p>
+				<p class="text-gray-600 text-center max-w-xs">
+				  Crafting pixel-perfect interfaces with modern web technologies.
+				</p>
+			  </div>
+  
+			  <!-- Afarachi - Fullstack -->
+			  <div class="flex flex-col items-center bg-white p-6 rounded-2xl shadow-[0_0_30px_rgba(255,255,255)] hover:shadow-[0_0_60px_rgba(255,255,255)] transition-shadow duration-300 animate-fade">
+				<img 
+				  src="${afarachiImg}" 
+				  alt="Afarachi - Fullstack Developer"
+				  class="w-32 h-32 rounded-full object-cover ring-4 ring-pongblue mb-4"
+				>
+				<h3 class="text-2xl font-bold text-gray-900 mb-1">Afarachi</h3>
+				<p class="text-pongblue font-medium mb-2">Fullstack Developer</p>
+				<p class="text-gray-600 text-center max-w-xs">
+				  Bridging frontend beauty with backend functionality seamlessly.
+				</p>
+			  </div>
+  
+			  <!-- Jfatfat - Backend -->
+			  <div class="flex flex-col items-center bg-white p-6 rounded-2xl shadow-[0_0_30px_rgba(255,255,255)] hover:shadow-[0_0_60px_rgba(255,255,255)] transition-shadow duration-300 animate-fade-right">
+				<img 
+				  src="${jfatfatImg}" 
+				  alt="Jfatfat - Backend Developer"
+				  class="w-32 h-32 rounded-full object-cover ring-4 ring-pongblue mb-4"
+				>
+				<h3 class="text-2xl font-bold text-gray-900 mb-1">Jfatfat</h3>
+				<p class="text-pongblue font-medium mb-2">Backend Developer</p>
+				<p class="text-gray-600 text-center max-w-xs">
+				  Architecting robust server-side solutions and database systems.
+				</p>
+			  </div>
+			</div>
+  
+			<div class="mt-12 text-gray-400 max-w-2xl mx-auto">
+			  <p class="text-lg">
+				Our team combines expertise across the entire development stack to deliver 
+				high-performance, scalable web applications with exceptional user experiences.
+			  </p>
+			</div>
+		  </div>
+		</section>
 	  `;
 	},
-};
+  };
