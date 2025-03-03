@@ -3,7 +3,7 @@ import { createComponent } from "../../utils/StateManager.js";
 
 export const Footer = createComponent(() => {
     const container = document.createElement("footer");
-    container.className = "fixed bottom-0 left-0 w-full h-[68px] flex flex-col items-center justify-center text-center text-lg font-normal text-white bg-pongblue";
+    container.className = "fixed bottom-0 left-0 w-full h-[68px] flex items-center justify-center text-lg font-normal text-white bg-pongblue";
     container.innerHTML = `
         <p>
             © ${new Date().getFullYear()} Developed by 
