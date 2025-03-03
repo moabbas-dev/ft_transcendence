@@ -4,36 +4,58 @@ interface AIDifficultyPopupProps {
   onSelect: (difficulty: string) => void;
 }
 
-export const AIDifficultyPopup = createComponent((props: AIDifficultyPopupProps) => {
-  const container = document.createElement("div");
-  container.className = `
+export const AIDifficultyPopup = createComponent(
+  (props: AIDifficultyPopupProps) => {
+    const container = document.createElement("div");
+    container.className = `
     fixed inset-0 z-[10000]
     flex items-center justify-center
-    bg-black/50
+    bg-black/70
+    animate-fadeIn
   `;
 
-  container.innerHTML = `
-    <div class="bg-white p-6 rounded-lg shadow-lg">
-      <h2 class="text-2xl font-bold mb-4 text-center">Choose Difficulty</h2>
-      <div class="flex flex-col gap-4">
-        <button id="difficulty-easy" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Easy</button>
-        <button id="difficulty-medium" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">Medium</button>
-        <button id="difficulty-hard" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Hard</button>
+    container.innerHTML = `
+    <div class="bg-black p-8 rounded-lg shadow-lg border-2 border-purple-500 w-3/5 max-w-lg">
+      <h2 class="text-3xl font-bold mb-6 text-center text-purple-400" style="text-shadow: 0 0 10px #a855f7, 0 0 20px #a855f7;">CHOOSE DIFFICULTY</h2>
+      <div class="flex flex-col gap-6">
+        <button id="difficulty-easy" class="px-6 py-3 bg-black text-green-400 rounded font-bold text-lg border
+          border-green-400 relative overflow-hidden transition-all duration-300 ease-in-out opacity-0 animate-floatIn
+          will-change-transform btn-shine animation-delay-100 shadow-[0_0_10px_#4ade80]">EASY</button>
+        <button id="difficulty-medium" class="px-6 py-3 bg-black text-yellow-400 rounded font-bold text-lg border
+          border-yellow-400 relative overflow-hidden transition-all duration-300 ease-in-out opacity-0 animate-floatIn
+          will-change-transform btn-shine animation-delay-200 shadow-[0_0_10px_#facc15]">MEDIUM</button>
+        <button id="difficulty-hard" class="px-6 py-3 bg-black text-red-400 rounded font-bold text-lg border
+          border-red-400 relative overflow-hidden transition-all duration-300 ease-in-out opacity-0 animate-floatIn
+          will-change-transform btn-shine animation-delay-300 shadow-[0_0_10px_#f87171]">HARD</button>
       </div>
     </div>
   `;
 
-  const selectDifficulty = (difficulty: string) => {
-    props.onSelect(difficulty);
-    container.remove(); // Remove popup after selection
-  };
+    const selectDifficulty = (difficulty: string) => {
+      // Add exit animation
+      const popupContent = container.querySelector("div");
+      if (popupContent) {
+        popupContent.className = "animate-fadeOut";
+      }
 
-  container.querySelector("#difficulty-easy")!.addEventListener("click", () => selectDifficulty("easy"));
-  container.querySelector("#difficulty-medium")!.addEventListener("click", () => selectDifficulty("medium"));
-  container.querySelector("#difficulty-hard")!.addEventListener("click", () => selectDifficulty("hard"));
+      // Delay removal to allow animation to complete
+      setTimeout(() => {
+        props.onSelect(difficulty);
+        container.remove(); // Remove popup after selection
+      }, 50);
+    };
 
+    container
+      .querySelector("#difficulty-easy")!
+      .addEventListener("click", () => selectDifficulty("easy"));
+    container
+      .querySelector("#difficulty-medium")!
+      .addEventListener("click", () => selectDifficulty("medium"));
+    container
+      .querySelector("#difficulty-hard")!
+      .addEventListener("click", () => selectDifficulty("hard"));
 
-    const scores = {player: 0, ai: 0};
+    const scores = { player: 0, ai: 0 };
     // Function to update and save scores
     const saveScores = () => {
       localStorage.setItem("aiPongScores", JSON.stringify(scores));
@@ -43,5 +65,6 @@ export const AIDifficultyPopup = createComponent((props: AIDifficultyPopupProps)
 
     // localStorage.removeItem("aiPongScores");
 
-  return container;
-});
+    return container;
+  }
+);

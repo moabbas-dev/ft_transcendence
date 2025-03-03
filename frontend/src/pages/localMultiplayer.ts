@@ -1,7 +1,7 @@
 import { LocalPongGame } from "../components/local _offline_1v1/LocalPongGame.js";
 import { Header } from "../components/header_footer/header.js";
 import { Footer } from "../components/header_footer/footer.js";
-import { PlayerHeader } from "../components/local _offline_1v1/offline_1v1_Header.js";
+import { PlayerHeader } from "../components/offline_games_header/OfflineGames_Header.js";
 
 const scores = {player1: 0, player2: 0};
 // Function to update and save scores
@@ -35,7 +35,10 @@ export default {
     // Append Player Header
     const playerHeaderContainer = container.querySelector(".player-header");
     if (playerHeaderContainer) {
-        const playerHeader = PlayerHeader();
+        const playerHeader = PlayerHeader({
+          gameMode: "offline_1v1",
+          keyScores: "pongScores"  
+        });
         playerHeaderContainer.appendChild(playerHeader);
     }
 
