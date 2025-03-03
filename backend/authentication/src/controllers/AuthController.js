@@ -46,7 +46,11 @@ class AuthController {
 				const { accessToken, refreshToken } = await generateTokens(user, reply.server);
 				const sessId = await Session.create({ userId, accessToken, refreshToken });
 				await User.updateUserStatus(userId, { status: "online" });
-				return reply.code(200).send({ require2FA: false, sessionId: sessId, accessToken: accessToken, refreshToken: refreshToken });
+				return reply.code(200).send({
+					require2FA: false, sessionId: sessId, accessToken: accessToken, refreshToken: refreshToken,
+					userId: user.id, email: user.email, nickname: user.nickname, fullName: user.full_name,
+					avatarUrl: user.avatar_url
+				});
 			} else {
 				const sessId = await Session.create({ userId, accessToken: null, refreshToken: null });
 				reply.server.log.info(`sessId: ${sessId}`);

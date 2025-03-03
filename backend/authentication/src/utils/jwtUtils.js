@@ -5,9 +5,9 @@ const generateTokens = async (user, fastify) => {
 		{
 			userId: user.id,
 			email: user.email,
-			full_name: user.full_name,
+			fullName: user.full_name,
 			nickname: user.nickname,
-			googleId: user.googleId,
+			avatarUrl: user.avatar_url,
 			exp: accessTokenExpiry
 		}
 	);
@@ -31,7 +31,7 @@ const generateNewAccessToken = async (user, fastify) => {
 			email: user.email,
 			full_name: user.full_name,
 			nickname: user.nickname,
-			googleId: user.googleId,
+			avatarUrl: user.avatar_url,
 			exp: accessTokenExpiry
 		}
 	);
