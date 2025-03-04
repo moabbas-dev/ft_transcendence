@@ -5,10 +5,10 @@ export const Footer = createComponent(() => {
     const container = document.createElement("footer");
     container.className = "fixed bottom-0 left-0 w-full h-[68px] flex items-center justify-center text-lg font-normal text-white bg-pongblue";
     container.innerHTML = `
-        <p>
+        <p class="text-center">
             © ${new Date().getFullYear()} Developed by 
-            <button id="about-us" class="text-pongdark font-medium hover:opacity-70 transition-all">Afarachi, Moabbas, Jfatfat</button>. 
-            All intellectual property rights reserved.
+            <button id="about-us" class="text-pongdark font-medium hover:opacity-70 transition-all">Afarachi, Moabbas, Jfatfat</button>.
+            <span class="max-[380px]:hidden"> All intellectual property rights reserved.</span>
         </p>
     `;
     container.querySelector("#about-us")?.addEventListener("click", () => {
