@@ -3,7 +3,7 @@ import { msg } from "../../languages/LanguageController.js";
 import logoUrl from "/src/assets/ft_transcendencee.png";
 import { navigate } from "../../router.js";
 import { Notification } from "./Notification.js";
-import { Profile } from "../profile/UserProfile.js";
+import { DropDown } from "./DropDown.js";
 
 export const Header = createComponent(() => {
     const container = document.createElement("header");
@@ -17,7 +17,7 @@ export const Header = createComponent(() => {
                     <i class="fa-solid fa-play text-lg sm:text-xl"></i>
                     <span>${msg('home.header.play')}</span>
                 </div>
-                <div class="nav-child leaderBoard-page flex flex-col justify-center items-center transition-all hover:cursor-pointer hover:text-ponghover">
+                <div class="nav-child flex flex-col justify-center items-center transition-all hover:cursor-pointer hover:text-ponghover">
                     <i class="fa-solid fa-ranking-star text-lg sm:text-xl"></i>
                     <span>${msg('home.header.leaderBoard')}</span>
                 </div>
@@ -49,29 +49,22 @@ export const Header = createComponent(() => {
                 <option value="fr">fr</option>
             </select>
             <div class="account relative flex gap-3 text-white">
-                <div class="flex gap-3 hover:cursor-pointer hover:underline hover:text-ponghover">
+                <div id="profile-head" class="flex gap-3 hover:cursor-pointer hover:underline hover:text-ponghover">
                     <div class="profile-section flex items-center justify-center gap-2">
                         <div class="flex items-center justify-center text-lg font-bold">
                             <p>Guest</p>
                         </div>
                         <div class="w-10 h-10 bg-slate-400 rounded-full bg-[url('./assets/guest.png')] bg-cover"><!-- Logo Here as background image --></div>
                     </div>
-                    <ul class="account-list py-4 rounded-md shadow-md shadow-white right-0 text-nowrap absolute z-10 bottom-[-114px] bg-white text-pongdark hidden flex-col gap-1 animate-fade-down animate-once animate-duration-300">
-                        <li class="px-4 hover:text-pongblue hover:cursor-pointer hover:bg-slate-100">
-                            ${msg("home.register")}
-                        </li>
-                        <li class="px-4 hover:text-pongblue hover:cursor-pointer hover:bg-slate-100">
-                            ${msg("home.register")}
-                        </li>
-                        <li class="font-bold px-4 hover:text-pongblue hover:cursor-pointer hover:bg-slate-100">
-                            ${msg("home.register")}
-                        </li>
-                    </ul>
+
                 </div>
             </div>
-            </div>
+        </div>
     `;
     const account = container.querySelector(".account")!;
+    const dropdown = DropDown({isLoggedIn: true});
+    const profileHead = container.querySelector("#profile-head")!;
+    profileHead.appendChild(dropdown);
     const account_list = container.querySelector(".account-list")!;
     const notificationContainer = container.querySelector('.notification')!
     const notificationBell = container.querySelector('.notification-bell')!
@@ -80,11 +73,10 @@ export const Header = createComponent(() => {
     const navbar = container.querySelector('.navbar')!
     const navBtn = container.querySelector('.nav-btn')!
     const navChildren = container.querySelectorAll('.nav-child')!
-    const profileSection = container.querySelector('.profile-section')!
     const navChat = container.querySelector('.nav-chat')!
     const playPage = container.querySelector('.playPage')!
-    const leaderBoardPage = container.querySelector('.leaderBoard-page')!
-    
+   
+
     navChat.addEventListener('click', () => {
         navigate('/chat');
     });
@@ -92,16 +84,6 @@ export const Header = createComponent(() => {
     playPage.addEventListener('click', () => {
         navigate('/play');
     });
-
-    leaderBoardPage.addEventListener('click', () =>{
-        navigate('/leader-board');
-    });
-
-    profileSection.addEventListener('click', () => {
-        const profielPopUp = document.querySelector(".profile");
-        const profile = Profile();
-        profielPopUp?.appendChild(profile);    
-    })
 
     // For testing purposes
     notificationContainer.appendChild(Notification({username: 'Test User', message: 'Hello World!'}))

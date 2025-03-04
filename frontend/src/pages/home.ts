@@ -16,7 +16,7 @@ export default {
               <canvas id="pongCanvas" class="w-full h-[50vh] border-2 border-white rounded-lg"></canvas>
             </div>
             <div class="flex flex-col gap-4 justify-center max-sm:w-full max-sm:px-3">
-              <h1 class="text-5xl max-sm:text-center max-sm:font-bold sm:text-6xl lg:text-9xl text-white text-start drop-shadow-[1px_1px_20px_white] animate-fade-right animate-once animate-duration-700 animate-ease-linear">
+              <h1 class="text-5xl max-sm:text-center max-sm:font-bold sm:text-6xl lg:text-8xl xl:text-9xl text-white text-start drop-shadow-[1px_1px_20px_white] animate-fade-right animate-once animate-duration-700 animate-ease-linear">
                 ${msg("home.title")}
               </h1>
               <p class="text-white text-2xl max-sm:text-center lg:text-4xl animate-fade-left sm:animate-fade-right animate-once animate-duration-700 animate-delay-700 animate-ease-linear">

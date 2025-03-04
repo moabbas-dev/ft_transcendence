@@ -1,6 +1,5 @@
 import './router.js';
 import  io  from "socket.io-client";
-import { navigate } from './router.js';
 
 // const messageForm = document.getElementById('send-container');
 // const messageInput = document.getElementById('message-input') as HTMLInputElement | null;;
@@ -84,8 +83,7 @@ window.addEventListener('load', () => {
     });
 
     const formattedDate = currentDate.toLocaleDateString('en-US', {
-      month: 'long',
-      day: 'numeric'
+      month: 'long', day: 'numeric'
     });
     let dateHeader = document.querySelector(`.date-header[data-date="${formattedDate}"]`);
   
@@ -104,7 +102,7 @@ window.addEventListener('load', () => {
     messageElement.appendChild(messageText);
     messageElement.innerHTML += `<span class="text-xs text-gray-400">${messageDate}</span>`;
 
-    messageWrapper.classList.add('flex', 'w-full'); // Message container with flex
+    messageWrapper.classList.add('flex', 'w-full');
     // Common styles for both sender and receiver
     messageElement.classList.add(
       'flex',
@@ -112,32 +110,28 @@ window.addEventListener('load', () => {
       'justify-center',
       'pt-1',
       'px-2',
-      'rounded-lg',  // Rounded corners
+      'rounded-lg',
       'max-w-[250px]',
-      'md:max-w-sm',    // Limit width
+      'md:max-w-sm',
       'break-words',
       '2xl:max-w-xl',
       'text-white',
       '[direction:ltr]',
       'min-w-0',
       'text-[17px]',
-      'text-left'
+      'text-left',
     );
 
     // Apply conditional styles for sender and receiver
-    if (isSender) {
-      messageWrapper.classList.add('justify-end'); // Align sender messages to the right
-      messageElement.classList.add('bg-blue-900');
-    } else {
-      messageWrapper.classList.add('justify-start'); // Align receiver messages to the left
-      messageElement.classList.add('bg-pongdark');
-    }
-  
+    isSender? messageWrapper.classList.add('justify-end')
+          :   messageWrapper.classList.add('justify-start');
+
+    isSender? messageElement.classList.add('bg-blue-900', 'mr-1')
+          : messageElement.classList.add('bg-pongdark', 'ml-1');
+    
     messageWrapper.appendChild(messageElement);
-    if (messageContainer.firstChild) {
-      messageContainer.insertBefore(messageWrapper, messageContainer.firstChild);
-    } else {
-      messageContainer.appendChild(messageWrapper);
-    }
+  
+    messageContainer.firstChild? messageContainer.insertBefore(messageWrapper, messageContainer.firstChild)
+          : messageContainer.appendChild(messageWrapper);
   }
 });
