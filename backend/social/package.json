@@ -11,6 +11,7 @@
   "description": "",
   "dependencies": {
     "fastify": "^5.2.1",
+    "social": "file:",
     "sqlite3": "^5.1.7"
   }
 }
