@@ -38,7 +38,7 @@ export const AIPongGame = createComponent((difficulty: "easy" | "medium" | "hard
   container.style.height = "85vh";
 
   // Create GameCanvas
-  const gameCanvas = GameCanvas({
+  const gameCanvasInstance = new GameCanvas({
     gameState: state,
     onResize: (width: number, height: number) => {
       // Handle canvas resize
@@ -46,6 +46,7 @@ export const AIPongGame = createComponent((difficulty: "easy" | "medium" | "hard
       resetBall(true, width, height);
     }
   });
+  const gameCanvas = gameCanvasInstance.getContainer();
   container.appendChild(gameCanvas);
 
   // Create ScoreManager
@@ -76,8 +77,8 @@ export const AIPongGame = createComponent((difficulty: "easy" | "medium" | "hard
   // Create AI Controller
   const aiController = AIController({
     difficulty,
-    canvasWidth: gameCanvas.getWidth(),
-    canvasHeight: gameCanvas.getHeight(),
+    canvasWidth: gameCanvasInstance.getWidth(),
+    canvasHeight: gameCanvasInstance.getHeight(),
     paddleHeight: state.paddleHeight,
     paddleWidth: state.paddleWidth,
     paddleOffset: state.paddleOffset,
@@ -116,8 +117,8 @@ export const AIPongGame = createComponent((difficulty: "easy" | "medium" | "hard
       (scoreManager as any).resetScores();
       state.gameEnded = false;
       state.gameStarted = false;
-      resetBall(true, gameCanvas.getWidth(), gameCanvas.getHeight());
-      resetPaddlePositions(gameCanvas.getWidth(), gameCanvas.getHeight());
+      resetBall(true, gameCanvasInstance.getWidth(), gameCanvasInstance.getHeight());
+      resetPaddlePositions(gameCanvasInstance.getWidth(), gameCanvasInstance.getHeight());
       // Restart countdown
       (countdownOverlay as any).resetCountdown();
       // Hide popup
@@ -128,8 +129,8 @@ export const AIPongGame = createComponent((difficulty: "easy" | "medium" | "hard
 
   // Function to reset paddle positions to middle of the table
   const resetPaddlePositions = (width?: number, height?: number) => {
-    const canvasWidth = width || gameCanvas.getWidth();
-    const canvasHeight = height || gameCanvas.getHeight();
+    const canvasWidth = width || gameCanvasInstance.getWidth();
+    const canvasHeight = height || gameCanvasInstance.getHeight();
 
     state.playerY = (canvasHeight - state.paddleHeight) / 2;
     (aiController as any).setAIPosition((canvasHeight - state.paddleHeight) / 2);
@@ -137,8 +138,8 @@ export const AIPongGame = createComponent((difficulty: "easy" | "medium" | "hard
 
   // Reset the ball after scoring
   const resetBall = (forceReset = false, width?: number, height?: number) => {
-    const canvasWidth = width || gameCanvas.getWidth();
-    const canvasHeight = height || gameCanvas.getHeight();
+    const canvasWidth = width || gameCanvasInstance.getWidth();
+    const canvasHeight = height || gameCanvasInstance.getHeight();
 
     state.ballX = canvasWidth / 2;
     state.ballY = canvasHeight / 2;
@@ -168,17 +169,17 @@ export const AIPongGame = createComponent((difficulty: "easy" | "medium" | "hard
 
     // Process human player input
     if ((inputHandler as any).isKeyPressed("w") && state.playerY > 0) state.playerY -= 7;
-    if ((inputHandler as any).isKeyPressed("s") && state.playerY < gameCanvas.getHeight() - state.paddleHeight) state.playerY += 7;
+    if ((inputHandler as any).isKeyPressed("s") && state.playerY < gameCanvasInstance.getHeight() - state.paddleHeight) state.playerY += 7;
     if ((inputHandler as any).isKeyPressed("ArrowUp") && state.playerY > 0) state.playerY -= 7;
-    if ((inputHandler as any).isKeyPressed("ArrowDown") && state.playerY < gameCanvas.getHeight() - state.paddleHeight) state.playerY += 7;
+    if ((inputHandler as any).isKeyPressed("ArrowDown") && state.playerY < gameCanvasInstance.getHeight() - state.paddleHeight) state.playerY += 7;
 
     // Update AI paddle position 
-    (aiController as any).updateAIPosition(gameCanvas.getHeight());
+    (aiController as any).updateAIPosition(gameCanvasInstance.getHeight());
 
     state.ballX += state.ballSpeedX;
     state.ballY += state.ballSpeedY;
 
-    if (state.ballY <= 0 || state.ballY >= gameCanvas.getHeight())
+    if (state.ballY <= 0 || state.ballY >= gameCanvasInstance.getHeight())
       state.ballSpeedY *= -1;
 
     // Ball collision detection with paddles
@@ -189,8 +190,8 @@ export const AIPongGame = createComponent((difficulty: "easy" | "medium" | "hard
       state.ballY <= state.playerY + state.paddleHeight;
     
     const hitRightPaddle =
-      state.ballX + state.ballSize >= gameCanvas.getWidth() - (state.paddleOffset + state.paddleWidth) &&
-      state.ballX + state.ballSize < gameCanvas.getWidth() - state.paddleOffset &&
+      state.ballX + state.ballSize >= gameCanvasInstance.getWidth() - (state.paddleOffset + state.paddleWidth) &&
+      state.ballX + state.ballSize < gameCanvasInstance.getWidth() - state.paddleOffset &&
       state.ballY >= state.AiY &&
       state.ballY <= state.AiY + state.paddleHeight;
     
@@ -225,7 +226,7 @@ export const AIPongGame = createComponent((difficulty: "easy" | "medium" | "hard
       (scoreManager as any).updateScore("ai");
       resetBall();
     }
-    if (state.ballX > gameCanvas.getWidth()) {
+    if (state.ballX > gameCanvasInstance.getWidth()) {
       // Call ScoreManager to update player score
       (scoreManager as any).updateScore("player");
       resetBall();
@@ -235,13 +236,13 @@ export const AIPongGame = createComponent((difficulty: "easy" | "medium" | "hard
   // Game loop
   const gameLoop = () => {
     update();
-    (gameCanvas as any).draw();
+    gameCanvasInstance.draw();
     animationFrameId = requestAnimationFrame(gameLoop);
   };
 
   // Continue drawing during countdown to show the table
   const drawDuringCountdown = () => {
-    (gameCanvas as any).draw();
+    gameCanvasInstance.draw();
     if (!state.gameStarted && !state.gameEnded) {
       requestAnimationFrame(drawDuringCountdown);
     }
@@ -251,8 +252,8 @@ export const AIPongGame = createComponent((difficulty: "easy" | "medium" | "hard
   resetPaddlePositions();
   
   // Initialize ball in center
-  state.ballX = gameCanvas.getWidth() / 2;
-  state.ballY = gameCanvas.getHeight() / 2;
+  state.ballX = gameCanvasInstance.getWidth() / 2;
+  state.ballY = gameCanvasInstance.getHeight() / 2;
   
   // Start drawing the game table in the background while countdown is active
   drawDuringCountdown();
@@ -274,7 +275,7 @@ export const AIPongGame = createComponent((difficulty: "easy" | "medium" | "hard
     // Clean up the AI controller
     (aiController as any).destroy();
     // Clean up the game canvas
-    (gameCanvas as any).destroy();
+    gameCanvasInstance.destroy();
   };
 
   // Expose cleanup so the parent can call it
