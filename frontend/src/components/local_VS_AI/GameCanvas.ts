@@ -30,11 +30,11 @@ export class GameCanvas {
     
     // Create container
     this.container = document.createElement("div");
-    this.container.className = "relative w-full h-full";
+    this.container.className = "relative w-9/12 h-9/12";
 
     // Create canvas
     this.canvas = document.createElement("canvas");
-    this.canvas.className = "rounded-lg shadow-xl";
+    this.canvas.className = "rounded-lg shadow-xl mt-4";
     this.canvas.style.width = "100%";
     this.canvas.style.height = "100%";
     this.container.appendChild(this.canvas);

@@ -67,7 +67,7 @@ export const GameResultsPopUp = createComponent((props: GameResultsProps) => {
   
   // Method to update the winner and scores
   const updateResults = (winner: "player" | "ai", scores: { player: number; ai: number }) => {
-    winnerText.textContent = `${winner === "player" ? "Player 1" : "AI"} Wins!`;
+    winnerText.textContent = `${winner === "player" ? "Player" : "AI"} Wins!`;
     scoreText.textContent = `Final Score: ${scores.player} - ${scores.ai}`;
   };
   
