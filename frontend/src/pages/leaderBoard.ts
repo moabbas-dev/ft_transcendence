@@ -33,7 +33,7 @@ export default {
               <!-- 2nd Place -->
               <div class="second-place w-[30%] flex flex-col items-center gap-0.5 animate-fade-right animate-once animate-duration-700 animate-ease-linear">
                 <div class="relative">
-                  <div class="crown absolute -top-6 left-1/2 transform -translate-x-1/2 text-2xl animate-bounce animate-infinite animate-duration-1000">🥈</div>
+                  <div class="crown absolute -top-3 left-1/2 transform -translate-x-1/2 text-2xl animate-bounce animate-infinite animate-duration-1000">🥈</div>
                   <div class="avatar-container relative size-16 sm:size-24 overflow-hidden">
                     <img src="${pic2}" alt="2nd Place" class="second-avatar rounded-full absolute size-16 object-cover top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
                     <img src="${playerFrame1}" alt="Player Frame" class="absolute w-full h-full top-0 left-0 pointer-events-none z-10" />
@@ -48,7 +48,7 @@ export default {
               <!-- 1st Place -->
               <div class="first-place w-[40%] flex flex-col items-center gap-0.5 z-10 animate-fade-up animate-once animate-duration-700 animate-ease-linear">
                 <div class="relative">
-                  <div class="crown absolute -top-8 left-1/2 transform -translate-x-1/2 text-3xl animate-bounce animate-infinite animate-duration-1000">🥇</div>
+                  <div class="crown absolute -top-6 left-1/2 transform -translate-x-1/2 text-3xl animate-bounce animate-infinite animate-duration-1000">🥇</div>
                   <div class="avatar-container relative size-28 sm:size-32">
                     <img src="${pic1}" alt="1st Place" class="first-avatar absolute rounded-full w-24 h-24 object-cover top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
                     <img src="${playerFrame}" alt="Player Frame" class="absolute w-full h-full top-0 left-0 pointer-events-none z-10" />
@@ -63,7 +63,7 @@ export default {
               <!-- 3rd Place -->
               <div class="third-place w-[30%] flex flex-col items-center gap-0.5 animate-fade-left animate-once animate-duration-700 animate-ease-linear">
                 <div class="relative">
-                  <div class="crown absolute -top-6 left-1/2 transform -translate-x-1/2 text-2xl animate-bounce animate-infinite animate-duration-1000">🥉</div>
+                  <div class="crown absolute -top-3 left-1/2 transform -translate-x-1/2 text-2xl animate-bounce animate-infinite animate-duration-1000">🥉</div>
                   <div class="avatar-container relative size-16 sm:size-24 overflow-hidden">
                     <img src="${pic3}" alt="2nd Place" class="second-avatar rounded-full border-2 border-bronze absolute size-16 object-cover top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
                     <img src="${playerFrame2}" alt="Player Frame" class="absolute w-full h-full top-0 left-0 pointer-events-none z-10" />
