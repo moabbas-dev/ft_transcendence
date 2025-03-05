@@ -1,5 +1,4 @@
 import { Header } from "../components/header_footer/header.js";
-import { Footer } from "../components/header_footer/footer.js";
 import pic1 from "../assets/p11.jpg";
 import pic2 from "../assets/p10.jpg";
 import pic3 from "../assets/p12.jpg";
@@ -23,56 +22,60 @@ export default {
       <div class="profile"> </div>
       <div class="header bg-pongblue w-full h-fit"> </div>
       <div class="w-full overflow-x-none bg-pongdark">
-        <div class="container mx-auto px-4 py-8 flex flex-col gap-5">
-          <h1 class="text-5xl text-center text-white font-bold drop-shadow-[1px_1px_20px_white] animate-fade-down animate-once animate-duration-700 animate-ease-linear">
-            <span class="max-sm:hidden">Ping-</span>Pong Champions
-          </h1>
-          
-          <!-- Top 3 Players Podium -->
-          <div class="top-players flex items-end justify-center gap-4 min-w-0 w-full max-w-4xl mx-auto">
-            <!-- 2nd Place -->
-            <div class="second-place w-[30%] flex flex-col items-center gap-0.5 animate-fade-right animate-once animate-duration-700 animate-ease-linear">
-              <div class="relative">
-                <div class="crown absolute -top-6 left-1/2 transform -translate-x-1/2 text-2xl animate-bounce animate-infinite animate-duration-1000">🥈</div>
-                <div class="avatar-container relative size-16 sm:size-24 overflow-hidden">
-                  <img src="${pic2}" alt="2nd Place" class="second-avatar rounded-full absolute size-16 object-cover top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
-                  <img src="${playerFrame1}" alt="Player Frame" class="absolute w-full h-full top-0 left-0 pointer-events-none z-10" />
-                </div>
-                <div class="rank-badge bg-silver text-white rounded-full w-8 h-8 flex items-center justify-center absolute -bottom-2 -right-2 border-2 border-pongdark font-bold">2</div>
-              </div>
-              <p class="username text-xl text-white font-semibold second-name"></p>
-              <p class="score text-silver text-lg second-score"></p>
-              <div class="podium bg-silver w-full h-28 rounded-t-lg"></div>
-            </div>
-
-            <!-- 1st Place -->
-            <div class="first-place w-[40%] flex flex-col items-center gap-0.5 z-10 animate-fade-up animate-once animate-duration-700 animate-ease-linear">
-              <div class="relative">
-                <div class="crown absolute -top-8 left-1/2 transform -translate-x-1/2 text-3xl animate-bounce animate-infinite animate-duration-1000">🥇</div>
-                <div class="avatar-container relative size-28 sm:size-32">
-                  <img src="${pic1}" alt="1st Place" class="first-avatar absolute rounded-full w-24 h-24 object-cover top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
-                  <img src="${playerFrame}" alt="Player Frame" class="absolute w-full h-full top-0 left-0 pointer-events-none z-10" />
-                </div>
-                <div class="rank-badge bg-gold text-white rounded-full size-10 flex items-center justify-center absolute -bottom-2 -right-2 border-2 border-pongdark font-bold">1</div>
-              </div>
-              <p class="username text-2xl text-white font-bold first-name"></p>
-              <p class="score text-gold text-xl first-score"></p>
-              <div class="podium bg-gold w-full h-40 rounded-t-lg"></div>
-            </div>
+        <div class="container mx-auto px-4 py-8 flex flex-col gap-4">
+          <div class="flex flex-col gap-10">
+            <h1 class="text-5xl text-center text-white font-bold drop-shadow-[1px_1px_20px_white] animate-fade-down animate-once animate-duration-700 animate-ease-linear">
+              <span class="max-sm:hidden">Ping-</span>Pong Champions
+            </h1>
             
-            <!-- 3rd Place -->
-            <div class="third-place w-[30%] flex flex-col items-center gap-0.5 animate-fade-left animate-once animate-duration-700 animate-ease-linear">
-              <div class="relative">
-                <div class="crown absolute -top-6 left-1/2 transform -translate-x-1/2 text-2xl animate-bounce animate-infinite animate-duration-1000">🥉</div>
-                <div class="avatar-container relative size-16 sm:size-24 overflow-hidden">
-                  <img src="${pic3}" alt="2nd Place" class="second-avatar rounded-full border-2 border-bronze absolute size-16 object-cover top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
-                  <img src="${playerFrame2}" alt="Player Frame" class="absolute w-full h-full top-0 left-0 pointer-events-none z-10" />
+            <!-- Top 3 Players Podium -->
+            <div class="top-players flex items-end justify-center gap-4 min-w-0 w-full max-w-4xl mx-auto">
+              <!-- 2nd Place -->
+              <div class="second-place w-[30%] flex flex-col items-center gap-0.5 animate-fade-right animate-once animate-duration-700 animate-ease-linear">
+                <div class="relative">
+                  <div class="crown absolute -top-6 left-1/2 transform -translate-x-1/2 text-2xl animate-bounce animate-infinite animate-duration-1000">🥈</div>
+                  <div class="avatar-container relative size-16 sm:size-24 overflow-hidden">
+                    <img src="${pic2}" alt="2nd Place" class="second-avatar rounded-full absolute size-16 object-cover top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+                    <img src="${playerFrame1}" alt="Player Frame" class="absolute w-full h-full top-0 left-0 pointer-events-none z-10" />
+                  </div>
+                  <div class="rank-badge bg-silver text-white rounded-full w-8 h-8 flex items-center justify-center absolute -bottom-2 -right-2 border-2 border-pongdark font-bold">2</div>
                 </div>
-                <div class="rank-badge bg-bronze text-white rounded-full w-8 h-8 flex items-center justify-center absolute -bottom-2 -right-2 border-2 border-pongdark font-bold">3</div>
+                <p class="username text-xl text-white font-semibold second-name"></p>
+                <p class="score text-silver text-lg second-score"></p>
+                <div class="podium bg-silver w-full h-28 rounded-t-lg"></div>
+              </div>
+
+              <!-- 1st Place -->
+              <div class="first-place w-[40%] flex flex-col items-center gap-0.5 z-10 animate-fade-up animate-once animate-duration-700 animate-ease-linear">
+                <div class="relative">
+                  <div class="crown absolute -top-8 left-1/2 transform -translate-x-1/2 text-3xl animate-bounce animate-infinite animate-duration-1000">🥇</div>
+                  <div class="avatar-container relative size-28 sm:size-32">
+                    <img src="${pic1}" alt="1st Place" class="first-avatar absolute rounded-full w-24 h-24 object-cover top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+                    <img src="${playerFrame}" alt="Player Frame" class="absolute w-full h-full top-0 left-0 pointer-events-none z-10" />
+                  </div>
+                  <div class="rank-badge bg-gold text-white rounded-full size-10 flex items-center justify-center absolute -bottom-2 -right-2 border-2 border-pongdark font-bold">1</div>
+                </div>
+                <p class="username text-2xl text-white font-bold first-name"></p>
+                <p class="score text-gold text-xl first-score"></p>
+                <div class="podium bg-gold w-full h-40 rounded-t-lg"></div>
+              </div>
+              
+              <!-- 3rd Place -->
+              <div class="third-place w-[30%] flex flex-col items-center gap-0.5 animate-fade-left animate-once animate-duration-700 animate-ease-linear">
+                <div class="relative">
+                  <div class="crown absolute -top-6 left-1/2 transform -translate-x-1/2 text-2xl animate-bounce animate-infinite animate-duration-1000">🥉</div>
+                  <div class="avatar-container relative size-16 sm:size-24 overflow-hidden">
+                    <img src="${pic3}" alt="2nd Place" class="second-avatar rounded-full border-2 border-bronze absolute size-16 object-cover top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+                    <img src="${playerFrame2}" alt="Player Frame" class="absolute w-full h-full top-0 left-0 pointer-events-none z-10" />
+                  </div>
+                  <div class="rank-badge bg-bronze text-white rounded-full w-8 h-8 flex items-center justify-center absolute -bottom-2 -right-2 border-2 border-pongdark font-bold">3</div>
+                </div>
+                <p class="username text-2xl text-white font-bold first-name"></p>
+                <p class="score text-gold text-xl first-score"></p>
+                <div class="podium bg-bronze w-full h-20 rounded-t-lg"></div>
               </div>
             </div>
           </div>
-          
           <!-- Rest of Leaderboard -->
           <div class="leaderboard-table min-w-0 w-full bg-pongblue bg-opacity-20 rounded-xl overflow-y-auto max-w-4xl mx-auto shadow-lg animate-fade-up animate-once animate-duration-700 animate-delay-500 animate-ease-linear">
             <table class="w-full overflow-hidden">
