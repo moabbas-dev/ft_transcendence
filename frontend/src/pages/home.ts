@@ -44,21 +44,6 @@ export default {
     const footerComp = Footer()
     footer.appendChild(footerComp)
 
-    const languageSelect = document.getElementById("languages") as HTMLSelectElement;
-    const savedLanguage = localStorage.getItem("selectedLanguage");
-
-    if (savedLanguage) {
-      languageSelect.value = savedLanguage;
-      setLanguage(languageSelect.value as Lang);
-    }
-
-    languageSelect.addEventListener("change", function() {
-      const selectedLanguage = this.value;
-      localStorage.setItem("selectedLanguage", selectedLanguage);
-      setLanguage(selectedLanguage as Lang);
-      refreshRouter();
-    });
-
     const register_btn = document.querySelector(".register-btn")!;
     register_btn.addEventListener("click", () => {
       navigate("/register");
