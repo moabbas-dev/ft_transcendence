@@ -1,5 +1,5 @@
-import { navigate, refreshRouter } from "../router.js";
-import { Lang, msg, setLanguage } from "../languages/LanguageController.js";
+import { navigate } from "../router.js";
+import { msg } from "../languages/LanguageController.js";
 import { PongAnimation } from "../components/partials/PingPongAnimation.js";
 import {Header}  from "../components/header_footer/header.js";
 import { Footer } from "../components/header_footer/footer.js";

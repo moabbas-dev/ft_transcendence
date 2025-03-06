@@ -7,7 +7,7 @@ export type Lang = 'en' | 'fr';
 
 let currentLanguage:Lang = 'en'; 
 
-export const setLanguage = (lang: Lang) => {	
+export const setLanguage = (lang: Lang) => { 
 	if (translations[lang]) {
 	  currentLanguage = lang;
 	  document.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang } }));

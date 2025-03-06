@@ -45,8 +45,8 @@ export const Header = createComponent(() => {
 
             </div>
             <select id="languages" name="languages_options" title="Select your language" class="text-xl bg-pongblue text-white text-[2.5rem] focus:outline-none hover:opacity-80 hover:cursor-pointer">
-                <option value="en">en</option>
-                <option value="fr">fr</option>
+                <option value="en" class="text-center">en</option>
+                <option value="fr" class="text-center">fr</option>
             </select>
             <div class="account relative flex gap-3 text-white">
                 <div id="profile-head" class="flex gap-3 hover:cursor-pointer hover:underline hover:text-ponghover">
