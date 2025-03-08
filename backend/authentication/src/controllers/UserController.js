@@ -1,12 +1,12 @@
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
-const { sendEmail } = require('../utils/emailUtils');
 const Session = require('../models/Session');
 const saltRounds = 10;
 const SECRET_KEY = process.env.JWT_SECRET_KEY;
 const { validateEmail, validatePassword } = require('../utils/validationUtils');
 const ActivationToken = require('../models/ActivationToken');
 const { v4: uuidv4 } = require('uuid');
+const axios = require('axios');
 
 class UserController {
 
@@ -32,11 +32,16 @@ class UserController {
 			const activationToken = uuidv4();
 			await ActivationToken.create({ userId, activationToken });
 			try {
-				await sendEmail(email, "New account is here!", null, activationEmailHtml(activationToken, full_name));
-			} catch (error) {
-				return reply.code(500).send({ error: error.message });
+				await axios.post(`http://localhost:8000/notifications/email/${userId}`, {
+					email: email,
+					subject: "New account is here!",
+					body: activationEmailHtml(activationToken, full_name),
+				});
+
+				return reply.code(201).send({ userId });
+			} catch (err) {
+				return reply.code(500).send({ message: "Error sending email request!", error: err.message });
 			}
-			return reply.code(201).send({ userId });
 		} catch (err) {
 			if (err.message.includes('Users.nickname'))
 				return reply.code(409).send({ key: "nickname", message: "Nickname is already in use!", error: err.message });
