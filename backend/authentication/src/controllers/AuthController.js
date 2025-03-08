@@ -5,6 +5,7 @@ const User = require('../models/User');
 const SECRET_KEY = process.env.JWT_SECRET_KEY;
 const { generateTokens, generateNewAccessToken } = require('../utils/jwtUtils');
 const { sendEmail } = require('../utils/emailUtils');
+const ActivationToken = require('../models/ActivationToken');
 
 const authenticateUser = async (email, password) => {
 	const query = `SELECT * FROM Users WHERE email = ?`;
@@ -134,12 +135,27 @@ class AuthController {
 	}
 
 	static async activateUser(request, reply) {
-		const { id } = request.params;
+		const { activationToken } = request.params;
 		try {
-			const user = await User.findById(id);
+			const tokenRecord = await ActivationToken.getByToken(activationToken);
+			if (!tokenRecord)
+				return reply.code(404).send({ message: "Token not found!" });
+			// Check if the token has expired (24 hours expiration)
+			const expiresAt = tokenRecord.expires_at;
+			const userId = tokenRecord.user_id;
+			const tokenExpirationTime = new Date(expiresAt).getTime(); // Get the expiration time in milliseconds
+			const currentTime = new Date().getTime(); // Get the current time in milliseconds
+
+			// Check if the token has expired (24 hours expiration)
+			if (currentTime > tokenExpirationTime) {
+				await ActivationToken.deleteByToken(activationToken); // Delete expired token
+				await User.delete(userId);
+				return reply.code(400).send({ message: "Token has expired!" });
+			}
+			const user = await User.findById(userId);
 			if (!user)
 				return reply.code(404).send({ message: "User not found!" });
-			await User.activateUser(id);
+			await User.activateUser(userId);
 			return reply.code(200).send({ message: "Account activation complete!" });
 		} catch (err) {
 			return reply.code(500).send({ message: "Error activating the account!", error: err.message });
