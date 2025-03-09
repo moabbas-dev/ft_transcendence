@@ -15,7 +15,7 @@ export const DifficultyPopup = createComponent((props: DifficultyPopupProps) => 
   `;
 
   container.innerHTML = `
-  <div class="bg-black p-8 rounded-lg shadow-lg border-2 border-purple-500 w-3/5 max-w-lg">
+  <div class="bg-black p-8 rounded-lg shadow-lg border-2 border-purple-500 w-[90vw] sm:w-3/5 max-w-lg">
 	<h2 class="text-3xl font-bold mb-6 text-center text-purple-400" style="text-shadow: 0 0 10px #a855f7, 0 0 20px #a855f7;">CHOOSE DIFFICULTY</h2>
 	<div class="flex flex-col gap-6">
 	  <button id="difficulty-easy" class="px-6 py-3 bg-black text-green-400 rounded font-bold text-lg border

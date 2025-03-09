@@ -93,3 +93,13 @@
 .styled-scrollbar::-webkit-scrollbar-thumb:hover {
     background: #2d3748;
 }
+
+@media (orientation: portrait) {
+    #gameCanvas {
+        transform: rotate(-90deg);
+        transform-origin: center center;
+        width: 85dvh;
+        height: 85dvw;
+    }
+}
+/* w-[85dvh] h-[85dvw] */

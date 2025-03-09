@@ -124,6 +124,8 @@ module.exports = {
       addUtilities(newUtilities, ['responsive']);
     },
     require("tailwindcss-animated"),
-    // require('tailwind-scrollbar')
+    function({ addVariant }) {
+      addVariant('portrait', '@media (orientation: portrait)');
+    }
   ],
 };

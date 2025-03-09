@@ -12,7 +12,7 @@ export abstract class OfflineGame {
 	constructor(gameMode: "AI" | "Local") {
 		const canvas = document.createElement("canvas");
 		canvas.id = "gameCanvas";
-		canvas.className = "size-full rounded-lg";
+		canvas.className = "portrait:-rotate-90 portrait:origin-center max-sm:w-[85dvh] max-sm:h-[85dvw] portrait:w-[85dvh] portrait:h-[85dvw] sm:w-[80vw] sm:h-[80vh] rounded-lg -rotate-90 sm:rotate-0";
 		this.canvasElement = canvas;
 		this.gameHeader = OfflineGameHeader({gameMode})
 		this.resultPopup = GameResultsPopUp();

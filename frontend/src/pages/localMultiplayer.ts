@@ -12,9 +12,9 @@ saveScores();
 export default {
   render: (container: HTMLElement) => {
     container.innerHTML = `
-      <div class="content relative flex flex-col items-center justify-around h-screen border-8 bg-pongblue border-pongdark border-solid">
+      <div class="content relative flex flex-col items-center sm:justify-around h-screen max-sm:p-2 sm:border-8 bg-pongblue border-pongdark border-solid">
         <div class="player-header w-4/5 "></div>
-        <div id="game-container" class="flex items-center justify-center w-[85vw] h-[80vh]"></div>
+        <div id="game-container" class="flex items-center justify-center max-sm:flex-1 max-w-0"></div>
       </div>
     `;
 

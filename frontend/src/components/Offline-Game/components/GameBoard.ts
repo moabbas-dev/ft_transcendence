@@ -22,6 +22,7 @@ export interface gameState {
 	touchCurrentX: number | null;
 	touchCurrentY: number | null;
 	isTouching: boolean;
+	activeTouches: Map<number, { x: number; y: number }>;
 }
 
 export class GameBoard {
@@ -34,6 +35,7 @@ export class GameBoard {
 	private ballController: Controller;
 	private gameHeader: HTMLElement;
 	private AIDifficulty: AIDifficulty | undefined;
+	// private isPortraitMode = window.matchMedia("(orientation: portrait)").matches;
 
 	constructor(gameType: "AI" | "Local", canvas:HTMLCanvasElement, gameHeader:HTMLElement, difficulty?:AIDifficulty) {
 		this.gameType = gameType;
@@ -46,12 +48,12 @@ export class GameBoard {
 			throw new Error("Unable to get 2D rendering context");
 		}
 		this.ctx = ctx;
+		this.resize();
+		window.addEventListener('resize', () => this.resize());
 		this.state = this.createInitialState();		
 		this.initializeControllers();
 		this.ballController = new BallController();
 		this.initEventListeners();
-		this.resize();
-		window.addEventListener('resize', () => this.resize());
 		// Stop the game if the user navigate to another page before the game ends
 		window.addEventListener("beforeunload", this.handleNavigation.bind(this));
 		window.addEventListener("hashchange", this.handleNavigation.bind(this));
@@ -83,7 +85,8 @@ export class GameBoard {
 			touchStartY: null,
 			touchCurrentX: null,
 			touchCurrentY: null,
-			isTouching: false
+			isTouching: false,
+			activeTouches: new Map(),
 		};
 	}
 
@@ -112,68 +115,83 @@ export class GameBoard {
 		window.addEventListener('keyup', (e) => {
 		  this.state.keys[e.key.toLowerCase()] = false;
 		});
+		
 		const handleTouchStart = (e: TouchEvent) => {
 			e.preventDefault();
 			const rect = this.canvas.getBoundingClientRect();
-			const touch = e.touches[0];
+
+			// Handle all touches
+			Array.from(e.touches).forEach(touch => {
+			  const x = touch.clientX - rect.left;
+			  const y = touch.clientY - rect.top;
+			  
+			  // Store touch with its identifier
+			  this.state.activeTouches.set(touch.identifier, { x, y });
+			});
 			
-			this.state.touchStartX = touch.clientX - rect.left;
-			this.state.touchStartY = touch.clientY - rect.top;
-			this.state.isTouching = true;
-			
-			// Immediately set current positions
-			this.state.touchCurrentX = this.state.touchStartX;
-			this.state.touchCurrentY = this.state.touchStartY;
+			this.updatePaddlesFromTouch();
 		  };
 		
 		  const handleTouchMove = (e: TouchEvent) => {
 			e.preventDefault();
-			if (!this.state.isTouching) return;
-			
 			const rect = this.canvas.getBoundingClientRect();
-			const touch = e.touches[0];
 			
-			this.state.touchCurrentX = touch.clientX - rect.left;
-			this.state.touchCurrentY = touch.clientY - rect.top;
+			// Update all current touches
+			Array.from(e.touches).forEach(touch => {
+			  const x = touch.clientX - rect.left;
+			  const y = touch.clientY - rect.top;
+
+			  this.state.activeTouches.set(touch.identifier, { x, y });
+			});
 			
-			// Update paddle positions based on touch
 			this.updatePaddlesFromTouch();
 		  };
 		
 		  const handleTouchEnd = (e: TouchEvent) => {
 			e.preventDefault();
-			this.state.isTouching = false;
-			this.state.touchStartX = null;
-			this.state.touchStartY = null;
-			this.state.touchCurrentX = null;
-			this.state.touchCurrentY = null;
+			// Remove ended touches
+			Array.from(e.changedTouches).forEach(touch => {
+			  this.state.activeTouches.delete(touch.identifier);
+			});
+			this.updatePaddlesFromTouch();
 		  };
 		
-		  // Add event listeners
-		  this.canvas.addEventListener('touchstart', handleTouchStart);
-		  this.canvas.addEventListener('touchmove', handleTouchMove);
-		  this.canvas.addEventListener('touchend', handleTouchEnd);
-		  this.canvas.addEventListener('touchcancel', handleTouchEnd);
+
+		// Add event listeners
+		this.canvas.addEventListener('touchstart', handleTouchStart);
+		this.canvas.addEventListener('touchmove', handleTouchMove);
+		this.canvas.addEventListener('touchend', handleTouchEnd);
+		this.canvas.addEventListener('touchcancel', handleTouchEnd);
 	}
 
 	private updatePaddlesFromTouch() {
-		if (!this.state.isTouching || !this.state.touchCurrentY || !this.state.touchCurrentX) return;
-	  
-		const canvasCenter = this.canvas.width / 2;
-		const isLeftSide = this.state.touchCurrentX < canvasCenter;
-	  
-		// Convert touch position to canvas coordinates
-		const touchY = (this.state.touchCurrentY / this.canvas.height) * 100;
-		
-		if (isLeftSide) {
-		  // Control player 1 paddle
-		  this.state.player1Y = touchY * (this.canvas.height - this.state.paddleHeight) / 100;
-		} else {
-		  // Control player 2 paddle (or AI)
-		  if (this.gameType === 'Local') {
-			this.state.player2Y = touchY * (this.canvas.height - this.state.paddleHeight) / 100;
+		const rect = this.canvas.getBoundingClientRect();
+		// Reset paddle positions if no touches
+		if (this.state.activeTouches.size === 0) return;
+
+		// Process each active touch
+		this.state.activeTouches.forEach((touch) => {
+		  const rotatedX = touch.y;  // X becomes original Y
+		  const rotatedY = touch.x;  // Y becomes inverted X
+
+		  // Determine control area (left/right of rotated canvas)
+		  const isLeftSide = rotatedX > rect.height / 2;
+
+		  // Calculate vertical position
+		  const touchPosition = Math.min(Math.max(
+			rotatedY / rect.width,  // Use original width as rotated height
+			0
+		  ), 1);
+
+		  const paddleY = touchPosition * (rect.width - (this.state.paddleHeight / 2));
+
+		  // Update paddles based on touch position
+		  if (isLeftSide) {
+			this.state.player1Y = paddleY;
+		  } else if (this.gameType === 'Local') {
+			this.state.player2Y = paddleY;
 		  }
-		}
+		});
 	}
 
 	get canvasElement() {
@@ -309,7 +327,7 @@ export class GameBoard {
 		// Check game end condition
 		if (Math.max(this.state.scores.player1, this.state.scores.player2) >= 10) {
 			this.state.gameEnded = true;
-		}		
+		}
 	}
 
 	private clampPaddlePosition(positionKey: 'player1Y' | 'player2Y') {

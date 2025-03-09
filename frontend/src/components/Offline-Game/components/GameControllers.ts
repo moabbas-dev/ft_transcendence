@@ -13,7 +13,7 @@ export class HumanPlayerController implements Controller {
 	) {}
 
 	update(canvas: HTMLCanvasElement, state: gameState) {
-	  const paddleSpeed = this.calculatePaddleSpeed(canvas.height);
+		const paddleSpeed = this.calculatePaddleSpeed(canvas.height);
 
 		if (state.keys[this.controlKeys.up]) {
 			state[this.playerPositionKey] -= paddleSpeed;
@@ -21,26 +21,12 @@ export class HumanPlayerController implements Controller {
 		if (state.keys[this.controlKeys.down]) {
 			state[this.playerPositionKey] += paddleSpeed;
 		}
-		// Add touch handling
-		if (state.isTouching) {
-			const isLeftPaddle = this.playerPositionKey === 'player1Y';
-			const touchX = state.touchCurrentX;
-			
-			if (touchX && state.touchCurrentY && (
-				(isLeftPaddle && touchX < canvas.width/2) ||
-				(!isLeftPaddle && touchX > canvas.width/2)
-			)) {
-				const targetY = state.touchCurrentY - state.paddleHeight/2;
-				const delta = targetY - state[this.playerPositionKey];
-				state[this.playerPositionKey] += delta * 0.3; // Smooth follow
-			}
-		}
 	}
   
-private calculatePaddleSpeed(canvasHeight: number): number {
-	  return this.baseSpeed * (canvasHeight / 500);
+	private calculatePaddleSpeed(canvasHeight: number): number {
+		return this.baseSpeed * (canvasHeight / 500);
+		}
 	}
-}
 
 export class AIController implements Controller {
 	private difficulty: AIDifficulty;
