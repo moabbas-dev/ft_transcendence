@@ -33,8 +33,8 @@ export class AIController implements Controller {
 	private readonly config = {
 		baseSpeed: 8,
 		reactionDelay: { easy: 250, medium: 200, hard: 100 },
-		predictionAccuracy: { easy: 0.7, medium: 0.85, hard: 0.95 },
-		errorMargin: { easy: 0.4, medium: 0.2, hard: 0.1 }
+		predictionAccuracy: { easy: 0.7, medium: 0.8, hard: 0.95 },
+		errorMargin: { easy: 0.4, medium: 0.4, hard: 0.2 }
 	};
 	private lastUpdateTime = 0;
 	private targetY = 0;
@@ -63,7 +63,7 @@ export class AIController implements Controller {
 	private calculateTargetPosition(canvas: HTMLCanvasElement, state: gameState) {
 		const now = Date.now();
 		const timeSinceLastUpdate = now - this.lastUpdateTime;
-		
+
 		if (timeSinceLastUpdate < this.config.reactionDelay[this.difficulty])
 			return;
 
@@ -97,10 +97,10 @@ export class AIController implements Controller {
 			? predictedY % canvas.height 
 			: canvas.height - (predictedY % canvas.height);
 		}
-	
+
 		return predictedY;
 	}
-	
+
 	private applyDifficultyModifiers(
 		targetY: number,
 		maxError: number,

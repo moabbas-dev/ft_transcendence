@@ -9,7 +9,7 @@ const socket = io('http://localhost:8000');
 
 
 // Attach event listeners after rendering
-window.addEventListener('load', () => {
+document.addEventListener('DOMContentLoaded', () => {
   const messageContainer = document.getElementById('message-container')!;
   const messageInput = document.getElementById('message-input')!; // This is now a div
   const sendButton = document.getElementById('send-button')!;
