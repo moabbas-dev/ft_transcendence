@@ -5,9 +5,9 @@ import jfatfatImg from '/src/assets/jfatfat.jpg';
 export default {
 	render: (container: HTMLElement) => {
 	  container.innerHTML = `
-		<section class="min-h-screen bg-pongdark py-12 px-4 sm:px-6 lg:px-8">
-		  <div class="max-w-4xl mx-auto text-center">
-			<h2 class="text-3xl font-extrabold text-white sm:text-4xl mb-12">
+		<section class="min-h-screen flex items-center justify-center bg-pongdark py-12 px-4 sm:px-6 lg:px-8">
+		  <div class="max-w-4xl mx-auto text-center flex flex-col gap-12">
+			<h2 class="text-3xl font-extrabold text-white sm:text-4xl">
 			  Development Team
 			</h2>
 			
@@ -55,7 +55,7 @@ export default {
 			  </div>
 			</div>
   
-			<div class="mt-12 text-gray-400 max-w-2xl mx-auto">
+			<div class="text-gray-400 max-w-2xl mx-auto">
 			  <p class="text-lg">
 				Our team combines expertise across the entire development stack to deliver 
 				high-performance, scalable web applications with exceptional user experiences.
