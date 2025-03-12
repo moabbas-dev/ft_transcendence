@@ -59,5 +59,6 @@ export default {
 		logoContainer.addEventListener('click', () => {
 			navigate('/')
 		});
+		
 	}
 }

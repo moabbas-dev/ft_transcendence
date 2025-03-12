@@ -3,8 +3,9 @@ const bcrypt = require('bcrypt');
 const Session = require('../models/Session');
 const User = require('../models/User');
 const SECRET_KEY = process.env.JWT_SECRET_KEY;
-const { generateTokens, generateNewAccessToken } = require('../utils/jwtUtils');
-const { sendEmail } = require('../utils/emailUtils');
+const { generateTokens } = require('../utils/jwtUtils');
+const ActivationToken = require('../models/ActivationToken');
+const axios = require('axios');
 
 const authenticateUser = async (email, password) => {
 	const query = `SELECT * FROM Users WHERE email = ?`;
@@ -103,12 +104,18 @@ class AuthController {
 				return reply.code(404).send({ message: "User not found!" });
 			if (user && !user.is_active)
 				return reply.code(403).send({ message: "User not active!" });
+			const userId = user.id;
 			try {
-				await sendEmail(user.email, "Reset password email", null, passwordResetEmailMessage(user));
+				await axios.post(`http://localhost:8000/notifications/email/${userId}`, {
+					email: user.email,
+					subject: "Reset password email",
+					body: passwordResetEmailMessage(user),
+				});
+
+				return reply.code(200).send({ message: "Email sent successfully!" });
 			} catch (err) {
-				return reply.code(500).send({ error: err.message });
+				return reply.code(500).send({ message: "Error sending email request!", error: err.message });
 			}
-			return reply.code(200).send({ message: "Email sent successfully!" });
 		} catch (err) {
 			return reply.code(500).send({ message: "Error verifying the email for the password reset!", error: err.message });
 		}
@@ -134,12 +141,28 @@ class AuthController {
 	}
 
 	static async activateUser(request, reply) {
-		const { id } = request.params;
+		const { activationToken } = request.params;
 		try {
-			const user = await User.findById(id);
+			const tokenRecord = await ActivationToken.getByToken(activationToken);
+			if (!tokenRecord)
+				return reply.code(404).send({ message: "Token not found!" });
+			// Check if the token has expired (24 hours expiration)
+			const expiresAt = tokenRecord.expires_at;
+			const userId = tokenRecord.user_id;
+			const tokenExpirationTime = new Date(expiresAt).getTime(); // Get the expiration time in milliseconds
+			const currentTime = new Date().getTime(); // Get the current time in milliseconds
+
+			// Check if the token has expired (24 hours expiration)
+			if (currentTime > tokenExpirationTime) {
+				await ActivationToken.deleteByToken(activationToken); // Delete expired token
+				await User.delete(userId);
+				return reply.code(400).send({ message: "Token has expired!" });
+			}
+			const user = await User.findById(userId);
 			if (!user)
 				return reply.code(404).send({ message: "User not found!" });
-			await User.activateUser(id);
+			await User.activateUser(userId);
+			await ActivationToken.deleteByToken(activationToken); // Delete expired token
 			return reply.code(200).send({ message: "Account activation complete!" });
 		} catch (err) {
 			return reply.code(500).send({ message: "Error activating the account!", error: err.message });

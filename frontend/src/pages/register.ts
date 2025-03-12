@@ -18,14 +18,6 @@ export default {
 						<aside class="transition-opacity duration-400">
 						</aside>
 						<!-- SignIn, SignUp Forms Here -->
-						<div class="flex flex-col gap-3">
-							<div class="w-full p-1">
-								<button type="button" class="w-full flex items-center justify-start p-1 sm:p-2 text-white bg-pongblue hover:cursor-pointer hover:opacity-80 rounded-md transition-all duration-300">
-									<i class='bx bxl-google text-2xl'></i>
-									<span class="flex-1 text-center">${msg('register.continueGoogle')}</span>
-								</button>
-							</div>	
-						</div>
 					</div>
 				</section>
 			</div>
@@ -88,8 +80,8 @@ export default {
 				)
 			)
 		}
-		renderTwoFactor()
-		// renderSignIn();
+		// renderTwoFactor()
+		renderSignIn();
 		// renderUserInfo();
 
 		const canvas = document.getElementById('pongCanvas') as HTMLCanvasElement;

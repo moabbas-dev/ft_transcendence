@@ -37,6 +37,14 @@ const createTables = () => {
 					created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 					updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 					FOREIGN KEY (user_id) REFERENCES Users(id)
+				);`,
+		`CREATE TABLE IF NOT EXISTS Activation_Tokens (
+					id INTEGER PRIMARY KEY AUTOINCREMENT,
+					user_id INTEGER NOT NULL,
+					activation_token TEXT NOT NULL UNIQUE,
+					expires_at TIMESTAMP NOT NULL DEFAULT (DATETIME('now' + '24 hours')),
+					created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+					FOREIGN KEY (user_id) REFERENCES Users(id)
 				);`
 	];
 	queries.forEach((query) => {
@@ -49,17 +57,17 @@ const createTables = () => {
 
 // Graceful shutdown handling
 const closeDatabase = () => {
-    return new Promise((resolve, reject) => {
-        db.close(err => {
-            if (err) {
-                console.error('Error closing database:', err);
-                reject(err);
-            } else {
-                console.log('Database connection closed.');
-                resolve();
-            }
-        });
-    });
+	return new Promise((resolve, reject) => {
+		db.close(err => {
+			if (err) {
+				console.error('Error closing database:', err);
+				reject(err);
+			} else {
+				console.log('Database connection closed.');
+				resolve();
+			}
+		});
+	});
 };
 
 module.exports = { db, createTables, closeDatabase };

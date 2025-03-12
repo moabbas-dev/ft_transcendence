@@ -14,35 +14,43 @@ interface SignInProps {
 
 export const SignIn = createComponent((props: SignInProps) => {
 	const form = document.createElement('div');
-	form.className = `w-[93vw] sm:w-96 xl:w-[30vw] bg-white rounded-lg p-4 sm:p-8 ${props.styles || ''}`;
+	form.className = `flex flex-col justify-center gap-5 w-[93vw] sm:w-96 xl:w-[30vw] bg-white rounded-lg p-4 sm:p-8 ${props.styles || ''}`;
 	form.innerHTML = `
-  <div class="flex flex-col gap-3">
-    <h1 class="text-2xl font-bold text-center underline">${msg('register.signin.title')}</h1>
-    <form class="flex flex-col gap-2">
-      <div class="flex flex-col gap-1">
-        <label for="email" class="block text-base font-medium text-gray-700">Email</label>
-        <input type="email" id="email" placeholder="${msg('register.signin.emailPlaceholder')}" autocomplete="email" name="email" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pongblue focus:shadow-[0_0_5px_pongblue] focus:border-pongblue sm:text-base">
-      </div>
-      <div>
-        <label for="password" class="block text-base font-medium text-gray-700">${msg('register.signin.password')}</label>
-        <div class="relative mt-1">
-          <div>
-            <input type="password" id="password" placeholder="${msg('register.signin.passwordPlaceholder')}" autocomplete="current-password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pongblue focus:shadow-[0_0_5px_pongblue] focus:border-pongblue sm:text-base pr-10">
-          </div>
-          <span class="absolute inset-y-0 right-0 flex items-center h-fit py-3 pr-3 cursor-pointer toggle-password text-lg">
-            <i class='bx bx-hide hide-show pointer-events-none'></i>
-          </span>
-        </div>
-      </div>
-    <div class="flex items-center justify-end w-full forgot">
-      <!-- Forgot Password Button -->
+  	<div class="flex flex-col gap-3">
+    	<h1 class="text-2xl font-bold text-center underline">${msg('register.signin.title')}</h1>
+		<form class="flex flex-col gap-2">
+		<div class="flex flex-col gap-1">
+			<label for="email" class="block text-base font-medium text-gray-700">Email</label>
+			<input type="email" id="email" placeholder="${msg('register.signin.emailPlaceholder')}" autocomplete="email" name="email" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pongblue focus:shadow-[0_0_5px_pongblue] focus:border-pongblue sm:text-base">
+		</div>
+		<div>
+			<label for="password" class="block text-base font-medium text-gray-700">${msg('register.signin.password')}</label>
+			<div class="relative mt-1">
+			<div>
+				<input type="password" id="password" placeholder="${msg('register.signin.passwordPlaceholder')}" autocomplete="current-password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pongblue focus:shadow-[0_0_5px_pongblue] focus:border-pongblue sm:text-base pr-10">
+			</div>
+			<span class="absolute inset-y-0 right-0 flex items-center h-fit py-3 pr-3 cursor-pointer toggle-password text-lg">
+				<i class='bx bx-hide hide-show pointer-events-none'></i>
+			</span>
+			</div>
+		</div>
+		<div class="flex items-center justify-end w-full forgot">
+		<!-- Forgot Password Button -->
+		</div>
+		<!-- Sign In Button -->
+		</form>
+		<div class="w-full text-center">
+		${msg('register.signin.acc_question')} <span class="signup-link hover:cursor-pointer hover:opacity-80 text-pongblue">${msg('register.signin.signup_btn')}</span>
+		</div>
     </div>
-    <!-- Sign In Button -->
-    </form>
-    <div class="w-full text-center pt-1">
-      ${msg('register.signin.acc_question')} <span class="signup-link hover:cursor-pointer hover:opacity-80 text-pongblue">${msg('register.signin.signup_btn')}</span>
-    </div>
-    </div>
+	<div class="flex flex-col">
+		<div class="w-full p-1">
+			<a class="w-full flex items-center justify-start p-1 sm:p-2 text-white bg-pongblue hover:cursor-pointer hover:opacity-80 rounded-md transition-all duration-300">
+				<i class='bx bxl-google text-2xl'></i>
+				<span class="flex-1 text-center">${msg('register.continueGoogle')}</span>
+			</a>
+		</div>	
+	</div>
   `;
 	const formElement: HTMLFormElement = form.querySelector('form')!;
 	const emailInput: HTMLInputElement = form.querySelector('#email')!;

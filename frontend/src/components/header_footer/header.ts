@@ -1,7 +1,7 @@
 import { createComponent } from "../../utils/StateManager.js";
-import { msg } from "../../languages/LanguageController.js";
+import { Lang, msg, setLanguage } from "../../languages/LanguageController.js";
 import logoUrl from "/src/assets/ft_transcendencee.png";
-import { navigate } from "../../router.js";
+import { navigate, refreshRouter } from "../../router.js";
 import { Notification } from "./Notification.js";
 import { DropDown } from "./DropDown.js";
 
@@ -45,8 +45,8 @@ export const Header = createComponent(() => {
 
             </div>
             <select id="languages" name="languages_options" title="Select your language" class="text-xl bg-pongblue text-white text-[2.5rem] focus:outline-none hover:opacity-80 hover:cursor-pointer">
-                <option value="en" selected>en</option>
-                <option value="fr">fr</option>
+                <option value="en" class="text-center">en</option>
+                <option value="fr" class="text-center">fr</option>
             </select>
             <div class="account relative flex gap-3 text-white">
                 <div id="profile-head" class="flex gap-3 hover:cursor-pointer hover:underline hover:text-ponghover">
@@ -77,8 +77,6 @@ export const Header = createComponent(() => {
     const playPage = container.querySelector('.playPage')!
     const leaderBoardPage = container.querySelector('.leaderBoard-page')!
 
-   
-
     navChat.addEventListener('click', () => {
         navigate('/chat');
     });
@@ -89,6 +87,21 @@ export const Header = createComponent(() => {
 
     leaderBoardPage.addEventListener('click', () =>{
         navigate('/leader-board');
+    });
+
+    const languageSelect = container.querySelector("#languages") as HTMLSelectElement;
+    const savedLanguage = localStorage.getItem("selectedLanguage");
+
+    if (savedLanguage) {
+      languageSelect.value = savedLanguage;
+      setLanguage(languageSelect.value as Lang);
+    }
+
+    languageSelect.addEventListener("change", function() {
+      const selectedLanguage = this.value;
+      localStorage.setItem("selectedLanguage", selectedLanguage);
+      setLanguage(selectedLanguage as Lang);
+      refreshRouter();
     });
 
     // For testing purposes
