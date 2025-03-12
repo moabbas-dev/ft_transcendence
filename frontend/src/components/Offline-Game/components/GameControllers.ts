@@ -22,7 +22,7 @@ export class HumanPlayerController implements Controller {
 			state[this.playerPositionKey] += paddleSpeed;
 		}
 	}
-  
+
 	private calculatePaddleSpeed(canvasHeight: number): number {
 		return this.baseSpeed * (canvasHeight / 500);
 		}
@@ -32,16 +32,17 @@ export class AIController implements Controller {
 	private difficulty: AIDifficulty;
 	private readonly config = {
 		baseSpeed: 8,
-		reactionDelay: { easy: 250, medium: 200, hard: 100 },
-		predictionAccuracy: { easy: 0.7, medium: 0.8, hard: 0.95 },
-		errorMargin: { easy: 0.4, medium: 0.4, hard: 0.2 }
+		reactionDelay: { easy: 1000, medium: 600, hard: 300 },
+		predictionAccuracy: { easy: 0.7, medium: 0.85, hard: 0.95 },
+		errorMargin: { easy: 0.4, medium: 0.25, hard: 0.1 },
+		maxBouncePredictions: { easy: 0, medium: 1, hard: 3 }
 	};
 	private lastUpdateTime = 0;
 	private targetY = 0;
 	private ballTrajectory: number[] = [];
+	private predictionWave = 0;
 
 	constructor(difficulty: AIDifficulty) {
-		console.log("Difficulty selected:", difficulty);
 		this.difficulty = difficulty;
 	}
 
@@ -53,89 +54,90 @@ export class AIController implements Controller {
 	}
 
 	private trackBallMovement(state: gameState) {
-		// Store ball positions for trajectory analysis
+		// Store ball positions for trajectory analysis (as ai data)
 		this.ballTrajectory.push(state.ballY);
 		if (this.ballTrajectory.length > 10) {
 		  this.ballTrajectory.shift();
 		}
+
+        // add y acceleration to ball movement in hard mode
+        if (this.difficulty === "hard" && this.ballTrajectory.length > 2) {
+            const yVariance = Math.abs(this.ballTrajectory[this.ballTrajectory.length - 1] - 
+                this.ballTrajectory[this.ballTrajectory.length - 2]);
+            state.ballSpeedY += yVariance * 0.015;
+        }
 	}
 
 	private calculateTargetPosition(canvas: HTMLCanvasElement, state: gameState) {
-		const now = Date.now();
-		const timeSinceLastUpdate = now - this.lastUpdateTime;
+        const now = Date.now();
+        if (now - this.lastUpdateTime < this.config.reactionDelay[this.difficulty]) return;
 
-		if (timeSinceLastUpdate < this.config.reactionDelay[this.difficulty])
-			return;
-
-		// Predict ball position based on difficulty
-		const predictedY = this.predictBallPosition(canvas, state);
-		const error = canvas.height * this.config.errorMargin[this.difficulty];
-
-		this.targetY = this.applyDifficultyModifiers(
-		  predictedY,
-		  error,
-		  this.config.predictionAccuracy[this.difficulty]
-		);
-		
-		this.lastUpdateTime = now;
+        const predictedY = this.predictBallPosition(canvas, state);
+        this.targetY = this.applyDifficultyModifiers(predictedY, canvas.height);
+        this.lastUpdateTime = now;
+        this.predictionWave += 0.1;
 	}
 
 	private predictBallPosition(canvas: HTMLCanvasElement, state: gameState): number {
-		if (this.difficulty === "easy") return state.ballY;
-	
-		// Calculate predicted intercept point
-		const timeToIntercept = Math.abs(
-		  (canvas.width - state.paddleOffset - state.ballX) / state.ballSpeedX
-		);
-	
-		let predictedY = state.ballY + (state.ballSpeedY * timeToIntercept);
-	
-		// Bounce prediction for higher difficulties
-		if (this.difficulty === "hard") {
-		  const bounces = Math.floor(predictedY / canvas.height);
-		  predictedY = bounces % 2 === 0 
-			? predictedY % canvas.height 
-			: canvas.height - (predictedY % canvas.height);
-		}
+        const timeToIntercept = Math.abs(
+            (canvas.width - state.paddleOffset - state.ballX) / state.ballSpeedX
+        );
 
-		return predictedY;
+        let predictedY = state.ballY;
+        const trajectoryWeight = this.difficulty === "hard" ? 0.7 : 0.3;
+
+        if (this.ballTrajectory.length > 1) {
+            const yDelta = this.ballTrajectory[this.ballTrajectory.length - 1] - 
+                this.ballTrajectory[this.ballTrajectory.length - 2];
+            predictedY += yDelta * timeToIntercept * trajectoryWeight;
+        }
+
+        predictedY += state.ballSpeedY * timeToIntercept * (1 - trajectoryWeight);
+		predictedY = this.calculateBouncePrediction(predictedY, canvas.height, 
+			this.config.maxBouncePredictions[this.difficulty]);
+
+        return predictedY;
 	}
 
-	private applyDifficultyModifiers(
-		targetY: number,
-		maxError: number,
-		accuracy: number
-	  ): number {
-		// Apply random error based on difficulty
-		const error = maxError * (1 - accuracy) * (Math.random() * 2 - 1);
-		return targetY + error;
+	private applyDifficultyModifiers(targetY: number, canvasHeight: number): number {
+		const errorMargin = this.config.errorMargin[this.difficulty];
+		const waveOffset = Math.sin(this.predictionWave * 0.5) * canvasHeight * errorMargin;
+
+		return targetY + waveOffset * errorMargin
 	}
+
+	private calculateBouncePrediction(y: number, canvasHeight: number, maxBounces: number): number {
+        let remainingBounces = maxBounces;
+        let currentY = y;
+
+        while (remainingBounces > 0) {
+            if (currentY < 0) {
+                currentY = -currentY;
+                remainingBounces--;
+            } else if (currentY > canvasHeight) {
+                currentY = 2 * canvasHeight - currentY;
+                remainingBounces--;
+            } else {
+                break;
+            }
+        }
+        return currentY;
+    }
 	
 	private movePaddle(state: gameState, canvasHeight: number) {
-		const paddleCenter = state.player2Y + state.paddleHeight / 2;
-		const speed = this.calculateAdaptiveSpeed(paddleCenter, this.targetY);
+        const paddleCenter = state.player2Y + state.paddleHeight / 2;
+        const speed = this.calculateAdaptiveSpeed(paddleCenter, this.targetY);
+        const newPosition = state.player2Y + speed;
 
-		// Apply smooth movement with momentum
-		const newPosition = state.player2Y + speed;
-		state.player2Y = Math.max(0, 
-			Math.min(newPosition, canvasHeight - state.paddleHeight)
-		);
+        state.player2Y = Math.max(0, Math.min(newPosition, canvasHeight - state.paddleHeight));
 	}
 
 	private calculateAdaptiveSpeed(currentY: number, targetY: number): number {
-		const distance = targetY - currentY;
-		const baseSpeed = this.config.baseSpeed * (this.difficulty === "hard" ? 1.2 : 1);
-
-		// Dynamic speed adjustment based on distance
-		const speedMultiplier = Math.min(Math.abs(distance) / 50, 2);
-		const direction = Math.sign(distance);
-
-		// Add random speed variation for lower difficulties
-		const variation = this.difficulty === "easy" 
-		  ? Math.random() * 2 - 1 
-		  : 0;
-
-		return (baseSpeed * speedMultiplier + variation) * direction;
+        const distance = targetY - currentY;
+        const baseSpeed = this.config.baseSpeed * [1, 1.1, 1.2][["easy", "medium", "hard"].indexOf(this.difficulty)];
+        const speedMultiplier = Math.min(Math.abs(distance) / 50, 2);
+        
+        return baseSpeed * speedMultiplier * Math.sign(distance);
 	}
 }
 
@@ -168,8 +170,8 @@ export class BallController implements Controller {
 	resetBall(canvas: HTMLCanvasElement, state: gameState) {
         state.ballX = canvas.width / 2;
         state.ballY = canvas.height / 2;
-        
-        let angle = (Math.random() * Math.PI/2) - Math.PI/4;
+
+		let angle = (Math.random() * Math.PI/2) - Math.PI/4;
 		if (angle >= 0 && angle < 10)
 			angle = 10;
 		if (angle < 0 && angle > -10)
