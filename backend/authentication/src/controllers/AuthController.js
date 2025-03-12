@@ -48,9 +48,9 @@ class AuthController {
 				const sessId = await Session.create({ userId, accessToken, refreshToken });
 				await User.updateUserStatus(userId, { status: "online" });
 				return reply.code(200).send({
-					require2FA: false, sessionId: sessId, accessToken: accessToken, refreshToken: refreshToken,
-					userId: user.id, email: user.email, nickname: user.nickname, fullName: user.full_name,
-					avatarUrl: user.avatar_url
+					require2FA: false, sessionId: sessId, accessToken: accessToken, refreshToken: refreshToken
+					// userId: user.id, email: user.email, nickname: user.nickname, fullName: user.full_name,
+					// avatarUrl: user.avatar_url
 				});
 			} else {
 				const sessId = await Session.create({ userId, accessToken: null, refreshToken: null });
@@ -163,7 +163,8 @@ class AuthController {
 				return reply.code(404).send({ message: "User not found!" });
 			await User.activateUser(userId);
 			await ActivationToken.deleteByToken(activationToken); // Delete expired token
-			return reply.code(200).send({ message: "Account activation complete!" });
+			// return reply.code(200).send({ message: "Account activation complete!" });
+			return reply.redirect(`${process.env.FRONTEND_DOMAIN}/`);
 		} catch (err) {
 			return reply.code(500).send({ message: "Error activating the account!", error: err.message });
 		}
