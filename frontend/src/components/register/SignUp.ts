@@ -1,7 +1,10 @@
 import { createComponent, useCleanup } from "../../utils/StateManager.js";
 import { Button } from "../partials/Button.js";
-import {validateConfirmPassword, validateEmail, validatePassword} from "../../utils/FormValidation.js";
+import { validateConfirmPassword, validateEmail, validatePassword } from "../../utils/FormValidation.js";
 import { msg } from "../../languages/LanguageController.js";
+import { SignIn } from "./SignIn.js";
+import axios from "axios";
+import { navigate } from "../../router.js";
 
 interface SignUpProps {
 	styles: string,
@@ -14,7 +17,7 @@ export const SignUp = createComponent((props: SignUpProps) => {
 	form.innerHTML = `
 	<div class="flex flex-col gap-3 sm:gap-5">
 	  <h1 class="text-2xl font-bold text-center underline">${msg('register.signup.title')}</h1>
-	  <form class="flex flex-col gap-2 sm:gap-3">
+	  <form class="flex flex-col gap-2 sm:gap-3 max-h-[calc(202px+1rem)] sm:max-h-[calc(202px+35px)] overflow-y-auto">
 		<div class="flex flex-col gap-1">
 		  <label for="email" class="block text-base font-medium text-gray-700">Email</label>
 		  <input type="email" id="email" placeholder="${msg('register.signup.emailPlaceholder')}" autocomplete="email" name="email" class="relative w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pongblue focus:shadow-[0_0_5px_pongblue] focus:border-pongblue sm:text-base">
@@ -41,6 +44,18 @@ export const SignUp = createComponent((props: SignUpProps) => {
 			</span>
 			</div>
 	  	</div>
+		<div class="flex flex-col gap-1">
+			<label for="nickname" class="block text-base font-medium text-gray-700">Nickname</label>
+			<input type="text" id="nickname" placeholder="Your Nickname here" autocomplete="off" class="nickname relative w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pongblue focus:border-pongblue sm:text-base focus:shadow-[0_0_5px_pongblue]">
+		</div>
+		<div class="flex flex-col gap-1">
+			<label for="fullname" class="block text-base font-medium text-gray-700">Full name</label>
+			<input type="text" id="fullname" placeholder="Your Name here (first last)" autocomplete="off" class="full-name relative w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pongblue focus:border-pongblue sm:text-base focus:shadow-[0_0_5px_pongblue]">
+		</div>
+		<div class="flex flex-col gap-1">
+			<label for="age" class="block text-base font-medium text-gray-700">Age</label>
+			<input type="age" id="age" placeholder="Your Age here" autocomplete="off" class="age relative w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pongblue focus:border-pongblue sm:text-base focus:shadow-[0_0_5px_pongblue]">
+	  	</div>
 		<!-- SignUp Button -->
 	  </form>
 	  <div class="w-full text-center">
@@ -59,46 +74,75 @@ export const SignUp = createComponent((props: SignUpProps) => {
 	// signup_btn
 	// acc_question
 	// signin_btn
-	const formElement:HTMLFormElement = form.querySelector('form')!;
-	const emailInput:HTMLInputElement = form.querySelector('#email')!;
-	const passwordInput:HTMLInputElement = form.querySelector('#password')!;
-	const confirmPasswordInput:HTMLInputElement = form.querySelector('#conf-password')!;
+	const formElement: HTMLFormElement = form.querySelector('form')!;
+	const emailInput: HTMLInputElement = form.querySelector('#email')!;
+	const passwordInput: HTMLInputElement = form.querySelector('#password')!;
+	const confirmPasswordInput: HTMLInputElement = form.querySelector('#conf-password')!;
+	const nickname: HTMLInputElement = form.querySelector("#nickname")!
+	const fullname: HTMLInputElement = form.querySelector("#fullname")!
+	const age: HTMLInputElement = form.querySelector("#age")!
 
 	const signUpButton = Button({
-	  type: 'submit',
-	  text: msg('register.signup.signup_btn'),
-	  styles: 'w-full font-semibold p-2 text-base text-white',
-	  eventType: 'click',
-	  onClick: (e: MouseEvent) => {
-		if (!validateEmail(emailInput) || !validatePassword(passwordInput) || !validateConfirmPassword(passwordInput, confirmPasswordInput))
+		type: 'submit',
+		text: msg('register.signup.signup_btn'),
+		styles: 'w-full font-semibold p-2 text-base text-white',
+		eventType: 'click',
+		onClick: async (e: MouseEvent) => {
 			e.preventDefault();
-		else
-			console.log('email and pass are nice!');
-	  }
+			try {
+				const body = {
+					email: emailInput.value,
+					password: passwordInput.value,
+					nickname: nickname.value,
+					full_name: fullname.value,
+					google_id: null
+				};
+				await axios.post("http://localhost:8001/auth/users", body);
+				console.log("Check your email for an activation messsage");
+				navigate('/'); // You can edit it
+			} catch (err: any) {
+				if (err.response) {
+					if (err.response.status === 400) {
+						const msg = err.response.data.message;
+						console.log(msg)
+					}
+					else if (err.response.status === 500) {
+						console.error("Server error:", err.response.data.error);
+					} else {
+						console.error("Unexpected error:", err.response.data);
+					}
+				}
+				else if (err.request) {
+					console.error("No response from server:", err.request);
+				} else {
+					console.error("Error setting up request:", err.message);
+				}
+			}
+		}
 	});
 	formElement.appendChild(signUpButton);
 
 	const signinLink = form.querySelector('.signin-link')!;
 	signinLink.addEventListener('click', (e: Event) => {
-	  e.preventDefault();
-	  if (props.onSwitchToSignIn) {
-		props.onSwitchToSignIn();
-	  }
+		e.preventDefault();
+		if (props.onSwitchToSignIn) {
+			props.onSwitchToSignIn();
+		}
 	});
 	const togglePassword = form.querySelectorAll('.toggle-password');
 	const eyeIcon = togglePassword[0].querySelector('.hide-show')!;
 	const confEyeIcon = togglePassword[1].querySelector('.hide-show')!;
 
 	const handleTogglePassword = (e: Event) => {
-	  e.preventDefault();
-	  const wasPassword = passwordInput.type === 'password';
-	  passwordInput.type = wasPassword ? 'text' : 'password';
-	  confirmPasswordInput.type = passwordInput.type
-	  eyeIcon.classList.remove('bx-show', 'bx-hide');
-	  eyeIcon.classList.add(wasPassword ? 'bx-show' : 'bx-hide');
+		e.preventDefault();
+		const wasPassword = passwordInput.type === 'password';
+		passwordInput.type = wasPassword ? 'text' : 'password';
+		confirmPasswordInput.type = passwordInput.type
+		eyeIcon.classList.remove('bx-show', 'bx-hide');
+		eyeIcon.classList.add(wasPassword ? 'bx-show' : 'bx-hide');
 
-	  confEyeIcon.classList.remove('bx-show', 'bx-hide');
-	  confEyeIcon.classList.add(wasPassword ? 'bx-show' : 'bx-hide');
+		confEyeIcon.classList.remove('bx-show', 'bx-hide');
+		confEyeIcon.classList.add(wasPassword ? 'bx-show' : 'bx-hide');
 	};
 
 	togglePassword[0].addEventListener('click', handleTogglePassword);

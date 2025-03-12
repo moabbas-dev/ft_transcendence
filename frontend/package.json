@@ -24,6 +24,8 @@
     "boxicons": "^2.1.4",
     "chart.js": "^4.4.7",
     "frontend": "file:",
+    "jsonwebtoken": "^9.0.2",
+    "jwt-decode": "^4.0.0",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1"
   }

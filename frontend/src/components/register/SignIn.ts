@@ -5,6 +5,7 @@ import { msg } from '../../languages/LanguageController.js';
 import axios from 'axios';
 import { navigate } from '../../router.js';
 import store from '../../../store/store.js';
+import { jwtDecode } from "jwt-decode";
 
 interface SignInProps {
 	styles: string,
@@ -64,17 +65,20 @@ export const SignIn = createComponent((props: SignInProps) => {
 			};
 			const signIn = await axios.post("http://localhost:8001/auth/login", data);
 			if (signIn.data.require2FA == false) {
-				store.update("accessToken", signIn.data.accessToken);
-				store.update("refreshToken", signIn.data.refreshToken);
-				store.update("sessionId", signIn.data.sessionId);
-				store.update("userId", signIn.data.userId);
-				store.update("email", signIn.data.email);
-				store.update("nickname", signIn.data.nickname);
-				store.update("fullName", signIn.data.fullName);
-				store.update("avatarUrl", signIn.data.avatarUrl);
-				store.update("isLoggedIn", true);
-				navigate("/play");
-				console.log("Login successful:", signIn.data);
+				if (signIn.data.accessToken) {
+					const decodedToken: any = jwtDecode(signIn.data.accessToken);
+					store.update("accessToken", signIn.data.accessToken);
+					store.update("refreshToken", signIn.data.refreshToken);
+					store.update("sessionId", signIn.data.sessionId);
+					store.update("userId", decodedToken.userId);
+					store.update("email", decodedToken.email);
+					store.update("nickname", decodedToken.nickname);
+					store.update("fullName", decodedToken.fullName);
+					store.update("avatarUrl", decodedToken.avatarUrl);
+					store.update("isLoggedIn", true);
+					navigate("/play");
+					console.log("Login successful:", signIn.data);
+				}
 			}
 			else {
 				store.update("sessionId", signIn.data.sessionId);
