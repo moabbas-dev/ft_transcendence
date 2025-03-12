@@ -13,7 +13,7 @@ export default {
       <div class="w-full overflow-x-none bg-pongdark flex-1 flex items-center justify-center">
         <div class="container mx-auto grid place-content-center">
           <div class="flex items-center justify-center gap-3">
-            <div class="h-full bg-pongdark hidden sm:flex items-center">
+            <div class="xl:w-1/2 h-full bg-pongdark hidden sm:flex items-center">
               <canvas id="pongCanvas" class="w-full h-[50vh] border-2 border-white rounded-lg"></canvas>
             </div>
             <div class="flex flex-col gap-4 justify-center max-sm:w-full max-sm:px-3">
