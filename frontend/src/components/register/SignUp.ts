@@ -10,7 +10,7 @@ interface SignUpProps {
 
 export const SignUp = createComponent((props: SignUpProps) => {
 	const form = document.createElement('div')
-	form.className = `w-[93vw] sm:w-96 bg-white rounded-lg p-4 sm:p-8  ${props.styles || ''}`;
+	form.className = `flex flex-col justify-center gap-5 w-[93vw] sm:w-96 bg-white rounded-lg p-4 sm:p-8  ${props.styles || ''}`;
 	form.innerHTML = `
 	<div class="flex flex-col gap-3 sm:gap-5">
 	  <h1 class="text-2xl font-bold text-center underline">${msg('register.signup.title')}</h1>
@@ -43,9 +43,17 @@ export const SignUp = createComponent((props: SignUpProps) => {
 	  	</div>
 		<!-- SignUp Button -->
 	  </form>
-	  <div class="w-full text-center sm:pt-1">
+	  <div class="w-full text-center">
 	  	${msg('register.signup.acc_question')} <span class="signin-link hover:cursor-pointer hover:opacity-80 text-pongblue">${msg('register.signup.signin_btn')}</span>
 	  </div>
+	</div>
+	<div class="flex flex-col">
+		<div class="w-full p-1">
+			<a class="w-full flex items-center justify-start p-1 sm:p-2 text-white bg-pongblue hover:cursor-pointer hover:opacity-80 rounded-md transition-all duration-300">
+				<i class='bx bxl-google text-2xl'></i>
+				<span class="flex-1 text-center">${msg('register.continueGoogle')}</span>
+			</a>
+		</div>	
 	</div>
 	`;
 	// signup_btn
