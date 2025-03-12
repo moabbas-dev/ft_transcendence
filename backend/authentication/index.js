@@ -8,11 +8,7 @@ const fastifySession = require('@fastify/session');
 const path = require('path');
 
 // Register multipart plugin to handle file uploads
-fastify.register(require('fastify-multipart'), {
-    limits: {
-        fileSize: 10 * 1024 * 1024, // Limit file size to 10MB
-    },
-});
+fastify.register(require('@fastify/multipart'));
 
 fastify.register(require('@fastify/static'), {
     root: path.join(__dirname, 'uploads'),
@@ -65,6 +61,8 @@ fastify.register(require('./src/routes/JwtRoutes'));
 fastify.register(require('./src/routes/UserRoutes'));
 fastify.register(require('./src/routes/SessionRoutes'));
 fastify.register(require('./src/routes/TwoFactorRoutes'));
+fastify.register(require('./src/routes/UploadRoutes'));
+
 
 // Test route
 fastify.get('/', async (request, reply) => {
