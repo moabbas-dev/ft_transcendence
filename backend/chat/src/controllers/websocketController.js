@@ -1,60 +1,61 @@
 import { blockUser, unblockUser } from "../services/blockService.js";
+import { getUser, createOrUpdateUser, getUserByUsername } from "../services/userService.js";
+import { createFriendRequest, addFriend } from "../services/friendService.js"
 
 export function setupWebSocketHandlers(wsAdapter, fastify) {
   // Track online users mapping username to clientId
   const onlineUsers = new Map();
 
   wsAdapter.on("user:connect", async ({ clientId, payload }) => {
-    const { username, firstName, lastName } = payload;
+    const { username, userId } = payload; // Destructure both fields
+    if (!username || !userId) {
+        wsAdapter.sendTo(clientId, "error", { message: "Username and User ID are required" });
+        return;
+    }
+    console.log(userId);
+    console.log(username);
 
     try {
       // Create or update user in database
-      await userService.createOrUpdateUser({
-        username,
-        firstName,
-        lastName,
-        friends: [],
-        pendingFriends: [],
-      });
-
-      // Retrieve user data from the auth service via getUser()
-      const user = await userService.getUser(username);
+      // Update user in database
+      await createOrUpdateUser({ id: userId, username });
+        
+      // Fetch user by ID
+      const user = await getUser(userId);
       if (!user) {
-        wsAdapter.sendTo(clientId, "error", {
-          message: "Failed to retrieve user data",
-        });
-        return;
+          wsAdapter.sendTo(clientId, "error", { message: "User not found" });
+          return;
       }
 
       // Track user as online
-      onlineUsers.set(username, clientId);
+      onlineUsers.set(clientId, username);
 
-      // Send friend list to user with online status
-      const friendsWithStatus = await Promise.all(
-        (user.friends || []).map(async (friendUsername) => {
-          const friend = await userService.getUser(friendUsername);
-          if (!friend) return null;
+    //   // Send friend list to user with online status
+    //   const friendsWithStatus = await Promise.all(
+    //     (user.friends || []).map(async (friendUsername) => {
+    //       const friend = await getUser(friendUsername);
+    //       if (!friend) return null;
 
-          return {
-            username: friend.username,
-            firstname: friend.firstname,
-            lastname: friend.lastname,
-            isOnline: onlineUsers.has(friendUsername),
-          };
-        })
-      );
+    //       return {
+    //         username: friend.username,
+    //         firstname: friend.firstname,
+    //         lastname: friend.lastname,
+    //         isOnline: onlineUsers.has(friendUsername),
+    //       };
+    //     })
+    //   );
 
-      // Filter out null entries
-      const validFriends = friendsWithStatus.filter((f) => f !== null);
+    //   // Filter out null entries
+    //   const validFriends = friendsWithStatus.filter((f) => f !== null);
 
-      wsAdapter.sendTo(clientId, "friends:list", {
-        friends: validFriends,
-      });
+    //   wsAdapter.sendTo(clientId, "friends:list", {
+    //     friends: validFriends,
+    //   });
 
-      // Send pending friend requests
-      wsAdapter.sendTo(clientId, "friends:pending", {
-        pending: user.pendingFriends || [],
-      });
+    //   // Send pending friend requests
+    //   wsAdapter.sendTo(clientId, "friends:pending", {
+    //     pending: user.pendingFriends || [],
+    //   });
     } catch (error) {
       fastify.log.error("Error in user:connect handler", error);
       wsAdapter.sendTo(clientId, "error", {
@@ -83,23 +84,25 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
   // Handle friend request
   wsAdapter.on("friend:request", async ({ clientId, payload }) => {
     const { from, to } = payload;
-
+    
+    console.log("a friend request was sent from:", from)
+    console.log("to:" ,to);
     try {
       // Save friend request to database
-      await friendService.createFriendRequest(from, to);
+      await createFriendRequest(from, to);
 
-      // Notify the user if they're online
-      const toClientId = onlineUsers.get(to);
-      if (toClientId) {
-        const fromUser = await userService.getUser(from);
-        if (fromUser) {
-          wsAdapter.sendTo(toClientId, "friend:request", {
-            username: fromUser.username,
-            firstname: fromUser.firstname,
-            lastname: fromUser.lastname,
-          });
-        }
-      }
+      // // Notify the user if they're online
+      // const toClientId = onlineUsers.get(to);
+      // if (toClientId) {
+      //   const fromUser = await getUser(from);
+      //   if (fromUser) {
+      //     wsAdapter.sendTo(toClientId, "friend:request", {
+      //       username: fromUser.username,
+      //       firstname: fromUser.firstname,
+      //       lastname: fromUser.lastname,
+      //     });
+      //   }
+      // }
     } catch (error) {
       fastify.log.error("Error in friend:request handler", error);
       wsAdapter.sendTo(clientId, "error", {
@@ -112,13 +115,18 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
   wsAdapter.on("friend:accept", async ({ clientId, payload }) => {
     const { from, to } = payload;
 
+
+    console.log("friend request acceptance logs:");
+    console.log("user1ID:", from);
+    console.log("user2ID:", to);
+
     try {
       // Add friend relationship to database
-      await friendService.addFriend(from, to);
+      await addFriend(from, to);
 
       // Get user data for both users
-      const fromUser = await userService.getUser(from);
-      const toUser = await userService.getUser(to);
+      const fromUser = await getUser(from);
+      const toUser = await getUser(to);
 
       if (!fromUser || !toUser) {
         wsAdapter.sendTo(clientId, "error", {
@@ -128,26 +136,26 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       }
 
       // Notify both users
-      const fromClientId = onlineUsers.get(from);
-      const toClientId = onlineUsers.get(to);
+      // const fromClientId = onlineUsers.get(from);
+      // const toClientId = onlineUsers.get(to);
 
-      if (fromClientId) {
-        wsAdapter.sendTo(fromClientId, "friend:accepted", {
-          username: toUser.username,
-          firstname: toUser.firstname,
-          lastname: toUser.lastname,
-          isOnline: onlineUsers.has(to),
-        });
-      }
+      // if (fromClientId) {
+      //   wsAdapter.sendTo(fromClientId, "friend:accepted", {
+      //     username: toUser.username,
+      //     firstname: toUser.firstname,
+      //     lastname: toUser.lastname,
+      //     isOnline: onlineUsers.has(to),
+      //   });
+      // }
 
-      if (toClientId) {
-        wsAdapter.sendTo(toClientId, "friend:accepted", {
-          username: fromUser.username,
-          firstname: fromUser.firstname,
-          lastname: fromUser.lastname,
-          isOnline: onlineUsers.has(from),
-        });
-      }
+      // if (toClientId) {
+      //   wsAdapter.sendTo(toClientId, "friend:accepted", {
+      //     username: fromUser.username,
+      //     firstname: fromUser.firstname,
+      //     lastname: fromUser.lastname,
+      //     isOnline: onlineUsers.has(from),
+      //   });
+      // }
     } catch (error) {
       fastify.log.error("Error in friend:accept handler", error);
       wsAdapter.sendTo(clientId, "error", {
@@ -233,18 +241,20 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
   // Handle block user
   wsAdapter.on("user:block", async ({ clientId, payload }) => {
     try {
-      const { from, blocked } = payload;
+        const { from: blockerUsername, blocked: blockedUsername } = payload;
+        
+        // Convert usernames to user IDs
+        const blocker = await getUserByUsername(blockerUsername);
+        const blocked = await getUserByUsername(blockedUsername);
+        if (!blocker || !blocked) throw new Error("User not found");
 
-      // Add to blocked users in database
-      await blockUser(from, blocked);
-
-      // Confirm block to user
-      wsAdapter.sendTo(clientId, "user:blocked", { username: blocked });
+        await blockUser(blocker.id, blocked.id); // Use IDs
+        wsAdapter.sendTo(clientId, "user:blocked", { username: blockedUsername });
     } catch (error) {
-      fastify.log.error("Error in user:block handler", error);
-      wsAdapter.sendTo(clientId, "error", { message: "Failed to block user" });
+        fastify.log.error("Block error:", error);
+        wsAdapter.sendTo(clientId, "error", { message: "Failed to block user" });
     }
-  });
+});
 
   // Handle unblock user
   wsAdapter.on("user:unblock", async ({ clientId, payload }) => {

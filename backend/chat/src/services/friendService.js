@@ -1,5 +1,5 @@
-const { getDatabase } = require("../db/initDB.js");
-const { getUsersFromAuth } = require("./userService.js");
+import { getDatabase } from "../db/initDB.js";
+import { getUsersFromAuth } from "./userService.js";
 
 export async function addFriend(userId, friendId) {
   const db = await getDatabase();
@@ -45,11 +45,25 @@ export async function removeFriend(userId, friendId) {
 }
 
 export async function createFriendRequest(fromUser, toUser) {
-  const db = await getDatabase();
-  await db.run(
-    `INSERT OR IGNORE INTO friend_requests (from_user, to_user) VALUES (?, ?)`,
-    [fromUser, toUser]
-  );
+  try {
+    const db = await getDatabase();
+    
+    // Verify database connection
+    if (!db) throw new Error("No database connection");
+    
+    const result = await db.run(
+      `INSERT OR IGNORE INTO friend_requests (from_user, to_user) VALUES (?, ?)`,
+      [fromUser, toUser]
+    );
+    
+    console.log("Insert result:", result);
+    console.log(`Changes made: ${result.changes}`);
+    
+    return result;
+  } catch (error) {
+    console.error("Database error in createFriendRequest:", error);
+    throw error;
+  }
 }
 
 export async function getPendingFriendRequests(userId) {

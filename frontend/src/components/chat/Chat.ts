@@ -52,4 +52,3 @@ export const Chat = createComponent(() => {
     `;
     return container
 })
-

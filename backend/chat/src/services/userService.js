@@ -3,7 +3,7 @@ import axios from "axios";
 
 
 // Configure authentication service API URL
-const AUTH_API_URL = process.env.AUTH_API_URL || "http://auth-service:3000";
+const AUTH_API_URL = "http://localhost:8001";
 
 // Helper function to get user from auth service API
 export async function getUserFromAuth(userId) {
@@ -15,6 +15,16 @@ export async function getUserFromAuth(userId) {
       `Error fetching user ${userId} from auth service:`,
       error.message
     );
+    return null;
+  }
+}
+
+export async function getUserByUsername(username) {
+  try {
+    const response = await axios.get(`${AUTH_API_URL}/auth/users/username/${username}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching user ${username}:`, error.message);
     return null;
   }
 }
