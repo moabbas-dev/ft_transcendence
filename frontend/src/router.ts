@@ -27,6 +27,7 @@ export function refreshRouter() {
   const path = window.location.pathname;
   const page = routes[path] || NotFound;
   const appContainer = document.getElementById("app")!;
+  appContainer.className = "";
   appContainer.innerHTML = "";
 
   const savedLanguage = localStorage.getItem("selectedLanguage");
