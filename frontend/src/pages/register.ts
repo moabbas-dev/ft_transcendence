@@ -4,7 +4,6 @@ import { PongAnimation } from '../components/partials/PingPongAnimation.js';
 import { msg } from '../languages/LanguageController.js';
 import { SendEmail } from '../components/register/SendEmail.js';
 import { ResetPass } from '../components/register/ResetPass.js';
-import { UserInfoForm } from '../components/register/UserInfoForm.js';
 import { TwoFactorSend } from '../components/register/TwoFactor.js';
 
 export default {
@@ -67,11 +66,11 @@ export default {
 			)
 		}
 
-		const renderUserInfo = () => {
-			animateTransition(() => 
-				UserInfoForm()
-			)
-		}
+		// const renderUserInfo = () => {
+		// 	animateTransition(() => 
+		// 		UserInfoForm()
+		// 	)
+		// }
 
 		const renderTwoFactor = () => {
 			animateTransition(() => 
