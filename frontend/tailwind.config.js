@@ -29,6 +29,10 @@ module.exports = {
         fadeIn: 'fadeIn 0.5s ease-out',
         fadeOut: 'fadeOut 0.3s ease-out forwards',
         floatIn: 'floatIn 0.5s ease-out forwards',
+        pong: 'pong 1.5s infinite linear',
+        slide: 'slide 0.8s 0.2s infinite alternate linear',
+        slide2: 'slide2 1s infinite alternate linear',
+        flash: 'flash 0.75s infinite alternate linear',
       },
       keyframes: {
         slideUp: {
@@ -89,6 +93,29 @@ module.exports = {
         fadeOut: {
           'from': { opacity: '1' },
           'to': { opacity: '0' }
+        },
+        pong: {
+          '0%': { bottom: '20px', left: '0' },
+          '30%': { bottom: '-10px', left: '150px' },
+          '45%': { bottom: '40px', left: '170px' },
+          '70%': { bottom: '80px', left: '80px' },
+          '100%': { bottom: '20px', left: '0' },
+        },
+        slide: {
+          '0%': { bottom: '40px' },
+          '45%': { bottom: '0px' },
+          '67%': { bottom: '60px' },
+          '100%': { bottom: '40px' },
+        },
+        slide2: {
+          '0%': { top: '20px' },
+          '45%': { top: '0px' },
+          '67%': { top: '60px' },
+          '100%': { top: '20px' },
+        },
+        flash: {
+          '0%': { opacity: '0.2' },
+          '100%': { opacity: '1' },
         },
       },
     },

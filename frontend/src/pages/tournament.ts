@@ -1,3 +1,5 @@
+import { PongLoading } from "../components/partials/PongLoading";
+
 const buildTournamentTree = (playersNum: number): string => {
 	if (playersNum < 4 || playersNum > 8 || playersNum % 2 != 0) {
 		return "<p>Invalid Number of players!</p>";
@@ -45,9 +47,12 @@ const buildTournamentTree = (playersNum: number): string => {
 
 export default {
 	render: (container: HTMLElement) => {
-		container.className = "w-full h-dvh flex items-center justify-center";
-		container.innerHTML = `
-			${buildTournamentTree(8)}
-		`;
+		container.className = "w-full h-dvh flex items-center justify-center bg-pongdark";
+		// container.innerHTML = `
+		// 	${buildTournamentTree(8)}
+		// `;
+        container.innerHTML = `
+            ${PongLoading().outerHTML}
+        `
 	}
 }
