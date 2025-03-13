@@ -5,7 +5,7 @@ const dbPath = './data/auth.sqlite';
 
 const db = new sqlite3.Database(dbPath, (err) => {
 	if (err)
-		console.log(`Error creating the database!`);
+		console.error("Error creating the database:", err.message);
 	else
 		console.log(`The database created successfully at ${path.resolve(dbPath)}`);
 });
