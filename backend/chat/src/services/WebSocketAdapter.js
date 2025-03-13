@@ -1,11 +1,11 @@
-// import { Server as HTTPServer } from 'http';
 import WebSocket from "ws";
-// import { FastifyInstance } from 'fastify';
+import { WebSocketServer } from "ws";
 
 class WebSocketAdapter {
   constructor(server) {
-    this.wss = new WebSocket.Server({ server });
+    this.wss = new WebSocketServer({ server });
     this.clients = new Map();
+    this.setupConnectionHandler();
   }
 
   setupConnectionHandler() {
@@ -76,20 +76,6 @@ class WebSocketAdapter {
     }
   }
 
-  //we may use them  if we decided to add a group chatroom
-  // sendToUsers(usernames, event, payload) {
-  //     usernames.forEach(username => this.sendToUser(username, event, payload));
-  // }
-
-  // broadcast(event, payload, excludeClientId) {
-  //     for (const [clientId, client] of this.clients.entries()) {
-  //         if (excludeClientId && clientId === excludeClientId) continue;
-  //         if (client.socket.readyState === WebSocket.OPEN) {
-  //             client.socket.send(JSON.stringify({ event, payload }));
-  //         }
-  //     }
-  // }
-
   getUsernameByClientId(clientId) {
     const client = this.clients.get(clientId);
     return client ? client.username : null;
@@ -117,7 +103,8 @@ class WebSocketAdapter {
 }
 
 function registerWebSocketAdapter(fastify) {
-  return new WebSocketAdapter(fastify.server);
+  const adapter = new WebSocketAdapter(fastify.server);
+  return adapter;
 }
 
-module.exports = { WebSocketAdapter, registerWebSocketAdapter };
+export { WebSocketAdapter, registerWebSocketAdapter };

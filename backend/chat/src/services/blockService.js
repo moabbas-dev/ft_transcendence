@@ -1,5 +1,6 @@
-const { getDatabase } = require("../db/initDB.js");
-const { getUsersFromAuth } = require("./userService.js");
+import { getDatabase } from "../db/initDB.js";
+import { getUsersFromAuth } from "./userService.js";
+
 
 export async function blockUser(userId, blockedId) {
   const db = await getDatabase();
@@ -28,4 +29,3 @@ export async function getBlockedUsers(userId) {
   const blockedIds = blocked.map((b) => b.blocked_id);
   return await getUsersFromAuth(blockedIds);
 }
-
