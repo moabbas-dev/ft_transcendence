@@ -28,6 +28,12 @@ export async function initDatabase() {
       PRIMARY KEY (from_user, to_user)
     );
 
+    CREATE INDEX IF NOT EXISTS idx_friend_requests_to_user 
+    ON friend_requests(to_user);
+
+    CREATE INDEX IF NOT EXISTS idx_friends_user_id 
+    ON friends(user_id);
+
     CREATE TABLE IF NOT EXISTS blocked_users (
       user_id INTEGER NOT NULL,
       blocked_id INTEGER NOT NULL,

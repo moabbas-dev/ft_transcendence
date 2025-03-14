@@ -12,8 +12,9 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
         wsAdapter.sendTo(clientId, "error", { message: "Username and User ID are required" });
         return;
     }
-    console.log(userId);
-    console.log(username);
+    console.log("new user has connected: ",username, " | with ID:", userId);
+    console.log("#########");
+
 
     try {
       // Create or update user in database
@@ -75,7 +76,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
         disconnectedUser = username;
       }
     });
-
+    console.log("user disconnected:", username);
     if (disconnectedUser) {
       onlineUsers.delete(disconnectedUser);
     }
@@ -238,23 +239,29 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
     }
   });
 
-  // Handle block user
   wsAdapter.on("user:block", async ({ clientId, payload }) => {
     try {
-        const { from: blockerUsername, blocked: blockedUsername } = payload;
-        
-        // Convert usernames to user IDs
-        const blocker = await getUserByUsername(blockerUsername);
-        const blocked = await getUserByUsername(blockedUsername);
-        if (!blocker || !blocked) throw new Error("User not found");
-
-        await blockUser(blocker.id, blocked.id); // Use IDs
-        wsAdapter.sendTo(clientId, "user:blocked", { username: blockedUsername });
+      const { from: blockerId, blocked: blockedId } = payload;
+  
+      // Ensure IDs are valid numbers
+      if (typeof blockerId !== "number" || typeof blockedId !== "number") {
+        throw new Error("Invalid user IDs");
+      }
+  
+      // Block the user
+      await blockUser(blockerId, blockedId);
+  
+      // Notify the blocker
+      wsAdapter.sendTo(clientId, "user:blocked", {
+        userId: blockedId, // Send the blocked user's ID
+      });
     } catch (error) {
-        fastify.log.error("Block error:", error);
-        wsAdapter.sendTo(clientId, "error", { message: "Failed to block user" });
+      fastify.log.error("Block error:", error);
+      wsAdapter.sendTo(clientId, "error", {
+        message: "Failed to block user",
+      });
     }
-});
+  });
 
   // Handle unblock user
   wsAdapter.on("user:unblock", async ({ clientId, payload }) => {
@@ -273,6 +280,63 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       });
     }
   });
+
+
+  // In websocketController.js
+wsAdapter.on("friends:get", async ({ clientId, payload }) => {
+  try {
+    const { userId } = payload;
+    
+    // Get user data
+    const user = await getUser(userId);
+    if (!user) {
+      wsAdapter.sendTo(clientId, "error", { 
+        message: "User not found" 
+      });
+      return;
+    }
+
+    // Send friends list with online status
+    const friendsWithStatus = user.friends.map(friend => ({
+      ...friend,
+      isOnline: onlineUsers.has(friend.username)
+    }));
+
+    wsAdapter.sendTo(clientId, "friends:list", {
+      friends: friendsWithStatus
+    });
+
+  } catch (error) {
+    fastify.log.error("Error fetching friends:", error);
+    wsAdapter.sendTo(clientId, "error", {
+      message: "Failed to fetch friends"
+    });
+  }
+});
+
+// wsAdapter.on("friends:get_pending", async ({ clientId, payload }) => {
+//   try {
+//     const { userId } = payload;
+
+//     // Get pending requests from database
+//     const pendingRequests = await getPendingFriendRequests(userId);
+
+//     // Convert user IDs to user details
+//     const pendingDetails = await getUsersFromAuth(
+//       pendingRequests.map(req => req.from_user)
+//     );
+
+//     wsAdapter.sendTo(clientId, "friends:pending", {
+//       pending: pendingDetails
+//     });
+
+//   } catch (error) {
+//     fastify.log.error("Error fetching pending requests:", error);
+//     wsAdapter.sendTo(clientId, "error", {
+//       message: "Failed to fetch pending requests"
+//     });
+//   }
+// });
 }
 
 

@@ -94,6 +94,15 @@ export async function getAllUsers() {
   }
 }
 
+export async function getPendingFriendRequests(userId) {
+  const db = await getDatabase();
+  const requests = await db.all(
+    `SELECT from_user FROM friend_requests WHERE to_user = ?`,
+    [userId]
+  );
+  return requests;
+}
+
 export async function createOrUpdateUser(userData) {
   // This is a placeholder since user creation is handled by auth service
   // We might add local caching or other functionality here if needed
