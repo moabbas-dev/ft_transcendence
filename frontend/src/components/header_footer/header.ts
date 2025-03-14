@@ -39,7 +39,7 @@ export const Header = createComponent(() => {
             </div>
             <div class="notification-bell relative">
                 <i class="fa-solid fa-bell text-white text-2xl transition-all hover:cursor-pointer hover:text-ponghover"></i>
-                <span class="absolute -top-2 -right-2 rounded-full bg-red-600 text-white hover:cursor-pointer w-5 h-5 flex items-center justify-center text-sm">0</span>
+                <span class="notification-count absolute -top-2 -right-2 rounded-full text-white hover:cursor-pointer w-5 h-5 flex items-center justify-center text-sm">0</span>
             </div>
             <div class="notification hidden absolute overflow-y-auto top-full right-0 z-50 bg-white w-[300px] p-2 max-h-[300px] animate-fade-down animate-once animate-duration-300">
 
@@ -68,6 +68,7 @@ export const Header = createComponent(() => {
     const account_list = container.querySelector(".account-list")!;
     const notificationContainer = container.querySelector('.notification')!
     const notificationBell = container.querySelector('.notification-bell')!
+    const notificationCount = container.querySelector('.notification-count')!
     const searchBar = container.querySelector('#search-bar')!
     const searchIcon = container.querySelector('.fa-search')!
     const navbar = container.querySelector('.navbar')!
@@ -110,6 +111,10 @@ export const Header = createComponent(() => {
     notificationContainer.appendChild(Notification({username: 'Test User', message: 'Hello World!'}))
     notificationContainer.appendChild(Notification({username: 'Test User', message: 'Hello World!'}))
     notificationContainer.appendChild(Notification({username: 'Test User', message: 'Hello World!'}))
+
+    // this will be based on the unread notifications come from database not the length of children collection
+    notificationCount.classList.add(notificationContainer.children.length == 0? 'bg-gray-600' : 'bg-red-600');
+    notificationCount.textContent = `${notificationContainer.children.length}`
 
     navBtn.addEventListener('click', () => {
         const navStyles = 'max-sm:animate-fade-down max-sm:animate-once max-sm:animate-duration-[600ms] max-sm:flex max-sm:z-50 max-sm:flex-col max-sm:absolute max-sm:top-full max-sm:left-0 max-sm:w-fit max-sm:gap-0'

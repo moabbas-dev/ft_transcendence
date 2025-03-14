@@ -23,6 +23,7 @@ export interface gameState {
 	touchCurrentY: number | null;
 	isTouching: boolean;
 	activeTouches: Map<number, { x: number; y: number }>;
+	gamePaused: boolean;
 }
 
 export class GameBoard {
@@ -87,6 +88,7 @@ export class GameBoard {
 			touchCurrentY: null,
 			isTouching: false,
 			activeTouches: new Map(),
+			gamePaused: false
 		};
 	}
 
@@ -110,13 +112,26 @@ export class GameBoard {
 
 		// Universal key handling
 		window.addEventListener('keydown', (e) => {
-		  this.state.keys[e.key.toLowerCase()] = true;
+			const key = e.key.toLowerCase();
+
+			if (key === 'escape' && this.state.gameStarted && !this.state.gameEnded) {
+			  if (!this.state.keys[key]) {
+				this.state.gamePaused = !this.state.gamePaused;
+			  }
+			  e.preventDefault();
+			}
+
+			this.state.keys[key] = true;
 		});
 		window.addEventListener('keyup', (e) => {
 		  this.state.keys[e.key.toLowerCase()] = false;
 		});
-		
+
 		const handleTouchStart = (e: TouchEvent) => {
+			if (this.state.gamePaused) {
+				e.preventDefault();
+				return;
+			}
 			e.preventDefault();
 			const rect = this.canvas.getBoundingClientRect();
 
@@ -133,6 +148,10 @@ export class GameBoard {
 		  };
 		
 		  const handleTouchMove = (e: TouchEvent) => {
+			if (this.state.gamePaused) {
+				e.preventDefault();
+				return;
+			}
 			e.preventDefault();
 			const rect = this.canvas.getBoundingClientRect();
 			
@@ -148,6 +167,10 @@ export class GameBoard {
 		  };
 		
 		  const handleTouchEnd = (e: TouchEvent) => {
+			if (this.state.gamePaused) {
+				e.preventDefault();
+				return;
+			}
 			e.preventDefault();
 			// Remove ended touches
 			Array.from(e.changedTouches).forEach(touch => {
@@ -303,6 +326,16 @@ export class GameBoard {
 		}
 		// Reset shadow for other elements
 		this.ctx.shadowBlur = 0;
+		if (this.state.gamePaused) {
+			this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+			this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+			
+			this.ctx.fillStyle = 'white';
+			this.ctx.font = '48px Arial';
+			this.ctx.textAlign = 'center';
+			this.ctx.textBaseline = 'middle';
+			this.ctx.fillText('Paused', this.canvas.width / 2, this.canvas.height / 2);
+		}
 	}
 
 	update() {
@@ -353,7 +386,8 @@ export class GameBoard {
 	private gameLoop = () => {
 		// here i need this function to stop when the user naviagate to other page 
 		this.draw();
-		this.update();
+		if (!this.state.gamePaused)
+			this.update();
 		if (!this.state.gameEnded) {
 			requestAnimationFrame(this.gameLoop);
 		} else {
