@@ -4,6 +4,7 @@ import logoUrl from "/src/assets/ft_transcendencee.png";
 import { navigate, refreshRouter } from "../../router.js";
 import { Notification } from "./Notification.js";
 import { DropDown } from "./DropDown.js";
+import store from "../../../store/store.js";
 
 export const Header = createComponent(() => {
     const container = document.createElement("header");
@@ -52,7 +53,7 @@ export const Header = createComponent(() => {
                 <div id="profile-head" class="flex gap-3 hover:cursor-pointer hover:underline hover:text-ponghover">
                     <div class="profile-section flex items-center justify-center gap-2">
                         <div class="flex items-center justify-center text-lg font-bold">
-                            <p>Guest</p>
+                            <p>${store.nickname}</p>
                         </div>
                         <div class="w-10 h-10 bg-slate-400 rounded-full bg-[url('./assets/guest.png')] bg-cover"><!-- Logo Here as background image --></div>
                     </div>

@@ -5,6 +5,10 @@
 
 /public/boxicons
 
+
+.parcel-cache
+
+
 dist
 # debug
 npm-debug.log*
