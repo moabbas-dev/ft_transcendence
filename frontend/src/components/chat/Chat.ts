@@ -2,13 +2,13 @@ import { createComponent } from "../../utils/StateManager.js";
 import chatService from "../../utils/chatWebSocketService.js";
 
 interface Message {
-  id: string;
+  id: number;
   from: string;
   content: string;
   timestamp: number;
 }
 
-export const Chat = createComponent((props: { activeUser?: { nickname: string, id: string, full_name: string } }) => {
+export const Chat = createComponent((props: { activeUser?: { nickname: string, id: number, full_name: string } }) => {
     const container = document.createElement('div');
     let activeUser = props.activeUser;
     let messages: Message[] = [];
@@ -124,16 +124,16 @@ export const Chat = createComponent((props: { activeUser?: { nickname: string, i
             
             // Send typing indicator
             if (activeUser && chatService.isConnected()) {
-                chatService.sendTypingIndicator(activeUser.username);
+                chatService.sendTypingIndicator(activeUser.nickname);
             }
         });
         
         // Handle block button
         blockButton?.addEventListener('click', () => {
             if (activeUser && chatService.isConnected()) {
-                chatService.blockUser(activeUser.username);
+                chatService.blockUser(activeUser.nickname);
                 // You might want to update the UI to reflect the blocked status
-                alert(`${activeUser.firstName} ${activeUser.lastName} has been blocked`);
+                alert(`${activeUser.full_name} has been blocked`);
             }
         });
     };
@@ -146,20 +146,20 @@ export const Chat = createComponent((props: { activeUser?: { nickname: string, i
         if (!content || !activeUser || !chatService.isConnected()) return;
         
         // Send message via WebSocket
-        chatService.sendPrivateMessage(activeUser.username, content);
+        chatService.sendPrivateMessage(activeUser.nickname, content);
         
         // Clear input
         messageInput.innerText = '';
     };
     
     // Set the active user for chat
-    const setActiveUser = (user: { username: string, firstName: string, lastName: string }) => {
+    const setActiveUser = (user: { nickname: string, id: number, full_name: string }) => {
         activeUser = user;
         
         // Create room ID (combination of both usernames sorted alphabetically)
         const currentUsername = localStorage.getItem('username');
         if (currentUsername) {
-            roomId = [currentUsername, user.username].sort().join('-');
+            roomId = [currentUsername, user.nickname].sort().join('-');
             
             // Get message history for this room
             if (chatService.isConnected()) {
@@ -210,7 +210,7 @@ export const Chat = createComponent((props: { activeUser?: { nickname: string, i
             const { username } = data;
             
             // Only show typing indicator if it's from the active chat user
-            if (activeUser && username === activeUser.username) {
+            if (activeUser && username === activeUser.nickname) {
                 // Add typing indicator to the UI
                 const typingIndicator = document.createElement('div');
                 typingIndicator.className = 'typing-indicator text-white text-sm opacity-70 self-start ml-4';
