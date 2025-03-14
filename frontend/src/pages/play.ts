@@ -7,6 +7,7 @@ import { Footer } from "../components/header_footer/footer.js";
 export default {
   render: (container: HTMLElement) => {
     container.innerHTML = `
+        <div class="profile"></div>
         <div class="header bg-pongblue w-full h-fit"></div>
         <div class="content relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 h-[calc(100vh-56px-68px)] sm:h-[calc(100vh-136px)]">
             <canvas id="pongCanvas" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 sm:translate-x-0 sm:translate-y-0 sm:top-0 sm:left-0 z-0 w-full h-[inherit] opacity-50 inset-0 rotate-90 origin-center sm:rotate-0"></canvas>
@@ -43,7 +44,7 @@ export default {
                             <p class="hidden sm:block text-[0.9rem]">Compete in a knockout tournament</p>
                         </div>
                     </button>
-                    <button class="game-mode-btn max-[350px]:size-[120px] max-sm:size-[150px] max-sm:justify-center p-2 sm:p-8 border-none rounded-2xl group bg-gradient-to-br from-pongblue to-[rgba(100,100,255,0.8)] hover:from-[rgba(100,100,255,0.9)] hover:to-pongblue text-white flex max-sm:flex-col items-center gap-3 sm:gap-6 cursor-pointer transition-all duration-300 ease-in-out transform translate-y-0 shadow-md active:translate-y-0 animate-fade-up animate-once" data-route="/play/online-multi">
+                    <button id="online-multiplayer" class="game-mode-btn max-[350px]:size-[120px] max-sm:size-[150px] max-sm:justify-center p-2 sm:p-8 border-none rounded-2xl group bg-gradient-to-br from-pongblue to-[rgba(100,100,255,0.8)] hover:from-[rgba(100,100,255,0.9)] hover:to-pongblue text-white flex max-sm:flex-col items-center gap-3 sm:gap-6 cursor-pointer transition-all duration-300 ease-in-out transform translate-y-0 shadow-md active:translate-y-0 animate-fade-up animate-once">
                         <span class="group-hover:scale-[1.2] max-[350px]:text-[2rem] text-[2.5rem] transition-transform duration-300 ease-in-out">
                           <i class="fa-solid fa-globe drop-shadow-[0_5px_black] group-hover:drop-shadow-[0]"></i>
                         </span>
@@ -72,11 +73,15 @@ export default {
     document.querySelectorAll(".game-mode-btn").forEach((button) => {
       button.addEventListener("click", (e: Event) => {
         const target = e.currentTarget as HTMLElement;
-        console.log(target.dataset.route);
-        navigate(target.dataset.route!);
+        if (target.dataset.route)
+          navigate(target.dataset.route);
       });
     });
 
+    const onlineMuliplayerBtn = container.querySelector('#online-multiplayer')!
+    onlineMuliplayerBtn.addEventListener('click', () => {
+      navigate('/online-game')
+    })
     const canvas = document.getElementById("pongCanvas") as HTMLCanvasElement;
     if (canvas) {
       new PongAnimation(canvas);

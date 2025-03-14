@@ -36,15 +36,23 @@ export class GameBoard {
 	private ballController: Controller;
 	private gameHeader: HTMLElement;
 	private AIDifficulty: AIDifficulty | undefined;
-	// private isPortraitMode = window.matchMedia("(orientation: portrait)").matches;
 
-	constructor(gameType: "AI" | "Local", canvas:HTMLCanvasElement, gameHeader:HTMLElement, difficulty?:AIDifficulty) {
-		this.gameType = gameType;
-		this.canvas = canvas;
-		this.gameHeader = gameHeader
+	/** Overload signatures 
+	 *  the first constructor will be used for online games
+	 *  the second constructor for offline games
+	 * with this technique we can make a new class for online games inherits 
+	 * from this class some methods like draw(), initEventListerners() ...
+	*/
+	constructor();
+	constructor(gameType: "AI" | "Local", canvas:HTMLCanvasElement, gameHeader:HTMLElement, difficulty?:AIDifficulty);
+
+	constructor(gameType?: "AI" | "Local", canvas?:HTMLCanvasElement, gameHeader?:HTMLElement, difficulty?:AIDifficulty) {
+		this.gameType = gameType!;
+		this.canvas = canvas!;
+		this.gameHeader = gameHeader!
 		this.AIDifficulty = difficulty
 
-		const ctx = canvas.getContext('2d');
+		const ctx = canvas!.getContext('2d');
 		if (ctx === null) {
 			throw new Error("Unable to get 2D rendering context");
 		}
@@ -384,7 +392,6 @@ export class GameBoard {
 	}
 
 	private gameLoop = () => {
-		// here i need this function to stop when the user naviagate to other page 
 		this.draw();
 		if (!this.state.gamePaused)
 			this.update();

@@ -8,8 +8,8 @@ export default {
   render: (container: HTMLElement) => {
     container.className = 'flex flex-col h-dvh'
     container.innerHTML = `
-      <div class="profile"> </div>
-      <div class="header bg-pongblue w-full h-fit"> </div>
+      <div class="profile"></div>
+      <div class="header bg-pongblue w-full h-fit"></div>
       <div class="w-full overflow-x-none bg-pongdark flex-1 flex items-center justify-center">
         <div class="container mx-auto grid place-content-center">
           <div class="flex items-center justify-center gap-3">
