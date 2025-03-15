@@ -62,6 +62,9 @@ export async function initDatabase() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (room_id) REFERENCES chat_rooms (id)
     );
+
+    CREATE INDEX IF NOT EXISTS idx_messages_room 
+    ON messages(room_id, timestamp DESC);
   `);
 
   console.log("Database initialized");

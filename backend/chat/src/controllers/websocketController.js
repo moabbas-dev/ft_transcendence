@@ -1,6 +1,7 @@
 import { blockUser, unblockUser } from "../services/blockService.js";
-import { getUser, createOrUpdateUser, getUserByUsername } from "../services/userService.js";
+import { getUser, createOrUpdateUser, getUserByUsername, createChatRoom } from "../services/userService.js";
 import { createFriendRequest, addFriend } from "../services/friendService.js"
+import { saveMessage, getMessages } from "../services/chatService.js"
 
 export function setupWebSocketHandlers(wsAdapter, fastify) {
   // Track online users mapping username to clientId
@@ -14,7 +15,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
     }
     console.log("new user has connected: ",username, " | with ID:", userId);
     console.log("#########");
-
+    wsAdapter.sendTo(clientId, "msg", { message: "User connected" });
 
     try {
       // Create or update user in database
@@ -174,7 +175,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       const roomId = [from, to].sort().join("-");
 
       // Ensure chat room exists in database
-      await chatService.createChatRoom(roomId, [from, to]);
+      await createChatRoom(roomId, [from, to]);
 
       // Create message
       const newMessage = {
@@ -185,16 +186,16 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       };
 
       // Save message to database
-      await chatService.saveMessage(newMessage, roomId);
+      await saveMessage(newMessage, roomId);
 
       // Send the message to recipient if online
       const toClientId = onlineUsers.get(to);
-      if (toClientId) {
-        wsAdapter.sendTo(toClientId, "message:received", {
+      // if (toClientId) {
+        wsAdapter.sendTo(to, "message:received", {
           roomId,
           message: newMessage,
         });
-      }
+      // }
 
       // Also send confirmation to sender
       wsAdapter.sendTo(clientId, "message:sent", {
@@ -213,18 +214,24 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
   wsAdapter.on("messages:history", async ({ clientId, payload }) => {
     try {
       const { roomId } = payload;
-
-      // Get messages from database
-      const messages = await chatService.getMessages(roomId, 50);
-
+      
+      // Validate input
+      if (!roomId || typeof roomId !== 'string') {
+        throw new Error('Invalid room ID');
+      }
+  
+      const messages = await getMessages(roomId, 50);
+      
       wsAdapter.sendTo(clientId, "messages:history", {
         roomId,
-        messages,
+        messages
       });
+  
     } catch (error) {
-      fastify.log.error("Error in messages:history handler", error);
+      fastify.log.error("Message history error:", error);
       wsAdapter.sendTo(clientId, "error", {
         message: "Failed to retrieve message history",
+        details: error.message
       });
     }
   });
