@@ -1,4 +1,3 @@
-import store from "../../../store/store.js";
 import { createComponent } from "../../utils/StateManager.js";
 import chatService from "../../utils/chatWebSocketService.js";
 
@@ -7,31 +6,49 @@ interface ChatItemProps {
     userId: number,
     fullname: string,
     isFriend: boolean,
-    isOnline?: boolean,
+    status: string,
     onChatSelect?: (user: { nickname: string, id: number, full_name: string }) => void
 }
 
 export const ChatItem = createComponent((props: ChatItemProps) => {
     const chatItem = document.createElement('div');
-    chatItem.className = 'user-item flex items-center justify-between gap-3 py-3 hover:bg-ponghover hover:cursor-pointer border-b rounded-sm';
+    chatItem.className = 'user-item flex items-center p-3 rounded-lg transition-all duration-200 hover:bg-ponghover hover:cursor-pointer hover:shadow-md border-b';
+    
+    // Set additional styles based on status
+    if (props.status)
+        chatItem.classList.add('border-l-4', 'border-l-green-500');
+    else
+        chatItem.classList.add('border-l-4', 'border-l-red-500');
+    
     
     const render = () => {
         chatItem.innerHTML = `
-            <div class="flex items-center gap-2">
-                <div class="relative">
-                    <div class="bg-white rounded-full w-10 h-10 2xl:w-14 2xl:h-14"></div>
-                    ${props.isOnline ? 
-                        `<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-pongdark"></div>` : 
-                        ''
+            <div class="flex items-center gap-3 flex-1">
+                <div class="avatar-container relative">
+                    <div class="avatar h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-xl font-semibold text-gray-700">
+                        ${props.fullname.charAt(0).toUpperCase()}
+                    </div>
+                    ${props.status ? 
+                        `<span class="status-indicator absolute bottom-0 right-0 h-3 w-3 rounded-full ${
+                            props.status ? 'bg-green-500' : 'bg-gray-400'
+                        } border border-white"></span>` : 
+                        ``
                     }
                 </div>
-                <div class="text-white text-base sm:text-lg 2xl:text-xl">${props.fullname} - ${props.username}</div>
+                
+                <div class="user-info flex flex-col">
+                    <span class="font-medium text-white">${props.fullname}</span>
+                    <span class="text-sm text-gray-400">@${props.username}</span>
+                </div>
             </div>
+            
             ${!props.isFriend ? `
-            <div class="add-friend transition-all text-white mr-4 hover:bg-slate-700 w-fit h-fit rounded-lg">
-                <i title="Add Friend" class="fa-solid fa-user-plus p-2 text-lg hover:text-pongblue"></i>
+            <div class="add-friend-container">
+                <button class="add-friend p-2 rounded-full hover:bg-gray-100">
+                    <i class="fas fa-user-plus text-blue-500"></i>
+                </button>
             </div>
-            ` : ''}
+            ` : ``}
         `;
         
         attachEventListeners();
@@ -57,13 +74,23 @@ export const ChatItem = createComponent((props: ChatItemProps) => {
                     
                     // Update UI to show pending status
                     addFriend.firstChild?.remove();
-                    addFriend.innerHTML = `<i title="Pending..." class="fa-solid fa-user-clock p-2 text-lg hover:text-pongblue"></i>`;
+                    addFriend.innerHTML = `<i class="fas fa-user-clock text-yellow-500"></i>`;
+                    addFriend.classList.add('bg-yellow-100');
+                    
+                    // Add a subtle animation to indicate the request is pending
+                    addFriend.classList.add('animate-pulse');
                 }
             });
         }
         
         // Chat item click (select this chat)
         chatItem.addEventListener('click', () => {
+            // Highlight the selected chat
+            document.querySelectorAll('.user-item').forEach(item => {
+                item.classList.remove('bg-ponghover', 'shadow-md');
+            });
+            chatItem.classList.add('bg-ponghover', 'shadow-md');
+            
             // Call the onChatSelect callback with user info
             if (props.onChatSelect) {
                 props.onChatSelect({

@@ -1,10 +1,12 @@
 import store from "../../../store/store.js";
 import { createComponent } from "../../utils/StateManager.js";
 import chatService from "../../utils/chatWebSocketService.js";
+import bgImage from "../../assets/bg1.png";
+import { emoticons, emoticonsMap } from "./emoticons.js";
 
 interface Message {
   id: number;
-  from: string;
+  senderId: string | null;
   content: string;
   timestamp: number;
 }
@@ -21,14 +23,19 @@ export const Chat = createComponent(
     // Create the chat UI
     const renderChat = () => {
       container.innerHTML = `
-            <div class="flex flex-col bg-pongblue bg-custom-gradient justify-between px-1 sm:px-2 h-screen z-20 gap-2">
-                <header class="flex rounded-full mt-2 h-fit items-center justify-between py-3 px-2 bg-white">
+            <div class="flex flex-col bg-pongblue bg-custom-gradient justify-between h-screen z-20 gap-2 bg-cover bg-center" style="background-image: url(${bgImage})">
+                <header class="flex h-fit items-center justify-between py-3 px-2 bg-white">
                     <div class="flex">
                         <div class="back_arrow sm:hidden text-black text-3xl flex items-center justify-center hover:cursor-pointer hover:opacity-80">
                             <i class='bx bx-left-arrow-alt'></i>
                         </div>
                         <div class="flex items-center justify-center gap-1 sm:gap-2">
-                            <div class="friend_icon w-10 h-10 2xl:w-12 2xl:h-12 bg-black rounded-full"></div>
+                            <div class="avatar h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-xl font-semibold text-gray-700">
+                              ${
+                                activeUser?.full_name.charAt(0).toUpperCase() ||
+                                ""
+                              }
+                            </div>
                             <div>
                                 <p class="friend_name text-base sm:text-xl">${
                                   activeUser
@@ -58,28 +65,37 @@ export const Chat = createComponent(
                 </section>
                 ${
                   activeUser
-                    ? `
-                <div class="message-input-container flex items-center h-fit bg-pongdark gap-2 w-full rounded-full px-3 mb-16 sm:mb-4">
-                    <div class="flex items-center w-full px-2 py-2">
+                    ? `<div class="message-input-container flex items-center h-fit bg-gray-800 gap-2 w-full  px-3">
+                    <div class="flex items-center w-full  px-2 py-2">
                         <div 
                             id="message-input" 
                             contenteditable="true"
                             role="textbox"
-                            class="[&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-[#a0aec0] [&:empty]:before:pointer-events-none focus:outline-none bg-pongdark text-lg text-white flex-1 max-h-[4.75rem] overflow-y-auto whitespace-pre-wrap [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-pongdark [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:my-2"
+                            class="border rounded-full lg:py-2 py-1 pl-4 [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-[#a0aec0] [&:empty]:before:pointer-events-none focus:outline-none bg-gray-800 text-lg text-white flex-1 max-h-[4.75rem] overflow-y-auto whitespace-pre-wrap [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-pongdark [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:my-2 "
                             autocorrect="off"
                             autocapitalize="off"
                             spellcheck="false"
                             data-placeholder="Type your message..."
                         ></div>
                         <div 
+                            id="emoticon-button" 
+                            class="flex items-center justify-center hover:cursor-pointer hover:opacity-80 max-sm:bg-slate-400 hover:bg-slate-400 rounded-full w-10 h-10 text-2xl text-white bg-gray-800 transition-all duration-300 mx-1"
+                        >
+                            <i class='bx bx-smile'></i>
+                        </div>
+                        <div 
                             id="send-button" 
-                            class="flex items-center justify-center hover:cursor-pointer hover:opacity-80 max-sm:bg-slate-400 hover:bg-slate-400 rounded-full w-10 h-10 text-2xl text-white bg-pongdark transition-all duration-300 -mr-2"
+                            class="flex items-center justify-center hover:cursor-pointer hover:opacity-80 max-sm:bg-slate-400 hover:bg-slate-400 rounded-full w-10 h-10 text-2xl text-white bg-gray-800 transition-all duration-300 -mr-2"
                         >
                             <i class='bx bx-send'></i>
                         </div>
                     </div>
                 </div>
-                `
+                
+                <!-- Add emoticon container popup that will be hidden by default -->
+                <div id="emoticon-container" class="fixed bottom-20 sm:bottom-20 left-4 right-8 sm:left-auto  sm:w-72 max-h-60 overflow-y-auto max-w-80 bg-black bg-opacity-55 rounded-lg shadow-lg p-2 z-30 grid grid-cols-5 gap-2 hidden">
+                    <!-- Emoticons will be inserted here dynamically -->
+                </div>`
                     : ""
                 }
             </div>
@@ -97,10 +113,25 @@ export const Chat = createComponent(
       });
     };
 
+    const formatMessageContent = (content: string): string => {
+      // Replace emoticon codes with images
+      const emoticonRegex = /:([\w]+):/g;
+
+      return content.replace(emoticonRegex, (match) => {
+        const emoticonUrl = emoticonsMap[match as keyof typeof emoticonsMap];
+
+        if (emoticonUrl) {
+          return `<img src="${emoticonUrl}" alt="${match}" class="inline-block h-6" />`;
+        }
+
+        return match;
+      });
+    };
+
     // Render messages in the chat
     const renderMessages = () => {
       if (!messages.length) {
-        return `<div class="text-white text-center py-4 opacity-50">No messages yet</div>`;
+        return `<div class="text-black text-center py-4 opacity-50">No messages yet</div>`;
       }
 
       const currentUserId = store.userId;
@@ -122,46 +153,48 @@ export const Chat = createComponent(
       return Object.entries(messagesByDate)
         .map(([date, dateMessages]) => {
           return `
-            <div class="flex justify-center items-center w-full bg-slate-500 bg-opacity-30 my-2 py-1 rounded-md">
-                <div class="date-header text-center bg-ponghover text-white rounded-md px-2 py-1">
-                    ${date}
-                </div>
-            </div>
-            ${dateMessages
-              .map((message) => {
-                const isCurrentUser = message.from === currentUserId;
-                const messageTime = new Date(
-                  message.timestamp
-                ).toLocaleTimeString([], {
-                  hour: "numeric",
-                  minute: "2-digit",
-                  hour12: true,
-                });
+          <div class="flex justify-center items-center w-full bg-slate-500 bg-opacity-30 my-2 py-1 rounded-md">
+              <div class="date-header text-center bg-ponghover text-white rounded-md px-2 py-1">
+                  ${date}
+              </div>
+          </div>
+          ${dateMessages
+            .map((message) => {
+              const isCurrentUser = message.senderId == currentUserId;
 
-                return `
-                    <div class="flex w-full ${
-                      isCurrentUser ? "justify-end" : "justify-start"
-                    }">
-                        <div class="
-                            flex flex-col justify-center pt-1 px-2 rounded-lg
-                            max-w-[250px] md:max-w-sm break-words 2xl:max-w-xl
-                            text-white [direction:ltr] min-w-0 text-[17px] text-left
-                            ${
-                              isCurrentUser
-                                ? "bg-blue-900 mr-1"
-                                : "bg-pongdark ml-1"
-                            }
-                        ">
-                            <div class="message-content break-words">
-                                ${message.content}
-                            </div>
-                            <span class="text-xs text-gray-400">${messageTime}</span>
-                        </div>
-                    </div>
-                `;
-              })
-              .join("")}
-        `;
+              console.log(isCurrentUser);
+              const messageTime = new Date(
+                message.timestamp
+              ).toLocaleTimeString([], {
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true,
+              });
+
+              return `
+                  <div class="flex w-full ${
+                    isCurrentUser ? "justify-end" : "justify-start"
+                  }">
+                      <div class="
+                          flex flex-col justify-center pt-1 px-2 rounded-lg
+                          max-w-[250px] md:max-w-sm break-words 2xl:max-w-xl
+                          text-white [direction:ltr] min-w-0 text-[17px] text-left
+                          ${
+                            isCurrentUser
+                              ? "bg-blue-900 mr-1"
+                              : "bg-pongdark ml-1"
+                          }
+                      ">
+                          <div class="message-content break-words">
+                              ${formatMessageContent(message.content)}
+                          </div>
+                          <span class="text-xs text-gray-400">${messageTime}</span>
+                      </div>
+                  </div>
+              `;
+            })
+            .join("")}
+      `;
         })
         .join("");
     };
@@ -185,11 +218,6 @@ export const Chat = createComponent(
           e.preventDefault();
           sendMessage();
         }
-
-        // Send typing indicator
-        if (activeUser && chatService.isConnected()) {
-          chatService.sendTypingIndicator(activeUser.nickname);
-        }
       });
 
       // Handle block button
@@ -200,36 +228,126 @@ export const Chat = createComponent(
           alert(`${activeUser.full_name} has been blocked`);
         }
       });
+
+      const emoticonButton = container.querySelector("#emoticon-button");
+      const emoticonContainer = container.querySelector("#emoticon-container");
+
+      // Toggle emoticon container visibility
+      emoticonButton?.addEventListener("click", () => {
+        if (emoticonContainer) {
+          if (emoticonContainer.classList.contains("hidden")) {
+            loadEmoticons();
+            emoticonContainer.classList.remove("hidden");
+          } else {
+            emoticonContainer.classList.add("hidden");
+          }
+        }
+      });
+
+      // Load emoticons into the container
+      const loadEmoticons = () => {
+        const emoticonContainer = container.querySelector(
+          "#emoticon-container"
+        );
+        if (!emoticonContainer) return;
+
+        // Clear existing emoticons
+        emoticonContainer.innerHTML = "";
+
+        // Define your emoticons - this is a subset from your paste.txt
+
+        // Create emoticon elements
+        emoticons.forEach((emo) => {
+          const emoticonDiv = document.createElement("div");
+          emoticonDiv.className =
+            "emoticon p-2 rounded cursor-pointer w-12 h-12";
+          emoticonDiv.title = emo.title;
+          emoticonDiv.innerHTML = `<img src="${emo.src}" alt="${emo.title}" class="w-full h-auto">`;
+
+          // Add click event to insert emoticon
+          emoticonDiv.addEventListener("click", () => {
+            insertEmoticon(emo.title);
+            emoticonContainer?.classList.add("hidden");
+          });
+
+          emoticonContainer.appendChild(emoticonDiv);
+        });
+      };
+
+      // Insert emoticon into message input
+      const insertEmoticon = (emoticonCode: string) => {
+        const messageInput = container.querySelector(
+          "#message-input"
+        ) as HTMLDivElement;
+        if (!messageInput) return;
+
+        messageInput.innerText += emoticonCode + " ";
+      };
+
+      // Close emoticon container when clicking outside
+      document.addEventListener("click", (e) => {
+        const target = e.target as HTMLElement;
+        if (
+          emoticonContainer &&
+          !emoticonContainer.classList.contains("hidden") &&
+          !emoticonContainer.contains(target) &&
+          !emoticonButton?.contains(target)
+        ) {
+          emoticonContainer.classList.add("hidden");
+        }
+      });
     };
 
     const sendMessage = () => {
-        const messageInput = container.querySelector('#message-input') as HTMLDivElement;
-        const content = messageInput.innerText.trim();
-        
-        if (!content || !activeUser || !chatService.isConnected()) return;
-    
-        // Get current user from store/localStorage
-        const currentUser = store.userId; // Or localStorage.getItem('userId')
-        const currentUsername = store.nickname; // Or localStorage.getItem('username')
-    
-        if (!currentUser || !currentUsername) {
-            console.error('Current user not found');
-            return;
-        }
-    
-        // Create proper message payload
-        const newMessage = {
-            from: currentUser, // User ID
-            to: activeUser.id, // Recipient ID
-            content,
-            timestamp: Date.now()
-        };
-    
-        // Send via WebSocket
-        chatService.send('message:private', newMessage);
-    
-        // Clear input
-        messageInput.innerText = '';
+      const messageInput = container.querySelector(
+        "#message-input"
+      ) as HTMLDivElement;
+      const content = messageInput.innerText.trim();
+
+      if (!content || !activeUser || !chatService.isConnected()) return;
+
+      // Get current user info
+      const currentUser = store.userId;
+      const currentUsername = store.nickname;
+
+      if (!currentUser || !currentUsername) {
+        console.error("Current user not found");
+        return;
+      }
+
+      // Create temporary message for optimistic update
+      const tempMessage: Message = {
+        id: Date.now(), // Temporary ID (replace with real ID from server later)
+        senderId: currentUser,
+        content,
+        timestamp: Date.now(),
+      };
+
+      // Optimistically add message to UI
+      messages = [tempMessage, ...messages];
+      renderChat();
+      scrollToBottom();
+
+      // Create proper message payload
+      const newMessage = {
+        from: currentUser,
+        to: activeUser.id,
+        content,
+        timestamp: tempMessage.timestamp,
+      };
+
+      // Send via WebSocket
+      chatService.send("message:private", newMessage);
+
+      // Clear input
+      messageInput.innerText = "";
+    };
+
+    const scrollToBottom = () => {
+      const messageContainer = container.querySelector("#message-container");
+      if (messageContainer) {
+        messageContainer.scrollTop = 0; // For flex-col-reverse containers
+      }
     };
 
     // Set the active user for chat
@@ -241,9 +359,12 @@ export const Chat = createComponent(
       activeUser = user;
 
       // Create room ID (combination of both usernames sorted alphabetically)
-      const currentUsername = localStorage.getItem("username");
-      if (currentUsername) {
-        roomId = [currentUsername, user.nickname].sort().join("-");
+      const currentUserId = store.userId;
+      if (currentUserId) {
+        // Use consistent userId format for roomId
+        roomId = [currentUserId, user.id]
+          .sort((a: any, b: any) => a - b)
+          .join("-");
 
         // Get message history for this room
         if (chatService.isConnected()) {
@@ -256,25 +377,6 @@ export const Chat = createComponent(
 
     // Initialize WebSocket event listeners
     const initWebSocketEvents = () => {
-
-            // Listen for sent/received messages
-    const handleNewMessage = (data: { roomId: string; message: any }) => {
-        if (data.roomId === roomId) {
-            messages = [data.message, ...messages]; // Add to beginning
-            renderChat();
-            
-            // Auto-scroll to bottom
-            const container = document.getElementById('message-container');
-            if (container) {
-                container.scrollTop = container.scrollHeight;
-            }
-        }
-    };
-
-    chatService.on('message:received', handleNewMessage);
-    chatService.on('message:sent', handleNewMessage);
-
-
       // Listen for received messages
       chatService.on("message:received", (data: any) => {
         const { message, roomId: msgRoomId } = data;
@@ -283,6 +385,7 @@ export const Chat = createComponent(
         if (msgRoomId === roomId) {
           messages.unshift(message);
           renderChat();
+          scrollToBottom();
         }
       });
 
@@ -294,44 +397,23 @@ export const Chat = createComponent(
         if (msgRoomId === roomId) {
           messages.unshift(message);
           renderChat();
+          scrollToBottom();
         }
       });
 
-      // Listen for message history
       chatService.on("messages:history", (data) => {
+        if (!data || !data.messages) {
+          console.error("Invalid message history data received");
+          return;
+        }
+
         const { messages: historyMessages, roomId: msgRoomId } = data;
 
         // Only set messages if it's for the current room
         if (msgRoomId === roomId) {
-          messages = historyMessages.reverse(); // Most recent first
+          messages = historyMessages; // Most recent first
           renderChat();
-        }
-      });
-
-      // Listen for typing indicators
-      chatService.on("user:typing", (data) => {
-        const { username } = data;
-
-        // Only show typing indicator if it's from the active chat user
-        if (activeUser && username === activeUser.nickname) {
-          // Add typing indicator to the UI
-          const typingIndicator = document.createElement("div");
-          typingIndicator.className =
-            "typing-indicator text-white text-sm opacity-70 self-start ml-4";
-          typingIndicator.textContent = "Typing...";
-
-          // Remove any existing typing indicator
-          container.querySelector(".typing-indicator")?.remove();
-
-          // Add the new typing indicator
-          container
-            .querySelector("#message-container")
-            ?.appendChild(typingIndicator);
-
-          // Remove the typing indicator after 2 seconds
-          setTimeout(() => {
-            typingIndicator.remove();
-          }, 2000);
+          scrollToBottom();
         }
       });
 

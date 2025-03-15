@@ -205,22 +205,6 @@ class ChatWebSocketService {
   public getMessageHistory(roomId: string): void {
     this.send('messages:history', { roomId });
   }
-  
-  /**
-   * Send a typing indicator
-   */
-  public sendTypingIndicator(to: string): void {
-    if (!this.username) {
-      console.error('Not authenticated');
-      return;
-    }
-    
-    this.send('user:typing', {
-      from: this.username,
-      to
-    });
-  }
-  
   /**
    * Send a friend request
    */

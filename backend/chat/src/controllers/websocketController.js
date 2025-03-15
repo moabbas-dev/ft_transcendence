@@ -198,10 +198,10 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       // }
 
       // Also send confirmation to sender
-      wsAdapter.sendTo(clientId, "message:sent", {
-        roomId,
-        message: newMessage,
-      });
+      // wsAdapter.sendTo(clientId, "message:sent", {
+      //   roomId,
+      //   message: newMessage,
+      // });
     } catch (error) {
       fastify.log.error("Error in message:private handler", error);
       wsAdapter.sendTo(clientId, "error", {
@@ -233,16 +233,6 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
         message: "Failed to retrieve message history",
         details: error.message
       });
-    }
-  });
-
-  // Handle user typing indicator
-  wsAdapter.on("user:typing", ({ payload }) => {
-    const { from, to } = payload;
-    const toClientId = onlineUsers.get(to);
-
-    if (toClientId) {
-      wsAdapter.sendTo(toClientId, "user:typing", { username: from });
     }
   });
 
