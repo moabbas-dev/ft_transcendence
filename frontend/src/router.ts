@@ -9,7 +9,7 @@ import AboutPage from "./pages/about.js";
 import { Page } from "./types/types.js";
 import PlayVsAI from "./pages/PlayVsAI.js"
 import { Lang, setLanguage } from "./languages/LanguageController.js";
-import TournamentPage from "./pages/tournament.js";
+import TournamentPage from "./pages/tournaments.js";
 import OnlineGame from './pages/online-game.js'
 
 const routes: { [key: string]: Page } = {
@@ -21,8 +21,8 @@ const routes: { [key: string]: Page } = {
   "/chat": ChatPage,
   "/leader-board": LeaderBoardPage,
   "/about-us": AboutPage,
-  "/tournament": TournamentPage,
   "/online-game": OnlineGame,
+  "/play/tournaments": TournamentPage,
 };
 
 export function refreshRouter() {

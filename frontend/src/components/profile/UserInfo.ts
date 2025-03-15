@@ -5,29 +5,25 @@ export const UserInfo = createComponent(() => {
     container.innerHTML = `
         <div class="flex flex-col gap-4">
         <div class="flex justify-center flex-wrap gap-2 overflow-y-auto">
-            <div class="flex-1 min-w-[200px]">
+            <div class="flex-1 min-w-[250px]">
                 <label class="block font-semibold">First name:</label>
                 <input type="text" class="border border-gray-300 p-1 w-full" placeholder="First name">
             </div>
-            <div class="flex-1 min-w-[200px]">
+            <div class="flex-1 min-w-[250px]">
                 <label class="block font-semibold">Last name:</label>
                 <input type="text" class="border border-gray-300 p-1 w-full" placeholder="Last name">
             </div>    
-            <div class="flex-1 min-w-[200px]">
+            <div class="flex-1 min-w-[250px]">
                 <label class="block font-semibold">Age:</label>
                 <input type="text" class="border border-gray-300 p-1 w-full" placeholder="Age">
             </div>
-            <div class="flex-1 min-w-[200px]">
+            <div class="flex-1 min-w-[250px]">
                 <label class="block font-semibold">Country:</label>
                 <input type="text" class="border border-gray-300 p-1 w-full" placeholder="Country">
             </div>
-            <div class="flex-1 min-w-[200px]">
+            <div class="flex-1 min-w-[250px]">
                 <label class="block font-semibold">Email:</label>
                 <input type="text" class="border border-gray-300 p-1 w-full" placeholder="Email">
-            </div>
-            <div class="flex-1 min-w-[200px]">
-                <label class="block font-semibold">Gender:</label>
-                <input type="text" class="border border-gray-300 p-1 w-full" placeholder="Male/Female">
             </div>
         </div>
         
@@ -48,9 +44,23 @@ export const UserInfo = createComponent(() => {
         </div>
         <!-- Save Button on the right side -->
         <div class="flex justify-end">
-            <button type="submit" class="bg-pongblue p-1 w-40 text-white">Save</button>
+            <button type="submit" id="save-btn" class="bg-pongblue p-1 w-40 text-white hover:opacity-80 transition-all">Save</button>
         </div>
     </div>
     `;
+    const saveBtn = container.querySelector('#save-btn')!
+    saveBtn.addEventListener('click', (e:Event) => {
+        e.preventDefault()
+    })
+
+    saveBtn.addEventListener("mouseenter", function () {
+        saveBtn.innerHTML = '<i class="fa-regular fa-floppy-disk"></i>';
+        saveBtn.classList.toggle('text-lg')
+    });
+
+    saveBtn.addEventListener("mouseleave", function () {
+        saveBtn.textContent = 'Save';
+        saveBtn.classList.toggle('text-lg')
+    });
     return container;
 });
