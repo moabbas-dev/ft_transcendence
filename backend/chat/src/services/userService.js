@@ -103,6 +103,37 @@ export async function getPendingFriendRequests(userId) {
   return requests;
 }
 
+// In chatService.js
+export async function createChatRoom(roomId, participants) {
+  const db = await getDatabase();
+  
+  try {
+    await db.run('BEGIN TRANSACTION');
+
+    // 1. Create the chat room if it doesn't exist
+    await db.run(
+      `INSERT OR IGNORE INTO chat_rooms (id) VALUES (?)`,
+      [roomId]
+    );
+
+    // 2. Add participants to the room
+    for (const userId of participants) {
+      await db.run(
+        `INSERT OR IGNORE INTO room_participants (room_id, user_id) VALUES (?, ?)`,
+        [roomId, userId]
+      );
+    }
+
+    await db.run('COMMIT');
+    return true;
+    
+  } catch (error) {
+    await db.run('ROLLBACK');
+    console.error('Error creating chat room:', error);
+    throw new Error('Failed to create chat room');
+  }
+}
+
 export async function createOrUpdateUser(userData) {
   // This is a placeholder since user creation is handled by auth service
   // We might add local caching or other functionality here if needed

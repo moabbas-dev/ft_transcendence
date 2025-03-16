@@ -103,3 +103,39 @@
     }
 }
 /* w-[85dvh] h-[85dvw] */
+
+
+/* Smooth message transition */
+.message-wrapper {
+    transition: all 0.3s ease-in-out;
+}
+
+/* Scrollbar styling for message container */
+#message-container {
+    scrollbar-width: thin;
+    scrollbar-color: white #2d3748;
+}
+
+#message-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+#message-container::-webkit-scrollbar-track {
+    background: #2d3748;
+    border-radius: 4px;
+}
+
+#message-container::-webkit-scrollbar-thumb {
+    background: white;
+    border-radius: 4px;
+}
+
+/* Typing indicator animation */
+.typing-indicator {
+    animation: fadeInOut 1.5s infinite;
+}
+
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}

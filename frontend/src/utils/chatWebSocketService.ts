@@ -185,19 +185,19 @@ class ChatWebSocketService {
   /**
    * Send a private message to another user
    */
-  public sendPrivateMessage(to: string, content: string): void {
-    if (!this.username) {
-      console.error('Not authenticated');
-      return;
+  public sendPrivateMessage(toUserId: number, content: string): void {
+    if (!this.userId || !this.username) {
+        console.error('Not authenticated');
+        return;
     }
     
     this.send('message:private', {
-      from: this.username,
-      to,
-      content,
-      timestamp: Date.now()
+        from: this.userId,
+        to: toUserId,
+        content,
+        timestamp: Date.now()
     });
-  }
+}
   
   /**
    * Get message history for a specific chat room
@@ -205,22 +205,6 @@ class ChatWebSocketService {
   public getMessageHistory(roomId: string): void {
     this.send('messages:history', { roomId });
   }
-  
-  /**
-   * Send a typing indicator
-   */
-  public sendTypingIndicator(to: string): void {
-    if (!this.username) {
-      console.error('Not authenticated');
-      return;
-    }
-    
-    this.send('user:typing', {
-      from: this.username,
-      to
-    });
-  }
-  
   /**
    * Send a friend request
    */
