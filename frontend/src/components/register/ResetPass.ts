@@ -37,21 +37,21 @@ export const ResetPass = createComponent(() => {
 	  </form>
 	</div>
 	`;
-	const formElement:HTMLFormElement = form.querySelector('form')!;
-	const passwordInput:HTMLInputElement = form.querySelector('#password')!;
-	const confirmPasswordInput:HTMLInputElement = form.querySelector('#conf-password')!;
+	const formElement: HTMLFormElement = form.querySelector('form')!;
+	const passwordInput: HTMLInputElement = form.querySelector('#password')!;
+	const confirmPasswordInput: HTMLInputElement = form.querySelector('#conf-password')!;
 
 	const ChangePassButton = Button({
-	  type: 'submit',
-	  text: 'Change Password',
-	  styles: 'w-full font-semibold p-2 text-base text-white',
-	  eventType: 'click',
-	  onClick: (e: MouseEvent) => {
-		if (!validatePassword(passwordInput) || !validateConfirmPassword(passwordInput, confirmPasswordInput))
-			e.preventDefault();
-		else
-			console.log('email and pass are nice!');
-	  }
+		type: 'submit',
+		text: 'Change Password',
+		styles: 'w-full font-semibold p-2 text-base text-white',
+		eventType: 'click',
+		onClick: (e: MouseEvent) => {
+			if (!validatePassword(passwordInput) || !validateConfirmPassword(passwordInput, confirmPasswordInput))
+				e.preventDefault();
+			else
+				console.log('email and pass are nice!');
+		}
 	});
 	formElement.appendChild(ChangePassButton);
 
@@ -60,15 +60,15 @@ export const ResetPass = createComponent(() => {
 	const confEyeIcon = togglePassword[1].querySelector('.hide-show')!;
 
 	const handleTogglePassword = (e: Event) => {
-	  e.preventDefault();
-	  const wasPassword = passwordInput.type === 'password';
-	  passwordInput.type = wasPassword ? 'text' : 'password';
-	  confirmPasswordInput.type = passwordInput.type
-	  eyeIcon.classList.remove('bx-show', 'bx-hide');
-	  eyeIcon.classList.add(wasPassword ? 'bx-show' : 'bx-hide');
+		e.preventDefault();
+		const wasPassword = passwordInput.type === 'password';
+		passwordInput.type = wasPassword ? 'text' : 'password';
+		confirmPasswordInput.type = passwordInput.type
+		eyeIcon.classList.remove('bx-show', 'bx-hide');
+		eyeIcon.classList.add(wasPassword ? 'bx-show' : 'bx-hide');
 
-	  confEyeIcon.classList.remove('bx-show', 'bx-hide');
-	  confEyeIcon.classList.add(wasPassword ? 'bx-show' : 'bx-hide');
+		confEyeIcon.classList.remove('bx-show', 'bx-hide');
+		confEyeIcon.classList.add(wasPassword ? 'bx-show' : 'bx-hide');
 	};
 
 	togglePassword[0].addEventListener('click', handleTogglePassword);

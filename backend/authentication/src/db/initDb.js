@@ -18,7 +18,8 @@ const createTables = () => {
 					password TEXT,
 					nickname TEXT UNIQUE,
 					full_name TEXT NOT NULL,
-					status TEXT NOT NULL DEFAULT 'offline',
+					status TEXT NOT NULL DEFAULT 'offline' CHECK (status IN ('offline', 'online', 'in_game')),
+					elo INTEGER NOT NULL DEFAULT 1000,
 					avatar_url TEXT DEFAULT 'default_avatar.png',
 					google_id TEXT UNIQUE,
 					is_2fa_enabled BOOLEAN DEFAULT 0,
@@ -38,10 +39,11 @@ const createTables = () => {
 					updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 					FOREIGN KEY (user_id) REFERENCES Users(id)
 				);`,
-		`CREATE TABLE IF NOT EXISTS Activation_Tokens (
+		`CREATE TABLE IF NOT EXISTS User_Tokens (
 					id INTEGER PRIMARY KEY AUTOINCREMENT,
 					user_id INTEGER NOT NULL,
 					activation_token TEXT NOT NULL UNIQUE,
+					token_type TEXT NOT NULL CHECK (token_type IN ('account_activation', 'reset_password')),
 					expires_at TIMESTAMP NOT NULL DEFAULT (DATETIME('now' + '24 hours')),
 					created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 					FOREIGN KEY (user_id) REFERENCES Users(id)

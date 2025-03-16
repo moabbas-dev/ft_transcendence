@@ -1,3 +1,4 @@
+import store from "../../../store/store.js";
 import { msg } from "../../languages/LanguageController.js";
 import { navigate } from "../../router.js";
 import { createComponent } from "../../utils/StateManager.js";
@@ -37,8 +38,9 @@ export const DropDown = createComponent((props: DropDownProps) => {
 	})
 
 	const logout = container.querySelector('#logout');
-	logout?.addEventListener('click', () => {
+	logout?.addEventListener('click', async() => {
 		// handle logout here
+		store.logout();
 		navigate('/register')
 	})
 	return container;

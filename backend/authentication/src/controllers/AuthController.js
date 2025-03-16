@@ -4,8 +4,10 @@ const Session = require('../models/Session');
 const User = require('../models/User');
 const SECRET_KEY = process.env.JWT_SECRET_KEY;
 const { generateTokens } = require('../utils/jwtUtils');
-const ActivationToken = require('../models/ActivationToken');
+const UserToken = require('../models/UserToken');
 const axios = require('axios');
+const { v4: uuidv4 } = require('uuid');
+const { validatePassword } = require('../utils/validationUtils');
 
 const authenticateUser = async (email, password) => {
 	const query = `SELECT * FROM Users WHERE email = ?`;
@@ -88,12 +90,12 @@ class AuthController {
 
 	static async verifyResetEmail(request, reply) {
 		const { email } = request.body;
-		const passwordResetEmailMessage = (user) => {
+		const passwordResetEmailMessage = (fullName, uuid) => {
 			return `
 				<div>
-					<p>Dear ${user.full_name}, </p>
+					<p>Dear ${fullName}, </p>
 					<p>Please follow the below link to reset your password. </p>
-					<p>${process.env.FRONTEND_DOMAIN}/reset_password/${user.id} </p>
+					<p>${process.env.FRONTEND_DOMAIN}/reset_password/${uuid} </p>
 					<p>Have a nice day! </p>
 				</div>
 			`;
@@ -105,13 +107,14 @@ class AuthController {
 			if (user && !user.is_active)
 				return reply.code(403).send({ message: "User not active!" });
 			const userId = user.id;
+			const uuid = uuidv4();
 			try {
 				await axios.post(`http://localhost:8000/notifications/email/${userId}`, {
 					email: user.email,
 					subject: "Reset password email",
-					body: passwordResetEmailMessage(user),
+					body: passwordResetEmailMessage(user.full_name, uuid),
 				});
-
+				await UserToken.create({ userId, activationToken: uuid, tokenType: "reset_password" });
 				return reply.code(200).send({ message: "Email sent successfully!" });
 			} catch (err) {
 				return reply.code(500).send({ message: "Error sending email request!", error: err.message });
@@ -122,30 +125,14 @@ class AuthController {
 	}
 
 	static async validateResetPassword(request, reply) {
-		const { id } = request.params;
+		const { uuid } = request.params;
 		const { password, verifyPassword } = request.body;
 		try {
-			const user = await User.findById(id);
-			if (!user)
-				return reply.code(404).send({ message: "User not found!" });
-			if (user && !user.is_active)
-				return reply.code(403).send({ message: "User not active!" });
-			if (password !== verifyPassword)
-				return reply.code(400).send({ message: "passwords didn't match!" });
-			const hashedPassword = await bcrypt.hash(password, 10);
-			await User.updateUserPassword(id, { password: hashedPassword });
-			return reply.code(200).send({ message: "password changed successfully!" });
-		} catch (err) {
-			return reply.code(500).send({ message: "Error resetting password!", error: err.message });
-		}
-	}
-
-	static async activateUser(request, reply) {
-		const { activationToken } = request.params;
-		try {
-			const tokenRecord = await ActivationToken.getByToken(activationToken);
+			const tokenRecord = await UserToken.getByToken(uuid);
 			if (!tokenRecord)
 				return reply.code(404).send({ message: "Token not found!" });
+			if (tokenRecord.token_type !== "reset_password")
+				return reply.code(403).send({ message: "Token is not for reset password!" });
 			// Check if the token has expired (24 hours expiration)
 			const expiresAt = tokenRecord.expires_at;
 			const userId = tokenRecord.user_id;
@@ -154,7 +141,44 @@ class AuthController {
 
 			// Check if the token has expired (24 hours expiration)
 			if (currentTime > tokenExpirationTime) {
-				await ActivationToken.deleteByToken(activationToken); // Delete expired token
+				await UserToken.deleteByToken(UserToken); // Delete expired token
+				return reply.code(400).send({ message: "Token has expired!" });
+			}
+			const user = await User.findById(userId);
+			if (!user)
+				return reply.code(404).send({ message: "User not found!" });
+			if (user && !user.is_active)
+				return reply.code(403).send({ message: "User not active!" });
+			if (!validatePassword(password))
+				return reply.code(400).send({ message: "Incorrect password format!" });
+			if (password !== verifyPassword)
+				return reply.code(400).send({ message: "passwords didn't match!" });
+			const hashedPassword = await bcrypt.hash(password, 10);
+			await User.updateUserPassword(userId, { password: hashedPassword });
+			await UserToken.deleteByToken(uuid);
+			return reply.code(200).send({ message: "password changed successfully!" });
+		} catch (err) {
+			return reply.code(500).send({ message: "Error resetting password!", error: err.message });
+		}
+	}
+
+	static async activateUser(request, reply) {
+		const { token } = request.params;
+		try {
+			const tokenRecord = await UserToken.getByToken(token);
+			if (!tokenRecord)
+				return reply.code(404).send({ message: "Token not found!" });
+			if (tokenRecord.token_type !== "account_activation")
+				return reply.code(403).send({ message: "Token is not for account activation!"});
+			// Check if the token has expired (24 hours expiration)
+			const expiresAt = tokenRecord.expires_at;
+			const userId = tokenRecord.user_id;
+			const tokenExpirationTime = new Date(expiresAt).getTime(); // Get the expiration time in milliseconds
+			const currentTime = new Date().getTime(); // Get the current time in milliseconds
+
+			// Check if the token has expired (24 hours expiration)
+			if (currentTime > tokenExpirationTime) {
+				await UserToken.deleteByToken(UserToken); // Delete expired token
 				await User.delete(userId);
 				return reply.code(400).send({ message: "Token has expired!" });
 			}
@@ -162,7 +186,7 @@ class AuthController {
 			if (!user)
 				return reply.code(404).send({ message: "User not found!" });
 			await User.activateUser(userId);
-			await ActivationToken.deleteByToken(activationToken); // Delete expired token
+			await UserToken.deleteByToken(UserToken); // Delete expired token
 			// return reply.code(200).send({ message: "Account activation complete!" });
 			return reply.redirect(`${process.env.FRONTEND_DOMAIN}/`);
 		} catch (err) {

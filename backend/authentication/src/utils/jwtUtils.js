@@ -8,6 +8,7 @@ const generateTokens = async (user, fastify) => {
 			fullName: user.full_name,
 			nickname: user.nickname,
 			avatarUrl: user.avatar_url,
+			elo: user.elo,
 			exp: accessTokenExpiry
 		}
 	);
@@ -32,6 +33,7 @@ const generateNewAccessToken = async (user, fastify) => {
 			full_name: user.full_name,
 			nickname: user.nickname,
 			avatarUrl: user.avatar_url,
+			elo: user.elo,
 			exp: accessTokenExpiry
 		}
 	);
