@@ -2,6 +2,7 @@ import store from "../../../store/store.js";
 import { createComponent } from "../../utils/StateManager.js";
 import chatService from "../../utils/chatWebSocketService.js";
 import bgImage from "../../assets/bg1.png";
+import bgImage2 from "../../assets/chatBg5.gif"
 import { emoticons, emoticonsMap } from "./emoticons.js";
 
 interface Message {
@@ -23,7 +24,7 @@ export const Chat = createComponent(
     // Create the chat UI
     const renderChat = () => {
       container.innerHTML = `
-            <div class="flex flex-col bg-pongblue bg-custom-gradient justify-between h-screen z-20 gap-2 bg-cover bg-center" style="background-image: url(${bgImage})">
+            <div class="flex flex-col bg-pongblue bg-custom-gradient justify-between h-screen z-20 gap-2 bg-cover bg-center" style="background-image: ${activeUser ? `url(${bgImage})` : `url(${bgImage2})` }">
                 <header class="flex h-fit items-center justify-between py-3 px-2 bg-white">
                     <div class="flex">
                         <div class="back_arrow sm:hidden text-black text-3xl flex items-center justify-center hover:cursor-pointer hover:opacity-80">
@@ -130,7 +131,7 @@ export const Chat = createComponent(
 
     // Render messages in the chat
     const renderMessages = () => {
-      if (!messages.length) {
+      if (!messages.length && activeUser) {
         return `<div class="text-black text-center py-4 opacity-50">No messages yet</div>`;
       }
 
