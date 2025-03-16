@@ -1,11 +1,11 @@
 const { db } = require('../db/initDb');
 
-class ActivationToken {
-    static async create({ userId, activationToken }) {
-        const query = `INSERT INTO Activation_Tokens (user_id, activation_token)
-                        VALUES (?, ?)`;
+class UserToken {
+    static async create({ userId, activationToken, tokenType }) {
+        const query = `INSERT INTO User_Tokens (user_id, activation_token, token_type)
+                        VALUES (?, ?, ?)`;
         return new Promise((resolve, reject) => {
-            db.run(query, [userId, activationToken], function(err) {
+            db.run(query, [userId, activationToken, tokenType], function(err) {
                 if (err) reject(err);
                 else resolve(this.lastID);
             });
@@ -13,7 +13,7 @@ class ActivationToken {
     }
 
     static async getById(id) {
-        const query = `SELECT * FROM Activation_Tokens WHERE id = ?`;
+        const query = `SELECT * FROM User_Tokens WHERE id = ?`;
         return new Promise((resolve, reject) => {
             db.get(query, [id], function(err, row) {
                 if (err) reject(err);
@@ -23,7 +23,7 @@ class ActivationToken {
     }
 
     static async getByToken(token) {
-        const query = `SELECT * FROM Activation_Tokens WHERE activation_token = ?`;
+        const query = `SELECT * FROM User_Tokens WHERE activation_token = ?`;
         return new Promise((resolve, reject) => {
             db.get(query, [token], function(err, row) {
                 if (err) reject(err);
@@ -33,7 +33,7 @@ class ActivationToken {
     }
 
     static async getAll() {
-        const query = `SELECT * FROM Activation_Tokens`;
+        const query = `SELECT * FROM User_Tokens`;
         return new Promise((resolve, reject) => {
             db.all(query, function(err, rows) {
                 if (err) reject(err);
@@ -43,7 +43,7 @@ class ActivationToken {
     }
 
     static async deleteById(id) {
-        const query = `DELETE FROM Activation_Tokens WHERE id = ?`;
+        const query = `DELETE FROM User_Tokens WHERE id = ?`;
         return new Promise((resolve, reject) => {
             db.run(query, [id], function(err) {
                 if (err) reject(err);
@@ -53,7 +53,7 @@ class ActivationToken {
     }
 
     static async deleteByToken(token) {
-        const query = `DELETE FROM Activation_Tokens WHERE activation_token = ?`;
+        const query = `DELETE FROM User_Tokens WHERE activation_token = ?`;
         return new Promise((resolve, reject) => {
             db.run(query, [token], function(err) {
                 if (err) reject(err);
@@ -63,4 +63,4 @@ class ActivationToken {
     }
 }
 
-module.exports = ActivationToken;
+module.exports = UserToken;

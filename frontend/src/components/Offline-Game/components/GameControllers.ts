@@ -13,8 +13,9 @@ export class HumanPlayerController implements Controller {
 	) {}
 
 	update(canvas: HTMLCanvasElement, state: gameState) {
+		if(state.gamePaused)
+			return ;
 		const paddleSpeed = this.calculatePaddleSpeed(canvas.height);
-
 		if (state.keys[this.controlKeys.up]) {
 			state[this.playerPositionKey] -= paddleSpeed;
 		}
@@ -32,10 +33,9 @@ export class AIController implements Controller {
 	private difficulty: AIDifficulty;
 	private readonly config = {
 		baseSpeed: 8,
-		reactionDelay: { easy: 1000, medium: 600, hard: 300 },
-		predictionAccuracy: { easy: 0.7, medium: 0.85, hard: 0.95 },
-		errorMargin: { easy: 0.4, medium: 0.25, hard: 0.1 },
-		maxBouncePredictions: { easy: 0, medium: 1, hard: 3 }
+		reactionDelay: { easy: 1000, medium: 1000, hard: 1000 },
+		errorMargin: { easy: 0.35, medium: 0.25, hard: 0.1 },
+		maxBouncePredictions: { easy: 1, medium: 2, hard: 3 }
 	};
 	private lastUpdateTime = 0;
 	private targetY = 0;
@@ -47,7 +47,7 @@ export class AIController implements Controller {
 	}
 
 	update(canvas: HTMLCanvasElement, state: gameState) {
-		if (!state.gameStarted || state.gameEnded) return;
+		if (!state.gameStarted || state.gameEnded || state.gamePaused) return;
 		this.trackBallMovement(state);
 		this.calculateTargetPosition(canvas, state);
 		this.movePaddle(state, canvas.height);
@@ -136,7 +136,7 @@ export class AIController implements Controller {
         const distance = targetY - currentY;
         const baseSpeed = this.config.baseSpeed * [1, 1.1, 1.2][["easy", "medium", "hard"].indexOf(this.difficulty)];
         const speedMultiplier = Math.min(Math.abs(distance) / 50, 2);
-        
+
         return baseSpeed * speedMultiplier * Math.sign(distance);
 	}
 }
@@ -159,7 +159,7 @@ export class BallController implements Controller {
 	}
 
 	update(canvas: HTMLCanvasElement, state: gameState) {
-		if (!state.gameStarted || state.gameEnded) return;
+		if (!state.gameStarted || state.gameEnded || state.gamePaused) return;
 
 		this.moveBall(state);
 		this.checkWallCollisions(canvas, state);

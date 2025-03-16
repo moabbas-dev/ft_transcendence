@@ -4,7 +4,7 @@ const Session = require('../models/Session');
 const saltRounds = 10;
 const SECRET_KEY = process.env.JWT_SECRET_KEY;
 const { validateEmail, validatePassword } = require('../utils/validationUtils');
-const ActivationToken = require('../models/ActivationToken');
+const UserToken = require('../models/UserToken');
 const { v4: uuidv4 } = require('uuid');
 const axios = require('axios');
 
@@ -30,7 +30,7 @@ class UserController {
 			const passwordHash = await bcrypt.hash(password, saltRounds);
 			const userId = await User.create({ email, password: passwordHash, nickname, full_name, google_id });
 			const activationToken = uuidv4();
-			await ActivationToken.create({ userId, activationToken });
+			await UserToken.create({ userId, activationToken, tokenType: "account_activation" });
 			try {
 				await axios.post(`http://localhost:8000/notifications/email/${userId}`, {
 					email: email,
