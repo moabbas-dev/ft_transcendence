@@ -23,21 +23,43 @@ export const Profile = createComponent(() => {
       </div>
 
       <!-- Header (Nickname, Online, Avatar, Rank) -->
-      <div class="flex items-center justify-end gap-4">
+      
+      <div class="flex items-center gap-4 justify-end">
+          <div class="flex gap-2 mr-10 mt-8">
+            <button id="message-user" class="bg-pongblue text-white px-4 py-1 rounded hover:bg-blue-700 transition-colors">
+              <i class="fas fa-envelope mr-1"></i> Message
+            </button>
+            <button id="add-friend" class="bg-green-500 text-white px-4 py-1 rounded hover:bg-green-600 transition-colors">
+              <i class="fas fa-user-plus mr-1"></i> Add
+            </button>
+            <button id="block-user" class="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600 transition-colors">
+              <i class="fas fa-ban mr-1"></i> Block
+            </button>
+        </div>
+        <div class="flex">
         <div>
             <p class="font-bold text-lg">afarachi</p>
-            <p class="text-green-500">Online 🟢</p>
             <div class="flex items-center gap-1">
                 <p>Rank:</p>
                 <img src="${goldRank}" class="w-6">
             </div>
         </div>
-        <img 
-            src="${logoUrl}" 
-            alt="profile picture" 
-            class="w-20 h-20 object-cover rounded-full border-2 border-pongblue"
-        >
+        <div class="relative">
+          <img 
+              src="${logoUrl}" 
+              alt="profile picture" 
+              class="w-20 h-20 object-cover rounded-full border-2 border-pongblue"
+          >
+          <span class="absolute bottom-0 left-0 h-5 w-5 rounded-full
+            bg-green-500 border border-white"></span>
+        </div>
+
+        </div>
+            
       </div>
+      
+
+      
 
       <!-- Tabs (Statistics, History, Info) -->
         <div class="flex space-x-4 border-b border-gray-300">

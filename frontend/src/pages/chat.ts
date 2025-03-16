@@ -18,10 +18,14 @@ export default {
             <div class="flex">
                 <div class="flex flex-col gap-4 w-screen sm:w-[30vw] sm:min-w-[300px] h-[100dvh] bg-pongdark">
                     <div class="flex gap-2 text-white px-4 pt-4 text-3xl 2xl:text-4xl items-center">
-                        <div class="logo rounded-full size-8 bg-white drop-shadow-[0px_0px_5px_white] hover:cursor-pointer hover:drop-shadow-[1px_1px_20px_white]">
-                            <img src="${logoUrl}" class="logo size-8"/>
-                        </div>
-                        <h1>Neon Chat</h1>
+                                    <div class="logo flex flex-col items-center text-center font-bold text-white text-3xl transition-all duration-300 hover:drop-shadow-[0_0_25px_#a855f7]">
+                <span class="text-purple-500 drop-shadow-[0_0_10px_#a855f7] transition-all duration-300 hover:drop-shadow-[0_0_20px_#a855f7]">
+                    ft_transcendence
+                </span>
+                <h1 class="text-gray-300 text-xl transition-all duration-300 hover:text-white">
+                    Neon Chat
+                </h1>
+            </div>
                     </div>
                     <div class="friends-list-container flex flex-col">
                         <div class="text-white px-4 pb-2 flex justify-between items-center">
