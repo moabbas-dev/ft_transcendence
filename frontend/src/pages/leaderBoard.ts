@@ -6,6 +6,7 @@ import pic3 from "../assets/p12.jpg";
 import playerFrame from "../assets/g7.webp";
 import playerFrame1 from "../assets/g6.webp";
 import playerFrame2 from "../assets/g5.webp";
+import { Footer } from "../components/header_footer/footer.js";
 
 interface Player {
   id: number;
@@ -20,7 +21,7 @@ export default {
   render: async (container: HTMLElement) => {
     container.innerHTML = `
       <div class="profile"> </div>
-      <div class="header bg-pongblue w-full h-fit"> </div>
+      <div class="header bg-pongblue w-full h-fit sticky top-0 z-50"> </div>
       <div class="w-full overflow-x-none bg-pongdark">
         <div class="container mx-auto px-4 py-8 flex flex-col gap-4">
           <div class="flex flex-col gap-10">
@@ -77,7 +78,7 @@ export default {
             </div>
           </div>
           <!-- Rest of Leaderboard -->
-          <div class="leaderboard-table min-w-0 w-full bg-pongblue bg-opacity-20 rounded-xl overflow-y-auto max-w-4xl mx-auto shadow-lg animate-fade-up animate-once animate-duration-700 animate-delay-500 animate-ease-linear">
+          <div class="leaderboard-table min-w-0 w-full max-h-96 bg-pongblue bg-opacity-20 rounded-xl overflow-y-auto max-w-4xl mx-auto shadow-lg scrollbar-thin scrollbar-thumb-[#0f6292] scrollbar-track-gray-700">
             <table class="w-full overflow-hidden">
                 <thead>
                   <tr class="bg-pongblue text-white text-center text-lg sm:text-xl">
@@ -106,9 +107,9 @@ export default {
     headerNav?.appendChild(header);
 
     // Add footer
-    // const footer = container.querySelector(".footer")!;
-    // const footerComp = Footer();
-    // footer.appendChild(footerComp);
+    const footer = container.querySelector(".footer")!;
+    const footerComp = Footer();
+    footer.appendChild(footerComp);
 
     // Fetch leaderboard data
     await fetchAndDisplayLeaderboard();
@@ -190,6 +191,246 @@ async function fetchAndDisplayLeaderboard() {
         wins: 18,
         rank: 9,
         score: 1520,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
+      },
+      {
+        id: 10,
+        username: "BackspinKing",
+        avatar: "/images/avatars/avatar10.jpg",
+        wins: 15,
+        rank: 10,
+        score: 1450,
       },
       {
         id: 10,

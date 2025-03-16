@@ -12,11 +12,11 @@ export const Header = createComponent(() => {
     container.innerHTML = `
         <!-- <div id="menu-bar" class="fas fa-bars"></div> -->
         <div class="flex items-center justify-start w-1/2 gap-2 sm:gap-8">
-            <div class="logo hidden sm:flex flex-col items-center text-center font-bold text-white text-3xl transition-all duration-300 hover:drop-shadow-[0_0_25px_#a855f7]">
+            <div class="logo hidden sm:flex flex-col items-center text-center font-bold text-white text-xl transition-all duration-300 hover:drop-shadow-[0_0_25px_#a855f7]">
                 <span class="text-purple-500 drop-shadow-[0_0_10px_#a855f7] transition-all duration-300 hover:drop-shadow-[0_0_20px_#a855f7]">
                     ft_transcendence
                 </span>
-                <span class="text-gray-300 text-xl transition-all duration-300 hover:text-white">
+                <span class="text-gray-300 text-xs transition-all duration-300 hover:text-white">
                     Neon Pong
                 </span>
             </div>
