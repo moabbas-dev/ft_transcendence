@@ -2,6 +2,7 @@ import { createComponent } from "../../utils/StateManager.js";
 import { msg } from "../../languages/LanguageController.js";
 import { Button } from "../partials/Button.js";
 import { validateEmail } from "../../utils/FormValidation.js";
+import axios from "axios";
 
 interface SendEmailProps {
 	onSwitchToSignIn: () => void,
@@ -28,20 +29,39 @@ export const SendEmail = createComponent((props: SendEmailProps) => {
 			</div>
 		</div>
 	`;
-	const formElement:HTMLFormElement = form.querySelector('form')!;
-	const emailInput:HTMLInputElement = form.querySelector('#email')!;
+	const formElement: HTMLFormElement = form.querySelector('form')!;
+	const emailInput: HTMLInputElement = form.querySelector('#email')!;
 	const signInButton = Button({
 		type: 'submit',
 		text: msg('register.sendEmail.sendEmailBtn'),
 		styles: 'w-full font-semibold p-2 text-base text-white',
 		eventType: 'click',
-		onClick: (e: Event) => {
-		  if (!validateEmail(emailInput))
-	    	e.preventDefault();
-		  else
-			console.log('email and pass are nice!');
+		onClick: async (e: Event) => {
+			e.preventDefault();
+			try {
+				const body = {
+					email: emailInput.value
+				};
+				await axios.post(`http://localhost:8001/auth/resetPassword/email`, body);
+				console.log("Email found! Email message sent successfully!");
+			} catch (err: any) {
+				if (err.response) {
+					if (err.response.status === 404 || err.response.status === 403)
+						console.error(err.response.data.message);
+					else if (err.response.status === 500)
+						console.error(err.response.data.error);
+					else
+						console.error("Server Error!");
+				}
+				else if (err.request) {
+					console.error("No response from server:", err.request);
+				}
+				else {
+					console.error("Error setting up request:", err.message);
+				}
+			}
 		}
-	  });
+	});
 	formElement.appendChild(signInButton);
 
 	const signinLink = form.querySelector('.signin-link')!;
