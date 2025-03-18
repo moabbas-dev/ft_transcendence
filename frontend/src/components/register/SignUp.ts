@@ -160,12 +160,12 @@ export const SignUp = createComponent((props: SignUpProps) => {
       </div>
       
       <div class="flex flex-col w-full gap-3">
-        <a class="flex items-center justify-center gap-2 w-full py-2 bg-pongblue text-white rounded-lg hover:bg-opacity-90 transition-all duration-300">
+        <a class="flex items-center justify-center gap-2 w-full py-2 bg-pongblue text-white rounded-lg hover:cursor-pointer hover:bg-opacity-90 transition-all duration-300">
           <i class='bx bxl-google text-xl'></i>
           <span>${msg('register.continueGoogle')}</span>
         </a>
-        
-        <div class="text-center text-gray-600 mt-2">
+
+        <div class="text-center text-gray-600">
           ${msg('register.signup.acc_question')} 
           <span class="signin-link hover:cursor-pointer text-pongblue font-medium hover:underline">
             ${msg('register.signup.signin_btn')}
@@ -186,7 +186,7 @@ export const SignUp = createComponent((props: SignUpProps) => {
 	const signUpButton = Button({
 		type: 'submit',
 		text: msg('register.signup.signup_btn'),
-		styles: 'w-full font-semibold p-2 text-base text-white bg-pongblue rounded-lg hover:bg-opacity-90 transition-all duration-300 mt-2',
+		styles: 'w-full font-semibold p-2 text-base text-white bg-pongblue rounded-lg hover:bg-opacity-90 transition-all duration-300',
 		eventType: 'click',
 		onClick: async (e: MouseEvent) => {
 			e.preventDefault();

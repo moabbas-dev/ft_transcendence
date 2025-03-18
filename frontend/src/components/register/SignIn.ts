@@ -1,6 +1,5 @@
 import { Button } from '../partials/Button.js';
 import { createComponent, useCleanup } from '../../utils/StateManager.js';
-import { validateEmail, validatePassword } from '../../utils/FormValidation.js';
 import { msg } from '../../languages/LanguageController.js';
 import axios from 'axios';
 import { navigate } from '../../router.js';
@@ -15,42 +14,58 @@ interface SignInProps {
 
 export const SignIn = createComponent((props: SignInProps) => {
 	const form = document.createElement('div');
-	form.className = `flex flex-col justify-center gap-5 w-[93vw] sm:w-96 xl:w-[30vw] bg-white rounded-lg p-4 sm:p-8 ${props.styles || ''}`;
+	form.className = `flex flex-col justify-center gap-3 w-[93vw] sm:w-96 xl:w-[30vw] bg-white rounded-lg p-4 sm:p-8 ${props.styles || ''}`;
 	form.innerHTML = `
   	<div class="flex flex-col gap-3">
-    	<h1 class="text-2xl font-bold text-center underline">${msg('register.signin.title')}</h1>
+    	<h1 class="text-2xl sm:text-3xl font-bold text-center text-pongblue">${msg('register.signin.title')}</h1>
 		<form class="flex flex-col gap-2">
-		<div class="flex flex-col gap-1">
-			<label for="email" class="block text-base font-medium text-gray-700">Email</label>
-			<input type="email" id="email" placeholder="${msg('register.signin.emailPlaceholder')}" autocomplete="email" name="email" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pongblue focus:shadow-[0_0_5px_pongblue] focus:border-pongblue sm:text-base">
-		</div>
-		<div>
-			<label for="password" class="block text-base font-medium text-gray-700">${msg('register.signin.password')}</label>
-			<div class="relative mt-1">
-			<div>
-				<input type="password" id="password" placeholder="${msg('register.signin.passwordPlaceholder')}" autocomplete="current-password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pongblue focus:shadow-[0_0_5px_pongblue] focus:border-pongblue sm:text-base pr-10">
+			<div class="flex flex-col gap-1 px-1">
+				<label for="email" class="text-base font-medium text-gray-700">Email</label>
+				<div class="relative">
+					<span class="absolute inset-y-0 left-0 flex items-center pl-2 text-gray-500">
+					<i class="bx bx-envelope text-lg"></i>
+					</span>
+					<input type="email" id="email" placeholder="${msg('register.signup.emailPlaceholder')}" autocomplete="email" name="email" 
+					class="w-full pl-8 pr-2 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue">
+				</div>
 			</div>
-			<span class="absolute inset-y-0 right-0 flex items-center h-fit py-3 pr-3 cursor-pointer toggle-password text-lg">
-				<i class='bx bx-hide hide-show pointer-events-none'></i>
-			</span>
+
+			<div class="flex flex-col gap-1 px-1">
+				<label for="password" class="text-base font-medium text-gray-700">Password</label>
+				<div class="relative">
+					<span class="absolute inset-y-0 left-0 flex items-center pl-2 text-gray-500">
+						<i class="bx bx-lock-alt text-lg"></i>
+					</span>
+					<input type="password" id="password" placeholder="${msg('register.signup.passwordPlaceholder')}" autocomplete="current-password" name="password"
+					class="w-full pl-8 pr-8 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue">
+					<span class="absolute inset-y-0 right-0 flex items-center pr-2 cursor-pointer toggle-password">
+						<i class='bx bx-hide hide-show text-lg text-gray-500'></i>
+					</span>
+				</div>
 			</div>
-		</div>
-		<div class="flex items-center justify-end w-full forgot">
-		<!-- Forgot Password Button -->
-		</div>
-		<!-- Sign In Button -->
+
+			<div class="flex items-center justify-end w-full forgot">
+			<!-- Forgot Password Button -->
+			</div>
+			<!-- Sign In Button -->
 		</form>
-		<div class="w-full text-center">
-		${msg('register.signin.acc_question')} <span class="signup-link hover:cursor-pointer hover:opacity-80 text-pongblue">${msg('register.signin.signup_btn')}</span>
-		</div>
+
+		<div class="flex items-center w-full">
+			<div class="flex-1 border-t border-gray-300"></div>
+			<div class="px-4 text-sm text-gray-500">OR</div>
+			<div class="flex-1 border-t border-gray-300"></div>
+      	</div>
     </div>
-	<div class="flex flex-col">
+	<div class="flex flex-col gap-3">
 		<div class="w-full p-1">
 			<a class="w-full flex items-center justify-start p-1 sm:p-2 text-white bg-pongblue hover:cursor-pointer hover:opacity-80 rounded-md transition-all duration-300">
 				<i class='bx bxl-google text-2xl'></i>
 				<span class="flex-1 text-center">${msg('register.continueGoogle')}</span>
 			</a>
 		</div>	
+		<div class="w-full text-center">
+			${msg('register.signin.acc_question')} <span class="signup-link hover:cursor-pointer hover:underline text-pongblue">${msg('register.signin.signup_btn')}</span>
+		</div>
 	</div>
   `;
 	const formElement: HTMLFormElement = form.querySelector('form')!;
@@ -119,7 +134,7 @@ export const SignIn = createComponent((props: SignInProps) => {
 	const forgotBtn = Button({
 		type: 'button',
 		text: msg('register.signin.forgotpass'),
-		styles: 'bg-white text-pongblue p-0 rounded-none',
+		styles: 'bg-white text-pongblue p-0 rounded-none hover:opacity-100 hover:underline',
 		eventType: 'click',
 		onClick: (e: Event) => {
 			e.preventDefault()

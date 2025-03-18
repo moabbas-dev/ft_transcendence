@@ -81,9 +81,9 @@ export default {
 			)
 		}
 		// renderTwoFactor()
-		// renderSignIn();
+		renderSignIn();
 		// renderUserInfo();
-		renderSignUp()
+		// renderSignUp()
 
 		const canvas = document.getElementById('pongCanvas') as HTMLCanvasElement;
 		if (canvas)
