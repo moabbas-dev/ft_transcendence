@@ -39,7 +39,6 @@ class Store {
 			this.update("accessToken", null);
 			this.update("refreshToken", null);
 			this.update("sessionId", null);
-
 			console.log("User logged out successfully!");
 		}
 		catch (error: any) {
