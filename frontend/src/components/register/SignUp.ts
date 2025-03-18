@@ -1,8 +1,6 @@
 import { createComponent, useCleanup } from "../../utils/StateManager.js";
 import { Button } from "../partials/Button.js";
-import { validateConfirmPassword, validateEmail, validatePassword } from "../../utils/FormValidation.js";
 import { msg } from "../../languages/LanguageController.js";
-import { SignIn } from "./SignIn.js";
 import axios from "axios";
 import { navigate } from "../../router.js";
 

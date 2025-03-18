@@ -1,6 +1,5 @@
 import { createComponent } from "../../utils/StateManager.js";
 import { Lang, msg, setLanguage } from "../../languages/LanguageController.js";
-import logoUrl from "/src/assets/ft_transcendencee.png";
 import { navigate, refreshRouter } from "../../router.js";
 import { Notification } from "./Notification.js";
 import { DropDown } from "./DropDown.js";
