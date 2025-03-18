@@ -1,6 +1,7 @@
 import TournamentBrackets from "../components/Tournament-Game/TournamentBrackets.js";
 import { Header } from "../components/header_footer/header.js";
 import { WaitingRoom, renderWaitingRoomSlots } from "../components/Tournament-Game/WaitingRoom.js";
+import { TournamentResult, renderResultsTab } from "../components/Tournament-Game/TournamentResults.js";
 
 export default {
     render: (container: HTMLElement) => {
@@ -56,9 +57,10 @@ export default {
 
                 <!-- Tournament Content Tabs -->
                 <div>
-                    <div class="flex gap-4 border-b border-pongblue">
-                        <button id="tab-waiting" class="px-4 py-2 text-lg font-medium border-b-2 border-pongblue">Waiting Room</button>
-                        <button id="tab-bracket" class="px-4 py-2 text-lg font-medium text-gray-300">Bracket</button>
+                    <div class="flex max-sm:justify-center gap-4 border-b border-pongblue">
+                        <button id="tab-waiting" class="px-2 sm:px-4 py-1 sm:py-2 text-lg font-medium border-b-2 border-pongblue">Waiting Room</button>
+                        <button id="tab-bracket" class="px-2 sm:px-4 py-1 sm:py-2 text-lg font-medium text-gray-300">Bracket</button>
+                        <button id="tab-results" class="px-2 sm:px-4 py-1 sm:py-2 text-lg font-medium text-gray-300">Results</button>
                     </div>
                 </div>
 
@@ -79,6 +81,11 @@ export default {
                     
                     <!-- Waiting Room -->
                     <div id="waiting-content" class="block">
+                    </div>
+                    
+                    <!-- Results Tab -->
+                    <div id="results-content" class="hidden">
+                        <!-- Tournament Results will be rendered here -->
                     </div>
                 </div>
                 
@@ -175,7 +182,6 @@ export default {
             }
         }
 
-
         // Function to update both tournament and waiting room when player count changes
         function updateTournamentSize(playerCount: number) {
             // Update player max display
@@ -205,18 +211,21 @@ export default {
         // Tab switching logic
         const tabBracket = document.getElementById('tab-bracket');
         const tabWaiting = document.getElementById('tab-waiting');
+        const tabResults = document.getElementById('tab-results');
 
         const bracketContent = document.getElementById('bracket-content');
+        const resultsContent = document.getElementById('results-content');
+
         // Function to switch tabs
         function switchTab(activeTab: HTMLElement | null, activeContent: HTMLElement | null) {
             // Reset all tabs
-            [tabBracket, tabWaiting].forEach(tab => {
+            [tabBracket, tabWaiting, tabResults].forEach(tab => {
                 tab?.classList.remove('border-b-2', 'border-pongblue');
                 tab?.classList.add('text-gray-300');
             });
 
             // Reset all content
-            [bracketContent, waitingContent].forEach(content => {
+            [bracketContent, waitingContent, resultsContent].forEach(content => {
                 content?.classList.add('hidden');
                 content?.classList.remove('block');
             });
@@ -232,6 +241,24 @@ export default {
 
         tabBracket?.addEventListener('click', () => switchTab(tabBracket, bracketContent));
         tabWaiting?.addEventListener('click', () => switchTab(tabWaiting, waitingContent));
+        tabResults?.addEventListener('click', () => {
+            switchTab(tabResults, resultsContent);
+            
+            // Sample data for testing - replace with actual tournament results from API
+            const sampleResults: TournamentResult[] = [
+                { userId: '1', username: 'Mohamad', avatarUrl: '', place: 1, score: 25 },
+                { userId: '2', username: 'Runner-Up', avatarUrl: '', place: 2, score: 20 },
+                { userId: '3', username: 'ThirdPlace', avatarUrl: '', place: 3, score: 15 },
+                { userId: '4', username: '4th Player', avatarUrl: '', place: 4, score: 10 },
+                { userId: '5', username: '5th Player', avatarUrl: '', place: 5, score: 9 },
+                { userId: '6', username: '6th Player', avatarUrl: '', place: 6, score: 7 },
+                { userId: '7', username: '7th Player', avatarUrl: '', place: 7, score: 8 },
+                { userId: '8', username: '8th Player', avatarUrl: '', place: 8, score: 5 },
+            ];
+            
+            // Render the results tab content
+            renderResultsTab(container, sampleResults);
+        });
 
         const leaveButton = document.getElementById('leave-tournament');
         leaveButton?.addEventListener('click', () => {
