@@ -14,18 +14,22 @@ export const SendEmail = createComponent((props: SendEmailProps) => {
 	form.innerHTML = `
 		<div class="flex flex-col gap-3">
 			<div class="flex flex-col gap-2">
-				<h1 class="text-2xl font-bold text-center underline">${msg('register.sendEmail.resetPass')}</h1>
-				<p class="">${msg('register.sendEmail.info')}</p>
+				<h1 class="text-2xl sm:text-3xl font-bold text-center text-pongblue">${msg('register.sendEmail.resetPass')}</h1>
+				<p class="text-center">${msg('register.sendEmail.info')}</p>
 			</div>
 			<form class="flex flex-col gap-2">
-				<div class="flex flex-col gap-1">
-					<label for="email" class="block text-base font-medium text-gray-700">Email</label>
-					<input type="email" id="email" placeholder="${msg('register.signin.emailPlaceholder')}" autocomplete="email" name="email" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pongblue focus:shadow-[0_0_5px_pongblue] focus:border-pongblue sm:text-base">
+				<label for="email" class="text-base font-medium text-gray-700">Email</label>
+				<div class="relative">
+					<span class="absolute inset-y-0 left-0 flex items-center pl-2 text-gray-500">
+					<i class="bx bx-envelope text-lg"></i>
+					</span>
+					<input type="email" id="email" placeholder="${msg('register.signup.emailPlaceholder')}" autocomplete="email" name="email" 
+					class="w-full pl-8 pr-2 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue">
 				</div>
 			</form>
 			<div class="w-full text-center">
-				<span class="signin-link hover:cursor-pointer hover:opacity-80 text-pongblue">${msg('register.sendEmail.backToSignin')} </span>|
-				<span class="resend-email hover:cursor-pointer hover:opacity-80 text-pongblue"> ${msg('register.sendEmail.resendEmail')}</span>
+				<span class="signin-link hover:cursor-pointer hover:underline text-pongblue">${msg('register.sendEmail.backToSignin')} </span>|
+				<span class="resend-email hover:cursor-pointer hover:underline text-pongblue"> ${msg('register.sendEmail.resendEmail')}</span>
 			</div>
 		</div>
 	`;
@@ -34,7 +38,7 @@ export const SendEmail = createComponent((props: SendEmailProps) => {
 	const signInButton = Button({
 		type: 'submit',
 		text: msg('register.sendEmail.sendEmailBtn'),
-		styles: 'w-full font-semibold p-2 text-base text-white',
+		styles: 'w-full font-semibold p-2 text-base text-white rounded-lg',
 		eventType: 'click',
 		onClick: async (e: Event) => {
 			e.preventDefault();

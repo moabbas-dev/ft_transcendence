@@ -68,7 +68,7 @@ export const SignUp = createComponent((props: SignUpProps) => {
 					</span>
 				</div>
 			</div>
-			
+
 			<div class="flex flex-col gap-1 px-1">
 				<label for="fullname" class="text-base font-medium text-gray-700">Full name</label>
 				<div class="relative">

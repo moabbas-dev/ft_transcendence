@@ -7,32 +7,40 @@ export const ResetPass = createComponent(() => {
 	const form = document.createElement('div')
 	form.className = `w-[93vw] sm:w-96 bg-white rounded-lg p-4 sm:p-8`;
 	form.innerHTML = `
-	<div class="flex flex-col gap-5">
+	<div class="flex flex-col gap-2">
 	  <div class="flex flex-col gap-2">
-	  	<h1 class="text-2xl font-bold text-center underline">Reset Your Password</h1>
-		<p>Enter a new <b>Strong</b> password below to change your password.</p>
+	  	<h1 class="text-2xl sm:text-3xl font-bold text-center text-pongblue">Reset Your Password</h1>
+		<p class="text-center">Enter a new <b>Strong</b> password below to change your password.</p>
 	  </div>
 	  <form class="flex flex-col gap-3">
-		<div>
-		  <div class="relative mt-1">
-		  	<div>
-				<input type="password" id="password" placeholder="${msg('register.signup.passwordPlaceholder')}" autocomplete="current-password" name="password" class="relative w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pongblue focus:border-pongblue focus:shadow-[0_0_5px_pongblue] sm:text-base pr-10">
+		<div class="flex flex-col gap-1 px-1">
+			<label for="password" class="text-base font-medium text-gray-700">Password</label>
+			<div class="relative">
+				<span class="absolute inset-y-0 left-0 flex items-center pl-2 text-gray-500">
+					<i class="bx bx-lock-alt text-lg"></i>
+				</span>
+				<input type="password" id="password" placeholder="${msg('register.signup.passwordPlaceholder')}" autocomplete="current-password" name="password"
+				class="w-full pl-8 pr-8 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue">
+				<span class="absolute inset-y-0 right-0 flex items-center pr-2 cursor-pointer toggle-password">
+					<i class='bx bx-hide hide-show text-lg text-gray-500'></i>
+				</span>
 			</div>
-			<span class="absolute inset-y-0 h-[42px] right-0 flex items-center pr-3 cursor-pointer toggle-password text-lg">
-			  <i class='bx bx-hide hide-show pointer-events-none'></i>
-			</span>
-		  </div>
 		</div>
-		<div>
-			<div class="relative mt-1">
-			<div>
-				<input type="password" id="conf-password" placeholder="${msg('register.signup.passwordConfirm')}" autocomplete="current-password" name="password" class="relative w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pongblue focus:shadow-[0_0_5px_pongblue] focus:border-pongblue sm:text-base pr-10">
+	
+		<div class="flex flex-col gap-1 px-1">
+			<label for="conf-password" class="text-base font-medium text-gray-700">${msg('register.signup.passwordConfirmTitle')}</label>
+			<div class="relative">
+				<span class="absolute inset-y-0 left-0 flex items-center pl-2 text-gray-500">
+					<i class="bx bx-lock-alt text-lg"></i>
+				</span>
+				<input type="password" id="conf-password" placeholder="${msg('register.signup.passwordConfirm')}" autocomplete="current-password" name="password"
+				class="w-full pl-8 pr-8 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue">
+				<span class="absolute inset-y-0 right-0 flex items-center pr-2 cursor-pointer toggle-password">
+					<i class='bx bx-hide hide-show text-lg text-gray-500'></i>
+				</span>
 			</div>
-			<span class="absolute inset-y-0 right-0 flex items-center h-fit py-3 pr-3 cursor-pointer toggle-password text-lg">
-				<i class='bx bx-hide hide-show pointer-events-none'></i>
-			</span>
-			</div>
-	  	</div>
+		</div>
+
 		<!-- ChangePassword Button -->
 	  </form>
 	</div>
@@ -44,7 +52,7 @@ export const ResetPass = createComponent(() => {
 	const ChangePassButton = Button({
 		type: 'submit',
 		text: 'Change Password',
-		styles: 'w-full font-semibold p-2 text-base text-white',
+		styles: 'w-full font-semibold p-2 text-base text-white rounded-lg',
 		eventType: 'click',
 		onClick: (e: MouseEvent) => {
 			if (!validatePassword(passwordInput) || !validateConfirmPassword(passwordInput, confirmPasswordInput))
