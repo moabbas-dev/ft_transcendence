@@ -57,12 +57,10 @@ export const SignIn = createComponent((props: SignInProps) => {
       	</div>
     </div>
 	<div class="flex flex-col gap-3">
-		<div class="w-full p-1">
-			<a class="w-full flex items-center justify-start p-1 sm:p-2 text-white bg-pongblue hover:cursor-pointer hover:opacity-80 rounded-md transition-all duration-300">
-				<i class='bx bxl-google text-2xl'></i>
-				<span class="flex-1 text-center">${msg('register.continueGoogle')}</span>
-			</a>
-		</div>	
+		<a class="w-full flex items-center gap-2 justify-center py-2 text-white bg-pongblue hover:cursor-pointer hover:opacity-80 rounded-md transition-all duration-300">
+			<i class='bx bxl-google text-2xl'></i>
+			<span class="text-center">${msg('register.continueGoogle')}</span>
+		</a>
 		<div class="w-full text-center">
 			${msg('register.signin.acc_question')} <span class="signup-link hover:cursor-pointer hover:underline text-pongblue">${msg('register.signin.signup_btn')}</span>
 		</div>
@@ -122,7 +120,7 @@ export const SignIn = createComponent((props: SignInProps) => {
 	const signInButton = Button({
 		type: 'submit',
 		text: msg('register.signin.signin_btn'),
-		styles: 'w-full font-semibold p-2 text-base text-white',
+		styles: 'w-full font-semibold p-2 text-base text-white rounded-lg',
 		eventType: 'click',
 		onClick: async (e: Event) => {
 			e.preventDefault();
