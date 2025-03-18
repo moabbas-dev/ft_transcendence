@@ -87,7 +87,7 @@ export default {
 
     const onlineMuliplayerBtn = container.querySelector('#online-multiplayer')!
     onlineMuliplayerBtn.addEventListener('click', () => {
-      navigate('/online-game')
+      navigate('/play/online-game')
     })
     const canvas = document.getElementById("pongCanvas") as HTMLCanvasElement;
     if (canvas) {
