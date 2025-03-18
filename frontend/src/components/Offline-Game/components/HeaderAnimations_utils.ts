@@ -79,7 +79,7 @@ export function initBackgrounds(container: HTMLDivElement) {
 }
 
 export function updateBackgrounds(playerScore: number, aiScore: number) {
-  if (!leftBg || !rightBg) {
+  if (leftBg === null || rightBg === null) {
     console.warn(
       "Backgrounds are not initialized. Call initBackgrounds() first."
     );
@@ -102,12 +102,13 @@ export function updateBackgrounds(playerScore: number, aiScore: number) {
   rightBg.style.width = `${rightWidth}%`;
 
   // Update score display
-  const playerScoreElem = document.getElementById("player-score1");
-  const aiScoreElem = document.getElementById("player-score2");
+  const playerScoreElem = document.querySelector("#player-score1");
+  const aiScoreElem = document.querySelector("#player-score2");
+  
   if (playerScoreElem) {
-    playerScoreElem.querySelector("span")!.textContent = String(playerScore);
+    playerScoreElem.textContent = String(playerScore);
   }
   if (aiScoreElem) {
-    aiScoreElem.querySelector("span")!.textContent = String(aiScore);
+    aiScoreElem.textContent = String(aiScore);
   }
 }

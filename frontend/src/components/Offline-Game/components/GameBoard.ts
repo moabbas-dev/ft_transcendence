@@ -1,5 +1,7 @@
+import { refreshRouter } from "../../../router.js";
 import { AIDifficulty } from "../../../types/types.js";
 import { AIController, BallController, Controller, HumanPlayerController } from "./GameControllers.js";
+import { updateBackgrounds } from "./HeaderAnimations_utils.js";
 
 export interface gameState {
 	paddleHeight: number;
@@ -310,17 +312,18 @@ export class GameBoard {
 		this.state.paddleHeight
 		);
 
+		const ballSpeed = Math.sqrt(this.state.ballSpeedX ** 2 + this.state.ballSpeedY ** 2)
 		// Ball with neon glow
-		this.ctx.shadowColor = "#ffffff";
+		this.ctx.shadowColor = ballSpeed > 18 ? "#FF4500" : "#ffffff";
 		this.ctx.shadowBlur = 25;
-		this.ctx.fillStyle = "#ffffff";
+		this.ctx.fillStyle = ballSpeed > 18? "#FF4500" : "#ffffff";
 		this.ctx.beginPath();
 		this.ctx.arc(this.state.ballX, this.state.ballY, this.state.ballSize, 0, Math.PI * 2);
 		this.ctx.fill();
 		
 		// Draw ball trail
 		this.ctx.shadowBlur = 15;
-		this.ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+		this.ctx.fillStyle = ballSpeed > 18 ? "#FF4500" : "rgba(255, 255, 255, 0.3)";
 		for (let i = 1; i <= 5; i++) {
 			this.ctx.beginPath();
 			this.ctx.arc(
@@ -354,11 +357,13 @@ export class GameBoard {
 		const score1Element = this.gameHeader.querySelector('#player-score1');
 		if (score1Element) {
 		  score1Element.textContent = `${this.state.scores.player1}`;
+		  updateBackgrounds(this.state.scores.player1, this.state.scores.player2);
 		}
 		
 		const score2Element = this.gameHeader.querySelector('#player-score2');
 		if (score2Element) {
 		  score2Element.textContent = `${this.state.scores.player2}`;
+		  updateBackgrounds(this.state.scores.player1, this.state.scores.player2);
 		}
 
 		// Keep paddles within canvas bounds
@@ -416,7 +421,8 @@ export class GameBoard {
 
 			const restartButton = resultsPopup.querySelector("#restart-btn")
 			restartButton?.addEventListener('click', () => {
-				this.restartGame();
+				// this.restartGame();
+				refreshRouter()
 			}, { once: true });
 		}
 	}
