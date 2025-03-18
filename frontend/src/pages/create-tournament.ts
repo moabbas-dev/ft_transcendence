@@ -25,12 +25,14 @@ export default {
                 <div id="tournament-status" class="bg-gradient-to-r from-pongblue to-[rgba(100,100,255,0.8)] rounded-lg p-4 shadow-lg">
                     <div class="flex justify-between items-center flex-wrap gap-4">
                         <div class="flex flex-col gap-2">
-                            <div class="flex items-center gap-2">
+                            <div class="flex flex-wrap items-center gap-2">
                                 <h1 id="tournament-name" class="w-[22ch] text-2xl font-bold sm:text-3xl focus:outline focus:outline-1 focus:outline-white rounded-md p-2" contenteditable="true">Daily Knockout Tournament</h1>
-                                <button id="submit-change-tournament-name" type="submit" class="hidden rounded-full bg-green-700 text-white size-fit text-sm px-2 py-0.5 hover:opacity-80">Submit</button>
+                                <div class="size-fit flex flex-wrap gap-2">
+                                    <button id="submit-change-tournament-name" type="submit" class="hidden rounded-full bg-green-700 text-white size-fit text-sm px-2 py-0.5 hover:opacity-80">Submit</button>
+                                    <span id="name-error-message" class="hidden size-fit px-2 py-0.5 text-sm rounded-full bg-red-500 text-white">Name too short</span>
+                                </div>
                             </div>
-                            <span id="name-error-message" class="hidden size-fit px-2 py-0.5 text-sm rounded-full bg-red-500 text-white">Name too short</span>
-                            <div class="space-x-1">
+                            <div class="flex flex-wrap size-fit gap-2">
                                 <span id="status-badge" class="px-3 py-1 bg-yellow-600 text-white rounded-full text-sm w-fit">Waiting for Players</span>
                                 <button id="status-badge" class="px-3 py-1 bg-green-600 text-white rounded-xl text-sm w-fit hover:opacity-80 transition-all">Launch Tournament</button>
                             </div>
@@ -141,7 +143,6 @@ export default {
                 "Control", "Start", "End"
             ];
             const key = (e as KeyboardEvent).key
-            console.log(tournamentName.textContent!.length);
 
             const selection = window.getSelection();
             let selectedLength = 0;
@@ -163,8 +164,14 @@ export default {
         })
 
         changeTournamentNameBtn.addEventListener("click", () => {
-            if (tournamentName.textContent!.length < 3)
+            if (tournamentName.textContent!.length < 3) {
+                errorMessage.textContent = "Name too short"
                 errorMessage.classList.remove('hidden')
+            }
+            else if (tournamentName.textContent!.length > 25) {
+                errorMessage.textContent = "Name too long"
+                errorMessage.classList.remove('hidden')
+            }
             else {
                 // here we have to send changes to database
                 console.log("Tournament name submitted:", tournamentName.textContent);

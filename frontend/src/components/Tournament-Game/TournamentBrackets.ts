@@ -228,7 +228,7 @@ function generateSVGBracket(): string {
   }).join('');
   
   return `
-    <svg class="bracket-svg" width="100%" viewBox="0 0 ${bracketWidth} ${svgHeight}">
+    <svg class="bracket-svg ${playersCount === 4? 'w-1/2' : 'w-3/4'}" width="100%" viewBox="0 0 ${bracketWidth} ${svgHeight}">
       <!-- Round labels -->
       ${roundLabelsContent}
       
@@ -281,7 +281,7 @@ function generateSVGBracket(): string {
   function render() {
     const html = `
       <div class="tournament-bracket-container w-full overflow-x-auto">
-        <div class="tournament-bracket relative">
+        <div class="tournament-bracket relative flex justify-center">
           ${generateSVGBracket()}
         </div>
       </div>
