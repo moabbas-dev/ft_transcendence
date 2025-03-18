@@ -1,5 +1,4 @@
 import { Chat } from "../components/chat/Chat.js";
-import logoUrl from "/src/assets/ft_transcendencee.png";
 import { ChatItem } from "../components/chat/ChatItem.js";
 import { navigate } from "../router.js";
 import chatService from "../utils/chatWebSocketService.js";
@@ -15,34 +14,46 @@ interface Friend {
 export default {
   render: async (container: HTMLElement) => {
     container.innerHTML = `
-            <div class="flex">
-                <div class="flex flex-col gap-4 w-screen sm:w-[30vw] sm:min-w-[300px] h-[100dvh] bg-pongdark">
-                    <div class="flex gap-2 text-white px-4 pt-4 text-3xl 2xl:text-4xl items-center">
-                        <div class="logo rounded-full size-8 bg-white drop-shadow-[0px_0px_5px_white] hover:cursor-pointer hover:drop-shadow-[1px_1px_20px_white]">
-                            <img src="${logoUrl}" class="logo size-8"/>
-                        </div>
-                        <h1>Neon Chat</h1>
-                    </div>
-                    <div class="friends-list-container flex flex-col">
-                        <div class="text-white px-4 pb-2 flex justify-between items-center">
-                            <h2 class="text-xl">Friends</h2>
-                            <div class="loading-indicator hidden">
-                                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                            </div>
-                        </div>
-                        <div class="friends-list sm:flex flex-col scroll-pr-4 pl-4 flex-1 overflow-y-auto [scrollbar-width:thin] [scrollbar-color:white_pongdark]
-                        [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2
-                        [&::-webkit-scrollbar-track]:bg-ponghover [&::-webkit-scrollbar-track]:rounded
-                        [&::-webkit-scrollbar-thumb]:bg-pongdark [&::-webkit-scrollbar-thumb]:rounded
-                        [&::-webkit-scrollbar-thumb:hover]:bg-[#2d3748]">
-                            <div class="loading text-center text-white py-4">Loading friends...</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="chat hidden bg-black sm:block sm:w-[70vw] h-[100dvh]">
-                    <!-- Chat will be rendered here -->
+      <div class="flex">
+    <div class="flex flex-col gap-4 w-screen sm:w-[30vw] sm:min-w-[300px] h-[100dvh] bg-pongdark relative">
+        <div class="flex gap-2 text-white px-4 pt-2 text-3xl 2xl:text-4xl items-center w-full relative">
+            <div class="flex gap-2 text-white w-full text-3xl 2xl:text-4xl items-center justify-center">
+                <div class="logo flex flex-col items-center text-center font-bold text-white text-3xl transition-all duration-300 hover:drop-shadow-[0_0_25px_#a855f7]">
+                    <span class="text-purple-500 drop-shadow-[0_0_10px_#a855f7] transition-all duration-300 hover:drop-shadow-[0_0_20px_#a855f7]">
+                        ft_transcendence
+                    </span>
+                    <h1 class="text-gray-300 text-xl transition-all duration-300 hover:text-white">
+                        Neon Chat
+                    </h1>
                 </div>
             </div>
+            
+            <div class="absolute bottom-0 left-0 w-full h-[2px] bg-purple-500 shadow-[0_0_10px_#a855f7] transition-all duration-300 hover:shadow-[0_0_20px_#a855f7]"></div>
+        </div>
+
+        <div class="friends-list-container flex flex-col">
+            <div class="text-white px-4 pb-2 flex justify-between items-center">
+                <h2 class="text-xl">Friends</h2>
+                <div class="loading-indicator hidden">
+                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                </div>
+            </div>
+            
+            <div class="friends-list sm:flex flex-col scroll-pr-4 pl-4 flex-1 overflow-y-auto [scrollbar-width:thin] [scrollbar-color:white_pongdark]
+                [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2
+                [&::-webkit-scrollbar-track]:bg-ponghover [&::-webkit-scrollbar-track]:rounded
+                [&::-webkit-scrollbar-thumb]:bg-pongdark [&::-webkit-scrollbar-thumb]:rounded
+                [&::-webkit-scrollbar-thumb:hover]:bg-[#2d3748]">
+                <div class="loading text-center text-white py-4">Loading friends...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat hidden bg-black sm:block sm:w-[70vw] h-[100dvh]">
+        <!-- Chat will be rendered here -->
+    </div>
+</div>
+
         `;
 
     // Get references to elements

@@ -5,11 +5,14 @@ class Store {
 	nickname: string | null = localStorage.getItem("nickname");
 	email: string | null = localStorage.getItem("email");
 	fullName: string | null = localStorage.getItem("fullName");
+	age: string | null = localStorage.getItem("age");
+	country: string | null = localStorage.getItem("country");
 	avatarUrl: string | null = localStorage.getItem("avatarUrl");
 	isLoggedIn: boolean = localStorage.getItem("isLoggedIn") === "true";
 	accessToken: string | null = localStorage.getItem("accessToken");
 	refreshToken: string | null = localStorage.getItem("refreshToken");
 	sessionId: string | null = localStorage.getItem("sessionId");
+	createdAt: string | null = localStorage.getItem("createdAt");
 
 	// Function to update any variable dynamically
 	update(key: keyof Store, value: string | boolean | null): void {
@@ -35,11 +38,13 @@ class Store {
 			this.update("nickname", null);
 			this.update("email", null);
 			this.update("fullName", null);
+			this.update("age", null);
+			this.update("country", null);
 			this.update("avatarUrl", null);
 			this.update("accessToken", null);
 			this.update("refreshToken", null);
 			this.update("sessionId", null);
-
+			this.update("createdAt", null);
 			console.log("User logged out successfully!");
 		}
 		catch (error: any) {

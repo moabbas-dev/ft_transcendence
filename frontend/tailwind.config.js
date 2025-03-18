@@ -3,7 +3,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        pongblue: "#0F6292",//#04809F
+        pongblue: "#0F6292",
         pongdark: "rgb(17, 24, 39)",
         ponghover: "rgb(26, 36, 58)",
         // Podium colors
@@ -153,6 +153,7 @@ module.exports = {
     require("tailwindcss-animated"),
     function({ addVariant }) {
       addVariant('portrait', '@media (orientation: portrait)');
-    }
+    },
+    require('tailwind-scrollbar')
   ],
 };

@@ -4,11 +4,6 @@ export const UserStatistics = createComponent(() => {
     const container = document.createElement("div");
     container.className = 'flex flex-col gap-2'
     container.innerHTML = `
-      <p>Overview</p> 
-      <div class="flex gap-4">
-        <div>🏆 Wins: 7</div>
-        <div>👎 Losses: 3</div>
-      </div>
       <!-- Elo Rating Line Chart -->
       <div class="flex flex-col gap-4 justify-center">
         <canvas id="statsChart" class="w-full flex justify-center" height="250"></canvas>

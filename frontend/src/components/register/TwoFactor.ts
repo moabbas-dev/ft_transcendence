@@ -12,7 +12,7 @@ export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
 	form.innerHTML = `
 		<div class="flex flex-col gap-3">
 			<div class="flex flex-col gap-2">
-				<h1 class="text-2xl font-bold text-center underline">Two-Factor Authentication</h1>
+				<h1 class="text-2xl sm:text-3xl font-bold text-center text-pongblue">Two-Factor Authentication</h1>
 				<p class="text-center">Enter the 6-digits code from your authenticator app</p>
 			</div>
 			<form class="flex flex-col gap-4">
@@ -26,7 +26,7 @@ export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
 				</div>
 			</form>
 			<div class="w-full text-center">
-				<span class="signin-link hover:cursor-pointer hover:opacity-80 text-pongblue">${msg('register.sendEmail.backToSignin')} </span>
+				<span class="signin-link hover:cursor-pointer hover:underline text-pongblue">${msg('register.sendEmail.backToSignin')} </span>
 			</div>
 		</div>
 	`;
@@ -34,7 +34,7 @@ export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
 	const verifyButton = Button({
 		type: 'submit',
 		text: 'Verify',
-		styles: 'w-full font-semibold p-2 text-base text-white',
+		styles: 'w-full font-semibold p-2 text-base text-white rounded-lg',
 		eventType: 'click',
 		onClick: (e: Event) => {
 			e.preventDefault();

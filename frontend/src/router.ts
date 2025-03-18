@@ -11,18 +11,21 @@ import PlayVsAI from "./pages/PlayVsAI.js"
 import { Lang, setLanguage } from "./languages/LanguageController.js";
 import TournamentPage from "./pages/tournaments.js";
 import OnlineGame from './pages/online-game.js'
+import CreateTournamentPage from './pages/create-tournament.js'
 
 const routes: { [key: string]: Page } = {
   "/": HomePage,
   "/register": RegisterPage,
+  "/reset_password/:uuid": RegisterPage,
   "/play": PlayPage,
   "/play/local-ai": PlayVsAI,
   "/play/local-multi": LocalPongPage,
+  "/play/online-game": OnlineGame,
+  "/play/tournaments": TournamentPage,
+  "/tournaments/create": CreateTournamentPage,
   "/chat": ChatPage,
   "/leader-board": LeaderBoardPage,
   "/about-us": AboutPage,
-  "/online-game": OnlineGame,
-  "/play/tournaments": TournamentPage,
 };
 
 // export function refreshRouter() {

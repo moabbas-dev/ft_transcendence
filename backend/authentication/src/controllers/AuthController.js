@@ -8,6 +8,7 @@ const UserToken = require('../models/UserToken');
 const axios = require('axios');
 const { v4: uuidv4 } = require('uuid');
 const { validatePassword } = require('../utils/validationUtils');
+const { use } = require('react');
 
 const authenticateUser = async (email, password) => {
 	const query = `SELECT * FROM Users WHERE email = ?`;
@@ -50,7 +51,7 @@ class AuthController {
 				const sessId = await Session.create({ userId, accessToken, refreshToken });
 				await User.updateUserStatus(userId, { status: "online" });
 				return reply.code(200).send({
-					require2FA: false, sessionId: sessId, accessToken: accessToken, refreshToken: refreshToken
+					require2FA: false, sessionId: sessId, accessToken: accessToken, refreshToken: refreshToken,
 					// userId: user.id, email: user.email, nickname: user.nickname, fullName: user.full_name,
 					// avatarUrl: user.avatar_url
 				});
@@ -149,7 +150,7 @@ class AuthController {
 				return reply.code(404).send({ message: "User not found!" });
 			if (user && !user.is_active)
 				return reply.code(403).send({ message: "User not active!" });
-			if (!validatePassword(password))
+			if (!validatePassword(password) || !validatePassword(verifyPassword))
 				return reply.code(400).send({ message: "Incorrect password format!" });
 			if (password !== verifyPassword)
 				return reply.code(400).send({ message: "passwords didn't match!" });

@@ -139,3 +139,19 @@
     0%, 100% { opacity: 0.5; }
     50% { opacity: 1; }
 }
+
+input[type="radio"] + div + div {
+    transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+}
+
+input[type="radio"]:not(:checked) + div + div {
+    opacity: 0;
+}
+
+input[type="radio"]:checked + div + div {
+    opacity: 1;
+}
+
+input[type="radio"]:focus + div {
+    box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.5);
+}
