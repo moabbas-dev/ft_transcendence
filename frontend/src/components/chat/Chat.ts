@@ -4,6 +4,7 @@ import chatService from "../../utils/chatWebSocketService.js";
 import bgImage from "../../assets/bg1.png";
 import bgImage2 from "../../assets/chatBg5.gif"
 import { emoticons, emoticonsMap } from "./emoticons.js";
+import { Profile } from "../profile/UserProfile.js";
 
 interface Message {
   id: number;
@@ -30,7 +31,7 @@ export const Chat = createComponent(
                         <div class="back_arrow sm:hidden text-black text-3xl flex items-center justify-center hover:cursor-pointer hover:opacity-80">
                             <i class='bx bx-left-arrow-alt'></i>
                         </div>
-                        <div class="flex items-center justify-center gap-1 sm:gap-2">
+                        <div class="flex items-center justify-center gap-1 sm:gap-2"  id="friend_name">
                             <div class="avatar h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-xl font-semibold text-gray-700">
                               ${
                                 activeUser?.full_name.charAt(0).toUpperCase() ||
@@ -38,7 +39,7 @@ export const Chat = createComponent(
                               }
                             </div>
                             <div>
-                                <p class="friend_name text-base sm:text-xl">${
+                                <p  class="text-base sm:text-xl">${
                                   activeUser
                                     ? `${activeUser.full_name} - ${activeUser.nickname}`
                                     : "Select a chat"
@@ -105,6 +106,27 @@ export const Chat = createComponent(
       // Add event listeners after the HTML is rendered
       if (activeUser) {
         setupEventListeners();
+      }
+
+      const friend = document.querySelector('#friend_name');
+      if (friend) {
+        friend.addEventListener('click', () => {
+          // Check if the profile popup exists, create it if not
+          let profilePopUp = document.querySelector(".profile");
+          if (!profilePopUp) {
+            profilePopUp = document.createElement("div");
+            profilePopUp.className = "profile";
+            // Append it to a parent container, e.g. the main container
+            container.appendChild(profilePopUp);
+          }
+          
+          const profile = Profile({ 
+            uName: activeUser?.nickname,
+          });
+          console.log(activeUser?.nickname);
+          profilePopUp.innerHTML = ''; // Clear existing content
+          profilePopUp.appendChild(profile);
+        });
       }
 
       container.querySelector(".back_arrow")?.addEventListener("click", () => {
@@ -199,6 +221,8 @@ export const Chat = createComponent(
         })
         .join("");
     };
+
+
 
     // Setup event listeners for the chat
     const setupEventListeners = () => {

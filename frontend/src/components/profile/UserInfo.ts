@@ -1,48 +1,79 @@
 import { createComponent } from "../../utils/StateManager.js";
+import store from "../../../store/store.js";
+import axios from "axios";
 
-export const UserInfo = createComponent(() => {
+interface UserInfoProps {
+  uName: string;
+}
+
+export const UserInfo = createComponent((props: UserInfoProps) => {
+  if (props && props.uName) {
+    const token = store.accessToken;
+    // Make the API call with proper authorization headers
+    axios
+      .get(`http://localhost:8001/auth/users/nickname/${props.uName}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        // Store or use the user data
+        const userData = response.data;
+        updateUIWithUserData(userData, container);
+        console.log(userData);
+      })
+      .catch((error) => {
+        console.error("Error fetching user data:", error.response.data.message);
+      });
+  }
+
   const container = document.createElement("div");
   container.innerHTML = `
         <div class="flex flex-col gap-4">
-        <div class="flex justify-center flex-wrap gap-2 overflow-y-auto">
-            <div class="flex-1 min-w-[250px]">
-                <label class="block font-semibold">First name:</label>
-                <input type="text" class="border border-gray-300 p-1 w-full" placeholder="First name">
-            </div>
-            <div class="flex-1 min-w-[250px]">
-                <label class="block font-semibold">Last name:</label>
-                <input type="text" class="border border-gray-300 p-1 w-full" placeholder="Last name">
-            </div>    
-            <div class="flex-1 min-w-[250px]">
+          <div class="flex justify-center flex-wrap gap-2 overflow-y-auto">
+              <div class="flex-1 min-w-[250px]">
+                <label class="block font-semibold">Full name:</label>
+                <input type="text" class="border border-gray-300 p-1 w-full" placeholder="Full name" id="fullName" value=${
+                  store.fullName
+                }>
+              </div>  
+              <div class="flex-1 min-w-[250px]">
                 <label class="block font-semibold">Age:</label>
-                <input type="text" class="border border-gray-300 p-1 w-full" placeholder="Age">
-            </div>
-            <div class="flex-1 min-w-[250px]">
+                <input type="text" class="border border-gray-300 p-1 w-full" placeholder="Age" value="23">
+              </div>
+              <div class="flex-1 min-w-[250px]">
                 <label class="block font-semibold">Country:</label>
-                <input type="text" class="border border-gray-300 p-1 w-full" placeholder="Country">
-            </div>
-            <div class="flex-1 min-w-[250px]">
+                <input type="text" class="border border-gray-300 p-1 w-full" placeholder="Country" value="Lebanon">
+              </div>
+              <div class="flex-1 min-w-[250px]">
                 <label class="block font-semibold">Email:</label>
-                <input type="text" class="border border-gray-300 p-1 w-full" placeholder="Email">
+                <input type="text" class="border border-gray-300 p-1 w-full" placeholder="Email" value="${store.email}">
+              </div>
             </div>
-        </div>
-        
-        <!-- 2FA Toggle -->
-        <div class="flex flex-col gap-4">
-            <div class="flex items-center gap-2">
-                <span class="font-semibold">Enable 2FA</span>
-                <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" id="twoFactorToggle" class="sr-only peer" />
-                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 
-                    peer-focus:ring-blue-300 rounded-full peer 
-                    peer-checked:after:translate-x-full 
-                    peer-checked:after:border-white 
-                    after:content-[''] after:absolute after:top-0.5 after:left-[2px] 
-                    after:bg-white after:border-gray-300 after:border 
-                    after:rounded-full after:h-5 after:w-5 after:transition-all
-                    peer-checked:bg-pongblue"></div>
-                </label>
+            <div class="flex-1 min-w-[250px] border-b-2">
+              <p class="block font-semibold">Member Since:</P>
+              <p>18/3/2025</p>
             </div>
+            ${
+              props.uName
+                ? " "
+                : `<div>
+          <!-- 2FA Toggle -->
+          <div class="flex flex-col gap-4">
+              <div class="flex items-center gap-2">
+                  <span class="font-semibold">Enable 2FA</span>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" id="twoFactorToggle" class="sr-only peer" />
+                      <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 
+                      peer-focus:ring-blue-300 rounded-full peer 
+                        peer-checked:after:translate-x-full 
+                      peer-checked:after:border-white 
+                        after:content-[''] after:absolute after:top-0.5 after:left-[2px] 
+                      after:bg-white after:border-gray-300 after:border 
+                        after:rounded-full after:h-5 after:w-5 after:transition-all
+                      peer-checked:bg-pongblue"></div>
+                    </label>
+                </div>
             
             <!-- QR Code Container (initially hidden) -->
             <div id="qrCodeContainer" class="hidden">
@@ -70,11 +101,56 @@ export const UserInfo = createComponent(() => {
             </div>
         </div>
         <!-- Save Button on the right side -->
-        <div class="flex justify-end">
+        <div id="saveButtonContainer" class="flex justify-end">
             <button type="submit" id="save-btn" class="bg-pongblue p-1 w-40 text-white hover:opacity-80 transition-all">Save</button>
         </div>
-    </div>
+        </div>            
+    </div>`
+            }
+          
     `;
+
+  function updateUIWithUserData(userData: any, container: HTMLDivElement) {
+    // Update nickname
+    const fullNameElement = container.querySelector(
+      "#fullName"
+    ) as HTMLInputElement;
+    if (fullNameElement) {
+      fullNameElement.value = userData.full_name;
+      fullNameElement.readOnly = true;
+      fullNameElement.classList.add('bg-gray-200'); 
+
+    }
+    // Update age
+    const ageInput = container.querySelector(
+      'input[placeholder="Age"]'
+    ) as HTMLInputElement;
+    if (ageInput) {
+      ageInput.value = userData.age?.toString();
+      ageInput.readOnly = true;
+      ageInput.classList.add('bg-gray-200'); 
+    }
+
+    // Update country
+    const countryInput = container.querySelector(
+      'input[placeholder="Country"]'
+    ) as HTMLInputElement;
+    if (countryInput) {
+      countryInput.value = userData.country;
+      countryInput.readOnly = true;
+      countryInput.classList.add('bg-gray-200'); 
+    }
+
+    // Update email
+    const emailInput = container.querySelector(
+      'input[placeholder="Email"]'
+    ) as HTMLInputElement;
+    if (emailInput) {
+      emailInput.value = userData.email;
+      emailInput.readOnly = true;
+      emailInput.classList.add('bg-gray-200'); 
+    }
+  }
 
   const twoFactorToggle = container.querySelector(
     "#twoFactorToggle"
@@ -84,22 +160,27 @@ export const UserInfo = createComponent(() => {
   const secretKeyElement = container.querySelector("#secretKey");
   const regenerateQrBtn = container.querySelector("#regenerateQrBtn");
 
-  // Function to generate a random secret key
+  if (!props.uName) {
+    const saveBtn = container.querySelector("#save-btn")!;
+    // Save button interactions
+    if (saveBtn) {
+      saveBtn.addEventListener("click", (e: Event) => {
+        e.preventDefault();
+        // Here you would add the logic to save user info
+        console.log("Saving user info...");
+      });
 
-  const saveBtn = container.querySelector("#save-btn")!;
-  saveBtn.addEventListener("click", (e: Event) => {
-    e.preventDefault();
-  });
+      saveBtn.addEventListener("mouseenter", function () {
+        saveBtn.innerHTML = '<i class="fa-regular fa-floppy-disk"></i>';
+        saveBtn.classList.toggle("text-lg");
+      });
 
-  saveBtn.addEventListener("mouseenter", function () {
-    saveBtn.innerHTML = '<i class="fa-regular fa-floppy-disk"></i>';
-    saveBtn.classList.toggle("text-lg");
-  });
-
-  saveBtn.addEventListener("mouseleave", function () {
-    saveBtn.textContent = "Save";
-    saveBtn.classList.toggle("text-lg");
-  });
+      saveBtn.addEventListener("mouseleave", function () {
+        saveBtn.textContent = "Save";
+        saveBtn.classList.toggle("text-lg");
+      });
+    }
+  }
 
   // Function to generate a random secret key
   const generateSecretKey = () => {
@@ -177,25 +258,6 @@ export const UserInfo = createComponent(() => {
 
     qrCodeImage.innerHTML = qrSvg;
   };
-
-  // Save button interactions
-  if (saveBtn) {
-    saveBtn.addEventListener("click", (e: Event) => {
-      e.preventDefault();
-      // Here you would add the logic to save user info
-      console.log("Saving user info...");
-    });
-
-    saveBtn.addEventListener("mouseenter", function () {
-      saveBtn.innerHTML = '<i class="fa-regular fa-floppy-disk"></i>';
-      saveBtn.classList.toggle("text-lg");
-    });
-
-    saveBtn.addEventListener("mouseleave", function () {
-      saveBtn.textContent = "Save";
-      saveBtn.classList.toggle("text-lg");
-    });
-  }
 
   // Function to handle generating a new 2FA setup
   const setupNewTwoFactor = async () => {

@@ -35,7 +35,7 @@ export const Header = createComponent(() => {
                 </div>
             </nav>
             <nav class="nav-btn sm:hidden hover:cursor-pointer hover:opacity-80">
-                <i class="fa-solid fa-bars-staggered text-xl"></i>
+                <i class="fa-solid fa-bars text-xl"></i>
             </nav>
         </div>
         <div class="flex items-center justify-end gap-3 sm:gap-4 w-1/2">
@@ -124,14 +124,30 @@ export const Header = createComponent(() => {
     notificationCount.classList.add(notificationContainer.children.length == 0? 'bg-gray-600' : 'bg-red-600');
     notificationCount.textContent = `${notificationContainer.children.length}`
 
-    navBtn.addEventListener('click', () => {
+
+    document.addEventListener('click', (event :any) => {
+        const isClickInside = navBtn.contains(event.target) || navbar.contains(event.target);
+    
+        if (!isClickInside) {
+            navbar.classList.add('hidden');
+            navBtn.innerHTML = '<i class="fa-solid fa-bars text-xl"></i>';
+        }
+    });
+
+    navBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
         const navStyles = 'max-sm:animate-fade-down max-sm:animate-once max-sm:animate-duration-[600ms] max-sm:flex max-sm:z-50 max-sm:flex-col max-sm:absolute max-sm:top-full max-sm:left-0 max-sm:w-fit max-sm:gap-0'
         navStyles.split(' ').forEach(style => navbar.classList.toggle(style))
+        if (!navBtn.innerHTML.includes('fa-bars-staggered')) {
+            navBtn.innerHTML = '<i class="fa-solid fa-bars-staggered text-xl"></i>';
+        } else {
+            navBtn.innerHTML = '<i class="fa-solid fa-bars text-xl"></i>';
+        }        
         navbar.classList.toggle('hidden')
         const childrenStyles = 'max-sm:flex-row max-sm:w-full max-sm:max-w-full max-sm:justify-start max-sm:gap-2 max-sm:bg-pongblue max-sm:py-3 max-sm:px-5 max-sm:transition-all max-sm:hover:pl-7 max-sm:hover:pr-3'
         navChildren.forEach(nav => 
             childrenStyles.split(' ').forEach(style => nav.classList.toggle(style))
-        )
+        );
     })
 
     searchIcon.addEventListener('click', () => {

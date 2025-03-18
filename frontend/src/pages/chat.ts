@@ -1,5 +1,4 @@
 import { Chat } from "../components/chat/Chat.js";
-import logoUrl from "/src/assets/ft_transcendencee.png";
 import { ChatItem } from "../components/chat/ChatItem.js";
 import { navigate } from "../router.js";
 import chatService from "../utils/chatWebSocketService.js";
