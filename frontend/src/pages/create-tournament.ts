@@ -1,17 +1,6 @@
 import TournamentBrackets from "../components/Tournament-Game/TournamentBrackets.js";
 import { Header } from "../components/header_footer/header.js";
-import moabbas from '../assets/moabbas.jpg';
-import afarachi from '../assets/afarachi.jpg';
-import jfatfat from '../assets/jfatfat.jpg';
-import odib from '../assets/omar.webp';
-
-// Sample user data for search results [For testing purposes]
-const sampleUsers = [
-    { username: "Ahmad Farachi - afarachi", status: "online", avatar: afarachi, rank: "Gold" },
-    { username: "Jihad Fatfat - jfatfat", status: "offline", avatar: jfatfat, rank: "Silver" },
-    { username: "Mohamad Abbass - moabbas", status: "in-game", avatar: moabbas, rank: "Bronze" },
-    { username: "Omar Dib - odib", status: "online", avatar: odib, rank: "4" }
-];
+import { WaitingRoom, renderWaitingRoomSlots } from "../components/Tournament-Game/WaitingRoom.js";
 
 export default {
     render: (container: HTMLElement) => {
@@ -25,12 +14,14 @@ export default {
                 <div id="tournament-status" class="bg-gradient-to-r from-pongblue to-[rgba(100,100,255,0.8)] rounded-lg p-4 shadow-lg">
                     <div class="flex justify-between items-center flex-wrap gap-4">
                         <div class="flex flex-col gap-2">
-                            <div class="flex items-center gap-2">
+                            <div class="flex flex-wrap items-center gap-2">
                                 <h1 id="tournament-name" class="w-[22ch] text-2xl font-bold sm:text-3xl focus:outline focus:outline-1 focus:outline-white rounded-md p-2" contenteditable="true">Daily Knockout Tournament</h1>
-                                <button id="submit-change-tournament-name" type="submit" class="hidden rounded-full bg-green-700 text-white size-fit text-sm px-2 py-0.5 hover:opacity-80">Submit</button>
+                                <div class="size-fit flex flex-wrap gap-2">
+                                    <button id="submit-change-tournament-name" type="submit" class="hidden rounded-full bg-green-700 text-white size-fit text-sm px-2 py-0.5 hover:opacity-80">Submit</button>
+                                    <span id="name-error-message" class="hidden size-fit px-2 py-0.5 text-sm rounded-full bg-red-500 text-white">Name too short</span>
+                                </div>
                             </div>
-                            <span id="name-error-message" class="hidden size-fit px-2 py-0.5 text-sm rounded-full bg-red-500 text-white">Name too short</span>
-                            <div class="space-x-1">
+                            <div class="flex flex-wrap size-fit gap-2">
                                 <span id="status-badge" class="px-3 py-1 bg-yellow-600 text-white rounded-full text-sm w-fit">Waiting for Players</span>
                                 <button id="status-badge" class="px-3 py-1 bg-green-600 text-white rounded-xl text-sm w-fit hover:opacity-80 transition-all">Launch Tournament</button>
                             </div>
@@ -88,22 +79,6 @@ export default {
                     
                     <!-- Waiting Room -->
                     <div id="waiting-content" class="block">
-                        <div class="flex flex-col gap-6">
-                            <div class="text-2xl font-semibold">Waiting Room</div>
-                            <div class="flex flex-col gap-4 bg-[rgba(100,100,255,0.1)] rounded-lg p-4">
-                                <div class="flex justify-between items-center">
-                                    <div class="sm:text-lg font-medium">Current Players</div>
-                                    <div class="text-sm text-gray-300">Tournament starts when <span class="player-max-display">4</span> players join</div>
-                                </div>
-                                <div id="waiting-players" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-                                    <!-- Player slots will be dynamically generated -->
-                                </div>
-
-                                <div class="flex justify-between">
-                                    <button id="leave-tournament" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg">Leave Tournament</button>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
                 
@@ -141,7 +116,6 @@ export default {
                 "Control", "Start", "End"
             ];
             const key = (e as KeyboardEvent).key
-            console.log(tournamentName.textContent!.length);
 
             const selection = window.getSelection();
             let selectedLength = 0;
@@ -163,8 +137,14 @@ export default {
         })
 
         changeTournamentNameBtn.addEventListener("click", () => {
-            if (tournamentName.textContent!.length < 3)
+            if (tournamentName.textContent!.length < 3) {
+                errorMessage.textContent = "Name too short"
                 errorMessage.classList.remove('hidden')
+            }
+            else if (tournamentName.textContent!.length > 25) {
+                errorMessage.textContent = "Name too long"
+                errorMessage.classList.remove('hidden')
+            }
             else {
                 // here we have to send changes to database
                 console.log("Tournament name submitted:", tournamentName.textContent);
@@ -172,6 +152,9 @@ export default {
                 errorMessage.classList.add('hidden')
             }
         });
+
+        const waitingContent = document.getElementById('waiting-content')!;
+        waitingContent.appendChild(WaitingRoom())
 
         const radioButtons = document.querySelectorAll('input[name="players"]');
         // Function to render the tournament brackets
@@ -192,50 +175,6 @@ export default {
             }
         }
 
-        // Function to render waiting room slots based on player count
-        function renderWaitingRoomSlots(playerCount: number) {
-            const waitingPlayersContainer = container.querySelector('#waiting-players');
-            const playerMaxDisplay = container.querySelectorAll('.player-max-display');
-
-            if (waitingPlayersContainer) {
-                waitingPlayersContainer.innerHTML = '';
-
-                // Update player max display everywhere
-                playerMaxDisplay.forEach(el => {
-                    el.textContent = playerCount.toString();
-                });
-
-                // Generate slots for all players
-                for (let i = 0; i < playerCount; i++) {
-                    const playerData = i < sampleUsers.length ? sampleUsers[i] : null;
-
-                    if (playerData) {
-                        // Render occupied slot
-                        waitingPlayersContainer.innerHTML += `
-                            <div class="bg-[rgba(100,100,255,0.2)] p-4 rounded-lg flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <div class="size-10 rounded-full bg-pongblue mr-3">
-                                        <img src="${playerData.avatar}" alt="avatar" class="size-full rounded-full object-cover" />
-                                    </div>
-                                    <div>
-                                        <div class="font-medium">${playerData.username}</div>
-                                        <div class="text-sm text-gray-300">Rank: ${playerData.rank}</div>
-                                    </div>
-                                </div>
-                                <div class="bg-green-600 px-2 py-1 rounded text-xs">Ready</div>
-                            </div>
-                        `;
-                    } else {
-                        // Render empty slot
-                        waitingPlayersContainer.innerHTML += `
-                            <div class="border-2 border-dashed border-[rgba(100,100,255,0.3)] p-4 rounded-lg flex items-center justify-center">
-                                <div class="text-[rgba(255,255,255,0.5)]">Waiting for player...</div>
-                            </div>
-                        `;
-                    }
-                }
-            }
-        }
 
         // Function to update both tournament and waiting room when player count changes
         function updateTournamentSize(playerCount: number) {
@@ -246,7 +185,7 @@ export default {
             renderTournamentBrackets(playerCount);
 
             // Re-render waiting room slots
-            renderWaitingRoomSlots(playerCount);
+            renderWaitingRoomSlots(container, playerCount);
         }
 
         // Add event listeners to radio buttons
@@ -268,8 +207,6 @@ export default {
         const tabWaiting = document.getElementById('tab-waiting');
 
         const bracketContent = document.getElementById('bracket-content');
-        const waitingContent = document.getElementById('waiting-content');
-
         // Function to switch tabs
         function switchTab(activeTab: HTMLElement | null, activeContent: HTMLElement | null) {
             // Reset all tabs
@@ -303,19 +240,3 @@ export default {
         });
     }
 };
-
-// Maybe we'll use this later
-// <!-- Tournament Actions -->
-// <div class="mt-8">
-//     <div class="bg-[rgba(100,100,255,0.1)] rounded-lg p-4">
-//         <div class="flex justify-between items-center">
-//             <div class="text-lg font-medium">Tournament Actions</div>
-//             <div class="flex gap-4">
-//                 <button id="refresh-tournament" class="px-4 py-2 bg-[rgba(100,100,255,0.3)] hover:bg-[rgba(100,100,255,0.4)] rounded-lg flex items-center">
-//                     <span class="material-icons mr-1">refresh</span> Refresh
-//                 </button>
-//                 <button id="join-tournament" class="px-4 py-2 bg-pongblue hover:bg-[rgba(100,100,255,0.8)] rounded-lg">Join Tournament</button>
-//             </div>
-//         </div>
-//     </div>
-// </div>
