@@ -74,7 +74,7 @@ export const Header = createComponent(() => {
                 </div>
             </div>
         </div>
-        <div id="search-result-container" class="hidden absolute left-0 md:left-1/2 top-[calc(100%+44px)] md:top-full z-[9999] w-fit h-fit md:w-full bg-white border-t rounded-md shadow-[0_0_15px] shadow-white"></div>
+        <div id="search-result-container" class="hidden absolute left-0 md:left-1/2 top-[calc(100%+44px)] md:top-full z-[9999] w-fit h-fit max-md:w-full bg-white border-t rounded-md shadow-[0_0_15px] shadow-white"></div>
     `;
     const account = container.querySelector(".account")!;
     const dropdown = DropDown({isLoggedIn: true});
