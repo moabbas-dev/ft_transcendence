@@ -1,9 +1,11 @@
+import axios from "axios";
 import { msg } from "../../languages/LanguageController.js";
 import { validateConfirmPassword, validatePassword } from "../../utils/FormValidation.js";
 import { createComponent, useCleanup } from "../../utils/StateManager.js";
 import { Button } from "../partials/Button.js";
+import { navigate } from "../../router.js";
 
-export const ResetPass = createComponent(() => {
+export const ResetPass = createComponent((params: { [key: string]: string | number }) => {
 	const form = document.createElement('div')
 	form.className = `w-[93vw] sm:w-96 bg-white rounded-lg p-4 sm:p-8`;
 	form.innerHTML = `
@@ -54,11 +56,38 @@ export const ResetPass = createComponent(() => {
 		text: 'Change Password',
 		styles: 'w-full font-semibold p-2 text-base text-white rounded-lg',
 		eventType: 'click',
-		onClick: (e: MouseEvent) => {
-			if (!validatePassword(passwordInput) || !validateConfirmPassword(passwordInput, confirmPasswordInput))
-				e.preventDefault();
-			else
-				console.log('email and pass are nice!');
+		onClick: async(e: Event) => {
+			// if (!validatePassword(passwordInput) || !validateConfirmPassword(passwordInput, confirmPasswordInput))
+			// 	e.preventDefault();
+			// else
+			// 	console.log('email and pass are nice!');
+			e.preventDefault();
+			try {
+				const uuid = params["uuid"];
+				const body = {
+					password: passwordInput.value,
+					verifyPassword: confirmPasswordInput.value
+				};
+				await axios.post(`http://localhost:8001/auth/resetPassword/reset/${uuid}`, body);
+				console.log("Changing password complete!");
+				navigate("/register");
+			}
+			catch (error: any) {
+				if (error.response) {
+					if (error.response.status === 404 || error.response.status === 403 || error.response.status === 400) {
+						console.error("Error:", error.response.data.message);
+						// Show error message in UI (e.g., setting state for a span element)
+					} else if (error.response.status === 500) {
+						console.error("Server error:", error.response.data.error);
+					} else {
+						console.error("Unexpected error:", error.response.data);
+					}
+				} else if (error.request) {
+					console.error("No response from server:", error.request);
+				} else {
+					console.error("Error setting up request:", error.message);
+				}
+			}
 		}
 	});
 	formElement.appendChild(ChangePassButton);

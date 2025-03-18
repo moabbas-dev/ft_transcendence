@@ -150,7 +150,7 @@ class AuthController {
 				return reply.code(404).send({ message: "User not found!" });
 			if (user && !user.is_active)
 				return reply.code(403).send({ message: "User not active!" });
-			if (!validatePassword(password))
+			if (!validatePassword(password) || !validatePassword(verifyPassword))
 				return reply.code(400).send({ message: "Incorrect password format!" });
 			if (password !== verifyPassword)
 				return reply.code(400).send({ message: "passwords didn't match!" });

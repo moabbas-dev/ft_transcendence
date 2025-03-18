@@ -196,6 +196,8 @@ export const SignUp = createComponent((props: SignUpProps) => {
 					password: passwordInput.value,
 					nickname: nickname.value,
 					full_name: fullname.value,
+					age: age.value,
+					country: "Lebanon",
 					google_id: null
 				};
 				await axios.post("http://localhost:8001/auth/users", body);

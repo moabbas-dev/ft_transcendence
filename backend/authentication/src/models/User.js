@@ -2,13 +2,13 @@ const { db } = require('../db/initDb');
 
 class User {
 
-	static async create({ email, password, nickname, full_name, google_id = null }) {
+	static async create({ email, password, nickname, full_name, age, country, google_id = null }) {
 		const query = `
-      INSERT INTO Users (email, password, nickname, full_name, google_id)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO Users (email, password, nickname, full_name, age, country, google_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
 		return new Promise((resolve, reject) => {
-			db.run(query, [email, password, nickname, full_name, google_id], function (err) {
+			db.run(query, [email, password, nickname, full_name, age, country, google_id], function (err) {
 				if (err) reject(err);
 				else resolve(this.lastID);
 			});
@@ -55,14 +55,14 @@ class User {
 		});
 	}
 
-	static async update(id, { nickname, full_name, avatar_url }) {
+	static async update(id, { nickname, full_name, age, country, avatar_url }) {
 		const query = `
       		UPDATE Users
-      		SET nickname = ?, full_name = ?, avatar_url = ?, updated_at = CURRENT_TIMESTAMP
+      		SET nickname = ?, full_name = ?, age = ?, country = ?, avatar_url = ?, updated_at = CURRENT_TIMESTAMP
       		WHERE id = ?
     	`;
 		return new Promise((resolve, reject) => {
-			db.run(query, [nickname, full_name, avatar_url, id], function (err) {
+			db.run(query, [nickname, full_name, age, country, avatar_url, id], function (err) {
 				if (err) reject(err);
 				else resolve(this.changes);
 			});

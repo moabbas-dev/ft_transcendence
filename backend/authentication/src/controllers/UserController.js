@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const Session = require('../models/Session');
 const saltRounds = 10;
 const SECRET_KEY = process.env.JWT_SECRET_KEY;
-const { validateEmail, validatePassword } = require('../utils/validationUtils');
+const { validateEmail, validatePassword, validateNickname, validateFullName, validateAge, capitalizeFullName } = require('../utils/validationUtils');
 const UserToken = require('../models/UserToken');
 const { v4: uuidv4 } = require('uuid');
 const axios = require('axios');
@@ -11,7 +11,7 @@ const axios = require('axios');
 class UserController {
 
 	static async createUser(request, reply) {
-		const { email, password, nickname, full_name, google_id } = request.body;
+		const { email, password, nickname, full_name, age, country, google_id } = request.body;
 		const activationEmailHtml = (activationToken, full_name) => {
 			return `
 				<div>
@@ -27,8 +27,15 @@ class UserController {
 				return reply.code(400).send({ message: "Invalid email address!" });
 			if (!validatePassword(password))
 				return reply.code(400).send({ message: "Invalid password!" });
+			if (!validateNickname(nickname))
+				return reply.code(400).send({ message: "Invalid nickname!" });
+			if (!validateFullName(full_name))
+				return reply.code(400).send({ message: "Invalid full name!" });
+			if (!validateAge(Number(age)))
+				return reply.code(400).send({ message: "Invalid age!" });
 			const passwordHash = await bcrypt.hash(password, saltRounds);
-			const userId = await User.create({ email, password: passwordHash, nickname, full_name, google_id });
+			const fullName = capitalizeFullName(full_name);
+			const userId = await User.create({ email, password: passwordHash, nickname, full_name: fullName, age, country, google_id });
 			const activationToken = uuidv4();
 			await UserToken.create({ userId, activationToken, tokenType: "account_activation" });
 			try {
@@ -108,7 +115,7 @@ class UserController {
 
 	static async updateUser(request, reply) {
 		const { id } = request.params;
-		const { nickname, full_name, avatar_url } = request.body;
+		const { nickname, full_name, age, country, avatar_url } = request.body;
 		const authHeader = request.headers.authorization;
 		try {
 			if (!authHeader || !authHeader.startsWith('Bearer '))
@@ -124,7 +131,14 @@ class UserController {
 			}
 			if (decoded.userId != id)
 				return reply.code(403).send({ message: "Token does not belong to this user!" });
-			const changes = await User.update(id, { nickname, full_name, avatar_url });
+			if (!validateNickname(nickname))
+				return reply.code(400).send({ message: "Invalid email address!" });
+			if (!validateFullName(full_name))
+				return reply.code(400).send({ message: "Invalid full name!" });
+			if (!validateAge(Number(age)))
+				return reply.code(400).send({ message: "Invalid age!" });
+			const updatedFullName = capitalizeFullName(full_name);
+			const changes = await User.update(id, { nickname, full_name: updatedFullName, age, country, avatar_url });
 			if (changes == 0) reply.code(404).send({ message: 'User not found!' });
 			else reply.code(200).send({ message: 'User updated successfully!' });
 		} catch (err) {
