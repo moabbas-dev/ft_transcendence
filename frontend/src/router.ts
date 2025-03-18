@@ -15,6 +15,7 @@ import OnlineGame from './pages/online-game.js'
 const routes: { [key: string]: Page } = {
   "/": HomePage,
   "/register": RegisterPage,
+  "/reset_password/:uuid": RegisterPage,
   "/play": PlayPage,
   "/play/local-ai": PlayVsAI,
   "/play/local-multi": LocalPongPage,

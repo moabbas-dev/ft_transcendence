@@ -74,6 +74,9 @@ export const SignIn = createComponent((props: SignInProps) => {
 					store.update("email", decodedToken.email);
 					store.update("nickname", decodedToken.nickname);
 					store.update("fullName", decodedToken.fullName);
+					store.update("age", decodedToken.age);
+					store.update("country", decodedToken.country);
+					store.update("createdAt", decodedToken.createdAt);
 					store.update("avatarUrl", decodedToken.avatarUrl);
 					store.update("isLoggedIn", true);
 					navigate("/play");

@@ -54,7 +54,7 @@ class TwoFactorCodeController {
 
 	static async enable2faForUser(request, reply) {
 		const { userId } = request.params;
-		const authHeader = request.headers.authorization;
+		const authHeader = request.headers.authorization; 
 		try {
 			if (!authHeader || !authHeader.startsWith('Bearer '))
 				return reply.code(401).send({ message: 'Unauthorized: No token provided' });
