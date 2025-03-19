@@ -1,7 +1,7 @@
 import { SignIn } from '../components/register/SignIn.js';
 import { SignUp } from '../components/register/SignUp.js';
 import { PongAnimation } from '../components/partials/PingPongAnimation.js';
-import { msg } from '../languages/LanguageController.js';
+import { t } from '../languages/LanguageController.js';
 import { SendEmail } from '../components/register/SendEmail.js';
 import { ResetPass } from '../components/register/ResetPass.js';
 import { TwoFactorSend } from '../components/register/TwoFactor.js';

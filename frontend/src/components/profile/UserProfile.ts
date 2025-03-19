@@ -7,6 +7,7 @@ import { UserStatistics } from "./UserStatistics.js";
 import Chart from 'chart.js/auto';
 import store from "../../../store/store.js";
 import axios from "axios";
+import { t } from "../../languages/LanguageController.js";
 
 interface ProfileProps {
   uName: string,
@@ -52,20 +53,20 @@ export const Profile = createComponent((props: ProfileProps) => {
       <div class="flex items-center gap-4 justify-end">
           <div class="flex gap-2 mr-10 mt-8">
             <button id="message-user" class="bg-pongblue text-white px-4 py-1 rounded hover:bg-blue-700 transition-colors">
-              <i class="fas fa-envelope mr-1"></i> Message
+              <i class="fas fa-envelope mr-1"></i> ${t('profile.message')}
             </button>
             <button id="add-friend" class="bg-green-500 text-white px-4 py-1 rounded hover:bg-green-600 transition-colors">
-              <i class="fas fa-user-plus mr-1"></i> Add
+              <i class="fas fa-user-plus mr-1"></i> ${t('profile.add')}
             </button>
             <button id="block-user" class="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600 transition-colors">
-              <i class="fas fa-ban mr-1"></i> Block
+              <i class="fas fa-ban mr-1"></i> ${t('profile.block')}
             </button>
         </div>
         <div class="flex">
         <div>
             <p id="name" class="font-bold text-lg">${store.nickname}</p>
             <div class="flex items-center gap-1">
-                <p>Rank:</p>
+                <p>${t('profile.rank')}</p>
                 <img src="${goldRank}" class="w-6">
             </div>
         </div>
@@ -92,19 +93,19 @@ export const Profile = createComponent((props: ProfileProps) => {
               id="info-tab" 
               class="flex-1 py-2 text-white text-center transition-all  focus:outline-none bg-pongblue"
             >
-              Info
+            ${t('profile.infoTab.title')}
           </button>
           <button 
             id="statistics-tab" 
             class="flex-1 py-2 text-center transition-all focus:outline-none"
           >
-            Statistics
+          ${t('profile.statisticsTab.title')}
           </button>
           <button 
             id="history-tab" 
             class="flex-1 py-2 text-center transition-all focus:outline-none"
           >
-            History
+          ${t('profile.historyTab.title')}
           </button>
         </div>
 

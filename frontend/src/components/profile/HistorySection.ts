@@ -1,3 +1,4 @@
+import { t } from "../../languages/LanguageController.js";
 import { createComponent } from "../../utils/StateManager.js";
 
 interface HistorySectionProps {
@@ -10,7 +11,7 @@ interface HistorySectionProps {
 
 export const HistorySection = createComponent((props: HistorySectionProps) => {
 	const container = document.createElement("tr");
-	const outcome = props.resPlayer > props.resOpponent? 'Win' : props.resPlayer === props.resOpponent? 'Draw':'Lose';
+	const outcome = props.resPlayer > props.resOpponent? t('profile.historyTab.win') : props.resPlayer === props.resOpponent? t('profile.historyTab.draw') : t('profile.historyTab.lose');
 	container.classList.add(props.resPlayer > props.resOpponent ? 'bg-green-300' :
 	props.resPlayer == props.resOpponent? 'bg-slate-300' : 'bg-red-300', 'text-black');
 	container.innerHTML = `

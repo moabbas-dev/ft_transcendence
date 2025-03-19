@@ -1,5 +1,5 @@
 import { createComponent } from "../../utils/StateManager.js";
-import { Lang, msg, setLanguage } from "../../languages/LanguageController.js";
+import { Lang, t, setLanguage } from "../../languages/LanguageController.js";
 import { navigate, refreshRouter } from "../../router.js";
 import { Notification } from "./Notification.js";
 import { DropDown } from "./DropDown.js";
@@ -36,15 +36,15 @@ export const Header = createComponent(() => {
             <nav class="navbar items-center gap-4 hidden sm:flex">
                 <div class="nav-child playPage flex flex-col justify-center items-center transition-all hover:cursor-pointer hover:text-ponghover" onClick="${() => navigate('/play')}">
                     <i class="fa-solid fa-play text-lg sm:text-xl"></i>
-                    <span>${msg('home.header.play')}</span>
+                    <span>${t('home.header.play')}</span>
                 </div>
                 <div class="nav-child flex flex-col leaderBoard-page justify-center items-center transition-all hover:cursor-pointer hover:text-ponghover">
                     <i class="fa-solid fa-ranking-star text-lg sm:text-xl"></i>
-                    <span>${msg('home.header.leaderBoard')}</span>
+                    <span>${t('home.header.leaderBoard')}</span>
                 </div>
                 <div class="nav-child nav-chat flex flex-col justify-center items-center transition-all hover:cursor-pointer hover:text-ponghover" onClick="${() => navigate('/chat')}">
                     <i class="fa-solid fa-comments text-lg sm:text-xl"></i>
-                    <span>${msg('home.header.chat')}</span>
+                    <span>${t('home.header.chat')}</span>
                 </div>
             </nav>
             <nav class="nav-btn sm:hidden hover:cursor-pointer hover:opacity-80">
@@ -54,7 +54,7 @@ export const Header = createComponent(() => {
         <div class="flex items-center justify-end gap-3 sm:gap-4 w-1/2">
             <div class="md:flex-1">
                 <form action="" id="search-bar-container" class="search-bar-container bg-pongblue flex justify-center items-center gap-2 rounded-md md:p-2 md:bg-white z-50">
-                    <input type="text" name="search-bar" id="search-bar" autocomplete="off" placeholder="${msg('home.header.search')}" class="w-full hidden md:block text-lg text-ponghover rounded-md">
+                    <input type="text" name="search-bar" id="search-bar" autocomplete="off" placeholder="${t('home.header.search')}" class="w-full hidden md:block text-lg text-ponghover rounded-md">
                     <label for="search-bar" class="fas fa-search text-ponghover text-xl max-md:text-white max-md:bg-pongblue"></label>
                 </form>
             </div>

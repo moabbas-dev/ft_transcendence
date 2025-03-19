@@ -1,6 +1,6 @@
 import { createComponent, useCleanup } from "../../utils/StateManager.js";
 import { Button } from "../partials/Button.js";
-import { msg } from "../../languages/LanguageController.js";
+import { t } from "../../languages/LanguageController.js";
 import axios from "axios";
 import { navigate } from "../../router.js";
 
@@ -14,7 +14,7 @@ export const SignUp = createComponent((props: SignUpProps) => {
 	form.className = `flex flex-col justify-center items-center gap-5 w-[93vw] xl:w-[40vw] h-dvh 2xl:h-fit mx-auto bg-white rounded-lg shadow-lg p-4 sm:p-8 ${props.styles || ''}`;
 	form.innerHTML = `
     <div class="flex flex-col w-full gap-4">
-      <h1 class="text-2xl sm:text-3xl font-bold text-center text-pongblue">${msg('register.signup.title')}</h1>
+      <h1 class="text-2xl sm:text-3xl font-bold text-center text-pongblue">${t('register.signup.title')}</h1>
       
       <!-- Form area - scrollable only on mobile -->
       <form class="flex flex-col gap-2 pb-2">
@@ -25,29 +25,29 @@ export const SignUp = createComponent((props: SignUpProps) => {
 					<span class="absolute inset-y-0 left-0 flex items-center pl-2 text-gray-500">
 					<i class="bx bx-envelope text-lg"></i>
 					</span>
-					<input type="email" id="email" placeholder="${msg('register.signup.emailPlaceholder')}" autocomplete="email" name="email" 
+					<input type="email" id="email" placeholder="${t('register.signup.emailPlaceholder')}" autocomplete="email" name="email" 
 					class="w-full pl-8 pr-2 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue">
 				</div>
 			</div>
 			
 			<div class="flex flex-col gap-1 px-1">
-				<label for="nickname" class="text-base font-medium text-gray-700">Nickname</label>
+				<label for="nickname" class="text-base font-medium text-gray-700">${t("register.signup.nickname")}</label>
 				<div class="relative">
 					<span class="absolute inset-y-0 left-0 flex items-center pl-2 text-gray-500">
 						<i class="bx bx-user text-lg"></i>
 					</span>
-					<input type="text" id="nickname" placeholder="Your Nickname here" autocomplete="off" 
+					<input type="text" id="nickname" placeholder="${t("register.signup.nicknamePlaceholder")}" autocomplete="off" 
 					class="nickname w-full pl-8 pr-2 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue">
 				</div>
 			</div>
 
 			<div class="flex flex-col gap-1 px-1">
-				<label for="password" class="text-base font-medium text-gray-700">Password</label>
+				<label for="password" class="text-base font-medium text-gray-700">${t("register.signin.password")}</label>
 				<div class="relative">
 					<span class="absolute inset-y-0 left-0 flex items-center pl-2 text-gray-500">
 						<i class="bx bx-lock-alt text-lg"></i>
 					</span>
-					<input type="password" id="password" placeholder="${msg('register.signup.passwordPlaceholder')}" autocomplete="current-password" name="password"
+					<input type="password" id="password" placeholder="${t('register.signup.passwordPlaceholder')}" autocomplete="current-password" name="password"
 					class="w-full pl-8 pr-8 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue">
 					<span class="absolute inset-y-0 right-0 flex items-center pr-2 cursor-pointer toggle-password">
 						<i class='bx bx-hide hide-show text-lg text-gray-500'></i>
@@ -56,12 +56,12 @@ export const SignUp = createComponent((props: SignUpProps) => {
 			</div>
 			
 			<div class="flex flex-col gap-1 px-1">
-				<label for="conf-password" class="text-base font-medium text-gray-700">${msg('register.signup.passwordConfirmTitle')}</label>
+				<label for="conf-password" class="text-base font-medium text-gray-700">${t('register.signup.passwordConfirmTitle')}</label>
 				<div class="relative">
 					<span class="absolute inset-y-0 left-0 flex items-center pl-2 text-gray-500">
 						<i class="bx bx-lock-alt text-lg"></i>
 					</span>
-					<input type="password" id="conf-password" placeholder="${msg('register.signup.passwordConfirm')}" autocomplete="current-password" name="password"
+					<input type="password" id="conf-password" placeholder="${t('register.signup.passwordConfirm')}" autocomplete="current-password" name="password"
 					class="w-full pl-8 pr-8 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue">
 					<span class="absolute inset-y-0 right-0 flex items-center pr-2 cursor-pointer toggle-password">
 						<i class='bx bx-hide hide-show text-lg text-gray-500'></i>
@@ -70,37 +70,37 @@ export const SignUp = createComponent((props: SignUpProps) => {
 			</div>
 
 			<div class="flex flex-col gap-1 px-1">
-				<label for="fullname" class="text-base font-medium text-gray-700">Full name</label>
+				<label for="fullname" class="text-base font-medium text-gray-700">${t("register.signup.fullname")}</label>
 				<div class="relative">
 					<span class="absolute inset-y-0 left-0 flex items-center pl-2 text-gray-500">
 						<i class="bx bx-id-card text-lg"></i>
 					</span>
-					<input type="text" id="fullname" placeholder="Your Name here (first last)" autocomplete="off" 
+					<input type="text" id="fullname" placeholder="${t("register.signup.fullnamePlaceholder")}" autocomplete="off" 
 					class="full-name w-full pl-8 pr-2 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue">
 				</div>
 			</div>
 			
 			<div class="flex flex-col gap-1 px-1">
-				<label for="age" class="text-base font-medium text-gray-700">Age</label>
+				<label for="age" class="text-base font-medium text-gray-700">${t('register.signup.age')}</label>
 				<div class="relative">
 					<span class="absolute inset-y-0 left-0 flex items-center pl-2 text-gray-500">
 						<i class="bx bx-cake text-lg"></i>
 					</span>
-					<input type="number" id="age" placeholder="Your Age here" autocomplete="off" 
+					<input type="number" id="age" placeholder="${t('register.signup.agePlaceholder')}" autocomplete="off" 
 					class="age w-full pl-8 pr-2 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue">
 				</div>
 			</div>
 
 			<div class="flex flex-col gap-1 px-1">
 			<!-- coutry selection here -->
-				<label for="country" class="text-base font-medium text-gray-700">Country</label>
+				<label for="country" class="text-base font-medium text-gray-700">${t('register.signup.country')}</label>
 				<div class="relative">
 				<span class="absolute inset-y-0 left-0 flex items-center pl-2 text-gray-500">
 					<i class="bx bx-globe text-lg"></i>
 				</span>
 				<select id="country" name="country" 
 					class="w-full pl-8 pr-8 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue appearance-none bg-white">
-					<option value="" disabled selected>Select your country</option>
+					<option value="" disabled selected>${t('register.signup.countryPlaceholder')}</option>
 					<option value="AF">Afghanistan</option>
 					<option value="AL">Albania</option>
 					<option value="DZ">Algeria</option>
@@ -155,20 +155,20 @@ export const SignUp = createComponent((props: SignUpProps) => {
       
       <div class="flex items-center w-full">
         <div class="flex-1 border-t border-gray-300"></div>
-        <div class="px-4 text-sm text-gray-500">OR</div>
+        <div class="px-4 text-sm text-gray-500">${t('register.or')}</div>
         <div class="flex-1 border-t border-gray-300"></div>
       </div>
       
       <div class="flex flex-col w-full gap-3">
         <a class="flex items-center justify-center gap-2 w-full py-2 bg-pongblue text-white rounded-lg hover:cursor-pointer hover:bg-opacity-90 transition-all duration-300">
           <i class='bx bxl-google text-xl'></i>
-          <span>${msg('register.continueGoogle')}</span>
+          <span>${t('register.continueGoogle')}</span>
         </a>
 
         <div class="text-center text-gray-600">
-          ${msg('register.signup.acc_question')} 
+          ${t('register.signup.acc_question')} 
           <span class="signin-link hover:cursor-pointer text-pongblue font-medium hover:underline">
-            ${msg('register.signup.signin_btn')}
+            ${t('register.signup.signin_btn')}
           </span>
         </div>
       </div>
@@ -185,7 +185,7 @@ export const SignUp = createComponent((props: SignUpProps) => {
 	//   const 
 	const signUpButton = Button({
 		type: 'submit',
-		text: msg('register.signup.signup_btn'),
+		text: t('register.signup.signup_btn'),
 		styles: 'w-full font-semibold p-2 text-base text-white bg-pongblue rounded-lg hover:bg-opacity-90 transition-all duration-300',
 		eventType: 'click',
 		onClick: async (e: MouseEvent) => {
