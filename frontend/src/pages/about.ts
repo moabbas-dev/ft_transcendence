@@ -1,6 +1,7 @@
 import moabbasImg from '/src/assets/moabbas.jpg';
 import afarachiImg from '/src/assets/afarachi.jpg';
 import jfatfatImg from '/src/assets/jfatfat.jpg';
+import { t } from '../languages/LanguageController';
 
 export default {
 	render: (container: HTMLElement) => {
@@ -8,7 +9,7 @@ export default {
 		<section class="min-h-screen flex items-center justify-center bg-pongdark py-12 px-4 sm:px-6 lg:px-8">
 		  <div class="max-w-4xl mx-auto text-center flex flex-col gap-12">
 			<h2 class="text-3xl font-extrabold text-white sm:text-4xl">
-			  Development Team
+			  ${t('about.title')}
 			</h2>
 			
 			<div class="flex flex-col md:flex-row justify-center items-center gap-8 lg:gap-12">
@@ -20,9 +21,9 @@ export default {
 				  class="w-32 h-32 rounded-full object-cover ring-4 ring-pongblue mb-4"
 				>
 				<h3 class="text-2xl font-bold text-gray-900 mb-1">Moabbas</h3>
-				<p class="text-pongblue font-medium mb-2">Frontend Developer</p>
+				<p class="text-pongblue font-medium mb-2">Frontend ${t('about.developer')}</p>
 				<p class="text-gray-600 text-center max-w-xs">
-				  Crafting pixel-perfect interfaces with modern web technologies.
+				  ${t('about.moabbasInfo')}
 				</p>
 			  </div>
   
@@ -34,9 +35,9 @@ export default {
 				  class="w-32 h-32 rounded-full object-cover ring-4 ring-pongblue mb-4"
 				>
 				<h3 class="text-2xl font-bold text-gray-900 mb-1">Afarachi</h3>
-				<p class="text-pongblue font-medium mb-2">Fullstack Developer</p>
+				<p class="text-pongblue font-medium mb-2">Fullstack ${t('about.developer')}</p>
 				<p class="text-gray-600 text-center max-w-xs">
-				  Bridging frontend beauty with backend functionality seamlessly.
+				${t('about.afarachiInfo')}
 				</p>
 			  </div>
   
@@ -48,17 +49,16 @@ export default {
 				  class="w-32 h-32 rounded-full object-cover ring-4 ring-pongblue mb-4"
 				>
 				<h3 class="text-2xl font-bold text-gray-900 mb-1">Jfatfat</h3>
-				<p class="text-pongblue font-medium mb-2">Backend Developer</p>
+				<p class="text-pongblue font-medium mb-2">Backend ${t('about.developer')}</p>
 				<p class="text-gray-600 text-center max-w-xs">
-				  Architecting robust server-side solutions and database systems.
+				${t('about.jfatfatInfo')}
 				</p>
 			  </div>
 			</div>
   
 			<div class="text-gray-400 max-w-2xl mx-auto">
 			  <p class="text-lg">
-				Our team combines expertise across the entire development stack to deliver 
-				high-performance, scalable web applications with exceptional user experiences.
+			  	${t('about.conclusion')}
 			  </p>
 			</div>
 		  </div>

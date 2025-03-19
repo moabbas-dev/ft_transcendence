@@ -1,3 +1,4 @@
+import { t } from "../../../languages/LanguageController.js";
 import { createComponent } from "../../../utils/StateManager.js";
 
 export const GameResultsPopUp = createComponent(() => {
@@ -28,7 +29,7 @@ export const GameResultsPopUp = createComponent(() => {
   const restartButton = document.createElement("button");
   restartButton.className = 
     "px-4 py-2 bg-pongblue text-white border border-white rounded-lg transition-all hover:opacity-80 hover:shadow-neon";
-  restartButton.textContent = "Play Again";
+  restartButton.textContent = t('play.resultsPopup.playAgain');
   restartButton.style.boxShadow = "0 0 10px #0ff, 0 0 20px #0ff"; // Add neon glow to button
   restartButton.id = "restart-btn"
 

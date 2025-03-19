@@ -1,5 +1,5 @@
 import store from "../../../store/store.js";
-import { msg } from "../../languages/LanguageController.js";
+import { t } from "../../languages/LanguageController.js";
 import { navigate } from "../../router.js";
 import { createComponent } from "../../utils/StateManager.js";
 import { Profile } from "../profile/UserProfile.js";
@@ -14,7 +14,7 @@ export const DropDown = createComponent((props: DropDownProps) => {
 	container.innerHTML = `
 		${!props.isLoggedIn? `
 			<li id="register" class="px-4 py-2 hover:text-pongblue hover:cursor-pointer hover:bg-slate-100">
-				${msg("home.register")}
+				${t("home.register")}
 			</li>
 		` : `
 			<li id="view-profile" class="px-4 py-0.5 hover:text-pongblue hover:cursor-pointer hover:bg-slate-100">
