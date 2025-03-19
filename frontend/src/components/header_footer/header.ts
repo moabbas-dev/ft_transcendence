@@ -33,7 +33,7 @@ export const Header = createComponent(() => {
                     Neon Pong
                 </span>
             </div>
-            <nav class="navbar items-center gap-4 hidden sm:flex">
+            <nav class="navbar items-center gap-4 hidden text-nowrap sm:flex">
                 <div class="nav-child playPage flex flex-col justify-center items-center transition-all hover:cursor-pointer hover:text-ponghover" onClick="${() => navigate('/play')}">
                     <i class="fa-solid fa-play text-lg sm:text-xl"></i>
                     <span>${t('home.header.play')}</span>
@@ -48,7 +48,7 @@ export const Header = createComponent(() => {
                 </div>
             </nav>
             <nav class="nav-btn sm:hidden hover:cursor-pointer hover:opacity-80">
-                <i class="fa-solid fa-bars text-xl"></i>
+                <i class="fa-solid fa-bars text-2xl"></i>
             </nav>
         </div>
         <div class="flex items-center justify-end gap-3 sm:gap-4 w-1/2">
@@ -62,7 +62,7 @@ export const Header = createComponent(() => {
                 <i class="fa-solid fa-bell text-white text-2xl transition-all hover:cursor-pointer hover:text-ponghover"></i>
                 <span class="notification-count absolute -top-2 -right-2 rounded-full text-white hover:cursor-pointer w-5 h-5 flex items-center justify-center text-sm">0</span>
             </div>
-            <div class="notification hidden absolute overflow-y-auto top-full right-0 z-50 bg-white w-[300px] p-2 max-h-[300px] animate-fade-down animate-once animate-duration-300">
+            <div class="notification hidden absolute overflow-y-auto top-full ${localStorage.getItem('selectedLanguage') === 'ar'? 'left-0' : 'right-0'} z-50 bg-white w-[300px] p-2 max-h-[300px] animate-fade-down animate-once animate-duration-300">
 
             </div>
             <select id="languages" name="languages_options" title="Select your language" class="text-xl bg-pongblue text-white text-[2.5rem] focus:outline-none hover:opacity-80 hover:cursor-pointer">
@@ -81,7 +81,7 @@ export const Header = createComponent(() => {
                 </div>
             </div>
         </div>
-        <div id="search-result-container" class="hidden absolute left-0 md:left-1/2 top-[calc(100%+44px)] md:top-full z-[9999] w-fit h-fit max-md:w-full bg-white border-t rounded-md shadow-[0_0_15px] shadow-white"></div>
+        <div id="search-result-container" class="hidden absolute left-0 ${localStorage.getItem('selectedLanguage') === 'ar'? 'md:left-48' : 'md:left-1/2'} top-[calc(100%+44px)] md:top-full z-[9999] w-fit h-fit max-md:w-full bg-white border-t rounded-md shadow-[0_0_15px] shadow-white"></div>
     `;
     const account = container.querySelector(".account")!;
     const dropdown = DropDown({isLoggedIn: true});
@@ -173,7 +173,7 @@ export const Header = createComponent(() => {
 
     navBtn.addEventListener('click', (event) => {
         event.stopPropagation();
-        const navStyles = 'max-sm:animate-fade-down max-sm:animate-once max-sm:animate-duration-[600ms] max-sm:flex max-sm:z-50 max-sm:flex-col max-sm:absolute max-sm:top-full max-sm:left-0 max-sm:w-fit max-sm:gap-0'
+        const navStyles = `max-sm:animate-fade-down max-sm:animate-once max-sm:animate-duration-[600ms] max-sm:flex max-sm:z-50 max-sm:flex-col max-sm:absolute max-sm:top-full ${localStorage.getItem('selectedLanguage') === 'ar'? 'max-sm:right-0' : 'max-sm:left-0'} max-sm:w-fit max-sm:gap-0`
         navStyles.split(' ').forEach(style => navbar.classList.toggle(style))
         if (!navBtn.innerHTML.includes('fa-bars-staggered')) {
             navBtn.innerHTML = '<i class="fa-solid fa-bars-staggered text-xl"></i>';

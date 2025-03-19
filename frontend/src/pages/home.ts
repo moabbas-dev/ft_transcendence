@@ -24,13 +24,13 @@ export default {
                 ${t("home.tagline")}
               </p>
               <div class="flex flex-wrap justify-center sm:justify-start items-center gap-2 sm:gap-3">
-                <button id="register-btn" class="w-[13ch] text-lg rounded-ss-lg rounded-ee-xl text-white flex justify-center items-center bg-pongblue px-3 py-2 animate-fade-up animate-duration-700 animate-delay-1000 animate-ease-linear">${t(
+                <button id="register-btn" class="text-lg rounded-ss-lg rounded-ee-xl text-white flex justify-center items-center bg-pongblue px-3 py-2 animate-fade-up animate-duration-700 animate-delay-1000 animate-ease-linear">${t(
                   "home.register"
                 )}</button>
-                <button id="ai-btn" class="w-[13ch] text-lg rounded-ss-lg rounded-ee-xl text-white flex justify-center items-center bg-pongblue px-3 py-2 animate-fade-up animate-duration-700 animate-delay-[1200ms] animate-ease-linear">
+                <button id="ai-btn" class="text-lg rounded-ss-lg rounded-ee-xl text-white flex justify-center items-center bg-pongblue px-3 py-2 animate-fade-up animate-duration-700 animate-delay-[1200ms] animate-ease-linear">
                   ${t("home.playAI")}
                 </button>
-                <button id="local-btn" class="w-[13ch] text-lg rounded-ss-lg rounded-ee-xl text-white flex justify-center items-center bg-pongblue px-3 py-2 animate-fade-up animate-duration-700 animate-delay-[1400ms] animate-ease-linear">
+                <button id="local-btn" class="text-lg rounded-ss-lg rounded-ee-xl text-white flex justify-center items-center bg-pongblue px-3 py-2 animate-fade-up animate-duration-700 animate-delay-[1400ms] animate-ease-linear">
                   ${t("home.playLocaly")}
                 </button>
               </div>
