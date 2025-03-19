@@ -1,3 +1,4 @@
+import { t } from "../../languages/LanguageController.js";
 import { navigate } from "../../router.js";
 import { createComponent } from "../../utils/StateManager.js";
 
@@ -6,9 +7,9 @@ export const Footer = createComponent(() => {
     container.className = "w-full h-[68px] flex items-center justify-center px-2 text-lg font-normal text-white bg-pongblue";
     container.innerHTML = `
         <p class="text-center">
-            © ${new Date().getFullYear()} Developed by 
+            © ${new Date().getFullYear()} ${t("home.footer.developed")}
             <button id="about-us" class="text-pongdark font-medium hover:opacity-70 transition-all">Afarachi, Moabbas, Jfatfat</button>.
-            <span class="max-[380px]:hidden"> All intellectual property rights reserved.</span>
+            <span class="max-[380px]:hidden"> ${t("home.footer.rights")}</span>
         </p>
     `;
     container.querySelector("#about-us")?.addEventListener("click", () => {

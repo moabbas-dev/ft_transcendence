@@ -1,3 +1,4 @@
+import { t } from "../../../languages/LanguageController.js";
 import { refreshRouter } from "../../../router.js";
 import { AIDifficulty } from "../../../types/types.js";
 import { AIController, BallController, Controller, HumanPlayerController } from "./GameControllers.js";
@@ -345,7 +346,7 @@ export class GameBoard {
 			this.ctx.font = '48px Arial';
 			this.ctx.textAlign = 'center';
 			this.ctx.textBaseline = 'middle';
-			this.ctx.fillText('Paused', this.canvas.width / 2, this.canvas.height / 2);
+			this.ctx.fillText(t('play.paused'), this.canvas.width / 2, this.canvas.height / 2);
 		}
 	}
 
@@ -414,10 +415,10 @@ export class GameBoard {
 				text = "Player 2"
 			}
 			const winnerText = resultsPopup.querySelector('#winner-text')!
-			winnerText.textContent = `${text} Wins!`;
+			winnerText.textContent = `${text} ${t('play.resultsPopup.title')}`;
 			
 			const scoreText = resultsPopup.querySelector('#score-text')!
-			scoreText.textContent = `Final Score: ${this.gameScore.player1} - ${this.gameScore.player2}`
+			scoreText.textContent = `${t('play.resultsPopup.finalScore')}: ${this.gameScore.player1} - ${this.gameScore.player2}`
 
 			const restartButton = resultsPopup.querySelector("#restart-btn")
 			restartButton?.addEventListener('click', () => {

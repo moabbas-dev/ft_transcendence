@@ -1,5 +1,5 @@
 import axios from "axios";
-import { msg } from "../../languages/LanguageController.js";
+import { t } from "../../languages/LanguageController.js";
 import { validateConfirmPassword, validatePassword } from "../../utils/FormValidation.js";
 import { createComponent, useCleanup } from "../../utils/StateManager.js";
 import { Button } from "../partials/Button.js";
@@ -21,7 +21,7 @@ export const ResetPass = createComponent((params: { [key: string]: string | numb
 				<span class="absolute inset-y-0 left-0 flex items-center pl-2 text-gray-500">
 					<i class="bx bx-lock-alt text-lg"></i>
 				</span>
-				<input type="password" id="password" placeholder="${msg('register.signup.passwordPlaceholder')}" autocomplete="current-password" name="password"
+				<input type="password" id="password" placeholder="${t('register.signup.passwordPlaceholder')}" autocomplete="current-password" name="password"
 				class="w-full pl-8 pr-8 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue">
 				<span class="absolute inset-y-0 right-0 flex items-center pr-2 cursor-pointer toggle-password">
 					<i class='bx bx-hide hide-show text-lg text-gray-500'></i>
@@ -30,12 +30,12 @@ export const ResetPass = createComponent((params: { [key: string]: string | numb
 		</div>
 	
 		<div class="flex flex-col gap-1 px-1">
-			<label for="conf-password" class="text-base font-medium text-gray-700">${msg('register.signup.passwordConfirmTitle')}</label>
+			<label for="conf-password" class="text-base font-medium text-gray-700">${t('register.signup.passwordConfirmTitle')}</label>
 			<div class="relative">
 				<span class="absolute inset-y-0 left-0 flex items-center pl-2 text-gray-500">
 					<i class="bx bx-lock-alt text-lg"></i>
 				</span>
-				<input type="password" id="conf-password" placeholder="${msg('register.signup.passwordConfirm')}" autocomplete="current-password" name="password"
+				<input type="password" id="conf-password" placeholder="${t('register.signup.passwordConfirm')}" autocomplete="current-password" name="password"
 				class="w-full pl-8 pr-8 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue">
 				<span class="absolute inset-y-0 right-0 flex items-center pr-2 cursor-pointer toggle-password">
 					<i class='bx bx-hide hide-show text-lg text-gray-500'></i>

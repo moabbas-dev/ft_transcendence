@@ -14,11 +14,8 @@ export const setLanguage = (lang: Lang) => {
 	}
 };
 
-export const msg = (key:string) => {
+export const t = (key:string) => {
 	return key.split('.').reduce((obj, keyPart) => {
 	  return obj ? obj[keyPart] : null;
 	}, translations[currentLanguage]) || key;
 };
-// we can use it like this:
-// msg('home.title')
-// msg('register.signup.emailPlaceholder')

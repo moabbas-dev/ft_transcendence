@@ -3,6 +3,7 @@ import moabbas from '../../../assets/moabbas.jpg';
 import afarachi from '../../../assets/afarachi.jpg';
 import jfatfat from '../../../assets/jfatfat.jpg';
 import odib from '../../../assets/omar.webp';
+import { t } from "../../../languages/LanguageController.js";
 
 // Sample user data for search results [For testing purposes]
 const sampleUsers = [
@@ -18,7 +19,7 @@ export const FetchFriendsList = createComponent(() => {
 	container.className = 'size-full flex flex-col items-center justify-start gap-6 py-8'
 	container.innerHTML = `
 		<div class="relative w-full">
-			<input type="text" id="friend-search" placeholder="Search for friends..." class="w-full py-3 px-4 pl-10 rounded-lg bg-[rgba(100,100,255,0.2)] border border-pongblue focus:outline-none focus:border-[rgba(100,100,255,0.8)]">
+			<input type="text" id="friend-search" placeholder="${t('play.onlineGame.searchFriends')}" class="w-full py-3 px-4 pl-10 rounded-lg bg-[rgba(100,100,255,0.2)] border border-pongblue focus:outline-none focus:border-[rgba(100,100,255,0.8)]">
 			<i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-[rgba(255,255,255,0.6)]"></i>
 		</div>
 		<div id="search-results" class="w-full flex-1 overflow-y-auto max-h-96">
@@ -31,7 +32,7 @@ export const FetchFriendsList = createComponent(() => {
 			if (users.length === 0) {
 				searchResults.innerHTML = `
 					<div class="text-center py-6 text-[rgba(255,255,255,0.6)]">
-						No users found. Try a different search.
+						${t('play.onlineGame.noUsersSearch')}
 					</div>
 				`;
 				return;

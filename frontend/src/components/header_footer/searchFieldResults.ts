@@ -1,10 +1,12 @@
+import { t } from "../../languages/LanguageController";
+
 // Function to display search results
 export function displayResults(users: {username:string, status:string, avatar:string}[], container: HTMLElement): void {
 	// Clear previous results
 	container.innerHTML = '';
 
 	if (users.length === 0) {
-		container.innerHTML = '<div class="p-4 text-ponghover">No users found</div>';
+		container.innerHTML = `<div class="p-4 text-ponghover">${t('home.header.noUsersFound')}</div>`;
 		return;
 	}
 

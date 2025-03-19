@@ -1,5 +1,5 @@
 import { navigate } from "../router.js";
-import { msg } from "../languages/LanguageController.js";
+import { t } from "../languages/LanguageController.js";
 import { PongAnimation } from "../components/partials/PingPongAnimation.js";
 import { Header } from "../components/header_footer/header.js";
 import { Footer } from "../components/header_footer/footer.js";
@@ -17,7 +17,7 @@ export default {
         
         <div class="game-options relative z-10 container mx-auto max-sm:px-4 flex flex-col gap-5 sm:gap-8 md:gap-10 h-full w-full items-center justify-center">
             <h1 class="text-4xl md:text-6xl font-bold text-center text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] animate-fade-down animate-once">
-                ${msg("choose-mode")}
+                ${t("play.title")}
             </h1>
             
             <div class="grid grid-cols-2 gap-4 md:gap-8 max-w-4xl mx-auto">
@@ -26,8 +26,8 @@ export default {
                       <i class="fa-solid fa-robot drop-shadow-[0_5px_rgba(0,0,0,0.5)] group-hover:drop-shadow-[0_8px_10px_rgba(66,153,225,0.6)]"></i>
                     </span>
                     <div class="flex flex-col gap-1 text-center sm:text-left">
-                        <h2 class="max-[350px]:text-lg text-2xl font-bold">VS AI</h2>
-                        <p class="hidden sm:block text-[0.9rem] opacity-90">Test your skills against our smart AI</p>
+                        <h2 class="max-[350px]:text-lg text-2xl font-bold">${t('play.vsAI')}</h2>
+                        <p class="hidden sm:block text-[0.9rem] opacity-90">${t('play.vsAIInfo')}</p>
                     </div>
                 </button>
                 
@@ -36,8 +36,8 @@ export default {
                       <i class="fa-solid fa-user-group drop-shadow-[0_5px_rgba(0,0,0,0.5)] group-hover:drop-shadow-[0_8px_10px_rgba(66,153,225,0.6)]"></i>
                     </span>
                     <div class="flex flex-col gap-1 text-center sm:text-left">
-                        <h2 class="max-[350px]:text-lg text-2xl font-bold">Local Multiplayer</h2>
-                        <p class="hidden sm:block text-[0.9rem] opacity-90">Play with a friend on the same device</p>
+                        <h2 class="max-[350px]:text-lg text-2xl font-bold">${t('play.localPlayer')}</h2>
+                        <p class="hidden sm:block text-[0.9rem] opacity-90">${t('play.localPlayerInfo')}</p>
                     </div>
                 </button>
                 
@@ -46,8 +46,8 @@ export default {
                       <i class="fa-solid fa-trophy drop-shadow-[0_5px_rgba(0,0,0,0.5)] group-hover:drop-shadow-[0_8px_10px_rgba(66,153,225,0.6)]"></i>
                     </span>
                     <div class="flex flex-col gap-1 text-center sm:text-left">
-                        <h2 class="max-[350px]:text-lg text-2xl font-bold">Online Tournament</h2>
-                        <p class="hidden sm:block text-[0.9rem] opacity-90">Compete in a knockout tournament</p>
+                        <h2 class="max-[350px]:text-lg text-2xl font-bold">${t('play.tournament')}</h2>
+                        <p class="hidden sm:block text-[0.9rem] opacity-90">${t('play.tournamentInfo')}</p>
                     </div>
                 </button>
                 
@@ -56,8 +56,8 @@ export default {
                       <i class="fa-solid fa-globe drop-shadow-[0_5px_rgba(0,0,0,0.5)] group-hover:drop-shadow-[0_8px_10px_rgba(66,153,225,0.6)]"></i>
                     </span>
                     <div class="flex flex-col gap-1 text-center sm:text-left">
-                        <h2 class="max-[350px]:text-lg text-2xl font-bold">Online Multiplayer</h2>
-                        <p class="hidden sm:block text-[0.9rem] opacity-90">Challenge players worldwide</p>
+                        <h2 class="max-[350px]:text-lg text-2xl font-bold">${t('play.online')}</h2>
+                        <p class="hidden sm:block text-[0.9rem] opacity-90">${t('play.onlineInfo')}</p>
                     </div>
                 </button>
             </div>

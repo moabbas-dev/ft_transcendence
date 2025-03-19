@@ -7,6 +7,7 @@ import playerFrame from "../assets/g7.webp";
 import playerFrame1 from "../assets/g6.webp";
 import playerFrame2 from "../assets/g5.webp";
 import { Footer } from "../components/header_footer/footer.js";
+import { t } from "../languages/LanguageController.js";
 
 interface Player {
   id: number;
@@ -26,7 +27,7 @@ export default {
         <div class="container mx-auto px-4 py-8 flex flex-col gap-4">
           <div class="flex flex-col gap-10">
             <h1 class="text-5xl text-center text-white font-bold drop-shadow-[1px_1px_20px_white] animate-fade-down animate-once animate-duration-700 animate-ease-linear">
-              <span class="max-sm:hidden">Ping-</span>Pong Champions
+              <span class="max-sm:hidden">Ping-</span>Pong ${t('leaderBoard.title')}
             </h1>
             
             <!-- Top 3 Players Podium -->
@@ -79,13 +80,13 @@ export default {
           </div>
           <!-- Rest of Leaderboard -->
           <div class="leaderboard-table min-w-0 w-full max-h-96 bg-pongblue bg-opacity-20 rounded-xl overflow-y-auto max-w-4xl mx-auto shadow-lg scrollbar-thin scrollbar-thumb-[#0f6292] scrollbar-track-gray-700">
-            <table class="w-full overflow-hidden">
-                <thead>
+            <table class="relative w-full border-collapse">
+                <thead class="sticky top-0 z-10">
                   <tr class="bg-pongblue text-white text-center text-lg sm:text-xl">
-                    <th class="py-3 px-4">Rank</th>
-                    <th class="py-3 px-4" colspan="2">Player</th>
-                    <th class="py-3 px-4">Wins</th>
-                    <th class="py-3 px-4">Score</th>
+                    <th class="py-3 px-4">${t('leaderBoard.rank')}</th>
+                    <th class="py-3 px-4" colspan="2">${t('leaderBoard.player')}</th>
+                    <th class="py-3 px-4">${t('leaderBoard.wins')}</th>
+                    <th class="py-3 px-4">${t('leaderBoard.score')}</th>
                   </tr>
                 </thead>
               <tbody id="leaderboardBody" class="sm:text-lg">
