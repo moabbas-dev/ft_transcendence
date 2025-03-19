@@ -78,7 +78,7 @@ export default {
 
 			const gameModeDetails = document.getElementById("game-mode-details");
 			if (gameModeDetails) {
-				heading.textContent = "Finding an Opponent...";
+				heading.textContent = t('play.onlineGame.findingOponent');
 
 				gameModeDetails.innerHTML = ''
 				gameModeDetails.appendChild(FindOpponent({heading, isIconVisible, toggleInterval}))

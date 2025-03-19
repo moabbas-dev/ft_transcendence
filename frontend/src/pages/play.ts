@@ -26,8 +26,8 @@ export default {
                       <i class="fa-solid fa-robot drop-shadow-[0_5px_rgba(0,0,0,0.5)] group-hover:drop-shadow-[0_8px_10px_rgba(66,153,225,0.6)]"></i>
                     </span>
                     <div class="flex flex-col gap-1 text-center sm:text-left">
-                        <h2 class="max-[350px]:text-lg text-2xl font-bold">${t('play.vsAI')}</h2>
-                        <p class="hidden sm:block text-[0.9rem] opacity-90">${t('play.vsAIInfo')}</p>
+                        <h2 class="max-[350px]:text-lg text-2xl font-bold text-start">${t('play.vsAI')}</h2>
+                        <p class="hidden sm:block text-[0.9rem] opacity-90 text-start">${t('play.vsAIInfo')}</p>
                     </div>
                 </button>
                 
@@ -36,8 +36,8 @@ export default {
                       <i class="fa-solid fa-user-group drop-shadow-[0_5px_rgba(0,0,0,0.5)] group-hover:drop-shadow-[0_8px_10px_rgba(66,153,225,0.6)]"></i>
                     </span>
                     <div class="flex flex-col gap-1 text-center sm:text-left">
-                        <h2 class="max-[350px]:text-lg text-2xl font-bold">${t('play.localPlayer')}</h2>
-                        <p class="hidden sm:block text-[0.9rem] opacity-90">${t('play.localPlayerInfo')}</p>
+                        <h2 class="max-[350px]:text-lg text-2xl font-bold text-start">${t('play.localPlayer')}</h2>
+                        <p class="hidden sm:block text-[0.9rem] opacity-90 text-start">${t('play.localPlayerInfo')}</p>
                     </div>
                 </button>
                 
@@ -46,8 +46,8 @@ export default {
                       <i class="fa-solid fa-trophy drop-shadow-[0_5px_rgba(0,0,0,0.5)] group-hover:drop-shadow-[0_8px_10px_rgba(66,153,225,0.6)]"></i>
                     </span>
                     <div class="flex flex-col gap-1 text-center sm:text-left">
-                        <h2 class="max-[350px]:text-lg text-2xl font-bold">${t('play.tournament')}</h2>
-                        <p class="hidden sm:block text-[0.9rem] opacity-90">${t('play.tournamentInfo')}</p>
+                        <h2 class="max-[350px]:text-lg text-2xl font-bold text-start">${t('play.tournament')}</h2>
+                        <p class="hidden sm:block text-[0.9rem] opacity-90 text-start">${t('play.tournamentInfo')}</p>
                     </div>
                 </button>
                 
@@ -56,8 +56,8 @@ export default {
                       <i class="fa-solid fa-globe drop-shadow-[0_5px_rgba(0,0,0,0.5)] group-hover:drop-shadow-[0_8px_10px_rgba(66,153,225,0.6)]"></i>
                     </span>
                     <div class="flex flex-col gap-1 text-center sm:text-left">
-                        <h2 class="max-[350px]:text-lg text-2xl font-bold">${t('play.online')}</h2>
-                        <p class="hidden sm:block text-[0.9rem] opacity-90">${t('play.onlineInfo')}</p>
+                        <h2 class="max-[350px]:text-lg text-2xl font-bold text-start">${t('play.online')}</h2>
+                        <p class="hidden sm:block text-[0.9rem] opacity-90 text-start">${t('play.onlineInfo')}</p>
                     </div>
                 </button>
             </div>

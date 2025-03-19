@@ -1,21 +1,23 @@
 import en from './en.js'
 import fr from './fr.js'
+import ar from './ar.js'
 
-const translations:any = { en, fr };
+const translations: any = { en, fr, ar };
 
-export type Lang = 'en' | 'fr';
+export type Lang = 'en' | 'fr' | 'ar';
 
-let currentLanguage:Lang = 'en'; 
+let currentLanguage: Lang = 'en';
 
-export const setLanguage = (lang: Lang) => { 
+export const setLanguage = (lang: Lang) => {
 	if (translations[lang]) {
-	  currentLanguage = lang;
-	  document.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang } }));
+		document.body.dir = lang === 'ar'? 'rtl' : 'ltr';
+		currentLanguage = lang;
+		document.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang } }));
 	}
 };
 
-export const t = (key:string) => {
+export const t = (key: string) => {
 	return key.split('.').reduce((obj, keyPart) => {
-	  return obj ? obj[keyPart] : null;
+		return obj ? obj[keyPart] : null;
 	}, translations[currentLanguage]) || key;
 };

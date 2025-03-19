@@ -3,6 +3,7 @@ import moabbas from '../../assets/moabbas.jpg';
 import afarachi from '../../assets/afarachi.jpg';
 import jfatfat from '../../assets/jfatfat.jpg';
 import odib from '../../assets/omar.webp';
+import { t } from "../../languages/LanguageController.js";
 
 // Sample user data for search results [For testing purposes]
 const sampleUsers = [
@@ -96,7 +97,7 @@ const TournamentBrackets = createComponent((props: TournamentBracketsProps) => {
               </div>` :
           `<div class="size-6 bg-gray-200 rounded-full"></div>`
           }
-          <span class="text-sm text-pongdark ${isWinner ? 'font-bold' : ''}">${player?.username || 'TBD'}</span>
+          <span class="text-sm text-pongdark ${isWinner ? 'font-bold' : ''}">${player?.username || t('play.tournaments.createTournament.TBD')}</span>
         </div>
         <span class="text-sm font-semibold ${isWinner ? 'text-green-600' : 'text-gray-600'}">${score !== undefined ? score : ''}</span>
       </div>
@@ -117,8 +118,8 @@ const TournamentBrackets = createComponent((props: TournamentBracketsProps) => {
           ${renderPlayer(player1, score1, isPlayer1Winner)}
           ${renderPlayer(player2, score2, isPlayer2Winner)}
           ${isCompleted ?
-            `<div class="text-xs text-center text-gray-500">Match completed</div>` :
-            `<div class="text-xs text-center text-blue-500">Starts soon</div>`}
+            `<div class="text-xs text-center text-gray-500">${t('play.tournaments.createTournament.matchCompleted')}</div>` :
+            `<div class="text-xs text-center text-blue-500">${t('play.tournaments.createTournament.startSoon')}</div>`}
         </div>
       </div>
     `;
@@ -211,7 +212,7 @@ function generateSVGBracket(): string {
   
   // Generate round labels
   const roundLabelsContent = Array.from({ length: rounds }, (_, round) => {
-    const labelText = round === 0 ? 'Round 1' : round === rounds - 1 ? 'Final' : `Round ${round + 1}`;
+    const labelText = round === 0 ? `${t('play.tournaments.createTournament.round')} 1` : round === rounds - 1 ? t('play.tournaments.createTournament.final') : `${t('play.tournaments.createTournament.round')} ${round + 1}`;
     const labelX = round * (matchWidth + roundSpacing) + (matchWidth / 2); // Center the label over the matches
     
     return `
