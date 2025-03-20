@@ -5,19 +5,8 @@ import { Notification } from "./Notification.js";
 import { DropDown } from "./DropDown.js";
 import store from "../../../store/store.js";
 
-import moabbas from '../../assets/moabbas.jpg';
-import afarachi from '../../assets/afarachi.jpg';
-import jfatfat from '../../assets/jfatfat.jpg';
-import odib from '../../assets/omar.webp';
 import { displayResults } from "./searchFieldResults.js";
-
-// Sample user data for search results [For testing purposes]
-const sampleUsers = [
-	{ username: "Ahmad Farachi - afarachi", status: "online", avatar: afarachi },
-	{ username: "Jihad Fatfat - jfatfat", status: "offline", avatar: jfatfat },
-	{ username: "Mohamad Abbass - moabbas", status: "in-game", avatar: moabbas },
-	{ username: "Omar Dib - odib", status: "online", avatar: odib }
-];
+import axios from "axios";
 
 export const Header = createComponent(() => {
     const container = document.createElement("header");
@@ -116,10 +105,21 @@ export const Header = createComponent(() => {
 
     searchBar.addEventListener('input', () => {
         const searchQuery = searchBar.value.toLowerCase();
+        const token = store.accessToken;
+        axios
+        .get(`http://localhost:8001/auth/users`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          // Store or use the user data
+          const allUsers = response.data;
+          console.log(allUsers);
 
         // Filter users based on search query
-        const filteredUsers = sampleUsers.filter(user => 
-            user.username.toLowerCase().includes(searchQuery)
+        const filteredUsers = allUsers.filter((user: { nickname: string; }) => 
+            user.nickname.toLowerCase().includes(searchQuery)
         );
 
         // Show or hide results container
@@ -129,6 +129,14 @@ export const Header = createComponent(() => {
         } else {
             searchResult.classList.add('hidden');
         }
+        })
+        .catch((error) => {
+            if (error.response && error.response.data) {
+                console.error("Error fetching user data:", error.response.data.message);
+            } else {
+                console.error("Error fetching user data:", error.message);
+            }
+        });
     })
     
     searchBarContainer.addEventListener('submit', (e:Event) => {

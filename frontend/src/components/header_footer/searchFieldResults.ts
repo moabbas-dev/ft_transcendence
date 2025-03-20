@@ -1,6 +1,6 @@
 import { t } from "../../languages/LanguageController";
 
-export function displayResults(users: {username:string, status:string, avatar:string}[], container: HTMLElement): void {
+export function displayResults(users: {nickname:string, status:string, avatar:string}[], container: HTMLElement): void {
 	container.innerHTML = '';
 
 	if (users.length === 0) {
@@ -16,11 +16,11 @@ export function displayResults(users: {username:string, status:string, avatar:st
 
 		userItem.innerHTML = `
 		<div class="w-10 h-10 rounded-full relative">
-		  <img src="${user.avatar}" alt="${user.username}" class="w-full h-full rounded-full object-cover">
+		  <img src="${user.avatar}" alt="${user.nickname}" class="w-full h-full rounded-full object-cover">
 		  <span class="absolute bottom-0 right-0 w-3 h-3 ${statusColor} rounded-full border-2 border-white"></span>
 		</div>
 		<div>
-		  <div class="font-medium text-ponghover">${user.username}</div>
+		  <div class="font-medium text-ponghover">${user.nickname}</div>
 		  <div class="text-xs text-gray-500">${user.status}</div>
 		</div>
 	  `;
