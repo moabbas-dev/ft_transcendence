@@ -1,4 +1,5 @@
 import { t } from "../../languages/LanguageController";
+import { Profile } from "../profile/UserProfile";
 
 export function displayResults(users: {nickname:string, status:string, avatar:string}[], container: HTMLElement): void {
 	container.innerHTML = '';
@@ -15,7 +16,7 @@ export function displayResults(users: {nickname:string, status:string, avatar:st
 		const statusColor = getStatusColor(user.status);
 
 		userItem.innerHTML = `
-		<div class="w-10 h-10 rounded-full relative">
+		<div class="w-10 h-10 rounded-full relative" id="user">
 		  <img src="${user.avatar}" alt="${user.nickname}" class="w-full h-full rounded-full object-cover">
 		  <span class="absolute bottom-0 right-0 w-3 h-3 ${statusColor} rounded-full border-2 border-white"></span>
 		</div>
@@ -27,10 +28,17 @@ export function displayResults(users: {nickname:string, status:string, avatar:st
 
 		// Add click event to user item
 		userItem.addEventListener('click', () => {
-			// Handle user selection
-			console.log('Selected user:', user);
-			// You can navigate to user profile or perform other actions here
-
+			let profilePopUp = document.querySelector(".profile");
+				if (!profilePopUp) {
+				  profilePopUp = document.createElement("div");
+				  profilePopUp.className = "profile";
+				  container.appendChild(profilePopUp);
+				}
+				const profile = Profile({ 
+				  uName: user.nickname,
+				});
+				profilePopUp.innerHTML = '';
+				profilePopUp.appendChild(profile);
 			// Close the results container
 			container.classList.add('hidden');
 		});

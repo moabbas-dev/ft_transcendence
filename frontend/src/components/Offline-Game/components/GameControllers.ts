@@ -32,7 +32,7 @@ export class HumanPlayerController implements Controller {
 export class AIController implements Controller {
 	private difficulty: AIDifficulty;
 	private readonly config = {
-		baseSpeed: 8,
+		baseSpeed: 10,
 		reactionDelay: { easy: 1000, medium: 1000, hard: 1000 },
 		errorMargin: { easy: 0.35, medium: 0.25, hard: 0.1 },
 		maxBouncePredictions: { easy: 1, medium: 2, hard: 3 }

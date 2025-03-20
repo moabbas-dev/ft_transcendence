@@ -131,9 +131,9 @@ export default {
       // Handle friend request received
       chatService.on("friend:request", (data: any) => {
         // Show notification for new friend request
-        showNotification(
-          `New friend request from ${data.firstname} ${data.lastname}`
-        );
+        // showNotification(
+        //   `New friend request from ${data.firstname} ${data.lastname}`
+        // );
 
         // Refresh pending requests
         // chatService.send('friends:get_pending', {});
@@ -142,9 +142,9 @@ export default {
       // Handle friend request accepted
       chatService.on("friend:accepted", (data: any) => {
         // Add the new friend to the list and show notification
-        showNotification(
-          `${data.firstname} ${data.lastname} accepted your friend request`
-        );
+        // showNotification(
+        //   `${data.firstname} ${data.lastname} accepted your friend request`
+        // );
         loadFriendsList(); // Reload friends list
       });
 
@@ -155,29 +155,29 @@ export default {
 
       // Handle blocked user confirmation
       chatService.on("user:blocked", (data: any) => {
-        showNotification(`You have blocked ${data.blockedUsername}`);
+        // showNotification(`You have blocked ${data.blockedUsername}`);
         loadFriendsList(); // Reload friends list to update UI
       });
 
       // Handle unblocked user confirmation
       chatService.on("user:unblocked", (data: any) => {
-        showNotification(`You have unblocked ${data.unblockedUsername}`);
+        // showNotification(`You have unblocked ${data.unblockedUsername}`);
         loadFriendsList(); // Reload friends list to update UI
       });
 
       // Handle disconnection
       chatService.on("disconnect", () => {
         console.log("Disconnected from chat service");
-        showNotification(
-          "Disconnected from chat service. Attempting to reconnect...",
-          "error"
-        );
+        // showNotification(
+        //   "Disconnected from chat service. Attempting to reconnect...",
+        //   "error"
+        // );
       });
 
       // Handle reconnection
       chatService.on("reconnect", () => {
         console.log("Reconnected to chat service");
-        showNotification("Reconnected to chat service");
+        //showNotification("Reconnected to chat service");
         loadFriendsList(); // Reload friends list
       });
     }
@@ -482,27 +482,6 @@ export default {
       });
     }
 
-    // Show notification
-    function showNotification(
-      message: string,
-      type: "success" | "error" = "success"
-    ) {
-      const notification = document.createElement("div");
-      notification.className = `notification fixed top-4 right-4 p-3 rounded shadow-lg z-50 ${
-        type === "success" ? "bg-green-600" : "bg-red-600"
-      } text-white`;
-      notification.textContent = message;
-
-      document.body.appendChild(notification);
-
-      // Remove notification after 3 seconds
-      setTimeout(() => {
-        notification.classList.add("fade-out");
-        setTimeout(() => {
-          notification.remove();
-        }, 300);
-      }, 3000);
-    }
 
     // Add window resize event listener for mobile responsiveness
     window.addEventListener("resize", () => {
