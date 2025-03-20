@@ -106,6 +106,7 @@ export default {
         const tournamentName = container.querySelector('#tournament-name')!
         const changeTournamentNameBtn = container.querySelector('#submit-change-tournament-name')!
         const errorMessage = container.querySelector('#name-error-message')!
+        const oldTournamentName = tournamentName.textContent!;
 
         tournamentName.addEventListener('focus', () => {
             changeTournamentNameBtn.classList.remove("hidden");
@@ -150,6 +151,10 @@ export default {
             }
             else if (tournamentName.textContent!.length > 25) {
                 errorMessage.textContent = t('play.tournaments.createTournament.nameToolong')
+                errorMessage.classList.remove('hidden')
+            }
+            else if (tournamentName.textContent === oldTournamentName) {
+                errorMessage.textContent = 'Name not changed'
                 errorMessage.classList.remove('hidden')
             }
             else {
