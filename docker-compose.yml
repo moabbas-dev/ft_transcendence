@@ -9,23 +9,42 @@ services:
       - "8001:8001"
     networks:
       - ft_network
+    env_file:
+      - ./backend/authentication/.env
     volumes:
       - ./backend/authentication:/app
-      - /app/node_modules
+      - auth_node_modules:/app/node_modules
       - auth_data:/app/data  # Persistent storage for authentication database
 
-  social:
-    build: ./backend/social
-    container_name: ft_social
+  notifications:
+    build: ./backend/notifications
+    container_name: ft_notifications
     restart: always
     ports:
-      - "8002:8002"
+      - "8000:8000"
     networks:
       - ft_network
     volumes:
-      - ./backend/social:/app
-      - /app/node_modules
-      - social_data:/app/data  # Persistent storage for social database
+      - ./backend/notifications:/app
+      - notifications_node_modules:/app/node_modules
+      - notifications_data:/app/data  # Persistent storage for notifications database
+    depends_on:
+      - authentication
+
+  chat:
+    build: ./backend/chat
+    container_name: ft_chat
+    restart: always
+    ports:
+      - "3002:3002"
+    networks:
+      - ft_network
+    env_file:
+      - ./backend/chat/.env
+    volumes:
+      - ./backend/chat:/app
+      - chat_node_modules:/app/node_modules
+      - chat_data:/app/data  # Persistent storage for chat database
     depends_on:
       - authentication
 
@@ -39,10 +58,11 @@ services:
       - ft_network
     volumes:
       - ./frontend:/app
-      - /app/node_modules
+      - frontend_node_modules:/app/node_modules
     depends_on:
       - authentication
-      - social
+      - chat
+      - notifications
 
 networks:
   ft_network:
@@ -50,4 +70,9 @@ networks:
 
 volumes:
   auth_data:
-  social_data:
+  notifications_data:
+  chat_data:
+  auth_node_modules:
+  notifications_node_modules:
+  chat_node_modules:
+  frontend_node_modules:
