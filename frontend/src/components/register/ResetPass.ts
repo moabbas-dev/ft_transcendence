@@ -1,9 +1,9 @@
 import axios from "axios";
 import { t } from "../../languages/LanguageController.js";
-import { validateConfirmPassword, validatePassword } from "../../utils/FormValidation.js";
 import { createComponent, useCleanup } from "../../utils/StateManager.js";
 import { Button } from "../partials/Button.js";
 import { navigate } from "../../router.js";
+import Toast from "../../toast/Toast.js";
 
 export const ResetPass = createComponent((params: { [key: string]: string | number }) => {
 	const form = document.createElement('div')
@@ -57,10 +57,6 @@ export const ResetPass = createComponent((params: { [key: string]: string | numb
 		styles: 'w-full font-semibold p-2 text-base text-white rounded-lg',
 		eventType: 'click',
 		onClick: async(e: Event) => {
-			// if (!validatePassword(passwordInput) || !validateConfirmPassword(passwordInput, confirmPasswordInput))
-			// 	e.preventDefault();
-			// else
-			// 	console.log('email and pass are nice!');
 			e.preventDefault();
 			try {
 				const uuid = params["uuid"];
@@ -69,24 +65,21 @@ export const ResetPass = createComponent((params: { [key: string]: string | numb
 					verifyPassword: confirmPasswordInput.value
 				};
 				await axios.post(`http://localhost:8001/auth/resetPassword/reset/${uuid}`, body);
-				console.log("Changing password complete!");
+				Toast.show("Password changed successfully!", "success");
 				navigate("/register");
 			}
 			catch (error: any) {
 				if (error.response) {
-					if (error.response.status === 404 || error.response.status === 403 || error.response.status === 400) {
-						console.error("Error:", error.response.data.message);
-						// Show error message in UI (e.g., setting state for a span element)
-					} else if (error.response.status === 500) {
-						console.error("Server error:", error.response.data.error);
-					} else {
-						console.error("Unexpected error:", error.response.data);
-					}
-				} else if (error.request) {
-					console.error("No response from server:", error.request);
-				} else {
-					console.error("Error setting up request:", error.message);
-				}
+					if (error.response.status === 404 || error.response.status === 403 || error.response.status === 400)
+						Toast.show(`Error: ${error.response.data.message}`, "error");
+					else if (error.response.status === 500)
+						Toast.show(`Server error: ${error.response.data.error}`, "error");
+					else
+						Toast.show(`Unexpected error: ${error.response.data}`, "error");
+				} else if (error.request)
+					Toast.show(`No response from server: ${error.request}`, "error");
+				else
+					Toast.show(`Error setting up request: ${error.message}`, "error");
 			}
 		}
 	});

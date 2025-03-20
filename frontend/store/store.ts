@@ -1,4 +1,5 @@
 import axios from "axios";
+import Toast from "../src/toast/Toast";
 
 class Store {
 	userId: string | null = localStorage.getItem("userId");
@@ -45,19 +46,17 @@ class Store {
 			this.update("refreshToken", null);
 			this.update("sessionId", null);
 			this.update("createdAt", null);
-			console.log("User logged out successfully!");
 		}
 		catch (error: any) {
 			if (error.response) {
 				if (error.response.status === 404)
-					console.error("Error:", error.response.data.message);
+					Toast.show(`Error: ${error.response.data.message}`, "error");
 				else
-					console.error("Server error:", error.response.data.error);
-			} else if (error.request) {
-				console.error("No response from server:", error.request);
-			} else {
-				console.error("Error setting up request:", error.message);
-			}
+					Toast.show(`Server error: ${error.response.data.error}`, "error");
+			} else if (error.request)
+				Toast.show(`No response from the server: ${error.request}`, "error");
+			else
+				Toast.show(`Error setting up the request: ${error.message}`, "error")
 		}
 	}
 }

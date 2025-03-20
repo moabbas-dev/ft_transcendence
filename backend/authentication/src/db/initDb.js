@@ -35,8 +35,8 @@ const createTables = () => {
 					user_id INTEGER NOT NULL,
 					access_token TEXT,
 					refresh_token TEXT,
-					expires_at TIMESTAMP NOT NULL DEFAULT (DATETIME('now', '+1 hour')),
-					refresh_expires_at TIMESTAMP NOT NULL DEFAULT (DATETIME('now', '+30 days')),
+					expires_at TIMESTAMP NOT NULL DEFAULT (DATETIME('now', '+5 minutes')),
+					refresh_expires_at TIMESTAMP NOT NULL DEFAULT (DATETIME('now', '+30 minutes')),
 					created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 					updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 					FOREIGN KEY (user_id) REFERENCES Users(id)

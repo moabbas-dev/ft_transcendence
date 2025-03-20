@@ -4,6 +4,7 @@ import { Button } from "../partials/Button.js";
 import axios from "axios";
 import store from "../../../store/store.js";
 import { navigate } from "../../router.js";
+import Toast from "../../toast/Toast.js";
 
 interface TwoFactorSendProps {
 	onSwitchToSignIn: () => void,
@@ -47,21 +48,21 @@ export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
 			};
 			try {
 				await axios.post(`http://localhost:8001/auth/twoFactor/login/${store.sessionId}`, body);
-				console.log("two factor authentication validation complete!");
+				Toast.show("two factor authentication validation complete!", "success");
 				navigate("/play");
 			} catch (err: any) {
 				if (err.response) {
 					if (err.response.status === 400 || err.response.status === 403 || err.response.status === 404)
-						console.error("Error: ", err.response.data.message);
+						Toast.show(`Error: ${err.response.data.message}`, "error");
 					else if (err.response.status === 500)
-						console.error("Server error:", err.response.data.error);
+						Toast.show(`Server error: ${err.response.data.error}`, "error");
 					else
-						console.error("Unexpected error:", err.response.data);
+						Toast.show(`Unexpected error: ${err.response.data}`, "error");
 				}
 				else if (err.request)
-					console.error("No response from server:", err.request);
+					Toast.show(`No response from server: ${err.request}`, "error");
 				else
-					console.error("Error setting up request:", err.message);
+					Toast.show(`Error setting up request: ${err.message}`, "error");
 			}
 		}
 	});

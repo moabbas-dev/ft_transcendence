@@ -3,6 +3,7 @@ import { Button } from "../partials/Button.js";
 import { t } from "../../languages/LanguageController.js";
 import axios from "axios";
 import { navigate } from "../../router.js";
+import Toast from "../../toast/Toast.js";
 
 interface SignUpProps {
 	styles: string,
@@ -181,14 +182,15 @@ export const SignUp = createComponent((props: SignUpProps) => {
 	const confirmPasswordInput = form.querySelector('#conf-password') as HTMLInputElement;
 	const nickname = form.querySelector("#nickname") as HTMLInputElement;
 	const fullname = form.querySelector("#fullname") as HTMLInputElement;
-	const age = form.querySelector("#age") as HTMLInputElement;
+	const ageInput = form.querySelector("#age") as HTMLInputElement;
+	const countryInput = form.querySelector("#country") as HTMLSelectElement;
 	//   const 
 	const signUpButton = Button({
 		type: 'submit',
 		text: t('register.signup.signup_btn'),
 		styles: 'w-full font-semibold p-2 text-base text-white bg-pongblue rounded-lg hover:bg-opacity-90 transition-all duration-300',
 		eventType: 'click',
-		onClick: async (e: MouseEvent) => {
+		onClick: async (e: Event) => {
 			e.preventDefault();
 			try {
 				const body = {
@@ -196,30 +198,26 @@ export const SignUp = createComponent((props: SignUpProps) => {
 					password: passwordInput.value,
 					nickname: nickname.value,
 					full_name: fullname.value,
-					age: age.value,
-					country: "Lebanon",
+					age: ageInput.value,
+					country: countryInput.value,
 					google_id: null
 				};
 				await axios.post("http://localhost:8001/auth/users", body);
-				console.log("Check your email for an activation message");
+				Toast.show(`SignUp successful! Go to your email ${emailInput.value} to activate your account`, "success");
 				navigate('/'); // You can edit it
 			} catch (err: any) {
 				if (err.response) {
-					if (err.response.status === 400) {
-						const msg = err.response.data.message;
-						console.log(msg);
-					}
-					else if (err.response.status === 500) {
-						console.error("Server error:", err.response.data.error);
-					} else {
-						console.error("Unexpected error:", err.response.data);
-					}
+					if (err.response.status === 400 || err.response.status === 409)
+						Toast.show(`Error: ${err.response.data.message}`, "error");
+					else if (err.response.status === 500)
+						Toast.show(`Server error: ${err.response.data.error}`, "error");
+					else
+						Toast.show(`Unexpected error: ${err.response.data}`, "error");
 				}
-				else if (err.request) {
-					console.error("No response from server:", err.request);
-				} else {
-					console.error("Error setting up request:", err.message);
-				}
+				else if (err.request)
+					Toast.show(`No response from server: ${err.request}`, "error");
+				else
+					Toast.show(`Error setting up request: ${err.message}`, "error");
 			}
 		}
 	});
