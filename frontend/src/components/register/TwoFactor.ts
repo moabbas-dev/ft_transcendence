@@ -1,6 +1,9 @@
 import { createComponent } from "../../utils/StateManager.js";
 import { t } from "../../languages/LanguageController.js";
 import { Button } from "../partials/Button.js";
+import axios from "axios";
+import store from "../../../store/store.js";
+import { navigate } from "../../router.js";
 
 interface TwoFactorSendProps {
 	onSwitchToSignIn: () => void,
@@ -27,18 +30,39 @@ export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
 			</form>
 		</div>
 	`;
-	const formElement:HTMLFormElement = form.querySelector('form')!;
+	const formElement: HTMLFormElement = form.querySelector('form')!;
 	const verifyButton = Button({
 		type: 'submit',
 		text: t("register.twoFactor.verifyBtn"),
 		styles: 'w-full font-semibold p-2 text-base text-white rounded-lg',
 		eventType: 'click',
-		onClick: (e: Event) => {
+		onClick: async (e: Event) => {
 			e.preventDefault();
 			let code = Array.from(inputs).map(input => input.value).join('');
 			console.log("Entered code:", code);
-			inputs.forEach(input => {input.value = ""});
-			requestAnimationFrame(() => {inputs[0].focus()});
+			inputs.forEach(input => { input.value = "" });
+			requestAnimationFrame(() => { inputs[0].focus() });
+			const body = {
+				code: code
+			};
+			try {
+				await axios.post(`http://localhost:8001/auth/twoFactor/login/${store.sessionId}`, body);
+				console.log("two factor authentication validation complete!");
+				navigate("/play");
+			} catch (err: any) {
+				if (err.response) {
+					if (err.response.status === 400 || err.response.status === 403 || err.response.status === 404)
+						console.error("Error: ", err.response.data.message);
+					else if (err.response.status === 500)
+						console.error("Server error:", err.response.data.error);
+					else
+						console.error("Unexpected error:", err.response.data);
+				}
+				else if (err.request)
+					console.error("No response from server:", err.request);
+				else
+					console.error("Error setting up request:", err.message);
+			}
 		}
 	});
 	formElement.appendChild(verifyButton);
@@ -48,8 +72,8 @@ export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
 	// Auto-focus the first input on page load
 	if (inputs.length) {
 		requestAnimationFrame(() => {
-		  inputs[0].focus();
-		  inputs[0].select(); // Optional: highlight text for better UX
+			inputs[0].focus();
+			inputs[0].select(); // Optional: highlight text for better UX
 		});
 	}
 
@@ -70,7 +94,7 @@ export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
 
 			const allFilled = Array.from(inputs).every(input => input.value.length === 1);
 			if (allFilled)
-			  formElement.requestSubmit();
+				formElement.requestSubmit();
 		});
 
 		// Handle backspace to move to previous field
@@ -80,7 +104,7 @@ export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
 		});
 	});
 
-	form.addEventListener("submit", (e:Event) => {
+	form.addEventListener("submit", (e: Event) => {
 		e.preventDefault();
 		let code = Array.from(inputs).map(input => input.value).join('');
 		console.log("Entered code:", code);
