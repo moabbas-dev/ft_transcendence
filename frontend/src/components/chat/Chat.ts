@@ -39,7 +39,7 @@ export const Chat = createComponent(
                               }
                             </div>
                             <div>
-                                <p  class="text-base sm:text-xl">${
+                                <p  class="text-base sm:text-xl ${activeUser? "cursor-pointer hover:underline" : ""} ">${
                                   activeUser
                                     ? `${activeUser.full_name} - ${activeUser.nickname}`
                                     : "Select a chat"

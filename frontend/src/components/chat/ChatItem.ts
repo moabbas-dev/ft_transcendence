@@ -7,10 +7,12 @@ interface ChatItemProps {
     fullname: string,
     isFriend: boolean,
     status: string,
+    unreadCount: number, // to be handled later
     onChatSelect?: (user: { nickname: string, id: number, full_name: string }) => void
 }
 
 export const ChatItem = createComponent((props: ChatItemProps) => {
+    props.unreadCount = 20;
     const chatItem = document.createElement('div');
     chatItem.className = 'user-item flex items-center p-3 rounded-lg transition-all duration-200 hover:bg-ponghover hover:cursor-pointer hover:shadow-md border-b';
     
@@ -28,6 +30,13 @@ export const ChatItem = createComponent((props: ChatItemProps) => {
                     <div class="avatar h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-xl font-semibold text-gray-700">
                         ${props.fullname.charAt(0).toUpperCase()}
                     </div>
+                    ${props.unreadCount > 0 ? `
+                    <div class="absolute top-0 right-0 bg-red-500 text-white rounded-full 
+                        text-xs min-w-[20px] h-5 flex items-center justify-center px-1">
+                        ${props.unreadCount > 9 ? '9+' : props.unreadCount}
+                    </div>
+                ` : ''}
+
                     ${props.status ? 
                         `<span class="status-indicator absolute bottom-0 right-0 h-3 w-3 rounded-full ${
                             props.status ? 'bg-green-500' : 'bg-gray-400'
@@ -85,6 +94,10 @@ export const ChatItem = createComponent((props: ChatItemProps) => {
         
         // Chat item click (select this chat)
         chatItem.addEventListener('click', () => {
+            if (props.unreadCount > 0) {
+                props.unreadCount = 0;
+                render(); // Re-render with updated count
+            }
             // Highlight the selected chat
             document.querySelectorAll('.user-item').forEach(item => {
                 item.classList.remove('bg-ponghover', 'shadow-md');

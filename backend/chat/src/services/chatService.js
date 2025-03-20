@@ -40,13 +40,14 @@ export async function saveMessage(message, roomId) {
     // Insert the message
     await db.run(
       `INSERT INTO messages (id, room_id, sender_id, content, timestamp) 
-       VALUES (?, ?, ?, ?, ?)`,
+      VALUES (?, ?, ?, ?, ?)`,
       [
         message.id,
         roomId,
         message.from,
         message.content,
-        message.timestamp
+        message.timestamp,
+        message.read_status || 0
       ]
     );
 
@@ -71,7 +72,8 @@ export async function getMessages(roomId, limit = 50) {
         id, 
         sender_id as senderId, 
         content, 
-        timestamp, 
+        timestamp,
+        read_status 
         created_at as createdAt 
        FROM messages 
        WHERE room_id = ? 
@@ -92,3 +94,62 @@ export async function getMessages(roomId, limit = 50) {
     throw new Error('Failed to retrieve messages');
   }
 }
+
+// ///////////////////////////////////////////////////////
+
+// // working on displayin the un-read messages  
+// // ⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️
+
+// ///////////////////////////////////////////////////////
+
+// export async function getUnreadMessageCount(userId) {
+//   const db = await getDatabase();
+  
+//   // Get all rooms the user is part of
+//   const rooms = await db.all(
+//     `SELECT room_id FROM room_participants WHERE user_id = ?`,
+//     [userId]
+//   );
+  
+//   const unreadCounts = {};
+  
+//   // For each room, count unread messages
+//   for (const room of rooms) {
+//     const roomId = room.room_id;
+    
+//     // Get the other participant in this room
+//     const otherUser = await db.get(
+//       `SELECT user_id FROM room_participants 
+//        WHERE room_id = ? AND user_id != ?`,
+//       [roomId, userId]
+//     );
+    
+//     if (otherUser) {
+//       // Count unread messages from the other user
+//       const count = await db.get(
+//         `SELECT COUNT(*) as count FROM messages 
+//          WHERE room_id = ? AND sender_id != ? AND read_status = 0`,
+//         [roomId, userId]
+//       );
+      
+//       unreadCounts[otherUser.user_id] = count.count;
+//     }
+//   }
+  
+//   return unreadCounts;
+// }
+
+
+// // Add a function to mark messages as read
+// export async function markMessagesAsRead(roomId, userId) {
+//   const db = await getDatabase();
+  
+//   await db.run(
+//     `UPDATE messages 
+//      SET read_status = 1 
+//      WHERE room_id = ? AND sender_id != ?`,
+//     [roomId, userId]
+//   );
+  
+//   return true;
+// }

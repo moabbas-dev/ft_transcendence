@@ -1,7 +1,7 @@
 import { blockUser, unblockUser } from "../services/blockService.js";
 import { getUser, createOrUpdateUser, getUserByUsername, createChatRoom } from "../services/userService.js";
 import { createFriendRequest, addFriend } from "../services/friendService.js"
-import { saveMessage, getMessages } from "../services/chatService.js"
+import { saveMessage, getMessages, getUnreadMessageCount } from "../services/chatService.js"
 
 export function setupWebSocketHandlers(wsAdapter, fastify) {
   // Track online users mapping username to clientId
@@ -183,17 +183,23 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
         from,
         content,
         timestamp,
+        read_status: 0
       };
 
       // Save message to database
       await saveMessage(newMessage, roomId);
 
       // Send the message to recipient if online
-      const toClientId = onlineUsers.get(to);
+      // const toClientId = onlineUsers.get(to);
       // if (toClientId) {
         wsAdapter.sendTo(to, "message:received", {
           roomId,
           message: newMessage,
+        });
+
+        const unreadCounts = await getUnreadMessageCount(to);
+        wsAdapter.sendTo(to, "messages:unread", {
+          unreadCounts
         });
       // }
 
@@ -335,5 +341,4 @@ wsAdapter.on("friends:get", async ({ clientId, payload }) => {
 //   }
 // });
 }
-
 

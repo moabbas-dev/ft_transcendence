@@ -264,6 +264,8 @@ class ChatWebSocketService {
       unblocked: unblockedUsername
     });
   }
+
+  
 }
 
 // Create a singleton instance

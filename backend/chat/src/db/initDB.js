@@ -43,6 +43,8 @@ export async function initDatabase() {
 
     CREATE TABLE IF NOT EXISTS chat_rooms (
       id TEXT PRIMARY KEY,
+      last_message TEXT,
+      last_message_timestamp TIMESTAMP,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -59,6 +61,7 @@ export async function initDatabase() {
       sender_id INTEGER NOT NULL,
       content TEXT NOT NULL,
       timestamp INTEGER NOT NULL,
+      read_status BOOLEAN DEFAULT FALSE,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (room_id) REFERENCES chat_rooms (id)
     );
