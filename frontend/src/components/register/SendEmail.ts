@@ -1,8 +1,8 @@
 import { createComponent } from "../../utils/StateManager.js";
 import { t } from "../../languages/LanguageController.js";
 import { Button } from "../partials/Button.js";
-import { validateEmail } from "../../utils/FormValidation.js";
 import axios from "axios";
+import Toast from "../../toast/Toast.js";
 
 interface SendEmailProps {
 	onSwitchToSignIn: () => void,
@@ -47,22 +47,20 @@ export const SendEmail = createComponent((props: SendEmailProps) => {
 					email: emailInput.value
 				};
 				await axios.post(`http://localhost:8001/auth/resetPassword/email`, body);
-				console.log("Email found! Email message sent successfully!");
+				Toast.show("Email found! Email message sent successfully!", "success");
 			} catch (err: any) {
 				if (err.response) {
 					if (err.response.status === 404 || err.response.status === 403)
-						console.error(err.response.data.message);
+						Toast.show(`Error: ${err.response.data.message}`, "error");
 					else if (err.response.status === 500)
-						console.error(err.response.data.error);
+						Toast.show(`Server error: ${err.response.data.error}`, "error");
 					else
-						console.error("Server Error!");
+						Toast.show(`Unexpected error: ${err.response.data}`, "error");
 				}
-				else if (err.request) {
-					console.error("No response from server:", err.request);
-				}
-				else {
-					console.error("Error setting up request:", err.message);
-				}
+				else if (err.request)
+					Toast.show(`No response from server: ${err.request}`, "error");
+				else
+					Toast.show(`Error setting up request: ${err.message}`, "error");
 			}
 		}
 	});

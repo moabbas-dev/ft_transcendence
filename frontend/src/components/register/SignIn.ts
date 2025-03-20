@@ -5,6 +5,7 @@ import axios from 'axios';
 import { navigate } from '../../router.js';
 import store from '../../../store/store.js';
 import { jwtDecode } from "jwt-decode";
+import Toast from '../../toast/Toast.js';
 
 interface SignInProps {
 	styles: string,
@@ -93,30 +94,27 @@ export const SignIn = createComponent((props: SignInProps) => {
 					store.update("avatarUrl", decodedToken.avatarUrl);
 					store.update("isLoggedIn", true);
 					navigate("/play");
-					console.log("Login successful:", signIn.data);
+					Toast.show(`Login successful, Welcome ${store.fullName}!`, "success");
 				}
 			}
 			else {
 				store.update("sessionId", signIn.data.sessionId);
-				navigate("/"); // the route must be updated to be the route of 2fa validation page
-				console.log("First step is complete! now moving to the 2fa code checking!");
+				navigate("/register/twofactor");
+				Toast.show("First step is complete! Now moving to the 2fa code validation", "success");
 			}
 
 		} catch (error: any) {
 			if (error.response) {
-				if (error.response.status === 404 || error.response.status === 403) {
-					console.error("Error:", error.response.data.message);
-					// Show error message in UI (e.g., setting state for a span element)
-				} else if (error.response.status === 500) {
-					console.error("Server error:", error.response.data.error);
-				} else {
-					console.error("Unexpected error:", error.response.data);
-				}
-			} else if (error.request) {
-				console.error("No response from server:", error.request);
-			} else {
-				console.error("Error setting up request:", error.message);
-			}
+				if (error.response.status === 404 || error.response.status === 403)
+					Toast.show(`Error: ${error.response.data.message}`, "error");
+				else if (error.response.status === 500)
+					Toast.show(`Server error: ${error.response.data.error}`, "error");
+				else
+					Toast.show(`Unexpected error: ${error.response.data}`, "error");
+			} else if (error.request)
+				Toast.show(`No response from server: ${error.request}`, "error");
+			else
+				Toast.show(`Error setting up the request: ${error.message}`, "error");
 		}
 	};
 
