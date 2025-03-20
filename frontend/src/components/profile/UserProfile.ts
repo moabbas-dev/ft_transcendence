@@ -8,6 +8,7 @@ import Chart from 'chart.js/auto';
 import store from "../../../store/store.js";
 import axios from "axios";
 import { t } from "../../languages/LanguageController.js";
+import { UserFriends } from "./UserFriends.js";
 
 interface ProfileProps {
   uName: string,
@@ -66,32 +67,26 @@ export const Profile = createComponent((props: ProfileProps) => {
             </button>
         </div>
         <div class="flex">
-        <div>
-            <p id="name" class="font-bold text-lg">${store.nickname}</p>
-            <div class="flex items-center gap-1">
-                <p>${t('profile.rank')}</p>
-                <img src="${goldRank}" class="w-6">
-            </div>
+          <div>
+              <p id="name" class="font-bold text-lg">${store.nickname}</p>
+              <div class="flex items-center gap-1">
+                  <p>${t('profile.rank')}</p>
+                  <img src="${goldRank}" class="w-6">
+              </div>
+          </div>
+          <div class="relative">
+            <img 
+                src="${logoUrl}" 
+                alt="profile picture" 
+                class="size-14 sm:size-20 object-cover rounded-full border-2 border-pongblue"
+            >
+            <span class="absolute bottom-0 left-0 h-5 w-5 rounded-full
+              bg-green-500 border border-white"></span>
+          </div>
         </div>
-        <div class="relative">
-          <img 
-              src="${logoUrl}" 
-              alt="profile picture" 
-              class="size-14 sm:size-20 object-cover rounded-full border-2 border-pongblue"
-          >
-          <span class="absolute bottom-0 left-0 h-5 w-5 rounded-full
-            bg-green-500 border border-white"></span>
-        </div>
-
-        </div>
-            
       </div>
-      
-
-      
-
       <!-- Tabs (Statistics, History, Info) -->
-        <div class="flex space-x-4 border-b border-gray-300">
+        <div id="profile-tabs" class="flex space-x-4 border-b border-gray-300">
           <button 
               id="info-tab" 
               class="flex-1 py-2 text-white text-center transition-all  focus:outline-none bg-pongblue"
@@ -109,6 +104,13 @@ export const Profile = createComponent((props: ProfileProps) => {
             class="flex-1 py-2 text-center transition-all focus:outline-none"
           >
           ${t('profile.historyTab.title')}
+          </button>
+
+          <button 
+            id="friends-tab" 
+            class="flex-1 py-2 text-center transition-all focus:outline-none"
+          >
+            Friends
           </button>
         </div>
 
@@ -135,9 +137,11 @@ export const Profile = createComponent((props: ProfileProps) => {
 
   // Query elements
   const closeButton = container.querySelector("#close-button")!
+  const profileTabs = container.querySelector("#profile-tabs")!
   const statisticsTab = container.querySelector("#statistics-tab")!
   const historyTab = container.querySelector("#history-tab")!
   const infoTab = container.querySelector("#info-tab")!
+  const friendsTab = container.querySelector("#friends-tab")!
   const contentContainer = container.querySelector("#content-container")!
   const overlay = container.querySelector('.overlay')!
 
@@ -152,12 +156,12 @@ export const Profile = createComponent((props: ProfileProps) => {
 
   // Helper function to clear active background from all tabs
   function clearActiveTabs() {
-    statisticsTab?.classList.remove("bg-pongblue");
-    statisticsTab?.classList.remove("text-white");
-    historyTab?.classList.remove("bg-pongblue");
-    historyTab?.classList.remove("text-white");
-    infoTab?.classList.remove("bg-pongblue");
-    infoTab?.classList.remove("text-white");
+    profileTabs?.childNodes.forEach((tab) => {
+      if (tab instanceof HTMLElement) {
+        tab.classList.remove("bg-pongblue");
+        tab.classList.remove("text-white");
+      }
+    })
   }
 
   // User Profile by default
@@ -278,6 +282,14 @@ export const Profile = createComponent((props: ProfileProps) => {
         // Here you can call an API or handle logic to enable/disable 2FA
       });
     }
+  });
+
+  friendsTab?.addEventListener("click", () => {
+    if (!contentContainer) return;
+    clearActiveTabs();
+    friendsTab.classList.add("bg-pongblue", "text-white");
+    contentContainer.innerHTML = "";
+    contentContainer?.appendChild(UserFriends());
   });
 
   return container;
