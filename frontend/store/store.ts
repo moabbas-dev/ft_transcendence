@@ -46,7 +46,6 @@ class Store {
 			this.update("refreshToken", null);
 			this.update("sessionId", null);
 			this.update("createdAt", null);
-			Toast.show("Logged out successfully!", "success");
 		}
 		catch (error: any) {
 			if (error.response) {
