@@ -451,7 +451,6 @@ export const Chat = createComponent(
 
       // Listen for user blocked confirmation
       chatService.on("user:blocked", (data) => {
-        console.log(`User ${data.username} has been blocked`);
         // You might want to update the UI to reflect the blocked status
       });
     };

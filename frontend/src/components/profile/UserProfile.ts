@@ -4,37 +4,94 @@ import goldRank from "/src/assets/gold-medal.png";
 import { GamesHistory } from "./GmaesHistory.js";
 import { UserInfo } from "./UserInfo.js";
 import { UserStatistics } from "./UserStatistics.js";
-import Chart from 'chart.js/auto';
+import Chart from "chart.js/auto";
 import store from "../../../store/store.js";
 import axios from "axios";
 import { t } from "../../languages/LanguageController.js";
+import { chatService } from "../../utils/chatWebSocketService.js";
 
 interface ProfileProps {
-  uName: string,
+  uName: string;
 }
 
-
 export const Profile = createComponent((props: ProfileProps) => {
-
   if (props && props.uName) {
     const token = store.accessToken;
     // Make the API call with proper authorization headers
-    axios.get(`http://localhost:8001/auth/users/nickname/${props.uName}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-    .then(response => {
-      // Store or use the user data
-      const userData = response.data;
-      updateUIWithUserData(userData, container);
-      
-    })
-    .catch(error => {
-      console.error("Error fetching user data:", error.response.data.message);
-    });
+    axios
+      .get(`http://localhost:8001/auth/users/nickname/${props.uName}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        // Store or use the user data
+        const userData = response.data;
+        updateUIWithUserData(userData, container);
+        // Set up event listener for the "Add Friend" button
+        addFriendButton?.addEventListener("click", () => {
+          // Make sure we have the current user's ID and the target user's ID
+          const fromUserId = store.userId; // Current user ID from store
+
+          // If userData is not loaded yet, use the username from props to look up
+          const toUsername = props.uName;
+          console.log(props.uName);
+
+          if (!fromUserId || !toUsername) {
+            console.error("Missing user information for friend request");
+            // You might want to show a notification to the user here
+            return;
+          }
+
+          // Send the friend request via WebSocket
+          chatService.send("friend:request", {
+            from: fromUserId,
+            to: userData.id,
+          });
+
+          // Update UI to show request is pending
+          addFriendButton.textContent = "Request Sent";
+          addFriendButton.disabled = true;
+          addFriendButton.classList.remove(
+            "bg-green-500",
+            "hover:bg-green-600"
+          );
+          addFriendButton.classList.add("bg-gray-400");
+
+          // Optional: Show a success message
+          // showNotification("Friend request sent successfully!");
+        });
+
+        // Set up event listener for the "Block User" button
+        blockUserButton?.addEventListener("click", () => {
+          const fromUserId = store.userId; // Current user ID
+          const toUserId = userData?.id; // Target user ID from loaded user data
+
+          if (!fromUserId || !toUserId) {
+            console.error("Missing user information for blocking");
+            return;
+          }
+
+          // Send the block request via WebSocket
+          chatService.send("user:block", {
+            from: fromUserId,
+            blocked: toUserId,
+          });
+
+          // Update UI to show user is blocked
+          blockUserButton.textContent = "Blocked";
+          blockUserButton.disabled = true;
+          blockUserButton.classList.remove("bg-red-500", "hover:bg-red-600");
+          blockUserButton.classList.add("bg-gray-400");
+
+          // showNotification("User has been blocked");
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching user data:", error.response.data.message);
+      });
   }
-  
+
   // A wrapper for our popup + overlay
   // The actual modal container
   const container = document.createElement("div");
@@ -54,22 +111,22 @@ export const Profile = createComponent((props: ProfileProps) => {
           <div class="flex gap-2 flex-1 justify-end">
             <button id="message-user" class="max-sm:flex-1 bg-pongblue text-white text-nowrap max-sm:text-sm px-2 sm:px-4 py-1 rounded hover:bg-blue-700 transition-colors">
               <i class="fas fa-envelope min-[401px]:mr-1"></i>
-              <span class="max-[402px]:hidden">${t('profile.message')}</span>
+              <span class="max-[402px]:hidden">${t("profile.message")}</span>
             </button>
             <button id="add-friend" class="max-sm:flex-1 bg-green-500 text-white max-sm:text-sm px-2 sm:px-4 py-1 rounded hover:bg-green-600 transition-colors">
               <i class="fas fa-user-plus min-[401px]:mr-1"></i>
-              <span class="max-[402px]:hidden">${t('profile.add')}</span>
+              <span class="max-[402px]:hidden">${t("profile.add")}</span>
             </button>
             <button id="block-user" class="max-sm:flex-1 bg-red-500 text-white max-sm:text-sm px-2 sm:px-4 py-1 rounded hover:bg-red-600 transition-colors">
               <i class="fas fa-ban min-[401px]:mr-1"></i>
-              <span class="max-[402px]:hidden">${t('profile.block')}</span>
+              <span class="max-[402px]:hidden">${t("profile.block")}</span>
             </button>
         </div>
         <div class="flex">
         <div>
             <p id="name" class="font-bold text-lg">${store.nickname}</p>
             <div class="flex items-center gap-1">
-                <p>${t('profile.rank')}</p>
+                <p>${t("profile.rank")}</p>
                 <img src="${goldRank}" class="w-6">
             </div>
         </div>
@@ -96,19 +153,19 @@ export const Profile = createComponent((props: ProfileProps) => {
               id="info-tab" 
               class="flex-1 py-2 text-white text-center transition-all  focus:outline-none bg-pongblue"
             >
-            ${t('profile.infoTab.title')}
+            ${t("profile.infoTab.title")}
           </button>
           <button 
             id="statistics-tab" 
             class="flex-1 py-2 text-center transition-all focus:outline-none"
           >
-          ${t('profile.statisticsTab.title')}
+          ${t("profile.statisticsTab.title")}
           </button>
           <button 
             id="history-tab" 
             class="flex-1 py-2 text-center transition-all focus:outline-none"
           >
-          ${t('profile.historyTab.title')}
+          ${t("profile.historyTab.title")}
           </button>
         </div>
 
@@ -119,35 +176,41 @@ export const Profile = createComponent((props: ProfileProps) => {
     </div>
   `;
 
-  function updateUIWithUserData(userData : any, container: HTMLDivElement) {
+  function updateUIWithUserData(userData: any, container: HTMLDivElement) {
     // Update nickname
-    const nicknameElement = container.querySelector('#name');
+    const nicknameElement = container.querySelector("#name");
     if (nicknameElement) {
       nicknameElement.textContent = userData.nickname || store.nickname;
     }
-    
+
     // Update other elements as needed
     // For example, rank, avatar image, etc.
-    
+
     // You could also pass this data to your sub-components
     // For example, when creating UserInfo, UserStatistics, etc.
   }
 
   // Query elements
-  const closeButton = container.querySelector("#close-button")!
-  const statisticsTab = container.querySelector("#statistics-tab")!
-  const historyTab = container.querySelector("#history-tab")!
-  const infoTab = container.querySelector("#info-tab")!
-  const contentContainer = container.querySelector("#content-container")!
-  const overlay = container.querySelector('.overlay')!
+  const closeButton = container.querySelector("#close-button")!;
+  const statisticsTab = container.querySelector("#statistics-tab")!;
+  const historyTab = container.querySelector("#history-tab")!;
+  const infoTab = container.querySelector("#info-tab")!;
+  const contentContainer = container.querySelector("#content-container")!;
+  const overlay = container.querySelector(".overlay")!;
+  const addFriendButton = container.querySelector(
+    "#add-friend"
+  )! as HTMLButtonElement;
+  const blockUserButton = container.querySelector(
+    "#block-user"
+  )! as HTMLButtonElement;
 
   overlay.addEventListener("click", () => {
-    container.remove()
-  })
+    container.remove();
+  });
 
   // Close the modal on X click
   closeButton?.addEventListener("click", () => {
-    container.remove()
+    container.remove();
   });
 
   // Helper function to clear active background from all tabs
@@ -161,21 +224,25 @@ export const Profile = createComponent((props: ProfileProps) => {
   }
 
   // User Profile by default
-  contentContainer?.appendChild(UserInfo({
-    uName: props.uName,
-  }));
+  contentContainer?.appendChild(
+    UserInfo({
+      uName: props.uName,
+    })
+  );
 
   statisticsTab?.addEventListener("click", () => {
     if (!contentContainer) return;
     clearActiveTabs();
     statisticsTab.classList.add("bg-pongblue", "text-white");
-    
+
     // Set up the content with three canvases
     contentContainer.innerHTML = "";
     contentContainer?.appendChild(UserStatistics());
 
     // Initialize the Elo Rating Line Chart
-    const statsCtx = document.getElementById("statsChart") as HTMLCanvasElement | null;
+    const statsCtx = document.getElementById(
+      "statsChart"
+    ) as HTMLCanvasElement | null;
     if (statsCtx) {
       const lineData = {
         labels: ["January", "February", "March", "April", "May", "June"],
@@ -196,9 +263,11 @@ export const Profile = createComponent((props: ProfileProps) => {
       };
       new Chart(statsCtx, lineConfig);
     }
-  
+
     // Initialize the Wins/Losses Bar Chart
-    const barCtx = document.getElementById("barChart") as HTMLCanvasElement | null;
+    const barCtx = document.getElementById(
+      "barChart"
+    ) as HTMLCanvasElement | null;
     if (barCtx) {
       const barData = {
         labels: ["January", "February", "March", "April", "May", "June"],
@@ -222,9 +291,11 @@ export const Profile = createComponent((props: ProfileProps) => {
       };
       new Chart(barCtx, barConfig);
     }
-  
+
     // Initialize the Win Rate Pie Chart
-    const pieCtx = document.getElementById("pieChart") as HTMLCanvasElement | null;
+    const pieCtx = document.getElementById(
+      "pieChart"
+    ) as HTMLCanvasElement | null;
     if (pieCtx) {
       const pieData = {
         labels: ["Wins", "Losses"],
@@ -232,10 +303,7 @@ export const Profile = createComponent((props: ProfileProps) => {
           {
             label: "Win Rate",
             data: [70, 30], // For example: 70% wins, 30% losses
-            backgroundColor: [
-              "rgb(75, 192, 192)",
-              "rgb(255, 99, 132)"
-            ],
+            backgroundColor: ["rgb(75, 192, 192)", "rgb(255, 99, 132)"],
             hoverOffset: 4,
           },
         ],
@@ -245,7 +313,7 @@ export const Profile = createComponent((props: ProfileProps) => {
         data: pieData,
         options: {
           responsive: false,
-          maintainAspectRatio: false
+          maintainAspectRatio: false,
         },
       };
       new Chart(pieCtx, pieConfig);
@@ -266,11 +334,15 @@ export const Profile = createComponent((props: ProfileProps) => {
     infoTab.classList.add("bg-pongblue", "text-white");
     contentContainer.innerHTML = "";
     console.log(props.uName);
-    contentContainer?.appendChild(UserInfo({
-      uName: props.uName,
-    }));
+    contentContainer?.appendChild(
+      UserInfo({
+        uName: props.uName,
+      })
+    );
 
-    const toggle = contentContainer.querySelector("#twoFactorToggle") as HTMLInputElement | null;
+    const toggle = contentContainer.querySelector(
+      "#twoFactorToggle"
+    ) as HTMLInputElement | null;
     if (toggle) {
       toggle.addEventListener("change", (event) => {
         const isChecked = (event.target as HTMLInputElement).checked;

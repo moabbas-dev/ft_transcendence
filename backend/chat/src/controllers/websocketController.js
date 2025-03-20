@@ -1,7 +1,7 @@
 import { blockUser, unblockUser } from "../services/blockService.js";
 import { getUser, createOrUpdateUser, getUserByUsername, createChatRoom } from "../services/userService.js";
 import { createFriendRequest, addFriend } from "../services/friendService.js"
-import { saveMessage, getMessages, getUnreadMessageCount } from "../services/chatService.js"
+import { saveMessage, getMessages } from "../services/chatService.js"
 
 export function setupWebSocketHandlers(wsAdapter, fastify) {
   // Track online users mapping username to clientId
@@ -253,6 +253,8 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
   
       // Block the user
       await blockUser(blockerId, blockedId);
+
+      console.log("the user:", blockerId,", blocked:", blockedId);
   
       // Notify the blocker
       wsAdapter.sendTo(clientId, "user:blocked", {
