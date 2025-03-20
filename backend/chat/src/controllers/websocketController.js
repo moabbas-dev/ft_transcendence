@@ -1,6 +1,6 @@
 import { blockUser, unblockUser } from "../services/blockService.js";
-import { getUser, createOrUpdateUser, getUserByUsername, createChatRoom } from "../services/userService.js";
-import { createFriendRequest, addFriend } from "../services/friendService.js"
+import { getUser, createOrUpdateUser, getUserByUsername, createChatRoom, getUsersFromAuth } from "../services/userService.js";
+import { createFriendRequest, addFriend, getPendingFriendRequests } from "../services/friendService.js"
 import { saveMessage, getMessages } from "../services/chatService.js"
 
 export function setupWebSocketHandlers(wsAdapter, fastify) {
@@ -319,28 +319,30 @@ wsAdapter.on("friends:get", async ({ clientId, payload }) => {
   }
 });
 
-// wsAdapter.on("friends:get_pending", async ({ clientId, payload }) => {
-//   try {
-//     const { userId } = payload;
+wsAdapter.on("friends:get_pending", async ({ clientId, payload }) => {
+  try {
+    const { userId } = payload;
 
-//     // Get pending requests from database
-//     const pendingRequests = await getPendingFriendRequests(userId);
+    // Get pending requests from database
+    const pendingRequests = await getPendingFriendRequests(userId);
+    console.log("lolllllllllllllllllllllllllll",pendingRequests);
 
-//     // Convert user IDs to user details
-//     const pendingDetails = await getUsersFromAuth(
-//       pendingRequests.map(req => req.from_user)
-//     );
+    // // Convert user IDs to user details
+    // const pendingDetails = await getUsersFromAuth(
+    //   pendingRequests.map(req => req.from_user)
+    // );
+    // console.log(pendingDetails);
 
-//     wsAdapter.sendTo(clientId, "friends:pending", {
-//       pending: pendingDetails
-//     });
+    wsAdapter.sendTo(clientId, "friends:pending", {
+      pending: pendingRequests
+    });
 
-//   } catch (error) {
-//     fastify.log.error("Error fetching pending requests:", error);
-//     wsAdapter.sendTo(clientId, "error", {
-//       message: "Failed to fetch pending requests"
-//     });
-//   }
-// });
+  } catch (error) {
+    fastify.log.error("Error fetching pending requests:", error);
+    wsAdapter.sendTo(clientId, "error", {
+      message: "Failed to fetch pending requests"
+    });
+  }
+});
 }
 

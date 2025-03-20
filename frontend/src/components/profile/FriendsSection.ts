@@ -93,7 +93,7 @@ export const FriendsSection = createComponent(() => {
     // Set up event listener for friends data
     chatService.on("friends:list", (data) => {
         handleFriendsReceived(data.friends);
-		console.log(data.friends);
+		// console.log(data.friends);
     });
     
     // Initialize by loading friends
