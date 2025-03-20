@@ -1,5 +1,5 @@
 import { createComponent } from "../../utils/StateManager.js";
-import { msg } from "../../languages/LanguageController.js";
+import { t } from "../../languages/LanguageController.js";
 import { Button } from "../partials/Button.js";
 
 interface TwoFactorSendProps {
@@ -12,8 +12,8 @@ export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
 	form.innerHTML = `
 		<div class="flex flex-col gap-3">
 			<div class="flex flex-col gap-2">
-				<h1 class="text-2xl sm:text-3xl font-bold text-center text-pongblue">Two-Factor Authentication</h1>
-				<p class="text-center">Enter the 6-digits code from your authenticator app</p>
+				<h1 class="text-2xl sm:text-3xl font-bold text-center text-pongblue">${t("register.twoFactor.title")}</h1>
+				<p class="text-center">${t("register.twoFactor.info")}</p>
 			</div>
 			<form class="flex flex-col gap-4">
 				<div id="auth-code" class="flex gap-4 justify-center">
@@ -25,15 +25,12 @@ export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
 					<input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
 				</div>
 			</form>
-			<div class="w-full text-center">
-				<span class="signin-link hover:cursor-pointer hover:underline text-pongblue">${msg('register.sendEmail.backToSignin')} </span>
-			</div>
 		</div>
 	`;
 	const formElement:HTMLFormElement = form.querySelector('form')!;
 	const verifyButton = Button({
 		type: 'submit',
-		text: 'Verify',
+		text: t("register.twoFactor.verifyBtn"),
 		styles: 'w-full font-semibold p-2 text-base text-white rounded-lg',
 		eventType: 'click',
 		onClick: (e: Event) => {
@@ -45,14 +42,6 @@ export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
 		}
 	});
 	formElement.appendChild(verifyButton);
-
-	const signinLink = form.querySelector('.signin-link')!;
-	signinLink.addEventListener('click', (e) => {
-		e.preventDefault();
-		if (props.onSwitchToSignIn) {
-			props.onSwitchToSignIn();
-		}
-	});
 
 	const inputs: NodeListOf<HTMLInputElement> = form.querySelectorAll("#auth-code input");
 

@@ -7,6 +7,7 @@ import { UserStatistics } from "./UserStatistics.js";
 import Chart from 'chart.js/auto';
 import store from "../../../store/store.js";
 import axios from "axios";
+import { t } from "../../languages/LanguageController.js";
 
 interface ProfileProps {
   uName: string,
@@ -40,8 +41,8 @@ export const Profile = createComponent((props: ProfileProps) => {
   // Insert modal HTML
   container.innerHTML = `
     <!-- Overlay -->
-    <div class="overlay absolute top-0 left-0 w-full h-full z-[80] bg-black/50"></div>
-    <div class="user-container absolute top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%] z-[90] w-full md:w-[70%] 2xl:w-3/6 h-[100dvh] md:h-full max-h-[90dvh] p-4 bg-white border rounded-lg border-gray-300 shadow-md flex flex-col gap-2">
+    <div class="overlay fixed top-0 left-0 w-full h-full z-[80] bg-black/50"></div>
+    <div class="user-container fixed top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%] z-[90] w-full md:w-[70%] 2xl:w-3/6 h-[100dvh] md:h-full max-h-[90dvh] p-4 bg-white border rounded-lg border-gray-300 shadow-md flex flex-col gap-2">
       <!-- Close Button (X) -->
       <div class="flex justify-start">
           <i class="fas fa-times text-2xl cursor-pointer hover:text-red-600" id="close-button"></i>
@@ -49,23 +50,26 @@ export const Profile = createComponent((props: ProfileProps) => {
 
       <!-- Header (Nickname, Online, Avatar, Rank) -->
       
-      <div class="flex items-center gap-4 justify-end">
-          <div class="flex gap-2 mr-10 mt-8">
-            <button id="message-user" class="bg-pongblue text-white px-4 py-1 rounded hover:bg-blue-700 transition-colors">
-              <i class="fas fa-envelope mr-1"></i> Message
+      <div class="flex items-center gap-4 sm:gap-8">
+          <div class="flex gap-2 flex-1 justify-end">
+            <button id="message-user" class="max-sm:flex-1 bg-pongblue text-white text-nowrap max-sm:text-sm px-2 sm:px-4 py-1 rounded hover:bg-blue-700 transition-colors">
+              <i class="fas fa-envelope min-[401px]:mr-1"></i>
+              <span class="max-[402px]:hidden">${t('profile.message')}</span>
             </button>
-            <button id="add-friend" class="bg-green-500 text-white px-4 py-1 rounded hover:bg-green-600 transition-colors">
-              <i class="fas fa-user-plus mr-1"></i> Add
+            <button id="add-friend" class="max-sm:flex-1 bg-green-500 text-white max-sm:text-sm px-2 sm:px-4 py-1 rounded hover:bg-green-600 transition-colors">
+              <i class="fas fa-user-plus min-[401px]:mr-1"></i>
+              <span class="max-[402px]:hidden">${t('profile.add')}</span>
             </button>
-            <button id="block-user" class="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600 transition-colors">
-              <i class="fas fa-ban mr-1"></i> Block
+            <button id="block-user" class="max-sm:flex-1 bg-red-500 text-white max-sm:text-sm px-2 sm:px-4 py-1 rounded hover:bg-red-600 transition-colors">
+              <i class="fas fa-ban min-[401px]:mr-1"></i>
+              <span class="max-[402px]:hidden">${t('profile.block')}</span>
             </button>
         </div>
         <div class="flex">
         <div>
             <p id="name" class="font-bold text-lg">${store.nickname}</p>
             <div class="flex items-center gap-1">
-                <p>Rank:</p>
+                <p>${t('profile.rank')}</p>
                 <img src="${goldRank}" class="w-6">
             </div>
         </div>
@@ -73,7 +77,7 @@ export const Profile = createComponent((props: ProfileProps) => {
           <img 
               src="${logoUrl}" 
               alt="profile picture" 
-              class="w-20 h-20 object-cover rounded-full border-2 border-pongblue"
+              class="size-14 sm:size-20 object-cover rounded-full border-2 border-pongblue"
           >
           <span class="absolute bottom-0 left-0 h-5 w-5 rounded-full
             bg-green-500 border border-white"></span>
@@ -92,19 +96,19 @@ export const Profile = createComponent((props: ProfileProps) => {
               id="info-tab" 
               class="flex-1 py-2 text-white text-center transition-all  focus:outline-none bg-pongblue"
             >
-              Info
+            ${t('profile.infoTab.title')}
           </button>
           <button 
             id="statistics-tab" 
             class="flex-1 py-2 text-center transition-all focus:outline-none"
           >
-            Statistics
+          ${t('profile.statisticsTab.title')}
           </button>
           <button 
             id="history-tab" 
             class="flex-1 py-2 text-center transition-all focus:outline-none"
           >
-            History
+          ${t('profile.historyTab.title')}
           </button>
         </div>
 

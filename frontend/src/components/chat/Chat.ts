@@ -5,6 +5,7 @@ import bgImage from "../../assets/bg1.png";
 import bgImage2 from "../../assets/chatBg5.gif"
 import { emoticons, emoticonsMap } from "./emoticons.js";
 import { Profile } from "../profile/UserProfile.js";
+import { t } from "../../languages/LanguageController.js";
 
 interface Message {
   id: number;
@@ -42,7 +43,7 @@ export const Chat = createComponent(
                                 <p  class="text-base sm:text-xl ${activeUser? "cursor-pointer hover:underline" : ""} ">${
                                   activeUser
                                     ? `${activeUser.full_name} - ${activeUser.nickname}`
-                                    : "Select a chat"
+                                    : t('chat.nochat')
                                 }</p>
                             </div>
                         </div>

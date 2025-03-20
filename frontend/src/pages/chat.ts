@@ -3,6 +3,7 @@ import { ChatItem } from "../components/chat/ChatItem.js";
 import { navigate } from "../router.js";
 import chatService from "../utils/chatWebSocketService.js";
 import store from "../../store/store.js";
+import { t } from "../languages/LanguageController.js";
 
 interface Friend {
   nickname: string;
@@ -33,7 +34,7 @@ export default {
 
         <div class="friends-list-container flex flex-col">
             <div class="text-white px-4 pb-2 flex justify-between items-center">
-                <h2 class="text-xl">Friends</h2>
+                <h2 class="text-xl">${t('chat.friends')}</h2>
                 <div class="loading-indicator hidden">
                     <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                 </div>
@@ -44,7 +45,7 @@ export default {
                 [&::-webkit-scrollbar-track]:bg-ponghover [&::-webkit-scrollbar-track]:rounded
                 [&::-webkit-scrollbar-thumb]:bg-pongdark [&::-webkit-scrollbar-thumb]:rounded
                 [&::-webkit-scrollbar-thumb:hover]:bg-[#2d3748]">
-                <div class="loading text-center text-white py-4">Loading friends...</div>
+                <div class="loading text-center text-white py-4">${t('chat.loadingFriends')}</div>
             </div>
         </div>
     </div>
@@ -186,7 +187,7 @@ export default {
       try {
         // Show loading state
         friendsList.innerHTML =
-          '<div class="loading text-center text-white py-4">Loading friends...</div>';
+          `<div class="loading text-center text-white py-4">${t('chat.loadingFriends')}</div>`;
 
         // Request friends list from server
         if (chatService.isConnected()) {

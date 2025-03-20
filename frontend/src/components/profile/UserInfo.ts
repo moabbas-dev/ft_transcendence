@@ -1,6 +1,7 @@
 import { createComponent } from "../../utils/StateManager.js";
 import store from "../../../store/store.js";
 import axios from "axios";
+import { t } from "../../languages/LanguageController.js";
 
 interface UserInfoProps {
   uName: string;
@@ -32,17 +33,17 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
         <div class="flex flex-col gap-4">
           <div class="flex justify-center flex-wrap gap-2 overflow-y-auto">
               <div class="flex-1 min-w-[250px]">
-                <label class="block font-semibold">Full name:</label>
+                <label class="block font-semibold">${t('profile.infoTab.fullname')}</label>
                 <input type="text" class="border border-gray-300 p-1 w-full" placeholder="Full name" id="fullName" value=${
                   store.fullName
                 }>
               </div>  
               <div class="flex-1 min-w-[250px]">
-                <label class="block font-semibold">Age:</label>
+                <label class="block font-semibold">${t('profile.infoTab.age')}</label>
                 <input type="text" class="border border-gray-300 p-1 w-full" placeholder="Age" value="23">
               </div>
               <div class="flex-1 min-w-[250px]">
-                <label class="block font-semibold">Country:</label>
+                <label class="block font-semibold">${t('profile.infoTab.country')}</label>
                 <input type="text" class="border border-gray-300 p-1 w-full" placeholder="Country" value="Lebanon">
               </div>
               <div class="flex-1 min-w-[250px]">
@@ -51,17 +52,17 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
               </div>
             </div>
             <div class="flex-1 min-w-[250px] border-b-2">
-              <p class="block font-semibold">Member Since:</P>
+              <p class="block font-semibold">${t('profile.infoTab.memberSince')}</P>
               <p>18/3/2025</p>
             </div>
             ${
               props.uName
                 ? " "
-                : `<div>
+                : `<div class="flex flex-col gap-2">
           <!-- 2FA Toggle -->
           <div class="flex flex-col gap-4">
               <div class="flex items-center gap-2">
-                  <span class="font-semibold">Enable 2FA</span>
+                  <span class="font-semibold">${t('profile.infoTab.enable2fa')}</span>
                   <label class="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" id="twoFactorToggle" class="sr-only peer" />
                       <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 
@@ -78,14 +79,14 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
             <!-- QR Code Container (initially hidden) -->
             <div id="qrCodeContainer" class="hidden">
                 <div class="flex flex-col items-center p-4 border border-gray-300 rounded-md bg-gray-50">
-                    <h3 class="font-semibold mb-2">Scan this QR code with your authenticator app</h3>
+                    <h3 class="font-semibold mb-2">${t('profile.infoTab.qrcodeScan')}</h3>
                     <div id="qrCodeImage" class="w-48 h-48 bg-white p-4 border border-gray-200 rounded-md flex items-center justify-center">
                         <!-- QR code will be inserted here dynamically -->
                         <div class="animate-pulse text-center text-gray-400">
                             <div class="flex justify-center">
                                 <i class="fas fa-spinner fa-spin text-4xl mb-2"></i>
                             </div>
-                            <p>Generating...</p>
+                            <p>${t('profile.infoTab.generating')}</p>
                         </div>
                     </div>
                     <div class="mt-4 text-center">
@@ -94,7 +95,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
                     </div>
                     <div class="mt-4">
                         <button id="regenerateQrBtn" class="bg-pongblue text-white px-4 py-1 rounded hover:bg-blue-700 transition-colors">
-                            <i class="fas fa-sync-alt mr-1"></i> Generate New Code
+                            <i class="fas fa-sync-alt mr-1"></i> ${t('profile.infoTab.generateNewQrcode')}
                         </button>
                     </div>
                 </div>
@@ -102,7 +103,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
         </div>
         <!-- Save Button on the right side -->
         <div id="saveButtonContainer" class="flex justify-end">
-            <button type="submit" id="save-btn" class="bg-pongblue p-1 w-40 text-white hover:opacity-80 transition-all">Save</button>
+            <button type="submit" id="save-btn" class="bg-pongblue p-1 w-40 text-white hover:opacity-80 transition-all">${t('profile.infoTab.saveBtn')}</button>
         </div>
         </div>            
     </div>`

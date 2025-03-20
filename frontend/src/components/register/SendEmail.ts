@@ -1,5 +1,5 @@
 import { createComponent } from "../../utils/StateManager.js";
-import { msg } from "../../languages/LanguageController.js";
+import { t } from "../../languages/LanguageController.js";
 import { Button } from "../partials/Button.js";
 import { validateEmail } from "../../utils/FormValidation.js";
 import axios from "axios";
@@ -14,8 +14,8 @@ export const SendEmail = createComponent((props: SendEmailProps) => {
 	form.innerHTML = `
 		<div class="flex flex-col gap-3">
 			<div class="flex flex-col gap-2">
-				<h1 class="text-2xl sm:text-3xl font-bold text-center text-pongblue">${msg('register.sendEmail.resetPass')}</h1>
-				<p class="text-center">${msg('register.sendEmail.info')}</p>
+				<h1 class="text-2xl sm:text-3xl font-bold text-center text-pongblue">${t('register.sendEmail.resetPass')}</h1>
+				<p class="text-center">${t('register.sendEmail.info')}</p>
 			</div>
 			<form class="flex flex-col gap-2">
 				<label for="email" class="text-base font-medium text-gray-700">Email</label>
@@ -23,13 +23,13 @@ export const SendEmail = createComponent((props: SendEmailProps) => {
 					<span class="absolute inset-y-0 left-0 flex items-center pl-2 text-gray-500">
 					<i class="bx bx-envelope text-lg"></i>
 					</span>
-					<input type="email" id="email" placeholder="${msg('register.signup.emailPlaceholder')}" autocomplete="email" name="email" 
+					<input type="email" id="email" placeholder="${t('register.signup.emailPlaceholder')}" autocomplete="email" name="email" 
 					class="w-full pl-8 pr-2 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue">
 				</div>
 			</form>
 			<div class="w-full text-center">
-				<span class="signin-link hover:cursor-pointer hover:underline text-pongblue">${msg('register.sendEmail.backToSignin')} </span>|
-				<span class="resend-email hover:cursor-pointer hover:underline text-pongblue"> ${msg('register.sendEmail.resendEmail')}</span>
+				<span class="signin-link hover:cursor-pointer hover:underline text-pongblue">${t('register.sendEmail.backToSignin')} </span>|
+				<span class="resend-email hover:cursor-pointer hover:underline text-pongblue"> ${t('register.sendEmail.resendEmail')}</span>
 			</div>
 		</div>
 	`;
@@ -37,7 +37,7 @@ export const SendEmail = createComponent((props: SendEmailProps) => {
 	const emailInput: HTMLInputElement = form.querySelector('#email')!;
 	const signInButton = Button({
 		type: 'submit',
-		text: msg('register.sendEmail.sendEmailBtn'),
+		text: t('register.sendEmail.sendEmailBtn'),
 		styles: 'w-full font-semibold p-2 text-base text-white rounded-lg',
 		eventType: 'click',
 		onClick: async (e: Event) => {

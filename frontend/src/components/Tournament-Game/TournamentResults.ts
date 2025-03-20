@@ -1,3 +1,5 @@
+import { t } from "../../languages/LanguageController";
+
 // Define the TournamentResult interface
 export interface TournamentResult {
     userId: string;
@@ -42,7 +44,7 @@ const TournamentResults = (results: TournamentResult[] = []) => {
             // Score HTML if available
             let scoreHTML = '';
             if (player.score !== undefined) {
-                scoreHTML = `<span class="text-sm opacity-80">${player.score} pts</span>`;
+                scoreHTML = `<span class="text-sm opacity-80">${player.score} ${t('play.tournaments.createTournament.pts')}</span>`;
             }
             
             playerInfoHTML = `
@@ -84,8 +86,8 @@ const TournamentResults = (results: TournamentResult[] = []) => {
             let avatarHTML = '';
             if (player.avatarUrl) {
                 avatarHTML = `
-                    <div class="w-8 h-8 rounded-full overflow-hidden mr-3 bg-pongblue">
-                        <img src="${player.avatarUrl}" alt="${player.username}" class="w-full h-full object-cover">
+                    <div class="size-8 rounded-full overflow-hidden mr-3 bg-pongblue">
+                        <img src="${player.avatarUrl}" alt="${player.username}" class="size-full object-cover">
                     </div>
                 `;
             }
@@ -93,7 +95,7 @@ const TournamentResults = (results: TournamentResult[] = []) => {
             // Score HTML if available
             let scoreHTML = '';
             if (player.score !== undefined) {
-                scoreHTML = `<span class="text-sm text-gray-300">${player.score} pts</span>`;
+                scoreHTML = `<span class="text-sm text-gray-300">${player.score} ${t('play.tournaments.createTournament.pts')}</span>`;
             }
             
             playerCardsHTML += `

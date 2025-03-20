@@ -2,6 +2,7 @@ import TournamentBrackets from "../components/Tournament-Game/TournamentBrackets
 import { Header } from "../components/header_footer/header.js";
 import { WaitingRoom, renderWaitingRoomSlots } from "../components/Tournament-Game/WaitingRoom.js";
 import { TournamentResult, renderResultsTab } from "../components/Tournament-Game/TournamentResults.js";
+import { t } from "../languages/LanguageController.js";
 
 export default {
     render: (container: HTMLElement) => {
@@ -14,23 +15,23 @@ export default {
                 <!-- Tournament Status Bar -->
                 <div id="tournament-status" class="bg-gradient-to-r from-pongblue to-[rgba(100,100,255,0.8)] rounded-lg p-4 shadow-lg">
                     <div class="flex justify-between items-center flex-wrap gap-4">
-                        <div class="flex flex-col gap-2">
+                        <div class="flex flex-col flex-1 gap-2">
                             <div class="flex flex-wrap items-center gap-2">
-                                <h1 id="tournament-name" class="w-[22ch] text-2xl font-bold sm:text-3xl focus:outline focus:outline-1 focus:outline-white rounded-md p-2" contenteditable="true">Daily Knockout Tournament</h1>
+                                <h1 id="tournament-name" class="w-[25ch] text-2xl font-bold sm:text-3xl focus:outline focus:outline-1 focus:outline-white rounded-md p-2" contenteditable="true">${t('play.tournaments.createTournament.title')}</h1>
                                 <div class="size-fit flex flex-wrap gap-2">
-                                    <button id="submit-change-tournament-name" type="submit" class="hidden rounded-full bg-green-700 text-white size-fit text-sm px-2 py-0.5 hover:opacity-80">Submit</button>
-                                    <span id="name-error-message" class="hidden size-fit px-2 py-0.5 text-sm rounded-full bg-red-500 text-white">Name too short</span>
+                                    <button id="submit-change-tournament-name" type="submit" class="hidden rounded-full bg-green-700 text-white size-fit text-sm px-2 py-0.5 hover:opacity-80">${t('play.tournaments.createTournament.submitTitle')}</button>
+                                    <span id="name-error-message" class="hidden size-fit px-2 py-0.5 text-sm rounded-full bg-red-500 text-white">${t('play.tournaments.createTournament.nameTooshort')}</span>
                                 </div>
                             </div>
                             <div class="flex flex-wrap size-fit gap-2">
-                                <span id="status-badge" class="px-3 py-1 bg-yellow-600 text-white rounded-full text-sm w-fit">Waiting for Players</span>
-                                <button id="status-badge" class="px-3 py-1 bg-green-600 text-white rounded-xl text-sm w-fit hover:opacity-80 transition-all">Launch Tournament</button>
+                                <span id="status-badge" class="px-3 py-1 bg-yellow-600 text-white rounded-full text-sm w-fit">${t('play.tournaments.createTournament.waiting')}</span>
+                                <button id="status-badge" class="px-3 py-1 bg-green-600 text-white rounded-xl text-sm w-fit hover:opacity-80 transition-all">${t('play.tournaments.createTournament.launch')}</button>
                             </div>
                         </div>
                         <div class="flex flex-col items-start sm:items-end gap-2">
-                            <div class="text-lg font-medium">Players: <span id="player-count">2</span>/<span id="player-max">4</span></div>
+                            <div class="text-lg font-medium">${t('play.tournaments.createTournament.players')}: <span id="player-count">2</span>/<span id="player-max">4</span></div>
                             
-                            <div class="flex space-x-4">
+                            <div class="flex gap-4">
                                 <!-- 4 Players Radio Button -->
                                 <label class="flex items-center gap-2 cursor-pointer">
                                     <div class="relative">
@@ -38,7 +39,7 @@ export default {
                                         <div class="size-4 sm:size-6 border-2 border-gray-200 rounded-full"></div>
                                         <div class="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full transform scale-75"></div>
                                     </div>
-                                    <span class="max-sm:text-[14px] text-gray-200">4 players</span>
+                                    <span class="max-sm:text-[14px] text-gray-200">4 ${t('play.tournaments.createTournament.players')}</span>
                                 </label>
                         
                                 <!-- 8 Players Radio Button -->
@@ -48,7 +49,7 @@ export default {
                                         <div class="size-4 sm:size-6 border-2 border-gray-200 rounded-full"></div>
                                         <div class="absolute inset-0 bg-gradient-to-r from-pink-400 to-orange-500 rounded-full transform scale-75"></div>
                                     </div>
-                                    <span class="text-gray-200">8 players</span>
+                                    <span class="text-gray-200">8 ${t('play.tournaments.createTournament.players')}</span>
                                 </label>
                             </div>
                         </div>
@@ -58,9 +59,9 @@ export default {
                 <!-- Tournament Content Tabs -->
                 <div>
                     <div class="flex max-sm:justify-center gap-4 border-b border-pongblue">
-                        <button id="tab-waiting" class="px-2 sm:px-4 py-1 sm:py-2 text-lg font-medium border-b-2 border-pongblue">Waiting Room</button>
-                        <button id="tab-bracket" class="px-2 sm:px-4 py-1 sm:py-2 text-lg font-medium text-gray-300">Bracket</button>
-                        <button id="tab-results" class="px-2 sm:px-4 py-1 sm:py-2 text-lg font-medium text-gray-300">Results</button>
+                        <button id="tab-waiting" class="px-2 sm:px-4 py-1 sm:py-2 text-lg font-medium border-b-2 border-pongblue">${t('play.tournaments.createTournament.waitingRoom')}</button>
+                        <button id="tab-bracket" class="px-2 sm:px-4 py-1 sm:py-2 text-lg font-medium text-gray-300">${t('play.tournaments.createTournament.bracket')}</button>
+                        <button id="tab-results" class="px-2 sm:px-4 py-1 sm:py-2 text-lg font-medium text-gray-300">${t('play.tournaments.createTournament.results')}</button>
                     </div>
                 </div>
 
@@ -69,13 +70,13 @@ export default {
                     <!-- Bracket View -->
                     <div id="bracket-content" class="hidden">
                         <div class="flex flex-col items-center justify-center gap-6">
-                            <div class="text-2xl font-semibold">Tournament Bracket</div>
+                            <div class="text-2xl font-semibold">${t('play.tournaments.createTournament.tournamentBracket')}</div>
                             <div class="tournament-bracket relative w-full">
                                 <!-- Tournament Brackets -->
                             </div>
                         </div>
                         <div class="text-center">
-                            <p class="text-sm text-gray-300">Match duration: 10 minutes or first to 10 goals</p>
+                            <p class="text-sm text-gray-300">${t('play.tournaments.createTournament.info')}</p>
                         </div>
                     </div>
                     
@@ -145,11 +146,11 @@ export default {
 
         changeTournamentNameBtn.addEventListener("click", () => {
             if (tournamentName.textContent!.length < 3) {
-                errorMessage.textContent = "Name too short"
+                errorMessage.textContent = t('play.tournaments.createTournament.nameTooshort')
                 errorMessage.classList.remove('hidden')
             }
             else if (tournamentName.textContent!.length > 25) {
-                errorMessage.textContent = "Name too long"
+                errorMessage.textContent = t('play.tournaments.createTournament.nameToolong')
                 errorMessage.classList.remove('hidden')
             }
             else {

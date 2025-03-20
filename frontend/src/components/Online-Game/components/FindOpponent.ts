@@ -4,6 +4,7 @@ import afarachi from '../../../assets/afarachi.jpg';
 import jfatfat from '../../../assets/jfatfat.jpg';
 import odib from '../../../assets/omar.webp';
 import { PongLoading } from "../../partials/PongLoading.js";
+import { t } from "../../../languages/LanguageController.js";
 
 // Sample user data for search results [For testing purposes]
 const sampleUsers = [
@@ -24,11 +25,11 @@ export const FindOpponent = createComponent((props: FindOpponentProps) => {
 	container.className = 'w-full h-full flex flex-col items-center justify-center gap-8 py-8'
 	container.innerHTML = `
 	<div id="loading-online" class="max-[460px]:scale-75 md:scale-150"></div>
-	<p class="text-xl text-[rgba(255,255,255,0.6)]">Searching for rivals...</p>
-	<button id="cancel-search" class="py-2 px-6 bg-red-500 hover:bg-red-600 rounded-full">Cancel</button>
+	<p class="text-xl text-[rgba(255,255,255,0.6)]">${t('play.onlineGame.searchingForRivals')}</p>
+	<button id="cancel-search" class="py-2 px-6 bg-red-500 hover:bg-red-600 rounded-full">${t('play.onlineGame.cancel')}</button>
 	`
 	const loadingOnline = container.querySelector("#loading-online");
-	loadingOnline?.appendChild(PongLoading({ text: 'Searching' }));
+	loadingOnline?.appendChild(PongLoading({ text: t('play.onlineGame.searching')}));
 
 	const matchmakingTimeout = setTimeout(() => {
 		const onlineUsers = sampleUsers.filter(user => user.status === 'online');
@@ -38,7 +39,7 @@ export const FindOpponent = createComponent((props: FindOpponentProps) => {
 			container.innerHTML = `
 				<div class="w-full h-full flex flex-col items-center justify-center gap-6 py-8">
 					<div class="text-center">
-						<p class="text-2xl mb-4">Opponent Found!</p>
+						<p class="text-2xl mb-4">${t('play.onlineGame.oponentFound')}</p>
 						<div class="flex items-center justify-center gap-4 mb-6">
 							<div class="size-16 rounded-full bg-pongblue relative">
 								<img src="${opponent.avatar}" alt="${opponent.username}" class="rounded-full size-full">
@@ -53,28 +54,28 @@ export const FindOpponent = createComponent((props: FindOpponentProps) => {
 				</div>
 			`;
 		}
-		props.heading.textContent = 'Opponent Found!'
+		props.heading.textContent = t('play.onlineGame.oponentFound')
 	}, 5000);
 
 	container.querySelector("#cancel-search")!.addEventListener("click", () => {
 		clearTimeout(matchmakingTimeout);
 		// Reset UI
-		props.heading.textContent = "Choose Your Mode";
+		props.heading.textContent = t('play.title');
 		container.innerHTML = `
 			<div class="relative w-full h-[4rem] sm:h-[8rem] flex items-center justify-center">
 				<i id="icon-friends" class="fa-solid fa-users max-[460px]:text-[3rem] text-[5rem] md:text-[10rem] absolute transition-opacity duration-500 opacity-100 bg-gradient-to-r from-pongblue via-[rgba(100,100,255,0.8)] to-pongblue text-transparent bg-clip-text"></i>
-				<span id="text-friends" class="text-[2rem] sm:text-[3rem] md:text-[5rem] text-center font-bold absolute transition-opacity duration-500 opacity-0">Vs Friends</span>
+				<span id="text-friends" class="text-[2rem] sm:text-[3rem] md:text-[5rem] text-center font-bold absolute transition-opacity duration-500 opacity-0">${t('play.onlineGame.vsFriend')}</span>
 			</div>
 			<div id="loading-pong" class="max-[460px]:scale-75 md:scale-150"></div>
 			<div class="relative w-full h-[4rem] sm:h-[8rem] flex items-center justify-center">
 				<i id="icon-online" class="fa-solid fa-globe max-[460px]:text-[3rem] text-[5rem] md:text-[10rem] absolute transition-opacity duration-500 opacity-100 bg-gradient-to-b from-pongblue via-[rgba(100,100,255,0.8)] to-pongblue text-transparent bg-clip-text"></i>
-				<span id="text-online" class="text-[2rem] sm:text-[3rem] md:text-[5rem] text-center font-bold absolute transition-opacity duration-500 opacity-0 ">Vs Rivals</span>
+				<span id="text-online" class="text-[2rem] sm:text-[3rem] md:text-[5rem] text-center font-bold absolute transition-opacity duration-500 opacity-0 ">${t('play.onlineGame.vsRivals')}</span>
 			</div>
 		`;
 
 		// Reinitialize loading animation and toggle
 		const loadingPong = container.querySelector('#loading-pong');
-		loadingPong!.appendChild(PongLoading({ text: 'OR' }));
+		loadingPong!.appendChild(PongLoading({ text: t('play.onlineGame.or')}));
 		
 		props.isIconVisible = true;
 		props.toggleInterval = setInterval(() => {
