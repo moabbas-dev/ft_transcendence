@@ -39,8 +39,8 @@ export async function saveMessage(message, roomId) {
 
     // Insert the message
     await db.run(
-      `INSERT INTO messages (id, room_id, sender_id, content, timestamp) 
-      VALUES (?, ?, ?, ?, ?)`,
+      `INSERT INTO messages (id, room_id, sender_id, content, timestamp, read_status) 
+      VALUES (?, ?, ?, ?, ?, ?)`,
       [
         message.id,
         roomId,
@@ -63,7 +63,7 @@ export async function saveMessage(message, roomId) {
 
 
 // In chatService.js
-export async function getMessages(roomId, limit = 50) {
+export async function getMessages(roomId, limit = 1000) {
   const db = await getDatabase();
   
   try {
@@ -73,7 +73,7 @@ export async function getMessages(roomId, limit = 50) {
         sender_id as senderId, 
         content, 
         timestamp,
-        read_status 
+        read_status,
         created_at as createdAt 
        FROM messages 
        WHERE room_id = ? 

@@ -226,7 +226,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
         throw new Error('Invalid room ID');
       }
   
-      const messages = await getMessages(roomId, 50);
+      const messages = await getMessages(roomId, 1000);
       
       wsAdapter.sendTo(clientId, "messages:history", {
         roomId,

@@ -22,8 +22,8 @@ const Friend = createComponent((props: FriendProps) => {
 			<button class="size-[32px] p-1.5 grid place-content-center bg-pongblue text-white rounded-full hover:opacity-80">
 				<i class="fa-regular fa-comment-dots"></i>
 			</button>
-			<button class="size-[32px] p-1.5 grid place-content-center bg-gray-300 rounded-full hover:bg-gray-200">
-				<i class="fa-solid fa-ellipsis-vertical"></i>
+			<button class="size-[32px] p-1.5 grid place-content-center bg-pongblue rounded-full hover:bg-gray-200">
+                <i class="fas fa-times text-2xl cursor-pointer first-line:text-red-600" id="close-button"></i>
 			</button>
 		</div>
 	`
