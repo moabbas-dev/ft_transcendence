@@ -10,7 +10,7 @@ interface DropDownProps {
 
 export const DropDown = createComponent((props: DropDownProps) => {
 	const container = document.createElement("ul");
-	container.className = `account-list ${props.isLoggedIn? 'py-3' : 'py-2'} rounded-md shadow-md shadow-white right-0 text-nowrap absolute z-[999] top-[48px] sm:top-[54px] bg-white text-pongdark hidden flex-col animate-fade-down animate-once animate-duration-300`
+	container.className = `account-list ${props.isLoggedIn? 'py-3' : 'py-2'} rounded-md shadow-md shadow-white ${localStorage.getItem('selectedLanguage') === 'ar'? 'left-0' : 'right-0'} text-nowrap absolute z-[999] top-[48px] sm:top-[54px] bg-white text-pongdark hidden flex-col animate-fade-down animate-once animate-duration-300`
 	container.innerHTML = `
 		${!props.isLoggedIn? `
 			<li id="register" class="px-4 py-2 hover:text-pongblue hover:cursor-pointer hover:bg-slate-100">

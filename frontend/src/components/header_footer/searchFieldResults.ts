@@ -1,8 +1,6 @@
 import { t } from "../../languages/LanguageController";
 
-// Function to display search results
-export function displayResults(users: {username:string, status:string, avatar:string}[], container: HTMLElement): void {
-	// Clear previous results
+export function displayResults(users: {nickname:string, status:string, avatar:string}[], container: HTMLElement): void {
 	container.innerHTML = '';
 
 	if (users.length === 0) {
@@ -10,21 +8,19 @@ export function displayResults(users: {username:string, status:string, avatar:st
 		return;
 	}
 
-	// Create a list of user items
 	users.forEach(user => {
 		const userItem = document.createElement('div');
-		userItem.className = 'flex items-center gap-3 p-3 hover:bg-gray-100 cursor-pointer';
+		userItem.className = 'flex items-center rounded-md gap-3 p-3 hover:bg-gray-100 cursor-pointer';
 
-		// Status indicator
 		const statusColor = getStatusColor(user.status);
 
 		userItem.innerHTML = `
 		<div class="w-10 h-10 rounded-full relative">
-		  <img src="${user.avatar}" alt="${user.username}" class="w-full h-full rounded-full object-cover">
+		  <img src="${user.avatar}" alt="${user.nickname}" class="w-full h-full rounded-full object-cover">
 		  <span class="absolute bottom-0 right-0 w-3 h-3 ${statusColor} rounded-full border-2 border-white"></span>
 		</div>
 		<div>
-		  <div class="font-medium text-ponghover">${user.username}</div>
+		  <div class="font-medium text-ponghover">${user.nickname}</div>
 		  <div class="text-xs text-gray-500">${user.status}</div>
 		</div>
 	  `;

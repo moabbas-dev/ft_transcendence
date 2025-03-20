@@ -8,7 +8,6 @@ const UserToken = require('../models/UserToken');
 const axios = require('axios');
 const { v4: uuidv4 } = require('uuid');
 const { validatePassword } = require('../utils/validationUtils');
-const { use } = require('react');
 
 const authenticateUser = async (email, password) => {
 	const query = `SELECT * FROM Users WHERE email = ?`;

@@ -130,10 +130,6 @@
     border-radius: 4px;
 }
 
-/* Typing indicator animation */
-.typing-indicator {
-    animation: fadeInOut 1.5s infinite;
-}
 
 @keyframes fadeInOut {
     0%, 100% { opacity: 0.5; }

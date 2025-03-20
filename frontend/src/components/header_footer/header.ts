@@ -5,19 +5,8 @@ import { Notification } from "./Notification.js";
 import { DropDown } from "./DropDown.js";
 import store from "../../../store/store.js";
 
-import moabbas from '../../assets/moabbas.jpg';
-import afarachi from '../../assets/afarachi.jpg';
-import jfatfat from '../../assets/jfatfat.jpg';
-import odib from '../../assets/omar.webp';
 import { displayResults } from "./searchFieldResults.js";
-
-// Sample user data for search results [For testing purposes]
-const sampleUsers = [
-	{ username: "Ahmad Farachi - afarachi", status: "online", avatar: afarachi },
-	{ username: "Jihad Fatfat - jfatfat", status: "offline", avatar: jfatfat },
-	{ username: "Mohamad Abbass - moabbas", status: "in-game", avatar: moabbas },
-	{ username: "Omar Dib - odib", status: "online", avatar: odib }
-];
+import axios from "axios";
 
 export const Header = createComponent(() => {
     const container = document.createElement("header");
@@ -33,7 +22,7 @@ export const Header = createComponent(() => {
                     Neon Pong
                 </span>
             </div>
-            <nav class="navbar items-center gap-4 hidden sm:flex">
+            <nav class="navbar items-center gap-4 hidden text-nowrap sm:flex">
                 <div class="nav-child playPage flex flex-col justify-center items-center transition-all hover:cursor-pointer hover:text-ponghover" onClick="${() => navigate('/play')}">
                     <i class="fa-solid fa-play text-lg sm:text-xl"></i>
                     <span>${t('home.header.play')}</span>
@@ -48,7 +37,7 @@ export const Header = createComponent(() => {
                 </div>
             </nav>
             <nav class="nav-btn sm:hidden hover:cursor-pointer hover:opacity-80">
-                <i class="fa-solid fa-bars text-xl"></i>
+                <i class="fa-solid fa-bars text-2xl"></i>
             </nav>
         </div>
         <div class="flex items-center justify-end gap-3 sm:gap-4 w-1/2">
@@ -62,12 +51,13 @@ export const Header = createComponent(() => {
                 <i class="fa-solid fa-bell text-white text-2xl transition-all hover:cursor-pointer hover:text-ponghover"></i>
                 <span class="notification-count absolute -top-2 -right-2 rounded-full text-white hover:cursor-pointer w-5 h-5 flex items-center justify-center text-sm">0</span>
             </div>
-            <div class="notification hidden absolute overflow-y-auto top-full right-0 z-50 bg-white w-[300px] p-2 max-h-[300px] animate-fade-down animate-once animate-duration-300">
+            <div class="notification hidden absolute overflow-y-auto top-full ${localStorage.getItem('selectedLanguage') === 'ar'? 'left-0' : 'right-0'} z-50 bg-white w-[300px] p-2 max-h-[300px] animate-fade-down animate-once animate-duration-300">
 
             </div>
             <select id="languages" name="languages_options" title="Select your language" class="text-xl bg-pongblue text-white text-[2.5rem] focus:outline-none hover:opacity-80 hover:cursor-pointer">
                 <option value="en" class="text-center">en</option>
                 <option value="fr" class="text-center">fr</option>
+                <option value="ar" class="text-center">ع</option>
             </select>
             <div class="account relative flex gap-3 text-white">
                 <div id="profile-head" class="flex gap-3 hover:cursor-pointer hover:underline hover:text-ponghover">
@@ -80,7 +70,7 @@ export const Header = createComponent(() => {
                 </div>
             </div>
         </div>
-        <div id="search-result-container" class="hidden absolute left-0 md:left-1/2 top-[calc(100%+44px)] md:top-full z-[9999] w-fit h-fit max-md:w-full bg-white border-t rounded-md shadow-[0_0_15px] shadow-white"></div>
+        <div id="search-result-container" class="hidden absolute left-0 ${localStorage.getItem('selectedLanguage') === 'ar'? 'md:left-48' : 'md:left-1/2'} top-[calc(100%+44px)] md:top-full z-[9999] w-fit h-fit max-md:w-full bg-white border-t rounded-md shadow-[0_0_15px] shadow-white"></div>
     `;
     const account = container.querySelector(".account")!;
     const dropdown = DropDown({isLoggedIn: true});
@@ -115,10 +105,21 @@ export const Header = createComponent(() => {
 
     searchBar.addEventListener('input', () => {
         const searchQuery = searchBar.value.toLowerCase();
+        const token = store.accessToken;
+        axios
+        .get(`http://localhost:8001/auth/users`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          // Store or use the user data
+          const allUsers = response.data;
+          console.log(allUsers);
 
         // Filter users based on search query
-        const filteredUsers = sampleUsers.filter(user => 
-            user.username.toLowerCase().includes(searchQuery)
+        const filteredUsers = allUsers.filter((user: { nickname: string; }) => 
+            user.nickname.toLowerCase().includes(searchQuery)
         );
 
         // Show or hide results container
@@ -128,6 +129,14 @@ export const Header = createComponent(() => {
         } else {
             searchResult.classList.add('hidden');
         }
+        })
+        .catch((error) => {
+            if (error.response && error.response.data) {
+                console.error("Error fetching user data:", error.response.data.message);
+            } else {
+                console.error("Error fetching user data:", error.message);
+            }
+        });
     })
     
     searchBarContainer.addEventListener('submit', (e:Event) => {
@@ -172,7 +181,7 @@ export const Header = createComponent(() => {
 
     navBtn.addEventListener('click', (event) => {
         event.stopPropagation();
-        const navStyles = 'max-sm:animate-fade-down max-sm:animate-once max-sm:animate-duration-[600ms] max-sm:flex max-sm:z-50 max-sm:flex-col max-sm:absolute max-sm:top-full max-sm:left-0 max-sm:w-fit max-sm:gap-0'
+        const navStyles = `max-sm:animate-fade-down max-sm:animate-once max-sm:animate-duration-[600ms] max-sm:flex max-sm:z-50 max-sm:flex-col max-sm:absolute max-sm:top-full ${localStorage.getItem('selectedLanguage') === 'ar'? 'max-sm:right-0' : 'max-sm:left-0'} max-sm:w-fit max-sm:gap-0`
         navStyles.split(' ').forEach(style => navbar.classList.toggle(style))
         if (!navBtn.innerHTML.includes('fa-bars-staggered')) {
             navBtn.innerHTML = '<i class="fa-solid fa-bars-staggered text-xl"></i>';
