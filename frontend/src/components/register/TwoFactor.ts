@@ -25,9 +25,6 @@ export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
 					<input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
 				</div>
 			</form>
-			<div class="w-full text-center">
-				<span class="signin-link hover:cursor-pointer hover:underline text-pongblue">${t('register.sendEmail.backToSignin')} </span>
-			</div>
 		</div>
 	`;
 	const formElement:HTMLFormElement = form.querySelector('form')!;
@@ -45,14 +42,6 @@ export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
 		}
 	});
 	formElement.appendChild(verifyButton);
-
-	const signinLink = form.querySelector('.signin-link')!;
-	signinLink.addEventListener('click', (e) => {
-		e.preventDefault();
-		if (props.onSwitchToSignIn) {
-			props.onSwitchToSignIn();
-		}
-	});
 
 	const inputs: NodeListOf<HTMLInputElement> = form.querySelectorAll("#auth-code input");
 

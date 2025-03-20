@@ -15,7 +15,7 @@ export default {
                 <!-- Tournament Status Bar -->
                 <div id="tournament-status" class="bg-gradient-to-r from-pongblue to-[rgba(100,100,255,0.8)] rounded-lg p-4 shadow-lg">
                     <div class="flex justify-between items-center flex-wrap gap-4">
-                        <div class="flex flex-col gap-2">
+                        <div class="flex flex-col flex-1 gap-2">
                             <div class="flex flex-wrap items-center gap-2">
                                 <h1 id="tournament-name" class="w-[25ch] text-2xl font-bold sm:text-3xl focus:outline focus:outline-1 focus:outline-white rounded-md p-2" contenteditable="true">${t('play.tournaments.createTournament.title')}</h1>
                                 <div class="size-fit flex flex-wrap gap-2">

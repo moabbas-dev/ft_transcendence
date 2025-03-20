@@ -58,7 +58,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
             ${
               props.uName
                 ? " "
-                : `<div>
+                : `<div class="flex flex-col gap-2">
           <!-- 2FA Toggle -->
           <div class="flex flex-col gap-4">
               <div class="flex items-center gap-2">
