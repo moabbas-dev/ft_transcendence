@@ -20,7 +20,7 @@ const BlockedUser = createComponent((props: BlockedUserProps) => {
 			<p class="font-medium">${props.name}</p>
 			<span class="text-sm text-gray-500">Blocked on ${props.blockedOn}</span>
 		</div>
-		<div class="ml-auto flex gap-2">
+		<div class="flex flex-1 justify-end gap-2">
 			<button id="unblock" class="px-3 py-1 bg-pongblue text-white text-sm rounded hover:bg-opacity-80">
 				Unblock
 			</button>

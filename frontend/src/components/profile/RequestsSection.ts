@@ -21,7 +21,7 @@ const Request = createComponent((props: RequestProps) => {
 			<p class="font-medium">${props.name}</p>
 			<span class="text-sm text-gray-500">${props.timeSent}</span>
 		</div>
-		<div class="ml-auto flex gap-2">
+		<div class="flex flex-1 justify-end gap-2">
 			<button id="accept" class="px-3 py-1 bg-pongblue text-white text-sm rounded hover:opacity-80">
 				Accept
 			</button>

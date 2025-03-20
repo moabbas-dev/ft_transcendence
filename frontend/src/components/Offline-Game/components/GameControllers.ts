@@ -59,13 +59,6 @@ export class AIController implements Controller {
 		if (this.ballTrajectory.length > 10) {
 		  this.ballTrajectory.shift();
 		}
-
-        // add y acceleration to ball movement in hard mode
-        if (this.difficulty === "hard" && this.ballTrajectory.length > 2) {
-            const yVariance = Math.abs(this.ballTrajectory[this.ballTrajectory.length - 1] - 
-                this.ballTrajectory[this.ballTrajectory.length - 2]);
-            state.ballSpeedY += yVariance * 0.015;
-        }
 	}
 
 	private calculateTargetPosition(canvas: HTMLCanvasElement, state: gameState) {
@@ -123,21 +116,20 @@ export class AIController implements Controller {
         }
         return currentY;
     }
-	
-	private movePaddle(state: gameState, canvasHeight: number) {
-        const paddleCenter = state.player2Y + state.paddleHeight / 2;
-        const speed = this.calculateAdaptiveSpeed(paddleCenter, this.targetY);
-        const newPosition = state.player2Y + speed;
 
-        state.player2Y = Math.max(0, Math.min(newPosition, canvasHeight - state.paddleHeight));
+	private movePaddle(state: gameState, canvasHeight: number) {
+		const paddleCenter = state.player2Y + state.paddleHeight / 2;
+		const speed = this.calculateAdaptiveSpeed(paddleCenter, this.targetY, canvasHeight);
+		const newPosition = state.player2Y + speed;
+		state.player2Y = Math.max(0, Math.min(newPosition, canvasHeight - state.paddleHeight));
 	}
 
-	private calculateAdaptiveSpeed(currentY: number, targetY: number): number {
-        const distance = targetY - currentY;
-        const baseSpeed = this.config.baseSpeed * [1, 1.1, 1.2][["easy", "medium", "hard"].indexOf(this.difficulty)];
-        const speedMultiplier = Math.min(Math.abs(distance) / 50, 2);
-
-        return baseSpeed * speedMultiplier * Math.sign(distance);
+	private calculateAdaptiveSpeed(currentY: number, targetY: number, canvasHeight: number): number {
+		const distance = targetY - currentY;
+		const scaledBaseSpeed = this.config.baseSpeed * (canvasHeight / 500);
+		const effectiveSpeed = Math.min(scaledBaseSpeed, Math.abs(distance));
+    
+		return effectiveSpeed * Math.sign(distance);
 	}
 }
 

@@ -60,6 +60,7 @@ export default {
 			  <p class="text-lg">
 			  	${t('about.conclusion')}
 			  </p>
+			  <p class="text-pongdark">Mr. Walid please 125 :)</p>
 			</div>
 		  </div>
 		</section>

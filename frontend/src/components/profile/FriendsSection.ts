@@ -18,7 +18,7 @@ const Friend = createComponent((props: FriendProps) => {
 			<p class="font-medium">${props.nickname}</p>
 			<span class="text-sm text-gray-500">${props.status}</span>
 		</div>
-		<div class="ml-auto flex gap-2">
+		<div class="flex flex-1 justify-end gap-2">
 			<button class="size-[32px] p-1.5 grid place-content-center bg-pongblue text-white rounded-full hover:opacity-80">
 				<i class="fa-regular fa-comment-dots"></i>
 			</button>
@@ -34,8 +34,8 @@ export const FriendsSection = createComponent(() => {
     const section = document.createElement('div');
     section.className = "flex flex-col gap-4";
 	section.innerHTML = `
-		<div id="search-container" class="flex items-center gap-4 rounded-lg bg-gray-200 focus-within:bg-gray-100 focus-within:shadow-sm focus-within:shadow-pongblue focus-within:border focus-within:border-pongblue">
-			<i class="fa-solid fa-magnifying-glass pl-4"></i>
+		<div id="search-container" class="flex items-center gap-4 px-4 rounded-lg bg-gray-200 focus-within:bg-gray-100 focus-within:shadow-sm focus-within:shadow-pongblue focus-within:border focus-within:border-pongblue">
+			<i class="fa-solid fa-magnifying-glass"></i>
 			<input 
 				id="friends-search"
 				type="text"
