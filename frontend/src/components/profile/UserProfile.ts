@@ -109,7 +109,8 @@ export const Profile = createComponent((props: ProfileProps) => {
       <!-- Header (Nickname, Online, Avatar, Rank) -->
       
       <div class="flex items-center gap-4 sm:gap-8">
-          <div class="flex gap-2 flex-1 justify-end">
+        ${(props && props.uName)? `
+            <div class="flex gap-2 flex-1 justify-end">
             <button id="message-user" class="max-sm:flex-1 bg-pongblue text-white text-nowrap max-sm:text-sm px-2 sm:px-4 py-1 rounded hover:bg-blue-700 transition-colors">
               <i class="fas fa-envelope min-[401px]:mr-1"></i>
               <span class="max-[402px]:hidden">${t("profile.message")}</span>
@@ -122,7 +123,9 @@ export const Profile = createComponent((props: ProfileProps) => {
               <i class="fas fa-ban min-[401px]:mr-1"></i>
               <span class="max-[402px]:hidden">${t("profile.block")}</span>
             </button>
-        </div>
+          </div>
+        ` : "" }  
+        
         <div class="flex">
           <div>
               <p id="name" class="font-bold text-lg">${store.nickname}</p>
