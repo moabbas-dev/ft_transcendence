@@ -7,6 +7,7 @@ import store from "../../../store/store.js";
 
 import { displayResults } from "./searchFieldResults.js";
 import axios from "axios";
+import getValidAccessToken from "../../../refresh/RefreshToken.js";
 
 export const Header = createComponent(() => {
     const container = document.createElement("header");
@@ -103,10 +104,13 @@ export const Header = createComponent(() => {
         navigate('/leader-board');
     });
 
-    searchBar.addEventListener('input', () => {
+    searchBar.addEventListener('input', async() => {
         const searchQuery = searchBar.value.toLowerCase();
-        const token = store.accessToken;
-        axios
+        const token = await getValidAccessToken();
+        console.log(`token: ${token}`);
+        if (!token)
+            return;
+        await axios
         .get(`http://localhost:8001/auth/users`, {
           headers: {
             Authorization: `Bearer ${token}`,
