@@ -1,6 +1,6 @@
 import { blockUser, unblockUser } from "../services/blockService.js";
 import { getUser, createOrUpdateUser, getUserByUsername, createChatRoom, getUsersFromAuth } from "../services/userService.js";
-import { createFriendRequest, addFriend, getPendingFriendRequests } from "../services/friendService.js"
+import { createFriendRequest, addFriend, getPendingFriendRequests, removeFriend } from "../services/friendService.js"
 import { saveMessage, getMessages } from "../services/chatService.js"
 
 export function setupWebSocketHandlers(wsAdapter, fastify) {
@@ -10,10 +10,10 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
   wsAdapter.on("user:connect", async ({ clientId, payload }) => {
     const { username, userId } = payload; // Destructure both fields
     if (!username || !userId) {
-        wsAdapter.sendTo(clientId, "error", { message: "Username and User ID are required" });
-        return;
+      wsAdapter.sendTo(clientId, "error", { message: "Username and User ID are required" });
+      return;
     }
-    console.log("new user has connected: ",username, " | with ID:", userId);
+    console.log("new user has connected: ", username, " | with ID:", userId);
     console.log("#########");
     wsAdapter.sendTo(clientId, "msg", { message: "User connected" });
 
@@ -21,43 +21,43 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       // Create or update user in database
       // Update user in database
       await createOrUpdateUser({ id: userId, username });
-        
+
       // Fetch user by ID
       const user = await getUser(userId);
       if (!user) {
-          wsAdapter.sendTo(clientId, "error", { message: "User not found" });
-          return;
+        wsAdapter.sendTo(clientId, "error", { message: "User not found" });
+        return;
       }
 
       // Track user as online
       onlineUsers.set(clientId, username);
 
-    //   // Send friend list to user with online status
-    //   const friendsWithStatus = await Promise.all(
-    //     (user.friends || []).map(async (friendUsername) => {
-    //       const friend = await getUser(friendUsername);
-    //       if (!friend) return null;
+      //   // Send friend list to user with online status
+      //   const friendsWithStatus = await Promise.all(
+      //     (user.friends || []).map(async (friendUsername) => {
+      //       const friend = await getUser(friendUsername);
+      //       if (!friend) return null;
 
-    //       return {
-    //         username: friend.username,
-    //         firstname: friend.firstname,
-    //         lastname: friend.lastname,
-    //         isOnline: onlineUsers.has(friendUsername),
-    //       };
-    //     })
-    //   );
+      //       return {
+      //         username: friend.username,
+      //         firstname: friend.firstname,
+      //         lastname: friend.lastname,
+      //         isOnline: onlineUsers.has(friendUsername),
+      //       };
+      //     })
+      //   );
 
-    //   // Filter out null entries
-    //   const validFriends = friendsWithStatus.filter((f) => f !== null);
+      //   // Filter out null entries
+      //   const validFriends = friendsWithStatus.filter((f) => f !== null);
 
-    //   wsAdapter.sendTo(clientId, "friends:list", {
-    //     friends: validFriends,
-    //   });
+      //   wsAdapter.sendTo(clientId, "friends:list", {
+      //     friends: validFriends,
+      //   });
 
-    //   // Send pending friend requests
-    //   wsAdapter.sendTo(clientId, "friends:pending", {
-    //     pending: user.pendingFriends || [],
-    //   });
+      //   // Send pending friend requests
+      //   wsAdapter.sendTo(clientId, "friends:pending", {
+      //     pending: user.pendingFriends || [],
+      //   });
     } catch (error) {
       fastify.log.error("Error in user:connect handler", error);
       wsAdapter.sendTo(clientId, "error", {
@@ -86,9 +86,9 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
   // Handle friend request
   wsAdapter.on("friend:request", async ({ clientId, payload }) => {
     const { from, to } = payload;
-    
+
     console.log("a friend request was sent from:", from)
-    console.log("to:" ,to);
+    console.log("to:", to);
     try {
       // Save friend request to database
       await createFriendRequest(from, to);
@@ -166,6 +166,39 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
     }
   });
 
+
+  // Handle friend removal
+  wsAdapter.on("friend:remove", async ({ clientId, payload }) => {
+    try {
+      const { userId, friendId } = payload;
+
+      console.log(`Removing friend: User ${userId} removing friend ${friendId}`);
+
+      // Remove friendship in the database
+      await removeFriend(userId, friendId);
+
+      // Notify the user that the friend was removed successfully
+      wsAdapter.sendTo(clientId, "friend:removed", {
+        success: true,
+        friendId
+      });
+
+      // // Optionally notify the other user if they're online
+      // wsAdapter.sendTo(friendId, "friend:removed", {
+      //   success: true,
+      //   friendId: userId
+      // });
+
+    } catch (error) {
+      // fastify.log.error("Error in friend:remove handler:", error);
+      console.error("Error in friend:remove handler:", error); // More detailed logging
+      wsAdapter.sendTo(clientId, "error", {
+        message: "Failed to remove friend",
+        details: error.message
+      });
+    }
+  });
+
   // Handle private messages
   wsAdapter.on("message:private", async ({ clientId, payload }) => {
     try {
@@ -192,15 +225,15 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       // Send the message to recipient if online
       // const toClientId = onlineUsers.get(to);
       // if (toClientId) {
-        wsAdapter.sendTo(to, "message:received", {
-          roomId,
-          message: newMessage,
-        });
+      wsAdapter.sendTo(to, "message:received", {
+        roomId,
+        message: newMessage,
+      });
 
-        const unreadCounts = await getUnreadMessageCount(to);
-        wsAdapter.sendTo(to, "messages:unread", {
-          unreadCounts
-        });
+      const unreadCounts = await getUnreadMessageCount(to);
+      wsAdapter.sendTo(to, "messages:unread", {
+        unreadCounts
+      });
       // }
 
       // Also send confirmation to sender
@@ -220,19 +253,19 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
   wsAdapter.on("messages:history", async ({ clientId, payload }) => {
     try {
       const { roomId } = payload;
-      
+
       // Validate input
       if (!roomId || typeof roomId !== 'string') {
         throw new Error('Invalid room ID');
       }
-  
+
       const messages = await getMessages(roomId, 1000);
-      
+
       wsAdapter.sendTo(clientId, "messages:history", {
         roomId,
         messages
       });
-  
+
     } catch (error) {
       fastify.log.error("Message history error:", error);
       wsAdapter.sendTo(clientId, "error", {
@@ -245,17 +278,17 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
   wsAdapter.on("user:block", async ({ clientId, payload }) => {
     try {
       const { from: blockerId, blocked: blockedId } = payload;
-  
+
       // Ensure IDs are valid numbers
       if (typeof blockerId !== "number" || typeof blockedId !== "number") {
         throw new Error("Invalid user IDs");
       }
-  
+
       // Block the user
       await blockUser(blockerId, blockedId);
 
-      console.log("the user:", blockerId,", blocked:", blockedId);
-  
+      console.log("the user:", blockerId, ", blocked:", blockedId);
+
       // Notify the blocker
       wsAdapter.sendTo(clientId, "user:blocked", {
         userId: blockedId, // Send the blocked user's ID
@@ -288,61 +321,61 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
 
 
   // In websocketController.js
-wsAdapter.on("friends:get", async ({ clientId, payload }) => {
-  try {
-    const { userId } = payload;
-    
-    // Get user data
-    const user = await getUser(userId);
-    if (!user) {
-      wsAdapter.sendTo(clientId, "error", { 
-        message: "User not found" 
+  wsAdapter.on("friends:get", async ({ clientId, payload }) => {
+    try {
+      const { userId } = payload;
+
+      // Get user data
+      const user = await getUser(userId);
+      if (!user) {
+        wsAdapter.sendTo(clientId, "error", {
+          message: "User not found"
+        });
+        return;
+      }
+
+      // Send friends list with online status
+      const friendsWithStatus = user.friends.map(friend => ({
+        ...friend,
+        isOnline: onlineUsers.has(friend.username)
+      }));
+
+      wsAdapter.sendTo(clientId, "friends:list", {
+        friends: friendsWithStatus
       });
-      return;
+
+    } catch (error) {
+      fastify.log.error("Error fetching friends:", error);
+      wsAdapter.sendTo(clientId, "error", {
+        message: "Failed to fetch friends"
+      });
     }
+  });
 
-    // Send friends list with online status
-    const friendsWithStatus = user.friends.map(friend => ({
-      ...friend,
-      isOnline: onlineUsers.has(friend.username)
-    }));
+  wsAdapter.on("friends:get_pending", async ({ clientId, payload }) => {
+    try {
+      const { userId } = payload;
 
-    wsAdapter.sendTo(clientId, "friends:list", {
-      friends: friendsWithStatus
-    });
+      // Get pending requests from database
+      const pendingRequests = await getPendingFriendRequests(userId);
+      console.log("lolllllllllllllllllllllllllll", pendingRequests);
 
-  } catch (error) {
-    fastify.log.error("Error fetching friends:", error);
-    wsAdapter.sendTo(clientId, "error", {
-      message: "Failed to fetch friends"
-    });
-  }
-});
+      // // Convert user IDs to user details
+      // const pendingDetails = await getUsersFromAuth(
+      //   pendingRequests.map(req => req.from_user)
+      // );
+      // console.log(pendingDetails);
 
-wsAdapter.on("friends:get_pending", async ({ clientId, payload }) => {
-  try {
-    const { userId } = payload;
+      wsAdapter.sendTo(clientId, "friends:pending", {
+        pending: pendingRequests
+      });
 
-    // Get pending requests from database
-    const pendingRequests = await getPendingFriendRequests(userId);
-    console.log("lolllllllllllllllllllllllllll",pendingRequests);
-
-    // // Convert user IDs to user details
-    // const pendingDetails = await getUsersFromAuth(
-    //   pendingRequests.map(req => req.from_user)
-    // );
-    // console.log(pendingDetails);
-
-    wsAdapter.sendTo(clientId, "friends:pending", {
-      pending: pendingRequests
-    });
-
-  } catch (error) {
-    fastify.log.error("Error fetching pending requests:", error);
-    wsAdapter.sendTo(clientId, "error", {
-      message: "Failed to fetch pending requests"
-    });
-  }
-});
+    } catch (error) {
+      fastify.log.error("Error fetching pending requests:", error);
+      wsAdapter.sendTo(clientId, "error", {
+        message: "Failed to fetch pending requests"
+      });
+    }
+  });
 }
 

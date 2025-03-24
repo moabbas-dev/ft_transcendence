@@ -219,6 +219,21 @@ class ChatWebSocketService {
   }
 
   /**
+ * Remove a friend
+ */
+public removeFriend(friendId: number): void {
+  if (!this.userId) {
+    console.error('Not authenticated');
+    return;
+  }
+  
+  this.send('friend:remove', {
+    userId: this.userId,
+    friendId
+  });
+}
+
+  /**
    * Get message history for a specific chat room
    */
   public getMessageHistory(roomId: string): void {
