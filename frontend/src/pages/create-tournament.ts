@@ -106,7 +106,7 @@ export default {
         const tournamentName = container.querySelector('#tournament-name')!
         const changeTournamentNameBtn = container.querySelector('#submit-change-tournament-name')!
         const errorMessage = container.querySelector('#name-error-message')!
-        const oldTournamentName = tournamentName.textContent!;
+        let oldTournamentName = tournamentName.textContent!;
 
         tournamentName.addEventListener('focus', () => {
             changeTournamentNameBtn.classList.remove("hidden");
@@ -161,6 +161,7 @@ export default {
                 // here we have to send changes to database
                 console.log("Tournament name submitted:", tournamentName.textContent);
                 changeTournamentNameBtn.classList.add("hidden");
+                oldTournamentName = tournamentName.textContent!
                 errorMessage.classList.add('hidden')
             }
         });
