@@ -41,10 +41,14 @@ export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
 				});
 				store.update("sessionId", googleData.data.sessionId);
 				Toast.show("First step is complete! Now moving to the 2FA code validation", "success");
+				localStorage.removeItem("googleAuth");
 			} catch (error: any) {
+				localStorage.removeItem("googleAuth");
 				if (error.response) {
-					if (error.response.status === 401 || error.response.status === 404)
-						Toast.show(`Error: ${error.response.data.message}`, "error");
+					if (error.response.status === 401) {
+						if (error.response.data.key !== "cookie")
+							Toast.show(`Error: ${error.response.data.message}`, "error");
+					}
 					else if (error.response.status === 500)
 						Toast.show(`Server error: ${error.response.data.error}`, "error");
 					else
@@ -54,7 +58,6 @@ export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
 				else
 					Toast.show(`Error setting up the request: ${error.message}`, "error");
 			}
-			localStorage.removeItem("googleAuth");
 		})();
 	}
 

@@ -6,7 +6,7 @@ const SECRET_KEY = process.env.JWT_SECRET_KEY;
 const { generateTokens } = require('../utils/jwtUtils');
 const UserToken = require('../models/UserToken');
 const axios = require('axios');
-const { validatePassword } = require('../utils/validationUtils');
+const { validatePassword, validateNickname, capitalizeFullName } = require('../utils/validationUtils');
 const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client(process.env.CLIENT_ID);
 
@@ -49,6 +49,17 @@ async function verifyGoogleToken(idToken) {
 	});
 	return ticket.getPayload();
 }
+
+const generateNickname = async (userId) => {
+	const randomString = Math.random().toString(36).substring(2, 7); // Generates a 5-letter string
+	const nickname = `user${userId}${randomString}`;
+
+	// Ensure it passes validation and is unique
+	if (!validateNickname(nickname) || await User.findByNickname(nickname)) {
+		return generateNickname(userId); // Retry if invalid or not unique
+	}
+	return nickname;
+};
 
 class AuthController {
 
@@ -232,7 +243,7 @@ class AuthController {
 					email: userInfo.email,
 					password: null,
 					nickname: null,
-					full_name: userInfo.name,
+					full_name: capitalizeFullName(userInfo.name),
 					age: null,
 					country: null,
 					google_id: hashedGoogleId
@@ -241,7 +252,7 @@ class AuthController {
 				if (!newUserId) {
 					throw new Error("Failed to create user");
 				}
-				const nickname = `user${newUserId}`;
+				const nickname = await generateNickname(newUserId);
 				await User.updateUserNickname(newUserId, { nickname: nickname });
 				user = await User.findById(newUserId);
 			}
@@ -279,14 +290,14 @@ class AuthController {
 			console.log("Received cookies:", request.cookies);
 			const sessionId = request.cookies.sessionId;
 			if (!sessionId)
-				return reply.code(401).send({ message: "No session ID found. Please log in." });
+				return reply.code(401).send({ key: "cookie", message: "No session ID found. Please log in." });
 			const session = await Session.getById(sessionId);
 			if (!session)
-				return reply.code(401).send({ message: "Invalid session id! please login again" });
-			if (!session.access_token && !session.refresh_token)// need 2fa authentication
-				return reply.code(200).send({ require2FA: true, sessionId });
+				return reply.code(401).send({ key: "not-found", message: "Invalid session id! please login again" });
+			if (!session.access_token && !session.refresh_token)
+				return reply.code(200).send({ sessionId });
 			else
-				return reply.code(200).send({ require2FA: false, sessionId, accessToken: session.access_token, refreshToken: session.refresh_token });
+				return reply.code(200).send({ sessionId, accessToken: session.access_token, refreshToken: session.refresh_token });
 		} catch (err) {
 			return reply.code(500).send({ message: "Error with google sign in!", error: err.message });
 		}
