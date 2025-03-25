@@ -1,13 +1,16 @@
 import { createComponent } from "../../utils/StateManager.js";
 import { Lang, t, setLanguage } from "../../languages/LanguageController.js";
 import { navigate, refreshRouter } from "../../router.js";
-import { Notification } from "./Notification.js";
 import { DropDown } from "./DropDown.js";
 import store from "../../../store/store.js";
-
 import { displayResults } from "./searchFieldResults.js";
 import axios from "axios";
 import getValidAccessToken from "../../../refresh/RefreshToken.js";
+import { TournamentAlertNotification } from "../Notifications/TournamentNotification.js";
+import { ChatNotification } from "../Notifications/ChatNotification.js";
+import { FriendRequestNotification } from "../Notifications/FriendRequestNotification.js";
+import { FriendRequestAcceptedNotification } from "../Notifications/FriendRequestAcceptedNotification.js";
+import { GameChallengeNotification } from "../Notifications/GameNotification.js";
 
 export const Header = createComponent(() => {
     const container = document.createElement("header");
@@ -52,7 +55,7 @@ export const Header = createComponent(() => {
                 <i class="fa-solid fa-bell text-white text-2xl transition-all hover:cursor-pointer hover:text-ponghover"></i>
                 <span class="notification-count absolute -top-2 -right-2 rounded-full text-white hover:cursor-pointer w-5 h-5 flex items-center justify-center text-sm">0</span>
             </div>
-            <div class="notification hidden absolute overflow-y-auto top-full ${localStorage.getItem('selectedLanguage') === 'ar'? 'left-0' : 'right-0'} z-50 bg-white w-[300px] p-2 max-h-[300px] animate-fade-down animate-once animate-duration-300">
+            <div class="notification hidden absolute overflow-y-auto top-full ${localStorage.getItem('selectedLanguage') === 'ar'? 'left-0' : 'right-0'} z-50 bg-white w-[300px] py-2 pl-2 max-sm:pr-2 max-h-[300px] animate-fade-down animate-once animate-duration-300">
 
             </div>
             <select id="languages" name="languages_options" title="Select your language" class="text-xl bg-pongblue text-white text-[2.5rem] focus:outline-none hover:opacity-80 hover:cursor-pointer">
@@ -163,11 +166,11 @@ export const Header = createComponent(() => {
     });
 
     // For testing purposes
-    notificationContainer.appendChild(Notification({username: 'Test User', message: 'Hello World!'}))
-    notificationContainer.appendChild(Notification({username: 'Test User', message: 'Hello World!'}))
-    notificationContainer.appendChild(Notification({username: 'Test User', message: 'Hello World!'}))
-    notificationContainer.appendChild(Notification({username: 'Test User', message: 'Hello World!'}))
-    notificationContainer.appendChild(Notification({username: 'Test User', message: 'Hello World!'}))
+    notificationContainer.appendChild(ChatNotification({username: 'Test User', message: 'Hello World!'}))
+    notificationContainer.appendChild(TournamentAlertNotification({username: 'Test User', message: 'Hello World!'}))
+    notificationContainer.appendChild(FriendRequestNotification({username: 'Test User', message: 'Hello World!'}))
+    notificationContainer.appendChild(FriendRequestAcceptedNotification({username: 'Test User', message: 'Hello World!'}))
+    notificationContainer.appendChild(GameChallengeNotification({username: 'Test User', message: 'Hello World!'}))
 
     // this will be based on the unread notifications come from database not the length of children collection
     notificationCount.classList.add(notificationContainer.children.length == 0? 'bg-gray-600' : 'bg-red-600');
