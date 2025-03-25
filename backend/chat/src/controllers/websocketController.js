@@ -113,6 +113,24 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
     }
   });
 
+
+
+/////////////////////////////////////////////////////////////
+//                                                         //
+//     to use it 👈(⌒▽⌒)👉 later                        //
+//                                                         //
+/////////////////////////////////////////////////////////////
+//   // Canceling a friend request
+// wsAdapter.on("friend:request:cancel", async ({ clientId, payload }) => {
+//   const { from, to } = payload;
+//   try {
+//     await cancelFriendRequest(from, to);
+//     // Send success notification
+//   } catch (error) {
+//     // Handle error
+//   }
+// });
+
   // Handle friend acceptance
   wsAdapter.on("friend:accept", async ({ clientId, payload }) => {
     const { from, to } = payload;
