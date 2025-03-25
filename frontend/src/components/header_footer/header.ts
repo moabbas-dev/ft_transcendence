@@ -55,7 +55,7 @@ export const Header = createComponent(() => {
                 <i class="fa-solid fa-bell text-white text-2xl transition-all hover:cursor-pointer hover:text-ponghover"></i>
                 <span class="notification-count absolute -top-2 -right-2 rounded-full text-white hover:cursor-pointer w-5 h-5 flex items-center justify-center text-sm">0</span>
             </div>
-            <div class="notification hidden absolute overflow-y-auto top-full ${localStorage.getItem('selectedLanguage') === 'ar'? 'left-0' : 'right-0'} z-50 bg-white w-[300px] py-2 pl-2 max-sm:pr-2 max-h-[300px] animate-fade-down animate-once animate-duration-300">
+            <div class="notification hidden absolute scrollbar-thin overflow-y-auto top-full ${localStorage.getItem('selectedLanguage') === 'ar'? 'left-0' : 'right-0'} z-50 bg-white w-[300px] py-2 pl-2 max-sm:pr-2 max-h-[300px] animate-fade-down animate-once animate-duration-300">
 
             </div>
             <select id="languages" name="languages_options" title="Select your language" class="text-xl bg-pongblue text-white text-[2.5rem] focus:outline-none hover:opacity-80 hover:cursor-pointer">
@@ -166,7 +166,7 @@ export const Header = createComponent(() => {
     });
 
     // For testing purposes
-    notificationContainer.appendChild(ChatNotification({username: 'Test User', message: 'Hello World!'}))
+    notificationContainer.appendChild(ChatNotification({username: 'Test User', message: 'This is a test message from 46 characters long'}))
     notificationContainer.appendChild(TournamentAlertNotification({username: 'Test User', message: 'Hello World!'}))
     notificationContainer.appendChild(FriendRequestNotification({username: 'Test User', message: 'Hello World!'}))
     notificationContainer.appendChild(FriendRequestAcceptedNotification({username: 'Test User', message: 'Hello World!'}))

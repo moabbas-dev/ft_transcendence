@@ -1,4 +1,4 @@
-import { createComponent } from "../../utils/StateManager";
+import { createComponent } from "../../utils/StateManager.js";
 
 interface ChatNotificationProps {
 	senderId: string,
@@ -18,7 +18,7 @@ export const ChatNotification = createComponent((props: ChatNotificationProps) =
 			<span>Just now</span>
 		</div>
 		<div>
-			<p class="text-gray-700">${props.message}</p>
+			<p class="text-gray-700">${ellipsis(props.message, 35)}</p>
 		</div>
 	`
 
@@ -26,3 +26,8 @@ export const ChatNotification = createComponent((props: ChatNotificationProps) =
 	// fetch receiver nickname
 	return notification;
 });
+
+function ellipsis(message: string, n: number) {
+	return (message.length > n) ? message.substr(0, n-1) + '&hellip;' : message;
+}
+
