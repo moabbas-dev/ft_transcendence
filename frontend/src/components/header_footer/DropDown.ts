@@ -41,7 +41,6 @@ export const DropDown = createComponent((props: DropDownProps) => {
 	logout?.addEventListener('click', async() => {
 		// handle logout here
 		store.logout();
-		navigate('/register')
 	})
 	return container;
 })

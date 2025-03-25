@@ -1,5 +1,6 @@
 import axios from "axios";
 import Toast from "../src/toast/Toast";
+import { navigate } from "../src/router";
 
 class Store {
 	userId: string | null = localStorage.getItem("userId");
@@ -46,6 +47,7 @@ class Store {
 			this.update("refreshToken", null);
 			this.update("sessionId", null);
 			this.update("createdAt", null);
+			navigate('/register');
 		}
 		catch (error: any) {
 			if (error.response) {
