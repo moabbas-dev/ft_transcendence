@@ -42,10 +42,7 @@ class TwoFactorCodeController {
 			await User.updateUserStatus(userId, { status: "online" });
 
 			return reply.code(200).send({
-				sessionId, accessToken, refreshToken,
-				userId: user.id, email: user.email,
-				nickname: user.nickname, fullName: user.full_name,
-				avatarUrl: user.avatar_url
+				accessToken, refreshToken,
 			});
 		} catch (err) {
 			return reply.code(500).send({ message: "Error validating the code!", error: err.message });

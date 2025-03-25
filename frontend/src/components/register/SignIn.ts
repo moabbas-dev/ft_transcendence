@@ -57,8 +57,8 @@ export const SignIn = createComponent((props: SignInProps) => {
 			<div class="flex-1 border-t border-gray-300"></div>
       	</div>
     </div>
-	<div class="flex flex-col gap-3">
-		<a class="w-full flex items-center gap-2 justify-center py-2 text-white bg-pongblue hover:cursor-pointer hover:opacity-80 rounded-md transition-all duration-300">
+	<div class="flex flex-col gap-3" id="google-btn">
+		<a href="http://localhost:8001/auth/google" id="google-sign" class="w-full flex items-center gap-2 justify-center py-2 text-white bg-pongblue hover:cursor-pointer hover:opacity-80 rounded-md transition-all duration-300">
 			<i class='bx bxl-google text-2xl'></i>
 			<span class="text-center">${t('register.continueGoogle')}</span>
 		</a>
@@ -160,6 +160,11 @@ export const SignIn = createComponent((props: SignInProps) => {
 		eyeIcon.classList.remove('bx-show', 'bx-hide');
 		eyeIcon.classList.add(wasPassword ? 'bx-show' : 'bx-hide');
 	};
+
+	const googleBtn = form.querySelector('#google-sign');
+	googleBtn?.addEventListener('click', () => {
+		localStorage.setItem("googleAuth", "true");
+	});
 
 	togglePassword.addEventListener('click', handleTogglePassword);
 	useCleanup(() => togglePassword.removeEventListener('click', handleTogglePassword))

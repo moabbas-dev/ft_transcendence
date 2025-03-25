@@ -89,10 +89,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
                             <p>${t('profile.infoTab.generating')}</p>
                         </div>
                     </div>
-                    <div class="mt-4 text-center">
-                        <p class="text-sm text-gray-600 mb-2">Or enter this code manually:</p>
-                        <code id="secretKey" class="bg-gray-100 p-2 rounded font-mono">Generating...</code>
-                    </div>
+
                     <div class="mt-4">
                         <button id="regenerateQrBtn" class="bg-pongblue text-white px-4 py-1 rounded hover:bg-blue-700 transition-colors">
                             <i class="fas fa-sync-alt mr-1"></i> ${t('profile.infoTab.generateNewQrcode')}

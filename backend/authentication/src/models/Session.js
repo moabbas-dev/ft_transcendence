@@ -37,9 +37,9 @@ class Session {
 		const query = `
 			UPDATE Sessions
 			SET access_token = ?,
-			expires_at = DATETIME('now', '+1 hour'),
+			expires_at = DATETIME('now', '+5 minutes'),
 			refresh_token = ?,
-			refresh_expires_at = DATETIME('now', '+30 days'),
+			refresh_expires_at = DATETIME('now', '+30 minutes'),
 			updated_at = CURRENT_TIMESTAMP
 			WHERE id = ?
 		`;
@@ -55,7 +55,7 @@ class Session {
 		const query = `
 			UPDATE Sessions
 			SET access_token = ?,
-			expires_at = DATETIME('now', '+1 hour'),
+			expires_at = DATETIME('now', '+5 minutes'),
 			updated_at = CURRENT_TIMESTAMP
 			WHERE id = ?
 		`;

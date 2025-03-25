@@ -6,8 +6,9 @@ const SECRET_KEY = process.env.JWT_SECRET_KEY;
 const { generateTokens } = require('../utils/jwtUtils');
 const UserToken = require('../models/UserToken');
 const axios = require('axios');
-const { v4: uuidv4 } = require('uuid');
-const { validatePassword } = require('../utils/validationUtils');
+const { validatePassword, validateNickname, capitalizeFullName } = require('../utils/validationUtils');
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client(process.env.CLIENT_ID);
 
 const authenticateUser = async (email, password) => {
 	const query = `SELECT * FROM Users WHERE email = ?`;
@@ -26,6 +27,10 @@ const authenticateUser = async (email, password) => {
 				reject(new Error("User not active"));
 				return;
 			}
+			if (user && !user.password) {
+				reject(new Error("Invalid password"));
+				return;
+			}
 			const isValid = await bcrypt.compare(password, user.password);
 			if (!isValid) {
 				reject(new Error("Invalid password"));
@@ -35,6 +40,25 @@ const authenticateUser = async (email, password) => {
 			resolve(user);
 		});
 	});
+};
+
+async function verifyGoogleToken(idToken) {
+	const ticket = await client.verifyIdToken({
+		idToken: idToken,
+		audience: process.env.CLIENT_ID, // Must match your Google OAuth2 client ID
+	});
+	return ticket.getPayload();
+}
+
+const generateNickname = async (userId) => {
+	const randomString = Math.random().toString(36).substring(2, 7); // Generates a 5-letter string
+	const nickname = `user${userId}${randomString}`;
+
+	// Ensure it passes validation and is unique
+	if (!validateNickname(nickname) || await User.findByNickname(nickname)) {
+		return generateNickname(userId); // Retry if invalid or not unique
+	}
+	return nickname;
 };
 
 class AuthController {
@@ -107,7 +131,7 @@ class AuthController {
 			if (user && !user.is_active)
 				return reply.code(403).send({ message: "User not active!" });
 			const userId = user.id;
-			const uuid = uuidv4();
+			const uuid = crypto.randomUUID();
 			try {
 				await axios.post(`http://localhost:8000/notifications/email/${userId}`, {
 					email: user.email,
@@ -169,7 +193,7 @@ class AuthController {
 			if (!tokenRecord)
 				return reply.code(404).send({ message: "Token not found!" });
 			if (tokenRecord.token_type !== "account_activation")
-				return reply.code(403).send({ message: "Token is not for account activation!"});
+				return reply.code(403).send({ message: "Token is not for account activation!" });
 			// Check if the token has expired (24 hours expiration)
 			const expiresAt = tokenRecord.expires_at;
 			const userId = tokenRecord.user_id;
@@ -197,7 +221,11 @@ class AuthController {
 	static async googleRemoteAuthenticate(request, reply) {
 		try {
 			const token = await request.server.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(request);
+			const googleUser = await verifyGoogleToken(token.token.id_token);  // Verifies authenticity
 
+			if (!googleUser.email_verified) {
+				return reply.code(400).send({ message: "Google email is not verified" });
+			}
 			// Fetch user info from Google
 			const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
 				headers: {
@@ -209,37 +237,69 @@ class AuthController {
 
 			// Send response with user info
 			let user = await User.findByEmail(userInfo.email);
+			const hashedGoogleId = await bcrypt.hash(userInfo.id, 10);
 			if (!user) {
 				const userData = {
 					email: userInfo.email,
 					password: null,
 					nickname: null,
-					full_name: userInfo.name,
-					google_id: userInfo.id
+					full_name: capitalizeFullName(userInfo.name),
+					age: null,
+					country: null,
+					google_id: hashedGoogleId
 				}
 				const newUserId = await User.create(userData);
 				if (!newUserId) {
 					throw new Error("Failed to create user");
 				}
-				const nickname = `user${newUserId}`;
+				const nickname = await generateNickname(newUserId);
 				await User.updateUserNickname(newUserId, { nickname: nickname });
 				user = await User.findById(newUserId);
 			}
 			const userId = user.id;
-			await User.updateUserGoogleID(userId, { googleId: userInfo.id });
-			await User.activateUser(userId);
+			if (!user.googleId)
+				await User.updateUserGoogleID(userId, { googleId: hashedGoogleId });
+			if (!user.is_active)
+				await User.activateUser(userId);
+			let sessId;
 			if (!user.is_2fa_enabled) {
 				const { accessToken, refreshToken } = await generateTokens(user, request.server);
-				const sessId = await Session.create({ userId, accessToken, refreshToken });
+				sessId = await Session.create({ userId, accessToken, refreshToken });
 				await User.updateUserStatus(userId, { status: "online" });
-				return reply.code(200).send({ require2FA: false, sessionId: sessId, accessToken, refreshToken });
-			} else {
-				const sessId = await Session.create({ userId, accessToken: null, refreshToken: null });
-				return reply.code(200).send({ require2FA: true, sessionId: sessId });
-			}
+			} else
+				sessId = await Session.create({ userId, accessToken: null, refreshToken: null });
+			reply.setCookie('sessionId', sessId, {
+				httpOnly: true,  // Prevents client-side JS access
+				secure: false,    // Ensures cookie is sent over HTTPS only
+				sameSite: 'Strict',  // Prevents cross-site request forgery (CSRF)
+				path: '/',       // Cookie accessible across the entire site
+				maxAge: 60 * 60 * 24 // Expires in 24 hours
+			});
+			if (!user.is_2fa_enabled)
+				return reply.redirect(`${process.env.FRONTEND_DOMAIN}/play`);
+			else
+				return reply.redirect(`${process.env.FRONTEND_DOMAIN}/register/twofactor`);
 		} catch (err) {
 			request.log.error(err);
 			return reply.code(500).send({ message: 'Authentication failed', error: err.message });
+		}
+	}
+
+	static async googlesignIn(request, reply) {
+		try {
+			console.log("Received cookies:", request.cookies);
+			const sessionId = request.cookies.sessionId;
+			if (!sessionId)
+				return reply.code(401).send({ key: "cookie", message: "No session ID found. Please log in." });
+			const session = await Session.getById(sessionId);
+			if (!session)
+				return reply.code(401).send({ key: "not-found", message: "Invalid session id! please login again" });
+			if (!session.access_token && !session.refresh_token)
+				return reply.code(200).send({ sessionId });
+			else
+				return reply.code(200).send({ sessionId, accessToken: session.access_token, refreshToken: session.refresh_token });
+		} catch (err) {
+			return reply.code(500).send({ message: "Error with google sign in!", error: err.message });
 		}
 	}
 }

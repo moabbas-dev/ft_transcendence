@@ -7,7 +7,7 @@ import { TwoFactorSend } from '../components/register/TwoFactor.js';
 import { UserInfoForm } from '../components/register/UserInfoForm.js';
 
 export default {
-	render: (container: HTMLElement, params?: { [key: string]: string | number }) => {
+	render: (container: HTMLElement, params?: { [key: string]: string }) => {
 		container.innerHTML = `
 		<div class="loaded-div fixed inset-0 overflow-hidden">
 			<canvas id="pongCanvas" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 sm:translate-x-0 sm:translate-y-0 sm:top-0 sm:left-0 z-0 w-[100vh] h-[100vw] sm:w-[100vw] sm:h-[100vh] inset-0 rotate-90 origin-center sm:rotate-0"></canvas>

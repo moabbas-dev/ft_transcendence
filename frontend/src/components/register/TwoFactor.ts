@@ -5,6 +5,7 @@ import axios from "axios";
 import store from "../../../store/store.js";
 import { navigate } from "../../router.js";
 import Toast from "../../toast/Toast.js";
+import { jwtDecode } from "jwt-decode";
 
 interface TwoFactorSendProps {
 	onSwitchToSignIn: () => void,
@@ -31,6 +32,35 @@ export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
 			</form>
 		</div>
 	`;
+
+	if (localStorage.getItem("googleAuth") && localStorage.getItem("googleAuth") === "true") {
+		(async () => {
+			try {
+				const googleData = await axios.get("http://localhost:8001/auth/google/signIn", {
+					withCredentials: true
+				});
+				store.update("sessionId", googleData.data.sessionId);
+				Toast.show("First step is complete! Now moving to the 2FA code validation", "success");
+				localStorage.removeItem("googleAuth");
+			} catch (error: any) {
+				localStorage.removeItem("googleAuth");
+				if (error.response) {
+					if (error.response.status === 401) {
+						if (error.response.data.key !== "cookie")
+							Toast.show(`Error: ${error.response.data.message}`, "error");
+					}
+					else if (error.response.status === 500)
+						Toast.show(`Server error: ${error.response.data.error}`, "error");
+					else
+						Toast.show(`Unexpected error: ${error.response}`, "error");
+				} else if (error.request)
+					Toast.show(`No response from server: ${error.request}`, "error");
+				else
+					Toast.show(`Error setting up the request: ${error.message}`, "error");
+			}
+		})();
+	}
+
 	const formElement: HTMLFormElement = form.querySelector('form')!;
 	const verifyButton = Button({
 		type: 'submit',
@@ -47,9 +77,21 @@ export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
 				code: code
 			};
 			try {
-				await axios.post(`http://localhost:8001/auth/twoFactor/login/${store.sessionId}`, body);
-				Toast.show("two factor authentication validation complete!", "success");
+				const userData = await axios.post(`http://localhost:8001/auth/twoFactor/login/${store.sessionId}`, body);
+				const decodedToken: any = jwtDecode(userData.data.accessToken);
+				store.update("accessToken", userData.data.accessToken);
+				store.update("refreshToken", userData.data.refreshToken);
+				store.update("userId", decodedToken.userId);
+				store.update("email", decodedToken.email);
+				store.update("nickname", decodedToken.nickname);
+				store.update("fullName", decodedToken.fullName);
+				store.update("age", decodedToken.age);
+				store.update("country", decodedToken.country);
+				store.update("createdAt", decodedToken.createdAt);
+				store.update("avatarUrl", decodedToken.avatarUrl);
+				store.update("isLoggedIn", true);
 				navigate("/play");
+				Toast.show(`Login successful, Welcome ${store.fullName}!`, "success");
 			} catch (err: any) {
 				if (err.response) {
 					if (err.response.status === 400 || err.response.status === 403 || err.response.status === 404)

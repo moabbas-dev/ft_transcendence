@@ -36,7 +36,7 @@ class UserController {
 			const passwordHash = await bcrypt.hash(password, saltRounds);
 			const fullName = capitalizeFullName(full_name);
 			const userId = await User.create({ email, password: passwordHash, nickname, full_name: fullName, age, country, google_id });
-			const activationToken = uuidv4();
+			const activationToken = crypto.randomUUID();
 			await UserToken.create({ userId, activationToken, tokenType: "account_activation" });
 			try {
 				await axios.post(`http://localhost:8000/notifications/email/${userId}`, {

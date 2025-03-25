@@ -28,6 +28,7 @@ export const Profile = createComponent((props: ProfileProps) => {
       .then((response) => {
         // Store or use the user data
         const userData = response.data;
+        console.log(userData.nickname);
         updateUIWithUserData(userData, container);
         // Set up event listener for the "Add Friend" button
         addFriendButton?.addEventListener("click", () => {

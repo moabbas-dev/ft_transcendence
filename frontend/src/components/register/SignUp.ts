@@ -27,7 +27,7 @@ export const SignUp = createComponent((props: SignUpProps) => {
 					<i class="bx bx-envelope text-lg"></i>
 					</span>
 					<input type="email" id="email" placeholder="${t('register.signup.emailPlaceholder')}" autocomplete="email" name="email" 
-					class="w-full pl-8 pr-2 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue">
+					class="w-full pl-8 pr-2 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue" required>
 				</div>
 			</div>
 			
@@ -38,7 +38,7 @@ export const SignUp = createComponent((props: SignUpProps) => {
 						<i class="bx bx-user text-lg"></i>
 					</span>
 					<input type="text" id="nickname" placeholder="${t("register.signup.nicknamePlaceholder")}" autocomplete="off" 
-					class="nickname w-full pl-8 pr-2 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue">
+					class="nickname w-full pl-8 pr-2 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue" required>
 				</div>
 			</div>
 
@@ -49,7 +49,7 @@ export const SignUp = createComponent((props: SignUpProps) => {
 						<i class="bx bx-lock-alt text-lg"></i>
 					</span>
 					<input type="password" id="password" placeholder="${t('register.signup.passwordPlaceholder')}" autocomplete="current-password" name="password"
-					class="w-full pl-8 pr-8 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue">
+					class="w-full pl-8 pr-8 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue" required>
 					<span class="absolute inset-y-0 right-0 flex items-center pr-2 cursor-pointer toggle-password">
 						<i class='bx bx-hide hide-show text-lg text-gray-500'></i>
 					</span>
@@ -63,7 +63,7 @@ export const SignUp = createComponent((props: SignUpProps) => {
 						<i class="bx bx-lock-alt text-lg"></i>
 					</span>
 					<input type="password" id="conf-password" placeholder="${t('register.signup.passwordConfirm')}" autocomplete="current-password" name="password"
-					class="w-full pl-8 pr-8 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue">
+					class="w-full pl-8 pr-8 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue" required>
 					<span class="absolute inset-y-0 right-0 flex items-center pr-2 cursor-pointer toggle-password">
 						<i class='bx bx-hide hide-show text-lg text-gray-500'></i>
 					</span>
@@ -77,7 +77,7 @@ export const SignUp = createComponent((props: SignUpProps) => {
 						<i class="bx bx-id-card text-lg"></i>
 					</span>
 					<input type="text" id="fullname" placeholder="${t("register.signup.fullnamePlaceholder")}" autocomplete="off" 
-					class="full-name w-full pl-8 pr-2 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue">
+					class="full-name w-full pl-8 pr-2 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue" required>
 				</div>
 			</div>
 			
@@ -160,8 +160,8 @@ export const SignUp = createComponent((props: SignUpProps) => {
         <div class="flex-1 border-t border-gray-300"></div>
       </div>
       
-      <div class="flex flex-col w-full gap-3">
-        <a class="flex items-center justify-center gap-2 w-full py-2 bg-pongblue text-white rounded-lg hover:cursor-pointer hover:bg-opacity-90 transition-all duration-300">
+      <div class="flex flex-col w-full gap-3" id="google-btn">
+        <a href="http://localhost:8001/auth/google" id="google-sign" class="flex items-center justify-center gap-2 w-full py-2 bg-pongblue text-white rounded-lg hover:cursor-pointer hover:bg-opacity-90 transition-all duration-300">
           <i class='bx bxl-google text-xl'></i>
           <span>${t('register.continueGoogle')}</span>
         </a>
@@ -246,6 +246,11 @@ export const SignUp = createComponent((props: SignUpProps) => {
 			icon.classList.add(isPasswordVisible ? 'bx-hide' : 'bx-show');
 		});
 	};
+
+	const googleBtn = form.querySelector('#google-sign');
+	googleBtn?.addEventListener('click', () => {
+		localStorage.setItem("googleAuth", "true");
+	});
 
 	togglePasswordElements.forEach(element => {
 		element.addEventListener('click', handleTogglePassword);
