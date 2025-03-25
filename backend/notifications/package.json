@@ -15,6 +15,7 @@
     "dotenv": "^16.4.7",
     "fastify": "^5.2.1",
     "nodemailer": "^6.10.0",
+    "nodemon": "^3.1.9",
     "notifications": "file:",
     "sqlite3": "^5.1.7"
   }
