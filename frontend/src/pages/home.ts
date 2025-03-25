@@ -8,37 +8,53 @@ export default {
   render: (container: HTMLElement) => {
     container.className = 'flex flex-col h-dvh'
     container.innerHTML = `
-      <div class="profile"></div>
-      <div class="header bg-pongblue w-full h-fit"></div>
-      <div class="w-full overflow-x-none bg-pongdark flex-1 flex items-center justify-center">
-        <div class="container mx-auto grid place-content-center">
-          <div class="flex items-center justify-center gap-3">
-            <div class="xl:w-1/2 h-full bg-pongdark hidden sm:flex items-center">
-              <canvas id="pongCanvas" class="w-full h-[50vh] border-2 border-white rounded-lg"></canvas>
+    <div class="profile"></div>
+    <div class="header bg-pongblue w-full h-fit"></div>
+    <div class="w-full overflow-x-none bg-gradient-to-br from-pongdark via-[#0a1128] to-pongdark flex-1 flex items-center justify-center py-12">
+      <div class="container mx-auto grid place-content-center">
+        <div class="flex items-center justify-center gap-6">
+          <div class="xl:w-1/2 h-full hidden sm:flex items-center">
+            <div class="relative">
+              <canvas id="pongCanvas" class="w-full h-[50vh] border-4 border-pongblue rounded-2xl shadow-[0_0_50px_rgba(59,130,246,0.3)] transform transition-transform animate-flip-up animate-duration-[3s]"></canvas>
+              <div class="absolute inset-0 bg-pongblue opacity-20 rounded-2xl animate-flip-down animate-duration-[3s]"></div>
             </div>
-            <div class="flex flex-col gap-4 justify-center max-sm:w-full max-sm:px-3">
-              <h1 class="text-5xl max-sm:text-center max-sm:font-bold sm:text-6xl lg:text-8xl xl:text-9xl text-white text-start drop-shadow-[1px_1px_20px_white] animate-fade-right animate-once animate-duration-700 animate-ease-linear">
+          </div>
+          <div class="flex flex-col gap-3 justify-center max-sm:w-full max-sm:px-3">
+            <div class="bg-[rgba(59,130,246,0.1)] border border-pongblue/20 rounded-xl p-6 transform transition-transform hover:scale-[1.02]">
+              <h1 class="text-5xl max-sm:text-center max-sm:font-bold sm:text-6xl lg:text-8xl xl:text-9xl text-white text-start drop-shadow-[0_0_10px_#0F6292] animate-fade-right animate-once animate-duration-700 animate-ease-linear">
                 ${t("home.title")}
               </h1>
-              <p class="text-white text-2xl max-sm:text-center lg:text-4xl animate-fade-left sm:animate-fade-right animate-once animate-duration-700 animate-delay-700 animate-ease-linear">
+              <p class="text-white text-2xl max-sm:text-center lg:text-4xl mt-4 opacity-80 animate-fade-left sm:animate-fade-right animate-once animate-duration-700 animate-delay-700 animate-ease-linear">
                 ${t("home.tagline")}
               </p>
-              <div class="flex flex-wrap justify-center sm:justify-start items-center gap-2 sm:gap-3">
-                <button id="register-btn" class="text-lg rounded-ss-lg rounded-ee-xl text-white flex justify-center items-center bg-pongblue px-3 py-2 animate-fade-up animate-duration-700 animate-delay-1000 animate-ease-linear">${t(
-                  "home.register"
-                )}</button>
-                <button id="ai-btn" class="text-lg rounded-ss-lg rounded-ee-xl text-white flex justify-center items-center bg-pongblue px-3 py-2 animate-fade-up animate-duration-700 animate-delay-[1200ms] animate-ease-linear">
-                  ${t("home.playAI")}
-                </button>
-                <button id="local-btn" class="text-lg rounded-ss-lg rounded-ee-xl text-white flex justify-center items-center bg-pongblue px-3 py-2 animate-fade-up animate-duration-700 animate-delay-[1400ms] animate-ease-linear">
-                  ${t("home.playLocaly")}
-                </button>
-              </div>
+            </div>
+            <div class="flex flex-wrap justify-center sm:justify-start items-center gap-4">
+              <button id="register-btn" class="group relative text-lg rounded-lg text-white flex justify-center items-center bg-pongblue px-6 py-3 
+                transition-all duration-300 ease-in-out
+                hover:bg-pongblue/90 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]
+                focus:outline-none focus:ring-2 focus:ring-pongblue focus:ring-offset-2
+                animate-fade-up animate-duration-700 animate-delay-1000 animate-ease-linear">
+                <span class="relative z-10">${t("home.register")}</span>
+              </button>
+              <button id="ai-btn" class="group relative text-lg rounded-lg text-white flex justify-center items-center bg-pongblue px-6 py-3 
+                transition-all duration-300 ease-in-out
+                hover:bg-pongblue/90 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]
+                focus:outline-none focus:ring-2 focus:ring-pongblue focus:ring-offset-2
+                animate-fade-up animate-duration-700 animate-delay-[1200ms] animate-ease-linear">
+                <span class="relative z-10">${t("home.playAI")}</span>
+              </button>
+              <button id="local-btn" class="group relative text-lg rounded-lg text-white flex justify-center items-center bg-pongblue px-6 py-3 
+                transition-all duration-300 ease-in-out
+                hover:bg-pongblue/90 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]
+                focus:outline-none focus:ring-2 focus:ring-pongblue focus:ring-offset-2
+                animate-fade-up animate-duration-700 animate-delay-[1400ms] animate-ease-linear">
+                <span class="relative z-10">${t("home.playLocaly")}</span>
+              </button>
             </div>
           </div>
         </div>
       </div>
-    `;
+    </div> `
     //header
     const headerNav = container.querySelector(".header");
     const header = Header();

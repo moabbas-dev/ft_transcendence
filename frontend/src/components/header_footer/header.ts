@@ -14,7 +14,7 @@ import { GameChallengeNotification } from "../Notifications/GameNotification.js"
 
 export const Header = createComponent(() => {
     const container = document.createElement("header");
-    container.className = "container mx-auto relative p-2 flex items-center justify-between text-white max-sm:gap-2";
+    container.className = "container mx-auto relative p-2 flex items-center bg-gradient-to-r from-pongblue via-[#0a1150] to-pongblue justify-between text-white max-sm:gap-2";
     container.innerHTML = `
         <!-- <div id="menu-bar" class="fas fa-bars"></div> -->
         <div class="flex items-center justify-start w-1/2 gap-2 sm:gap-8">
@@ -27,16 +27,16 @@ export const Header = createComponent(() => {
                 </span>
             </div>
             <nav class="navbar items-center gap-4 hidden text-nowrap sm:flex">
-                <div class="nav-child playPage flex flex-col justify-center items-center transition-all hover:cursor-pointer hover:text-ponghover" onClick="${() => navigate('/play')}">
-                    <i class="fa-solid fa-play text-lg sm:text-xl"></i>
+                <div class="nav-child playPage group flex flex-col justify-center items-center transition-all hover:cursor-pointer hover:text-ponghover" onClick="${() => navigate('/play')}">
+                    <i class="fa-solid fa-play text-lg sm:text-xl group-hover:rotate-12"></i>
                     <span>${t('home.header.play')}</span>
                 </div>
-                <div class="nav-child flex flex-col leaderBoard-page justify-center items-center transition-all hover:cursor-pointer hover:text-ponghover">
-                    <i class="fa-solid fa-ranking-star text-lg sm:text-xl"></i>
+                <div class="nav-child flex flex-col group leaderBoard-page justify-center items-center transition-all hover:cursor-pointer hover:text-ponghover">
+                    <i class="fa-solid fa-ranking-star text-lg sm:text-xl group-hover:rotate-12"></i>
                     <span>${t('home.header.leaderBoard')}</span>
                 </div>
-                <div class="nav-child nav-chat flex flex-col justify-center items-center transition-all hover:cursor-pointer hover:text-ponghover" onClick="${() => navigate('/chat')}">
-                    <i class="fa-solid fa-comments text-lg sm:text-xl"></i>
+                <div class="nav-child nav-chat flex flex-col group justify-center items-center transition-all hover:cursor-pointer hover:text-ponghover" onClick="${() => navigate('/chat')}">
+                    <i class="fa-solid fa-comments text-lg sm:text-xl group-hover:rotate-12"></i>
                     <span>${t('home.header.chat')}</span>
                 </div>
             </nav>
@@ -51,31 +51,32 @@ export const Header = createComponent(() => {
                     <label for="search-bar" class="fas fa-search text-ponghover text-xl max-md:text-white max-md:bg-pongblue"></label>
                 </form>
             </div>
-            <div class="notification-bell relative">
-                <i class="fa-solid fa-bell text-white text-2xl transition-all hover:cursor-pointer hover:text-ponghover"></i>
-                <span class="notification-count absolute -top-2 -right-2 rounded-full text-white hover:cursor-pointer w-5 h-5 flex items-center justify-center text-sm">0</span>
+            <div class="notification-bell relative group">
+                <i class="fa-solid fa-bell text-white text-2xl group-hover:scale-120 group-hover:rotate-12 transition-all hover:cursor-pointer hover:text-ponghover"></i>
+                <span class="notification-count absolute -top-2 -right-2 rounded-full group-hover:animate-jump-in text-white hover:cursor-pointer w-5 h-5 flex items-center justify-center text-sm">0</span>
             </div>
-            <div class="notification hidden absolute scrollbar-thin overflow-y-auto top-full ${localStorage.getItem('selectedLanguage') === 'ar'? 'left-0' : 'right-0'} z-50 bg-white w-[300px] py-2 pl-2 max-sm:pr-2 max-h-[300px] animate-fade-down animate-once animate-duration-300">
+            <div class="notification hidden absolute scrollbar-thin shadow-pongblue overflow-y-auto top-full ${localStorage.getItem('selectedLanguage') === 'ar'? 'left-0' : 'right-0'} z-50 bg-white w-[300px] py-2 pl-2 max-sm:pr-2 max-h-[300px] animate-fade-down animate-once animate-duration-300">
 
             </div>
-            <select id="languages" name="languages_options" title="Select your language" class="text-xl bg-pongblue text-white text-[2.5rem] focus:outline-none hover:opacity-80 hover:cursor-pointer">
+            <select id="languages" name="languages_options" title="Select your language" class="text-xl bg-pongdark/30 rounded-full px-1 text-white text-[2.5rem] focus:outline-none hover:opacity-80 cursor-pointer">
                 <option value="en" class="text-center">en</option>
                 <option value="fr" class="text-center">fr</option>
                 <option value="ar" class="text-center">ع</option>
             </select>
             <div class="account relative flex gap-3 text-white">
                 <div id="profile-head" class="flex gap-3 hover:cursor-pointer hover:underline hover:text-ponghover">
-                    <div class="profile-section flex items-center justify-center gap-2">
+                    <div class="profile-section group flex items-center justify-center gap-2">
                         <div class="flex items-center justify-center text-lg font-bold">
                             <p>${store.nickname}</p>
                         </div>
-                        <div class="w-10 h-10 bg-slate-400 rounded-full bg-[url('./assets/guest.png')] bg-cover"><!-- Logo Here as background image --></div>
+                        <div class="w-10 h-10 group-hover:rotate-12 group-hover:scale-110 transition-all bg-slate-400 rounded-full bg-[url('./assets/guest.png')] bg-cover"><!-- Logo Here as background image --></div>
                     </div>
                 </div>
             </div>
         </div>
         <div id="search-result-container" class="hidden absolute left-0 ${localStorage.getItem('selectedLanguage') === 'ar'? 'md:left-48' : 'md:left-1/2'} top-[calc(100%+44px)] md:top-full z-[9999] w-fit h-fit max-md:w-full bg-white border-t rounded-md shadow-[0_0_15px] shadow-white"></div>
     `;
+
     const account = container.querySelector(".account")!;
     const dropdown = DropDown({isLoggedIn: true});
     const profileHead = container.querySelector("#profile-head")!;
@@ -269,3 +270,4 @@ export const Header = createComponent(() => {
 
     return container;
 });
+// <div class="notification hidden absolute scrollbar-thin shadow-pongblue overflow-y-auto top-full ${localStorage.getItem('selectedLanguage') === 'ar'? 'left-0' : 'right-0'} z-50 bg-white w-[300px] py-2 pl-2 max-sm:pr-2 max-h-[300px] animate-fade-down animate-once animate-duration-300">

@@ -25,7 +25,7 @@ export const FriendRequestNotification = createComponent((props: FriendRequestPr
                 <button class="decline-btn w-1/2 bg-red-500 text-white py-1 rounded hover:bg-red-600 transition-colors">Decline</button>
             </div>
         </div>
-        <div></div>
+        <div class="h-[0.1rem]"></div>
     `;
 
     const acceptBtn = notification.querySelector('.accept-btn')!;
