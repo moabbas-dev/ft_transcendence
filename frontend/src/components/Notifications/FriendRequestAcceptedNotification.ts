@@ -1,13 +1,10 @@
-import { createComponent } from "../../utils/StateManager";
+import { createComponent } from "../../utils/StateManager.js";
+import { NotificationProps } from "./Notification.js";
 
-interface FriendRequestAcceptedProps {
-    username: string
-}
-
-export const FriendRequestAcceptedNotification = createComponent((props: FriendRequestAcceptedProps) => {
+export const FriendRequestAcceptedNotification = createComponent((props: NotificationProps) => {
+    props; // REMOVEABLE
     const notification = document.createElement('li');
     notification.className = 'w-full flex flex-col gap-2 text-black border-b bg-green-50';
-    
     notification.innerHTML = `
         <div class="flex justify-between items-center">
             <span class="text-lg font-bold">System</span>
@@ -15,7 +12,7 @@ export const FriendRequestAcceptedNotification = createComponent((props: FriendR
         </div>
         <div>
             <p class="text-gray-700">
-                <span class="text-pongblue font-semibold cursor-pointer hover:underline hover:opacity-90">${props.username}</span>
+                <span class="text-pongblue font-semibold cursor-pointer hover:underline hover:opacity-90">Test User</span>
                 accepted your friend invitation
             </p>
         </div>

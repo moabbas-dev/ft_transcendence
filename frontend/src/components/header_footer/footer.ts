@@ -16,7 +16,7 @@ export const Footer = createComponent(() => {
                         <span class="absolute bottom-0 left-0 w-full h-0.5 bg-pongblue origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
                     </span>
                 </button>
-                <span class="max-[380px]:hidden ml-2"> ${t("home.footer.rights")}</span>
+                <span class="max-[380px]:hidden">| ${t("home.footer.rights")}</span>
             </p>
         </div>
     `;

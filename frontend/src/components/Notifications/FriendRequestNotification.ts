@@ -1,12 +1,8 @@
 import { createComponent } from "../../utils/StateManager.js";
+import { NotificationProps } from "./Notification.js";
 
-interface FriendRequestProps {
-    username: string,
-    onAccept?: () => void,
-    onDecline?: () => void
-}
-
-export const FriendRequestNotification = createComponent((props: FriendRequestProps) => {
+export const FriendRequestNotification = createComponent((props: NotificationProps) => {
+    props;
     const notification = document.createElement('li');
     notification.className = 'w-full flex flex-col gap-1 text-black border-b bg-blue-50';
     
@@ -17,7 +13,7 @@ export const FriendRequestNotification = createComponent((props: FriendRequestPr
         </div>
         <div class="flex flex-col">
             <p class="text-gray-700">
-                <span class="text-pongblue font-semibold hover:cursor-pointer hover:underline hover:opacity-90">${props.username}</span>
+                <span class="text-pongblue font-semibold hover:cursor-pointer hover:underline hover:opacity-90">Test User</span>
                 Sent you a friend request
             </p>
             <div class="flex justify-between gap-2">

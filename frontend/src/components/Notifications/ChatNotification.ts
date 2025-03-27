@@ -1,12 +1,7 @@
 import { createComponent } from "../../utils/StateManager.js";
+import { NotificationProps } from "./Notification.js";
 
-interface ChatNotificationProps {
-	senderId: string,
-	receiverId: string,
-	message: string,
-}
-
-export const ChatNotification = createComponent((props: ChatNotificationProps) => {
+export const ChatNotification = createComponent((props: NotificationProps) => {
 	const notification = document.createElement('li');
 	notification.className = 'w-full flex flex-col gap-1 text-black border-b';
 	notification.innerHTML = `
@@ -18,7 +13,7 @@ export const ChatNotification = createComponent((props: ChatNotificationProps) =
 			<span>Just now</span>
 		</div>
 		<div>
-			<p class="text-gray-700">${ellipsis(props.message, 35)}</p>
+			<p class="text-gray-700">${ellipsis(props.message!, 35)}</p>
 		</div>
 	`
 
