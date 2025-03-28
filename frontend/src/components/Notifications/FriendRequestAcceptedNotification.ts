@@ -1,3 +1,4 @@
+import { formatDistanceToNow } from "date-fns";
 import { createComponent } from "../../utils/StateManager.js";
 import { NotificationProps } from "./Notification.js";
 
@@ -8,7 +9,7 @@ export const FriendRequestAcceptedNotification = createComponent((props: Notific
     notification.innerHTML = `
         <div class="flex justify-between items-center">
             <span class="text-lg font-bold">System</span>
-            <span class="">Just now</span>
+            <span class="text-sm text-gray-600">${formatDistanceToNow(props.created_at, { addSuffix: false })}</span>
         </div>
         <div>
             <p class="text-gray-700">

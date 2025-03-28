@@ -6,12 +6,12 @@ import { GameChallengeNotification } from "./GameNotification";
 import { TournamentAlertNotification } from "./TournamentNotification.js";
 
 export interface NotificationProps {
+	id: number;
 	senderId: number;
 	recipientId: number;
-	createdAt: TimeRanges;
 	type: "USER_MESSAGE" | "TOURNAMENT_ALERT" | "FRIEND_REQUEST" | "FRIEND_ACCEPTED" | "GAME_CHALLENGE";
 	content?: string;
-	message?: string;
+	created_at: Date;
 }
 
 export const Notification = createComponent((props: NotificationProps) => {

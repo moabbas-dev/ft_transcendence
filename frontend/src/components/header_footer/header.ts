@@ -6,11 +6,8 @@ import store from "../../../store/store.js";
 import { displayResults } from "./searchFieldResults.js";
 import axios from "axios";
 import getValidAccessToken from "../../../refresh/RefreshToken.js";
-import { TournamentAlertNotification } from "../Notifications/TournamentNotification.js";
-import { ChatNotification } from "../Notifications/ChatNotification.js";
-import { FriendRequestNotification } from "../Notifications/FriendRequestNotification.js";
-import { FriendRequestAcceptedNotification } from "../Notifications/FriendRequestAcceptedNotification.js";
-import { GameChallengeNotification } from "../Notifications/GameNotification.js";
+import { Notification, NotificationProps } from "../Notifications/Notification.js";
+import { formatInTimeZone } from 'date-fns-tz';
 
 export const Header = createComponent(() => {
     const container = document.createElement("header");
@@ -166,17 +163,47 @@ export const Header = createComponent(() => {
       refreshRouter();
     });
 
-    // For testing purposes
-    notificationContainer.appendChild(ChatNotification({username: 'Test User', message: 'This is a test message from 46 characters long'}))
-    notificationContainer.appendChild(TournamentAlertNotification({username: 'Test User', message: 'Hello World!'}))
-    notificationContainer.appendChild(FriendRequestNotification({username: 'Test User', message: 'Hello World!'}))
-    notificationContainer.appendChild(FriendRequestAcceptedNotification({username: 'Test User', message: 'Hello World!'}))
-    notificationContainer.appendChild(GameChallengeNotification({username: 'Test User', message: 'Hello World!'}))
+    // *************************TO BE REVIEWED**********************************
+    async function fetchUserNotifications(userId: number): Promise<NotificationProps[] | null> {
+        try {
+            const response = await axios.get(`http://localhost:3002/api/notifications/user/${userId}`);
+            return response.data;
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error)) {
+                console.error('Axios error fetching notifications:', error.message);
+                if (error.response) {
+                    console.error('Response data:', error.response.data);
+                    console.error('Response status:', error.response.status);
+                } else if (error.request) {
+                    console.error('Request made but no response received:', error.request);
+                }
+            } else {
+                console.error('Unexpected error:', error);
+            }
+            return null;
+        }
+    }
 
-    // this will be based on the unread notifications come from database not the length of children collection
-    notificationCount.classList.add(notificationContainer.children.length == 0? 'bg-gray-600' : 'bg-red-600');
-    notificationCount.textContent = `${notificationContainer.children.length}`
-
+    fetchUserNotifications(1).then(data => {
+        if (data) {
+            notificationContainer.innerHTML = '';
+            data.forEach(notification => {
+                const body = {
+                    senderId: notification.senderId,
+                    recipientId: notification.recipientId,
+                    type: notification.type,
+                    content: notification.content,
+                    created_at: formatInTimeZone(new Date(notification.created_at.toString().concat(' UTC')), 'Asia/Beirut', 'yyyy-MM-dd HH:mm:ss')
+                }
+                notificationContainer.appendChild(Notification(body))
+                console.log(body.created_at);
+            })
+            // this will be based on the unread notifications come from database not the length of children collection
+            notificationCount.classList.add(notificationContainer.children.length == 0? 'bg-gray-600' : 'bg-red-600');
+            notificationCount.textContent = `${notificationContainer.children.length}`
+        }
+    })
+    // *************************END**********************************
 
     document.addEventListener('click', (event :any) => {
         const isClickInside = navBtn.contains(event.target) || navbar.contains(event.target);
