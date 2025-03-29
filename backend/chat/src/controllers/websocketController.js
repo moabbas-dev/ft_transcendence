@@ -1,4 +1,4 @@
-import { blockUser, unblockUser } from "../services/blockService.js";
+import { blockUser, getBlockedUsers, unblockUser } from "../services/blockService.js";
 import { getUser, createOrUpdateUser, getUserByUsername, createChatRoom, getUsersFromAuth } from "../services/userService.js";
 import { createFriendRequest, addFriend, getPendingFriendRequests, removeFriend, getFriendshipStatus } from "../services/friendService.js"
 import { saveMessage, getMessages } from "../services/chatService.js"
@@ -296,7 +296,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
   wsAdapter.on("user:block", async ({ clientId, payload }) => {
     try {
       const { from: blockerId, blocked: blockedId } = payload;
-
+      console.log(blockerId, "blocked", blockedId);
       // Ensure IDs are valid numbers
       if (typeof blockerId !== "number" || typeof blockedId !== "number") {
         throw new Error("Invalid user IDs");
@@ -407,6 +407,38 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
     wsAdapter.sendTo(clientId, "friendship:status", {
       status: status
     });
+  });
+
+  wsAdapter.on("users:blocked_list", async ({clientId, payload}) => {
+    try {
+      const { userId } = payload;
+
+      if (!userId)
+      {
+        wsAdapter.sendTo(clientId, "error", {
+          message: "User ID is required"
+        });
+        return;
+      }
+
+      const blockedUsers = await getBlockedUsers(userId);
+
+      wsAdapter.sendTo(clientId, "users:blocked_list", {
+        blockedUsers
+      });
+
+      //testing ....
+      console.log("blocked users list:", blockedUsers);
+      console.log(`Sent blocked users list to user ${userId}`);
+
+
+    } catch (error) {
+      fastify.log.error("Error fetching blocked users:", error);
+      wsAdapter.sendTo(clientId, "error", {
+        message: "Failed to fetch blocked users",
+        details: error.message
+      });
+    }
   });
 }
 

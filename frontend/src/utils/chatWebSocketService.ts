@@ -288,15 +288,15 @@ class ChatWebSocketService {
   /**
    * Block a user
    */
-  public blockUser(blockedUsername: string): void {
+  public blockUser(blockedUserId: string): void {
     if (!this.username) {
       console.error("Not authenticated");
       return;
     }
 
     this.send("user:block", {
-      from: this.username,
-      blocked: blockedUsername,
+      from: this.userId,
+      blocked: blockedUserId,
     });
   }
 

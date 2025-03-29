@@ -120,6 +120,22 @@ export const Profile = createComponent((props: ProfileProps) => {
               break;
           }
         });
+
+        blockUserButton?.addEventListener("click", () => {
+          const fromUserId = store.userId;
+          const toUsername = props.uName;
+
+          if (!fromUserId || !toUsername) {
+            console.error("Missing user information for friend request");
+            return;
+          }
+
+          chatService.blockUser(userData.id);
+          
+          // Update UI immediately
+          blockUserButton.textContent = t("😝 Unblock User?");
+
+        });
       })
       .catch((error) => {
         console.error("Error fetching user data:", error.response.data.message);
@@ -428,7 +444,6 @@ export const Profile = createComponent((props: ProfileProps) => {
     const loadingElement = container.querySelector("#friendship-loading");
     const buttonsContainer = container.querySelector("#friendship-buttons");
     const addFriendButton = container.querySelector("#add-friend") as HTMLButtonElement;
-    const blockUserButton = container.querySelector("#block-user") as HTMLButtonElement;
 
     console.log("Received Status:", status);
 
