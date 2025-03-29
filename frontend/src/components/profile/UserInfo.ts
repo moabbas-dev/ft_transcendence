@@ -21,7 +21,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
         // Store or use the user data
         const userData = response.data;
         updateUIWithUserData(userData, container);
-        console.log(userData);
+        // console.log(userData);
       })
       .catch((error) => {
         console.error("Error fetching user data:", error.response.data.message);

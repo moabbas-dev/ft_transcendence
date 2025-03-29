@@ -107,7 +107,7 @@ export const Header = createComponent(() => {
     searchBar.addEventListener('input', async() => {
         const searchQuery = searchBar.value.toLowerCase();
         const token = await getValidAccessToken();
-        console.log(`token: ${token}`);
+        // console.log(`token: ${token}`);
         if (!token)
             return;
         await axios
@@ -119,7 +119,7 @@ export const Header = createComponent(() => {
         .then((response) => {
           // Store or use the user data
           const allUsers = response.data;
-          console.log(allUsers);
+        //   console.log(allUsers);
 
         // Filter users based on search query
         const filteredUsers = allUsers.filter((user: { nickname: string; }) => 

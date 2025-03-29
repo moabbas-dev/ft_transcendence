@@ -1,6 +1,6 @@
 import { blockUser, unblockUser } from "../services/blockService.js";
 import { getUser, createOrUpdateUser, getUserByUsername, createChatRoom, getUsersFromAuth } from "../services/userService.js";
-import { createFriendRequest, addFriend, getPendingFriendRequests, removeFriend } from "../services/friendService.js"
+import { createFriendRequest, addFriend, getPendingFriendRequests, removeFriend, getFriendshipStatus } from "../services/friendService.js"
 import { saveMessage, getMessages } from "../services/chatService.js"
 
 export function setupWebSocketHandlers(wsAdapter, fastify) {
@@ -376,7 +376,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
 
       // Get pending requests from database
       const pendingRequests = await getPendingFriendRequests(userId);
-      console.log("lolllllllllllllllllllllllllll", pendingRequests);
+      // console.log("lolllllllllllllllllllllllllll", pendingRequests);
 
       // // Convert user IDs to user details
       // const pendingDetails = await getUsersFromAuth(
@@ -395,5 +395,20 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       });
     }
   });
+
+  wsAdapter.on("friendship:check", async ({ clientId, payload }) => {
+    // Look up friendship status for the given nickname
+  
+    const { currentUserId, targetUserId } = payload;
+  
+    const status = await getFriendshipStatus(currentUserId, targetUserId);
+
+    console.log(status);
+    wsAdapter.sendTo(clientId, "friendship:status", {
+      status: status
+    });
+  });
 }
+
+
 

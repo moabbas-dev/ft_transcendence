@@ -104,20 +104,20 @@ export async function addFriend(userId, friendId) {
  * @returns {Promise<void>}
  */
 export async function removeFriend(userId, friendId) {
+  const db = await getDatabase();
+  
   try {
-    const db = await getDatabase();
-    
-    // Remove friendship in both directions (since friendship is bidirectional)
+    // Remove friendship in both directions
     await db.run(
       `DELETE FROM friends 
-       WHERE (user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)`,
+       WHERE (user_id = ? AND friend_id = ?) 
+       OR (user_id = ? AND friend_id = ?)`,
       [userId, friendId, friendId, userId]
     );
     
-    console.log(`Friendship removed between users ${userId} and ${friendId}`);
     return true;
   } catch (error) {
-    console.error("Error removing friend:", error);
+    console.error('Error removing friend:', error);
     throw error;
   }
 }
@@ -167,6 +167,7 @@ export async function getFriendshipStatus(userId, friendId) {
   // No relationship
   return { status: 'none' };
 }
+
 
 export async function getPendingFriendRequests(userId) {
   const db = await getDatabase();

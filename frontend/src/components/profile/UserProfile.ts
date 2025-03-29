@@ -16,83 +16,48 @@ interface ProfileProps {
 }
 
 export const Profile = createComponent((props: ProfileProps) => {
-  if (props && props.uName) {
-    const token = store.accessToken;
-    // Make the API call with proper authorization headers
-    axios
-      .get(`http://localhost:8001/auth/users/nickname/${props.uName}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => {
-        // Store or use the user data
-        const userData = response.data;
-        console.log(userData.nickname);
-        updateUIWithUserData(userData, container);
-        // Set up event listener for the "Add Friend" button
-        addFriendButton?.addEventListener("click", () => {
-          // Make sure we have the current user's ID and the target user's ID
-          const fromUserId = store.userId; // Current user ID from store
+// Modify the existing API call section to request friendship status via WebSocket
+if (props && props.uName) {
+  const token = store.accessToken;
 
-          // If userData is not loaded yet, use the username from props to look up
-          const toUsername = props.uName;
-          console.log(props.uName);
+  axios
+    .get(`http://localhost:8001/auth/users/nickname/${props.uName}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    .then((response) => {
+      const userData = response.data;
+      updateUIWithUserData(userData, container);
 
-          if (!fromUserId || !toUsername) {
-            console.error("Missing user information for friend request");
-            // You might want to show a notification to the user here
-            return;
-          }
-
-          // Send the friend request via WebSocket
-          chatService.send("friend:request", {
-            from: fromUserId,
-            to: userData.id,
-          });
-
-          // Update UI to show request is pending
-          addFriendButton.textContent = "Request Sent";
-          addFriendButton.disabled = true;
-          addFriendButton.classList.remove(
-            "bg-green-500",
-            "hover:bg-green-600"
-          );
-          addFriendButton.classList.add("bg-gray-400");
-
-          // Optional: Show a success message
-          // showNotification("Friend request sent successfully!");
-        });
-
-        // Set up event listener for the "Block User" button
-        blockUserButton?.addEventListener("click", () => {
-          const fromUserId = store.userId; // Current user ID
-          const toUserId = userData?.id; // Target user ID from loaded user data
-
-          if (!fromUserId || !toUserId) {
-            console.error("Missing user information for blocking");
-            return;
-          }
-
-          // Send the block request via WebSocket
-          chatService.send("user:block", {
-            from: fromUserId,
-            blocked: toUserId,
-          });
-
-          // Update UI to show user is blocked
-          blockUserButton.textContent = "Blocked";
-          blockUserButton.disabled = true;
-          blockUserButton.classList.remove("bg-red-500", "hover:bg-red-600");
-          blockUserButton.classList.add("bg-gray-400");
-
-          // showNotification("User has been blocked");
-        });
-      })
-      .catch((error) => {
-        console.error("Error fetching user data:", error.response.data.message);
+      // Request friendship status via WebSocket
+      chatService.send('friendship:check', {
+        currentUserId: store.userId,
+        targetUserId: userData.id
       });
-  }
+
+      // Existing event listeners...
+      addFriendButton?.addEventListener("click", () => {
+        const fromUserId = store.userId;
+        const toUsername = props.uName;
+
+        if (!fromUserId || !toUsername) {
+          console.error("Missing user information for friend request");
+          return;
+        }
+
+        // Send the friend request via WebSocket
+        chatService.send("friend:request", {
+          from: fromUserId,
+          to: userData.id,
+        });
+      });
+    })
+    .catch((error) => {
+      console.error("Error fetching user data:", error.response.data.message);
+    });
+}
+
 
   // A wrapper for our popup + overlay
   // The actual modal container
@@ -370,6 +335,57 @@ export const Profile = createComponent((props: ProfileProps) => {
     contentContainer.innerHTML = "";
     contentContainer?.appendChild(UserFriends());
   });
+
+
+
+
+// Add an event listener for friendship status
+chatService.on('friendship:status', (data) => {
+  const { status: status, relationship, initiator, direction } = data.status;
+
+  // Update UI based on friendship status
+  const addFriendButton = container.querySelector("#add-friend") as HTMLButtonElement;
+  const blockUserButton = container.querySelector("#block-user") as HTMLButtonElement;
+
+  // if (!addFriendButton || !blockUserButton) return;
+  console.log("Received Status:", status);
+  console.log("Received Relationship:", relationship);
+  switch (status) {
+    case 'friends':
+      console.log("✅ User is a friend");
+      addFriendButton.textContent = t("profile.friends");
+      addFriendButton.disabled = true;
+      addFriendButton.classList.remove("bg-green-500", "hover:bg-green-600");
+      addFriendButton.classList.add("bg-gray-400");
+      break;
+
+    case 'pending':
+      console.log("⏳ Friend request pending");
+      if (initiator === 'current_user' && direction === 'outgoing') {
+        addFriendButton.textContent = t("profile.requestSent");
+        addFriendButton.disabled = true;
+        addFriendButton.classList.remove("bg-green-500", "hover:bg-green-600");
+        addFriendButton.classList.add("bg-gray-400");
+      } else if (initiator === 'other_user' && direction === 'incoming') {
+        addFriendButton.textContent = t("profile.acceptRequest");
+        addFriendButton.classList.remove("bg-green-500", "hover:bg-green-600");
+        addFriendButton.classList.add("bg-yellow-500", "hover:bg-yellow-600");
+      }
+      break;
+
+    case 'none':
+      console.log("➕ User can send a friend request");
+      // Default state - allow sending friend request
+      addFriendButton.textContent = t("profile.add");
+      addFriendButton.disabled = false;
+      addFriendButton.classList.add("bg-green-500", "hover:bg-green-600");
+      addFriendButton.classList.remove("bg-gray-400");
+      break;
+    
+      default:
+        console.error("🚨 Unhandled status:", status);
+  }
+});
 
   return container;
 });
