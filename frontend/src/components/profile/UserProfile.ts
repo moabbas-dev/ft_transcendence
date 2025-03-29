@@ -16,47 +16,115 @@ interface ProfileProps {
 }
 
 export const Profile = createComponent((props: ProfileProps) => {
-// Modify the existing API call section to request friendship status via WebSocket
-if (props && props.uName) {
-  const token = store.accessToken;
 
-  axios
-    .get(`http://localhost:8001/auth/users/nickname/${props.uName}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    .then((response) => {
-      const userData = response.data;
-      updateUIWithUserData(userData, container);
+  let currentFriendshipStatus = 'unknown';
+  let currentInitiator: any = null;
+  let currentDirection: any = null;
 
-      // Request friendship status via WebSocket
-      chatService.send('friendship:check', {
-        currentUserId: store.userId,
-        targetUserId: userData.id
-      });
+  // Modify the existing API call section to request friendship status via WebSocket
+  if (props && props.uName) {
+    const token = store.accessToken;
 
-      // Existing event listeners...
-      addFriendButton?.addEventListener("click", () => {
-        const fromUserId = store.userId;
-        const toUsername = props.uName;
+    axios
+      .get(`http://localhost:8001/auth/users/nickname/${props.uName}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        const userData = response.data;
+        updateUIWithUserData(userData, container);
 
-        if (!fromUserId || !toUsername) {
-          console.error("Missing user information for friend request");
-          return;
-        }
-
-        // Send the friend request via WebSocket
-        chatService.send("friend:request", {
-          from: fromUserId,
-          to: userData.id,
+        // Request friendship status via WebSocket
+        console.log(userData);
+        console.log(userData.id);
+        chatService.send('friendship:check', {
+          currentUserId: store.userId,
+          targetUserId: userData.id
         });
+
+        // Existing event listeners...
+        // addFriendButton?.addEventListener("click", () => {
+        //   const fromUserId = store.userId;
+        //   const toUsername = props.uName;
+
+        //   if (!fromUserId || !toUsername) {
+        //     console.error("Missing user information for friend request");
+        //     return;
+        //   }
+
+        //   // Send the friend request via WebSocket
+        //   chatService.send("friend:request", {
+        //     from: fromUserId,
+        //     to: userData.id,
+        //   });
+        // });
+        // Remove the old listener and create a new one
+        addFriendButton?.addEventListener("click", () => {
+          const fromUserId = store.userId;
+          const toUsername = props.uName;
+
+          if (!fromUserId || !toUsername) {
+            console.error("Missing user information for friend request");
+            return;
+          }
+
+          // Different actions based on current friendship status
+          switch (currentFriendshipStatus) {
+            case 'none':
+              // Send friend request
+              console.log("Sending friend request");
+              chatService.send("friend:request", {
+                from: fromUserId,
+                to: userData.id,
+              });
+
+              // Update UI immediately - don't wait for server response
+              addFriendButton.textContent = t("profile.requestSent");
+              addFriendButton.disabled = true;
+              addFriendButton.classList.remove("bg-green-500", "hover:bg-green-600");
+              addFriendButton.classList.add("bg-gray-400");
+              currentFriendshipStatus = 'pending';
+              currentInitiator = 'current_user';
+              currentDirection = 'outgoing';
+              break;
+
+            case 'pending':
+              if (currentInitiator === 'other_user' && currentDirection === 'incoming') {
+                // Accept friend request
+                console.log("Accepting friend request");
+                chatService.send("friend:accept", {
+                  from: fromUserId,
+                  to: userData.id,
+                });
+
+                // Update UI immediately
+                addFriendButton.textContent = t("✖️Remove friend");
+                addFriendButton.classList.remove("bg-yellow-500", "hover:bg-yellow-600");
+                addFriendButton.classList.add("bg-red-500", "hover:bg-red-600");
+                currentFriendshipStatus = 'friends';
+              }
+              break;
+
+            case 'friends':
+              // Remove friend
+              console.log("Removing friend");
+              console.log(userData);
+              chatService.removeFriend(userData.id);
+
+              // Update UI immediately
+              addFriendButton.textContent = t("profile.add");
+              addFriendButton.classList.remove("bg-red-500", "hover:bg-red-600");
+              addFriendButton.classList.add("bg-green-500", "hover:bg-green-600");
+              currentFriendshipStatus = 'none';
+              break;
+          }
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching user data:", error.response.data.message);
       });
-    })
-    .catch((error) => {
-      console.error("Error fetching user data:", error.response.data.message);
-    });
-}
+  }
 
 
   // A wrapper for our popup + overlay
@@ -75,22 +143,30 @@ if (props && props.uName) {
       <!-- Header (Nickname, Online, Avatar, Rank) -->
       
       <div class="flex items-center gap-4 sm:gap-8">
-        ${(props && props.uName)? `
-            <div class="flex gap-2 flex-1 justify-end">
-            <button id="message-user" class="max-sm:flex-1 bg-pongblue text-white text-nowrap max-sm:text-sm px-2 sm:px-4 py-1 rounded hover:bg-blue-700 transition-colors">
-              <i class="fas fa-envelope min-[401px]:mr-1"></i>
-              <span class="max-[402px]:hidden">${t("profile.message")}</span>
-            </button>
-            <button id="add-friend" class="max-sm:flex-1 bg-green-500 text-white max-sm:text-sm px-2 sm:px-4 py-1 rounded hover:bg-green-600 transition-colors">
-              <i class="fas fa-user-plus min-[401px]:mr-1"></i>
-              <span class="max-[402px]:hidden">${t("profile.add")}</span>
-            </button>
-            <button id="block-user" class="max-sm:flex-1 bg-red-500 text-white max-sm:text-sm px-2 sm:px-4 py-1 rounded hover:bg-red-600 transition-colors">
-              <i class="fas fa-ban min-[401px]:mr-1"></i>
-              <span class="max-[402px]:hidden">${t("profile.block")}</span>
-            </button>
-          </div>
-        ` : "" }  
+        ${(props && props.uName) ? `
+            <div class="flex gap-2 flex-1 justify-end" id="friend-buttons-container">
+              <!-- Loading state -->
+              <div id="friendship-loading" class="text-gray-500">
+                <i class="fas fa-spinner fa-spin"></i>
+              </div>
+              
+              <!-- Buttons (initially hidden) -->
+              <div id="friendship-buttons" class="flex gap-2 w-full hidden">
+                <button id="message-user" class="max-sm:flex-1 bg-pongblue text-white text-nowrap max-sm:text-sm px-2 sm:px-4 py-1 rounded hover:bg-blue-700 transition-colors">
+                  <i class="fas fa-envelope min-[401px]:mr-1"></i>
+                  <span class="max-[402px]:hidden">${t("profile.message")}</span>
+                </button>
+                <button id="add-friend" class="max-sm:flex-1 bg-green-500 text-white max-sm:text-sm px-2 sm:px-4 py-1 rounded hover:bg-green-600 transition-colors">
+                  <i class="fas fa-user-plus min-[401px]:mr-1"></i>
+                  <span class="max-[402px]:hidden">${t("profile.add")}</span>
+                </button>
+                <button id="block-user" class="max-sm:flex-1 bg-red-500 text-white max-sm:text-sm px-2 sm:px-4 py-1 rounded hover:bg-red-600 transition-colors">
+                  <i class="fas fa-ban min-[401px]:mr-1"></i>
+                  <span class="max-[402px]:hidden">${t("profile.block")}</span>
+                </button>
+              </div>
+            </div>
+        ` : ""}  
         
         <div class="flex">
           <div>
@@ -339,53 +415,65 @@ if (props && props.uName) {
 
 
 
-// Add an event listener for friendship status
-chatService.on('friendship:status', (data) => {
-  const { status: status, relationship, initiator, direction } = data.status;
+  // Add an event listener for friendship status
+  chatService.on('friendship:status', (data) => {
+    const { status, relationship, initiator, direction } = data.status;
 
-  // Update UI based on friendship status
-  const addFriendButton = container.querySelector("#add-friend") as HTMLButtonElement;
-  const blockUserButton = container.querySelector("#block-user") as HTMLButtonElement;
+    // Store current status for use in click handlers
+    currentFriendshipStatus = status;
+    currentInitiator = initiator;
+    currentDirection = direction;
 
-  // if (!addFriendButton || !blockUserButton) return;
-  console.log("Received Status:", status);
-  console.log("Received Relationship:", relationship);
-  switch (status) {
-    case 'friends':
-      console.log("✅ User is a friend");
-      addFriendButton.textContent = t("profile.friends");
-      addFriendButton.disabled = true;
-      addFriendButton.classList.remove("bg-green-500", "hover:bg-green-600");
-      addFriendButton.classList.add("bg-gray-400");
-      break;
+    // Get loading and buttons containers
+    const loadingElement = container.querySelector("#friendship-loading");
+    const buttonsContainer = container.querySelector("#friendship-buttons");
+    const addFriendButton = container.querySelector("#add-friend") as HTMLButtonElement;
+    const blockUserButton = container.querySelector("#block-user") as HTMLButtonElement;
 
-    case 'pending':
-      console.log("⏳ Friend request pending");
-      if (initiator === 'current_user' && direction === 'outgoing') {
-        addFriendButton.textContent = t("profile.requestSent");
-        addFriendButton.disabled = true;
-        addFriendButton.classList.remove("bg-green-500", "hover:bg-green-600");
-        addFriendButton.classList.add("bg-gray-400");
-      } else if (initiator === 'other_user' && direction === 'incoming') {
-        addFriendButton.textContent = t("profile.acceptRequest");
-        addFriendButton.classList.remove("bg-green-500", "hover:bg-green-600");
-        addFriendButton.classList.add("bg-yellow-500", "hover:bg-yellow-600");
-      }
-      break;
+    console.log("Received Status:", status);
 
-    case 'none':
-      console.log("➕ User can send a friend request");
-      // Default state - allow sending friend request
-      addFriendButton.textContent = t("profile.add");
-      addFriendButton.disabled = false;
-      addFriendButton.classList.add("bg-green-500", "hover:bg-green-600");
-      addFriendButton.classList.remove("bg-gray-400");
-      break;
-    
+    // Style the button according to status
+    switch (status) {
+      case 'friends':
+        console.log("✅ User is a friend");
+        addFriendButton.textContent = t("✖️Remove friend");
+        addFriendButton.disabled = false; // Enable button for removing friend
+        addFriendButton.classList.remove("bg-green-500", "hover:bg-green-600", "bg-gray-400", "bg-yellow-500", "hover:bg-yellow-600");
+        addFriendButton.classList.add("bg-red-500", "hover:bg-red-600");
+        break;
+
+      case 'pending':
+        console.log("⏳ Friend request pending");
+        if (initiator === 'current_user' && direction === 'outgoing') {
+          addFriendButton.textContent = t("profile.requestSent");
+          addFriendButton.disabled = true; // Can't cancel request yet (add this feature later if needed)
+          addFriendButton.classList.remove("bg-green-500", "hover:bg-green-600", "bg-red-500", "hover:bg-red-600", "bg-yellow-500", "hover:bg-yellow-600");
+          addFriendButton.classList.add("bg-gray-400");
+        } else if (initiator === 'other_user' && direction === 'incoming') {
+          addFriendButton.textContent = t("profile.acceptRequest");
+          addFriendButton.disabled = false; // Enable to accept request
+          addFriendButton.classList.remove("bg-green-500", "hover:bg-green-600", "bg-red-500", "hover:bg-red-600", "bg-gray-400");
+          addFriendButton.classList.add("bg-yellow-500", "hover:bg-yellow-600");
+        }
+        break;
+
+      case 'none':
+        console.log("➕ User can send a friend request");
+        // Default state - allow sending friend request
+        addFriendButton.textContent = t("profile.add");
+        addFriendButton.disabled = false;
+        addFriendButton.classList.remove("bg-gray-400", "bg-red-500", "hover:bg-red-600", "bg-yellow-500", "hover:bg-yellow-600");
+        addFriendButton.classList.add("bg-green-500", "hover:bg-green-600");
+        break;
+
       default:
         console.error("🚨 Unhandled status:", status);
-  }
-});
+    }
+
+    // Hide loading element and show buttons after we've styled them
+    if (loadingElement) loadingElement.classList.add('hidden');
+    if (buttonsContainer) buttonsContainer.classList.remove('hidden');
+  });
 
   return container;
 });
