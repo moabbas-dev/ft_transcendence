@@ -1,7 +1,12 @@
 import { getDatabase } from "../db/initDB.js";
 import { getUsersFromAuth } from "./userService.js";
 
-
+/**
+ * Create a friend request between two users
+ * @param {number} fromUser - The ID of the user sending the request
+ * @param {number} toUser - The ID of the user receiving the request
+ * @returns {Promise<boolean>} - Returns true if the request was created successfully
+ */
 export async function createFriendRequest(fromUser, toUser) {
   const db = await getDatabase();
   
@@ -43,7 +48,12 @@ export async function createFriendRequest(fromUser, toUser) {
   }
 }
 
-
+/**
+ * Cancel a sent friend request
+ * @param {number} fromUserId - The ID of the user canceling the request
+ * @param {number} toUserId - The ID of the user receiving the request
+ * @returns {Promise<boolean>} - Returns true if the request was canceled successfully
+ */
 export async function cancelFriendRequest(fromUserId, toUserId) {
   const db = await getDatabase();
   
@@ -60,11 +70,12 @@ export async function cancelFriendRequest(fromUserId, toUserId) {
   }
 }
 
-
-
-
-
-
+/**
+ * Add a friend connection between two users
+ * @param {number} userId - The ID of the first user
+ * @param {number} friendId - The ID of the second user
+ * @returns {Promise<boolean>} - Returns true if the friendship was added successfully
+ */
 export async function addFriend(userId, friendId) {
   const db = await getDatabase();
   await db.run("BEGIN TRANSACTION");
@@ -97,7 +108,7 @@ export async function addFriend(userId, friendId) {
  * Remove friendship between two users
  * @param {number} userId - The ID of the first user
  * @param {number} friendId - The ID of the friend to remove
- * @returns {Promise<void>}
+ * @returns {Promise<boolean>} - Returns true if the friendship was removed successfully
  */
 export async function removeFriend(userId, friendId) {
   const db = await getDatabase();
@@ -118,14 +129,12 @@ export async function removeFriend(userId, friendId) {
   }
 }
 
-
-
-
-/////////////////////////////////////////////////////////////
-//                                                         //
-//                      👈(⌒▽⌒)👉                       //
-//                                                         //
-/////////////////////////////////////////////////////////////
+/**
+ * Get the friendship status between two users
+ * @param {number} userId - The ID of the first user
+ * @param {number} friendId - The ID of the second user
+ * @returns {Promise<Object>} - Returns an object with friendship status
+ */
 export async function getFriendshipStatus(userId, friendId) {
   const db = await getDatabase();
   
@@ -164,7 +173,11 @@ export async function getFriendshipStatus(userId, friendId) {
   return { status: 'none' };
 }
 
-
+/**
+ * Get all pending friend requests for a user
+ * @param {number} userId - The ID of the user
+ * @returns {Promise<Array>} - Returns an array of pending friend requests
+ */
 export async function getPendingFriendRequests(userId) {
   const db = await getDatabase();
   const requests = await db.all(

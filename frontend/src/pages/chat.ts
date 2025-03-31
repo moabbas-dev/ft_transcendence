@@ -398,6 +398,7 @@ export default {
             // Remove the stored data to prevent reopening on refresh
             localStorage.removeItem('openChatWithUser');
             
+            // navigate(`chat/${userData.username}`);
             // Find the chat component that's already initialized
             if (typeof (chatComponent as any).setActiveUser === 'function') {
               console.log(userData);

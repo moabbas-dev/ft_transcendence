@@ -1,36 +1,11 @@
 import { getDatabase } from "../db/initDB.js";
-import { getUsersFromAuth } from "./userService.js"
 
-
-export async function blockUser(userId, blockedId) {
-  const db = await getDatabase();
-  await db.run(
-    `INSERT OR IGNORE INTO blocked_users (user_id, blocked_id) VALUES (?, ?)`,
-    [userId, blockedId]
-  );
-}
-
-export async function unblockUser(userId, blockedId) {
-  const db = await getDatabase();
-  await db.run(
-    `DELETE FROM blocked_users WHERE user_id = ? AND blocked_id = ?`,
-    [userId, blockedId]
-  );
-}
-
-export async function getBlockedUsers(userId) {
-  const db = await getDatabase();
-  const blocked = await db.all(
-    `SELECT blocked_id FROM blocked_users WHERE user_id = ?`,
-    [userId]
-  );
-
-  // Get user details for each blocked user
-  const blockedIds = blocked.map((b) => b.blocked_id);
-  return await getUsersFromAuth(blockedIds);
-}
-
-
+/**
+ * Save a message in the database
+ * @param {Object} message - The message object
+ * @param {number} roomId - The ID of the room where the message was sent
+ * @returns {Promise<boolean>} - Returns true if the message was saved successfully
+ */
 export async function saveMessage(message, roomId) {
   const db = await getDatabase();
   
@@ -61,8 +36,12 @@ export async function saveMessage(message, roomId) {
   }
 }
 
-
-// In chatService.js
+/**
+ * Retrieve messages from a chat room
+ * @param {number} roomId - The ID of the chat room
+ * @param {number} [limit=1000] - The maximum number of messages to retrieve
+ * @returns {Promise<Array>} - Returns an array of messages
+ */
 export async function getMessages(roomId, limit = 1000) {
   const db = await getDatabase();
   
@@ -96,6 +75,13 @@ export async function getMessages(roomId, limit = 1000) {
 }
 
 // ///////////////////////////////////////////////////////
+
+
+/**
+ * Get the count of unread messages for a user
+ * @param {number} userId - The ID of the user
+ * @returns {Promise<Object>} - Returns an object with unread message counts per user
+ */
 
 // // working on displayin the un-read messages  
 // // ⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️
@@ -139,7 +125,12 @@ export async function getMessages(roomId, limit = 1000) {
 //   return unreadCounts;
 // }
 
-
+/**
+ * Mark all messages in a room as read for a user
+ * @param {number} roomId - The ID of the chat room
+ * @param {number} userId - The ID of the user marking messages as read
+ * @returns {Promise<boolean>} - Returns true if messages were successfully marked as read
+ */
 // // Add a function to mark messages as read
 // export async function markMessagesAsRead(roomId, userId) {
 //   const db = await getDatabase();
