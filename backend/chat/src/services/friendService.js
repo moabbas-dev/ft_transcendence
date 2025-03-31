@@ -43,26 +43,22 @@ export async function createFriendRequest(fromUser, toUser) {
   }
 }
 
-/////////////////////////////////////////////////////////////
-//                                                         //
-//     to use it 👈(⌒▽⌒)👉 later                        //
-//                                                         //
-/////////////////////////////////////////////////////////////
-// export async function cancelFriendRequest(fromUser, toUser) {
-//   const db = await getDatabase();
+
+export async function cancelFriendRequest(fromUserId, toUserId) {
+  const db = await getDatabase();
   
-//   try {
-//     await db.run(
-//       `DELETE FROM friend_requests 
-//        WHERE from_user = ? AND to_user = ?`,
-//       [fromUser, toUser]
-//     );
-//     return true;
-//   } catch (error) {
-//     console.error('Error canceling friend request:', error);
-//     throw error;
-//   }
-// }
+  try {
+    await db.run(
+      `DELETE FROM friend_requests 
+       WHERE from_user = ? AND to_user = ?`,
+      [fromUserId, toUserId]
+    );
+    return true;
+  } catch (error) {
+    console.error('Error canceling friend request:', error);
+    throw error;
+  }
+}
 
 
 

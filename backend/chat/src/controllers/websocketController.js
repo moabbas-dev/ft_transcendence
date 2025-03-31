@@ -1,6 +1,6 @@
 import { blockUser, getBlockedUsers, unblockUser } from "../services/blockService.js";
 import { getUser, createOrUpdateUser, getUserByUsername, createChatRoom, getUsersFromAuth } from "../services/userService.js";
-import { createFriendRequest, addFriend, getPendingFriendRequests, removeFriend, getFriendshipStatus } from "../services/friendService.js"
+import { createFriendRequest, cancelFriendRequest, addFriend, getPendingFriendRequests, removeFriend, getFriendshipStatus } from "../services/friendService.js"
 import { saveMessage, getMessages } from "../services/chatService.js"
 
 export function setupWebSocketHandlers(wsAdapter, fastify) {
@@ -115,21 +115,40 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
 
 
 
-/////////////////////////////////////////////////////////////
-//                                                         //
-//     to use it 👈(⌒▽⌒)👉 later                        //
-//                                                         //
-/////////////////////////////////////////////////////////////
 //   // Canceling a friend request
-// wsAdapter.on("friend:request:cancel", async ({ clientId, payload }) => {
-//   const { from, to } = payload;
-//   try {
-//     await cancelFriendRequest(from, to);
-//     // Send success notification
-//   } catch (error) {
-//     // Handle error
-//   }
-// });
+// Add this to websocketController.js where other friend-related handlers are
+wsAdapter.on("friend:decline", async ({ clientId, payload }) => {
+  try {
+    const { from, to } = payload;
+    
+    console.log("friend request declined:");
+    console.log("from user:", from);
+    console.log("to user:", to);
+    
+    // Decline the friend request in the database
+    await cancelFriendRequest(from, to);
+    
+    // Send confirmation to the user who declined the request
+    wsAdapter.sendTo(clientId, "friend:declined", {
+      success: true,
+      userId: from
+    });
+    
+    // Optionally, notify the sender that their request was declined
+    // wsAdapter.sendTo(from, "friend:request:declined", {
+    //   success: true,
+    //   userId: to
+    // });
+    
+  } catch (error) {
+    console.error("Error in friend:decline handler:", error);
+    wsAdapter.sendTo(clientId, "error", {
+      message: "Failed to decline friend request",
+      details: error.message
+    });
+  }
+});
+
 
   // Handle friend acceptance
   wsAdapter.on("friend:accept", async ({ clientId, payload }) => {
