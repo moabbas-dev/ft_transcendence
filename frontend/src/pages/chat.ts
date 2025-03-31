@@ -121,32 +121,6 @@ export default {
         renderFriendsList(data.friends);
       });
 
-      // Handle pending friend requests
-      chatService.on("friends:pending", (data: any) => {
-        // You could render a separate section for pending requests
-        console.log("Pending friend requests:", data.pending);
-        renderPendingRequests(data.pending);
-      });
-
-      // Handle friend request received
-      chatService.on("friend:request", (data: any) => {
-        // Show notification for new friend request
-        // showNotification(
-        //   `New friend request from ${data.firstname} ${data.lastname}`
-        // );
-
-        // Refresh pending requests
-        // chatService.send('friends:get_pending', {});
-      });
-
-      // Handle friend request accepted
-      chatService.on("friend:accepted", (data: any) => {
-        // Add the new friend to the list and show notification
-        // showNotification(
-        //   `${data.firstname} ${data.lastname} accepted your friend request`
-        // );
-        loadFriendsList(); // Reload friends list
-      });
 
       // Handle user online status changes
       chatService.on("user:status", (data: any) => {
@@ -333,95 +307,6 @@ export default {
       });
     }
 
-    // Render pending friend requests
-    function renderPendingRequests(pending: any[]) {
-      if (!pending || pending.length === 0) return;
-
-      // Check if pending requests section already exists
-      let pendingSection = container.querySelector(".pending-requests");
-
-      if (!pendingSection) {
-        // Create pending requests section
-        pendingSection = document.createElement("div");
-        pendingSection.className = "pending-requests flex flex-col px-4 mt-4";
-
-        const pendingTitle = document.createElement("div");
-        pendingTitle.className = "text-white text-xl mb-2";
-        pendingTitle.textContent = "Pending Requests";
-
-        pendingSection.appendChild(pendingTitle);
-
-        // Add it after the friends list container
-        const friendsListContainer = container.querySelector(
-          ".friends-list-container"
-        );
-        if (friendsListContainer) {
-          friendsListContainer.after(pendingSection);
-        }
-      } else {
-        // Clear existing pending requests
-        const pendingTitle = pendingSection.querySelector(
-          ".text-white.text-xl"
-        );
-        pendingSection.innerHTML = "";
-        if (pendingTitle) pendingSection.appendChild(pendingTitle);
-      }
-
-      // Add each pending request
-      pending.forEach((request) => {
-        const requestElement = document.createElement("div");
-        requestElement.className =
-          "pending-request flex items-center justify-between bg-ponghover rounded-lg p-2 mb-2";
-        requestElement.innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <div class="bg-white rounded-full w-8 h-8"></div>
-                        <div class="text-white">${request.firstname} ${request.lastname}</div>
-                    </div>
-                    <div class="flex gap-2">
-                        <button class="accept-btn bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">Accept</button>
-                        <button class="decline-btn bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Decline</button>
-                    </div>
-                `;
-
-        // Add event listeners for accept/decline buttons
-        const acceptBtn = requestElement.querySelector(".accept-btn");
-        acceptBtn?.addEventListener("click", () => {
-          if (chatService.isConnected()) {
-            chatService.acceptFriendRequest(request.username);
-            requestElement.remove();
-
-            // Check if pending section is now empty
-            const remainingRequests =
-              pendingSection?.querySelectorAll(".pending-request");
-            if (!remainingRequests || remainingRequests.length === 0) {
-              pendingSection?.remove();
-            }
-          }
-        });
-
-        const declineBtn = requestElement.querySelector(".decline-btn");
-        declineBtn?.addEventListener("click", () => {
-          if (chatService.isConnected()) {
-            // Assuming there's a method for declining friend requests
-            chatService.send("friend:decline", {
-              from: request.username,
-              to: localStorage.getItem("username"),
-            });
-            requestElement.remove();
-
-            // Check if pending section is now empty
-            const remainingRequests =
-              pendingSection?.querySelectorAll(".pending-request");
-            if (!remainingRequests || remainingRequests.length === 0) {
-              pendingSection?.remove();
-            }
-          }
-        });
-
-        pendingSection?.appendChild(requestElement);
-      });
-    }
-
     // Update user online status
     function updateUserStatus(username: string, isOnline: boolean) {
       const userItems = friendsList.querySelectorAll(".user-item");
@@ -500,5 +385,53 @@ export default {
         chatContainer.classList.add("sm:block", "sm:w-[70vw]");
       }
     });
+
+
+    setTimeout(() => {
+      const openChatWithUserData = localStorage.getItem('openChatWithUser');
+      if (openChatWithUserData) {
+        try {
+          const userData = JSON.parse(openChatWithUserData);
+          
+          // Make sure this is a recent request (within the last minute)
+          if (Date.now() - userData.timestamp < 60000) {
+            // Remove the stored data to prevent reopening on refresh
+            localStorage.removeItem('openChatWithUser');
+            
+            // Find the chat component that's already initialized
+            if (typeof (chatComponent as any).setActiveUser === 'function') {
+              console.log(userData);
+              // Open chat with the user
+              const formattedUserData = {
+                nickname: userData.username || userData.nickname,
+                id: userData.userId,
+                full_name: userData.fullname
+              };
+              (chatComponent as any).setActiveUser(formattedUserData);
+              
+              // Find and highlight the user in the friends list
+              const userItems = friendsList.querySelectorAll(".user-item");
+              userItems.forEach((item) => {
+                // Remove active class from all items
+                item.classList.remove("bg-ponghover");
+                
+                // Add active class to the selected user
+                if ((item as HTMLElement).dataset.username === userData.username) {
+                  item.classList.add("bg-ponghover");
+                }
+              });
+              
+              // For mobile: make sure chat is visible
+              if (window.innerWidth < 640) {
+                chat.classList.remove("hidden");
+                chat.classList.add("fixed", "bottom-0", "left-0", "w-full", "z-90", "animate-slideUp");
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Error processing stored chat user data:", error);
+        }
+      }
+    }, 500); // Increased delay to ensure everything is loaded
   },
 };

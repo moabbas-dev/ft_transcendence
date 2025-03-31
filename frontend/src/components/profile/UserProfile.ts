@@ -10,6 +10,7 @@ import axios from "axios";
 import { t } from "../../languages/LanguageController.js";
 import { chatService } from "../../utils/chatWebSocketService.js";
 import { UserFriends } from "./UserFriends.js";
+import { navigate } from "../../router.js";
 
 interface ProfileProps {
   uName: string;
@@ -136,10 +137,35 @@ export const Profile = createComponent((props: ProfileProps) => {
           blockUserButton.textContent = t("😝 Unblock User?");
 
         });
+
+        messageUserButton?.addEventListener("click", () => {
+          const fromUserId = store.userId;
+          
+          if (!fromUserId || !userData) {
+            console.error("Missing user information for messaging");
+            return;
+          }
+          
+          // Store the user information in localStorage temporarily, so the chat page can access it
+          localStorage.setItem('openChatWithUser', JSON.stringify({
+            username: userData.nickname,
+            userId: userData.id,
+            fullname: userData.full_name || userData.nickname,
+            timestamp: Date.now() // Add timestamp to ensure this is a new request
+          }));
+          
+          // Close the profile modal
+          container.remove();
+          
+          // Navigate to the chat page
+          navigate("/chat");
+        });
+
       })
       .catch((error) => {
         console.error("Error fetching user data:", error.response.data.message);
       });
+      
   }
 
 
@@ -269,6 +295,9 @@ export const Profile = createComponent((props: ProfileProps) => {
   const blockUserButton = container.querySelector(
     "#block-user"
   )! as HTMLButtonElement;
+  const messageUserButton = container.querySelector(
+    "#message-user"
+  ) as HTMLButtonElement;
   const profileTabs = container.querySelector("#profile-tabs")!
   const friendsTab = container.querySelector("#friends-tab")!
 
@@ -489,6 +518,16 @@ export const Profile = createComponent((props: ProfileProps) => {
     if (loadingElement) loadingElement.classList.add('hidden');
     if (buttonsContainer) buttonsContainer.classList.remove('hidden');
   });
+
+
+  ////////////////////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+  
+  
 
   return container;
 });
