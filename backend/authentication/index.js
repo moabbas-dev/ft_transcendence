@@ -1,5 +1,5 @@
 require('dotenv').config();
-const Fastify = require('fastify')
+const Fastify = require('fastify')({ logger: true });
 const cors = require('@fastify/cors');
 const { createTables, closeDatabase } = require('./src/db/initDb');
 const fastifyOauth2 = require('@fastify/oauth2');
@@ -30,7 +30,6 @@ fastify.register(require('@fastify/static'), {
 	root: path.join(__dirname, 'uploads'),
 	prefix: '/uploads/',
 });
-
 
 // Enable CORS on Fastify
 fastify.register(cors, {
