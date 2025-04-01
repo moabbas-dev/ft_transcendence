@@ -20,7 +20,7 @@ export const Profile = createComponent((props: ProfileProps) => {
     const token = store.accessToken;
     // Make the API call with proper authorization headers
     axios
-      .get(`http://localhost:8001/auth/users/nickname/${props.uName}`, {
+      .get(`https://localhost:8001/auth/users/nickname/${props.uName}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -6,11 +6,11 @@ import { GameChallengeNotification } from "./GameNotification";
 import { TournamentAlertNotification } from "./TournamentNotification.js";
 
 export interface NotificationProps {
-	id: number;
 	senderId: number;
 	recipientId: number;
 	type: "USER_MESSAGE" | "TOURNAMENT_ALERT" | "FRIEND_REQUEST" | "FRIEND_ACCEPTED" | "GAME_CHALLENGE";
 	content?: string;
+	is_read: boolean;
 	created_at: Date;
 }
 

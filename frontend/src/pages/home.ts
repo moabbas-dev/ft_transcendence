@@ -10,9 +10,9 @@ export default {
     container.innerHTML = `
     <div class="profile"></div>
     <div class="header bg-pongblue w-full h-fit"></div>
-    <div class="w-full overflow-x-none bg-gradient-to-br from-pongdark via-[#0a1128] to-pongdark flex-1 flex items-center justify-center py-12">
-      <div class="container mx-auto grid place-content-center">
-        <div class="flex items-center justify-center gap-6">
+    <div class="w-full overflow-x-none bg-gradient-to-br from-pongdark via-[#0a1128] to-pongdark flex-1 flex items-center justify-center">
+      <div class="container mx-auto grid place-content-center px-4">
+        <div class="flex items-center justify-center gap-5">
           <div class="xl:w-1/2 h-full hidden sm:flex items-center">
             <div class="relative">
               <canvas id="pongCanvas" class="w-full h-[50vh] border-4 border-pongblue rounded-2xl shadow-[0_0_50px_rgba(59,130,246,0.3)] transform transition-transform animate-flip-up animate-duration-[3s]"></canvas>
@@ -21,7 +21,7 @@ export default {
           </div>
           <div class="flex flex-col gap-3 justify-center max-sm:w-full max-sm:px-3">
             <div class="bg-[rgba(59,130,246,0.1)] border border-pongblue/20 rounded-xl p-6 transform transition-transform hover:scale-[1.02]">
-              <h1 class="text-5xl max-sm:text-center max-sm:font-bold sm:text-6xl lg:text-8xl xl:text-9xl text-white text-start drop-shadow-[0_0_10px_#0F6292] animate-fade-right animate-once animate-duration-700 animate-ease-linear">
+              <h1 class="text-nowrap text-5xl max-sm:text-center max-sm:font-bold sm:text-6xl lg:text-8xl xl:text-9xl text-white text-start drop-shadow-[0_0_10px_#0F6292] animate-fade-right animate-once animate-duration-700 animate-ease-linear">
                 ${t("home.title")}
               </h1>
               <p class="text-white text-2xl max-sm:text-center lg:text-4xl mt-4 opacity-80 animate-fade-left sm:animate-fade-right animate-once animate-duration-700 animate-delay-700 animate-ease-linear">
