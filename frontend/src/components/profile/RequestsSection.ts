@@ -78,6 +78,8 @@ interface RequestProps {
 
 const Request = createComponent((props: RequestProps) => {
 	const requestItem = document.createElement('div');
+	console.log("lala", props.nickname);
+	console.log(requests);
 	requestItem.className = "flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm";
 	requestItem.innerHTML = `
 		<img alt="${props.nickname}" src="${props.avatar}" class="size-10 rounded-full"/>
@@ -157,9 +159,10 @@ export const RequestsSection = createComponent(() => {
 	
 	// Setup event listener for pending friend requests
 	chatService.on("friends:pending", (data) => {
-		console.log(data.pending);
+		const reqs = data.pending;
+		console.log(reqs);
 		requests = data.pending.map((req: any) => ({
-			name: req.nickname,
+			nickname: req.nickname,
 			timeSent: formatTimeSent(req.created_at || Date.now()),
 			avatar: req.avatar || "https://placehold.co/40x40",
 			userId: store.userId,
@@ -178,9 +181,16 @@ export const RequestsSection = createComponent(() => {
 			requestsList.innerHTML = '<p class="text-gray-500 text-sm">No pending friend requests</p>';
 			return;
 		}
-		
+
 		requests.forEach(request => {
-			requestsList.appendChild(Request(request));
+			console.log(request);
+			requestsList.appendChild(Request({
+				nickname: request.nickname,
+				timeSent: request.timeSent,
+				avatar: request.avatar,
+				userId: request.userId,
+				fromUser: request.fromUser
+			}));
 		});
 	}
 	

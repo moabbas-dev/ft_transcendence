@@ -12,7 +12,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
     const token = store.accessToken;
     // Make the API call with proper authorization headers
     axios
-      .get(`http://localhost:8001/auth/users/nickname/${props.uName}`, {
+      .get(`https://localhost:8001/auth/users/nickname/${props.uName}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -21,7 +21,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
         // Store or use the user data
         const userData = response.data;
         updateUIWithUserData(userData, container);
-        console.log(userData);
+        // console.log(userData);
       })
       .catch((error) => {
         console.error("Error fetching user data:", error.response.data.message);

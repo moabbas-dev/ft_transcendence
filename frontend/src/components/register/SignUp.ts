@@ -1,9 +1,10 @@
 import { createComponent, useCleanup } from "../../utils/StateManager.js";
 import { Button } from "../partials/Button.js";
 import { t } from "../../languages/LanguageController.js";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { navigate } from "../../router.js";
 import Toast from "../../toast/Toast.js";
+import countryList from "country-list";
 
 interface SignUpProps {
 	styles: string,
@@ -99,50 +100,9 @@ export const SignUp = createComponent((props: SignUpProps) => {
 				<span class="absolute inset-y-0 left-0 flex items-center pl-2 text-gray-500">
 					<i class="bx bx-globe text-lg"></i>
 				</span>
-				<select id="country" name="country" 
+				<select id="country-select" name="country" 
 					class="w-full pl-8 pr-8 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue appearance-none bg-white">
 					<option value="" disabled selected>${t('register.signup.countryPlaceholder')}</option>
-					<option value="AF">Afghanistan</option>
-					<option value="AL">Albania</option>
-					<option value="DZ">Algeria</option>
-					<option value="AR">Argentina</option>
-					<option value="AU">Australia</option>
-					<option value="AT">Austria</option>
-					<option value="BE">Belgium</option>
-					<option value="BR">Brazil</option>
-					<option value="CA">Canada</option>
-					<option value="CN">China</option>
-					<option value="CO">Colombia</option>
-					<option value="EG">Egypt</option>
-					<option value="FR">France</option>
-					<option value="DE">Germany</option>
-					<option value="IN">India</option>
-					<option value="ID">Indonesia</option>
-					<option value="IT">Italy</option>
-					<option value="JP">Japan</option>
-					<option value="KR">South Korea</option>
-					<option value="MX">Mexico</option>
-					<option value="NL">Netherlands</option>
-					<option value="NZ">New Zealand</option>
-					<option value="NG">Nigeria</option>
-					<option value="NO">Norway</option>
-					<option value="PK">Pakistan</option>
-					<option value="PH">Philippines</option>
-					<option value="PL">Poland</option>
-					<option value="PT">Portugal</option>
-					<option value="RU">Russia</option>
-					<option value="SA">Saudi Arabia</option>
-					<option value="SG">Singapore</option>
-					<option value="ZA">South Africa</option>
-					<option value="ES">Spain</option>
-					<option value="SE">Sweden</option>
-					<option value="CH">Switzerland</option>
-					<option value="TH">Thailand</option>
-					<option value="TR">Turkey</option>
-					<option value="UA">Ukraine</option>
-					<option value="AE">United Arab Emirates</option>
-					<option value="GB">United Kingdom</option>
-					<option value="US">United States</option>
 				</select>
 				<span class="absolute inset-y-0 right-0 flex items-center pr-2 text-gray-500 pointer-events-none">
 					<i class="bx bx-chevron-down text-lg"></i>
@@ -161,7 +121,7 @@ export const SignUp = createComponent((props: SignUpProps) => {
       </div>
       
       <div class="flex flex-col w-full gap-3" id="google-btn">
-        <a href="http://localhost:8001/auth/google" id="google-sign" class="flex items-center justify-center gap-2 w-full py-2 bg-pongblue text-white rounded-lg hover:cursor-pointer hover:bg-opacity-90 transition-all duration-300">
+        <a href="https://localhost:8001/auth/google" id="google-sign" class="flex items-center justify-center gap-2 w-full py-2 bg-pongblue text-white rounded-lg hover:cursor-pointer hover:bg-opacity-90 transition-all duration-300">
           <i class='bx bxl-google text-xl'></i>
           <span>${t('register.continueGoogle')}</span>
         </a>
@@ -183,7 +143,17 @@ export const SignUp = createComponent((props: SignUpProps) => {
 	const nickname = form.querySelector("#nickname") as HTMLInputElement;
 	const fullname = form.querySelector("#fullname") as HTMLInputElement;
 	const ageInput = form.querySelector("#age") as HTMLInputElement;
-	const countryInput = form.querySelector("#country") as HTMLSelectElement;
+	const countryInput = form.querySelector("#country-select") as HTMLSelectElement;
+
+	// fill the coutries <select> automatically through a third party list of coutries
+	const countries = countryList.getNames();
+	countries.forEach(country => {
+		const option = document.createElement("option");
+		option.value = country;
+		option.textContent = country;
+		countryInput.appendChild(option);	  
+	})
+
 	//   const 
 	const signUpButton = Button({
 		type: 'submit',
@@ -202,7 +172,7 @@ export const SignUp = createComponent((props: SignUpProps) => {
 					country: countryInput.value,
 					google_id: null
 				};
-				await axios.post("http://localhost:8001/auth/users", body);
+				await axios.post("https://localhost:8001/auth/users", body);
 				Toast.show(`SignUp successful! Go to your email ${emailInput.value} to activate your account`, "success");
 				navigate('/'); // You can edit it
 			} catch (err: any) {

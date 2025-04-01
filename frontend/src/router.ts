@@ -25,6 +25,7 @@ const routes: { [key: string]: Page } = {
   "/play/tournaments": TournamentPage,
   "/tournaments/create": CreateTournamentPage,
   "/chat": ChatPage,
+  "/chat/:uName": ChatPage,
   "/leader-board": LeaderBoardPage,
   "/about-us": AboutPage
 };

@@ -39,7 +39,7 @@ process.on('SIGTERM', () => handleShutdown('SIGTERM'));
 const start = async () => {
 	try {
 		await fastify.listen({ port: 8000, host: '0.0.0.0' });
-		fastify.log.info(`Server listening on http://localhost:${fastify.server.address().port}`);
+		fastify.log.info(`Server listening on https://localhost:${fastify.server.address().port}`);
 	} catch (err) {
 		fastify.log.error(err);
 		process.exit(1);

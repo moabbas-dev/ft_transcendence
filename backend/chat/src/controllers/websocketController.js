@@ -1,6 +1,6 @@
-import { blockUser, unblockUser } from "../services/blockService.js";
+import { blockUser, getBlockedUsers, unblockUser } from "../services/blockService.js";
 import { getUser, createOrUpdateUser, getUserByUsername, createChatRoom, getUsersFromAuth } from "../services/userService.js";
-import { createFriendRequest, addFriend, getPendingFriendRequests, removeFriend } from "../services/friendService.js"
+import { createFriendRequest, cancelFriendRequest, addFriend, getPendingFriendRequests, removeFriend, getFriendshipStatus } from "../services/friendService.js"
 import { saveMessage, getMessages } from "../services/chatService.js"
 
 export function setupWebSocketHandlers(wsAdapter, fastify) {
@@ -112,6 +112,43 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       });
     }
   });
+
+
+
+//   // Canceling a friend request
+// Add this to websocketController.js where other friend-related handlers are
+wsAdapter.on("friend:decline", async ({ clientId, payload }) => {
+  try {
+    const { from, to } = payload;
+    
+    console.log("friend request declined:");
+    console.log("from user:", from);
+    console.log("to user:", to);
+    
+    // Decline the friend request in the database
+    await cancelFriendRequest(from, to);
+    
+    // Send confirmation to the user who declined the request
+    wsAdapter.sendTo(clientId, "friend:declined", {
+      success: true,
+      userId: from
+    });
+    
+    // Optionally, notify the sender that their request was declined
+    // wsAdapter.sendTo(from, "friend:request:declined", {
+    //   success: true,
+    //   userId: to
+    // });
+    
+  } catch (error) {
+    console.error("Error in friend:decline handler:", error);
+    wsAdapter.sendTo(clientId, "error", {
+      message: "Failed to decline friend request",
+      details: error.message
+    });
+  }
+});
+
 
   // Handle friend acceptance
   wsAdapter.on("friend:accept", async ({ clientId, payload }) => {
@@ -278,7 +315,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
   wsAdapter.on("user:block", async ({ clientId, payload }) => {
     try {
       const { from: blockerId, blocked: blockedId } = payload;
-
+      console.log(blockerId, "blocked", blockedId);
       // Ensure IDs are valid numbers
       if (typeof blockerId !== "number" || typeof blockedId !== "number") {
         throw new Error("Invalid user IDs");
@@ -358,7 +395,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
 
       // Get pending requests from database
       const pendingRequests = await getPendingFriendRequests(userId);
-      console.log("lolllllllllllllllllllllllllll", pendingRequests);
+      // console.log("lolllllllllllllllllllllllllll", pendingRequests);
 
       // // Convert user IDs to user details
       // const pendingDetails = await getUsersFromAuth(
@@ -377,5 +414,52 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       });
     }
   });
+
+  wsAdapter.on("friendship:check", async ({ clientId, payload }) => {
+    // Look up friendship status for the given nickname
+  
+    const { currentUserId, targetUserId } = payload;
+  
+    const status = await getFriendshipStatus(currentUserId, targetUserId);
+
+    console.log(status);
+    wsAdapter.sendTo(clientId, "friendship:status", {
+      status: status
+    });
+  });
+
+  wsAdapter.on("users:blocked_list", async ({clientId, payload}) => {
+    try {
+      const { userId } = payload;
+
+      if (!userId)
+      {
+        wsAdapter.sendTo(clientId, "error", {
+          message: "User ID is required"
+        });
+        return;
+      }
+
+      const blockedUsers = await getBlockedUsers(userId);
+
+      wsAdapter.sendTo(clientId, "users:blocked_list", {
+        blockedUsers
+      });
+
+      //testing ....
+      console.log("blocked users list:", blockedUsers);
+      console.log(`Sent blocked users list to user ${userId}`);
+
+
+    } catch (error) {
+      fastify.log.error("Error fetching blocked users:", error);
+      wsAdapter.sendTo(clientId, "error", {
+        message: "Failed to fetch blocked users",
+        details: error.message
+      });
+    }
+  });
 }
+
+
 

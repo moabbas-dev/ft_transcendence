@@ -133,7 +133,7 @@ class AuthController {
 			const userId = user.id;
 			const uuid = crypto.randomUUID();
 			try {
-				await axios.post(`http://localhost:8000/notifications/email/${userId}`, {
+				await axios.post(`https://localhost:8000/notifications/email/${userId}`, {
 					email: user.email,
 					subject: "Reset password email",
 					body: passwordResetEmailMessage(user.full_name, uuid),

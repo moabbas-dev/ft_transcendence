@@ -72,7 +72,7 @@ export default {
 
     if (localStorage.getItem("googleAuth") && localStorage.getItem("googleAuth") === "true") {
       try {
-        const googleData = await axios.get("http://localhost:8001/auth/google/signIn", {
+        const googleData = await axios.get("https://localhost:8001/auth/google/signIn", {
           withCredentials: true,
         });
         const decodedToken: any = jwtDecode(googleData.data.accessToken);
