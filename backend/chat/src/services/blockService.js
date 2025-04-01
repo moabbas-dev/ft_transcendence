@@ -1,7 +1,12 @@
 import { getDatabase } from "../db/initDB.js";
 import { getUsersFromAuth } from "./userService.js";
 
-
+/**
+ * Block a user by adding them to the blocked_users table
+ * @param {number} userId - The ID of the user performing the block
+ * @param {number} blockedId - The ID of the user being blocked
+ * @returns {Promise<void>}
+ */
 export async function blockUser(userId, blockedId) {
   const db = await getDatabase();
   await db.run(
@@ -10,6 +15,12 @@ export async function blockUser(userId, blockedId) {
   );
 }
 
+/**
+ * Unblock a user by removing them from the blocked_users table
+ * @param {number} userId - The ID of the user performing the unblock
+ * @param {number} blockedId - The ID of the user being unblocked
+ * @returns {Promise<void>}
+ */
 export async function unblockUser(userId, blockedId) {
   const db = await getDatabase();
   await db.run(
@@ -18,6 +29,11 @@ export async function unblockUser(userId, blockedId) {
   );
 }
 
+/**
+ * Get a list of users blocked by a specific user
+ * @param {number} userId - The ID of the user whose blocked list is being retrieved
+ * @returns {Promise<Array>} - Returns an array of blocked user details
+ */
 export async function getBlockedUsers(userId) {
   const db = await getDatabase();
   const blocked = await db.all(

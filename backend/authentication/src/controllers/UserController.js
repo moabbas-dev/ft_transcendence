@@ -39,7 +39,7 @@ class UserController {
 			const activationToken = crypto.randomUUID();
 			await UserToken.create({ userId, activationToken, tokenType: "account_activation" });
 			try {
-				await axios.post(`http://localhost:8000/notifications/email/${userId}`, {
+				await axios.post(`https://localhost:8000/notifications/email/${userId}`, {
 					email: email,
 					subject: "New account is here!",
 					body: activationEmailHtml(activationToken, full_name),

@@ -33,7 +33,7 @@ class Store {
 			return;
 		}
 		try {
-			await axios.get(`http://localhost:8001/auth/logout/${this.sessionId}`);
+			await axios.get(`https://localhost:8001/auth/logout/${this.sessionId}`);
 
 			this.update("isLoggedIn", false);
 			this.update("userId", null);

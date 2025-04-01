@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@types/country-list": "^2.1.4",
     "@types/jsonwebtoken": "^9.0.9",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.5.3",
@@ -24,6 +25,9 @@
     "axios": "^1.7.9",
     "boxicons": "^2.1.4",
     "chart.js": "^4.4.7",
+    "country-list": "^2.3.0",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
     "frontend": "file:",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",
