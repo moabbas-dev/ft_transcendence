@@ -35,7 +35,7 @@ export const Chat = createComponent(
                         <div class="flex items-center justify-center gap-1 sm:gap-2"  id="friend_name">
                             <div class="avatar h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-xl font-semibold text-gray-700">
                               ${
-                                activeUser?.full_name.charAt(0).toUpperCase() ||
+                                activeUser?.full_name?.charAt(0)?.toUpperCase() ||
                                 ""
                               }
                             </div>

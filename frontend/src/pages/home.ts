@@ -3,9 +3,11 @@ import { t } from "../languages/LanguageController.js";
 import { PongAnimation } from "../components/partials/PingPongAnimation.js";
 import {Header}  from "../components/header_footer/header.js";
 import { Footer } from "../components/header_footer/footer.js";
+import chatService from "../utils/chatWebSocketService.js";
+import store from "../../store/store.js";
 
 export default {
-  render: (container: HTMLElement) => {
+  render: async (container: HTMLElement) => {
     container.className = 'flex flex-col h-dvh'
     container.innerHTML = `
     <div class="profile"></div>
@@ -54,7 +56,32 @@ export default {
           </div>
         </div>
       </div>
-    </div> `
+    </div> 
+    `;
+
+    await initializeWebSocket();
+
+    // Initialize WebSocket connection
+    async function initializeWebSocket() {
+      try {
+        const username = store.nickname;
+        const userId = store.userId;
+
+        if (!username || !userId) {
+          console.error("User information not found in localStorage");
+          return;
+        }
+
+        // Connect to WebSocket server
+        await chatService.connect();
+
+        console.log("Connected to chat service");
+      } catch (error) {
+        console.error("Failed to connect to chat service:", error);
+      } finally {
+      }
+    }
+  
     //header
     const headerNav = container.querySelector(".header");
     const header = Header();
