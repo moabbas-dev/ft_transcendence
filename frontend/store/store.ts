@@ -3,26 +3,26 @@ import Toast from "../src/toast/Toast";
 import { navigate } from "../src/router";
 
 class Store {
-	userId: string | null = localStorage.getItem("userId");
-	nickname: string | null = localStorage.getItem("nickname");
-	email: string | null = localStorage.getItem("email");
-	fullName: string | null = localStorage.getItem("fullName");
-	age: string | null = localStorage.getItem("age");
-	country: string | null = localStorage.getItem("country");
-	avatarUrl: string | null = localStorage.getItem("avatarUrl");
-	isLoggedIn: boolean = localStorage.getItem("isLoggedIn") === "true";
-	accessToken: string | null = localStorage.getItem("accessToken");
-	refreshToken: string | null = localStorage.getItem("refreshToken");
-	sessionId: string | null = localStorage.getItem("sessionId");
-	createdAt: string | null = localStorage.getItem("createdAt");
+	userId: string | null = sessionStorage.getItem("userId");
+	nickname: string | null = sessionStorage.getItem("nickname");
+	email: string | null = sessionStorage.getItem("email");
+	fullName: string | null = sessionStorage.getItem("fullName");
+	age: string | null = sessionStorage.getItem("age");
+	country: string | null = sessionStorage.getItem("country");
+	avatarUrl: string | null = sessionStorage.getItem("avatarUrl");
+	isLoggedIn: boolean = sessionStorage.getItem("isLoggedIn") === "true";
+	accessToken: string | null = sessionStorage.getItem("accessToken");
+	refreshToken: string | null = sessionStorage.getItem("refreshToken");
+	sessionId: string | null = sessionStorage.getItem("sessionId");
+	createdAt: string | null = sessionStorage.getItem("createdAt");
 
 	// Function to update any variable dynamically
 	update(key: keyof Store, value: string | boolean | null): void {
 		(this as any)[key] = value;
 		if (value === null) {
-			localStorage.removeItem(key);
+			sessionStorage.removeItem(key);
 		} else {
-			localStorage.setItem(key, String(value));
+			sessionStorage.setItem(key, String(value));
 		}
 	}
 

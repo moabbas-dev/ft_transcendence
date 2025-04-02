@@ -46,7 +46,7 @@ export const SendEmail = createComponent((props: SendEmailProps) => {
 				const body = {
 					email: emailInput.value
 				};
-				await axios.post(`https://localhost:8001/auth/resetPassword/email`, body);
+				await axios.post(`https://localhost:8001/auth/resetPassword/email`, body, {headers: {"x-api-key": import.meta.env.VITE_AUTHENTICATION_API_KEY}});
 				Toast.show("Email found! Email message sent successfully!", "success");
 			} catch (err: any) {
 				if (err.response) {

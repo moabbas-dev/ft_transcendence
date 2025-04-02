@@ -5,6 +5,7 @@ import axios, { AxiosError } from "axios";
 import { navigate } from "../../router.js";
 import Toast from "../../toast/Toast.js";
 import countryList from "country-list";
+import https from 'https';
 
 interface SignUpProps {
 	styles: string,
@@ -172,10 +173,12 @@ export const SignUp = createComponent((props: SignUpProps) => {
 					country: countryInput.value,
 					google_id: null
 				};
-				await axios.post("https://localhost:8001/auth/users", body);
+				
+				await axios.post("/api/auth/users", body, {headers: {"x-api-key": import.meta.env.VITE_AUTHENTICATION_API_KEY}});
 				Toast.show(`SignUp successful! Go to your email ${emailInput.value} to activate your account`, "success");
 				navigate('/'); // You can edit it
 			} catch (err: any) {
+				console.log(err)
 				if (err.response) {
 					if (err.response.status === 400 || err.response.status === 409)
 						Toast.show(`Error: ${err.response.data.message}`, "error");

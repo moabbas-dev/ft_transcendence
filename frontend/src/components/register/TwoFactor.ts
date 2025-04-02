@@ -77,7 +77,7 @@ export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
 				code: code
 			};
 			try {
-				const userData = await axios.post(`https://localhost:8001/auth/twoFactor/login/${store.sessionId}`, body);
+				const userData = await axios.post(`https://localhost:8001/auth/twoFactor/login/${store.sessionId}`, body, {headers: {"x-api-key": import.meta.env.VITE_AUTHENTICATION_API_KEY}});
 				const decodedToken: any = jwtDecode(userData.data.accessToken);
 				store.update("accessToken", userData.data.accessToken);
 				store.update("refreshToken", userData.data.refreshToken);

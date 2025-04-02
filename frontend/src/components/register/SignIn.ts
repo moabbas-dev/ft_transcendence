@@ -77,7 +77,7 @@ export const SignIn = createComponent((props: SignInProps) => {
 				email: emailData,
 				password: passwordData
 			};
-			const signIn = await axios.post("https://localhost:8001/auth/login", data);
+			const signIn = await axios.post("https://localhost:8001/auth/login", data, {headers: {"x-api-key": import.meta.env.VITE_AUTHENTICATION_API_KEY}});
 			if (signIn.data.require2FA == false) {
 				if (signIn.data.accessToken) {
 					const decodedToken: any = jwtDecode(signIn.data.accessToken);

@@ -68,7 +68,7 @@ export default {
         const userId = store.userId;
 
         if (!username || !userId) {
-          console.error("User information not found in localStorage");
+          console.error("User information not found in sessionStorage");
           return;
         }
 

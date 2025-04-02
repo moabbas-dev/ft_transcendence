@@ -93,6 +93,14 @@ async function NotificationRoutes(fastify, options) {
 		  return reply.code(400).send({ error: error.message });
 		}
 	});
+	fastify.post('/email/:userId', async (req, reply) => {
+		try {
+			await notificationController.sendEmailNotification()
+		} catch (error) {
+			return reply.code(400).send({ error: error.message });
+		}
+	});
 }
+
 
 export default NotificationRoutes;

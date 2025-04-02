@@ -7,9 +7,10 @@ const { validateEmail, validatePassword, validateNickname, validateFullName, val
 const UserToken = require('../models/UserToken');
 const { v4: uuidv4 } = require('uuid');
 const axios = require('axios');
+const { log } = require('console');
 
 class UserController {
-
+	
 	static async createUser(request, reply) {
 		const { email, password, nickname, full_name, age, country, google_id } = request.body;
 		const activationEmailHtml = (activationToken, full_name) => {
@@ -22,6 +23,7 @@ class UserController {
 				</div>
 			`;
 		}
+		console.log(JSON.stringify(request.body, null, 2));
 		try {
 			if (!validateEmail(email))
 				return reply.code(400).send({ message: "Invalid email address!" });

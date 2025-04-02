@@ -15,6 +15,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
       .get(`https://localhost:8001/auth/users/nickname/${props.uName}`, {
         headers: {
           Authorization: `Bearer ${token}`,
+          'x-api-key': import.meta.env.VITE_AUTHENTICATION_API_KEY
         },
       })
       .then((response) => {
