@@ -2,7 +2,7 @@ import './router.js';
 // import  io  from "socket.io-client";
 // const messageForm = document.getElementById('send-container');
 // const messageInput = document.getElementById('message-input') as HTMLInputElement | null;;
-// const socket = io('https://localhost:8000');
+// const socket = io('http://localhost:8000');
 
 // console.log('App initialized!');
 

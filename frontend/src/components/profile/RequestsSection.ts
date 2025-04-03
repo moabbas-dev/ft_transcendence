@@ -2,8 +2,8 @@
 
 // // Incoming requests [For Testing Purposes]
 // const requests = [
-// 	{ name: "Casey Parker", timeSent: "2 days ago", avatar: "https://placehold.co/40x40" },
-// 	{ name: "Riley Martin", timeSent: "1 week ago", avatar: "https://placehold.co/40x40" }
+// 	{ name: "Casey Parker", timeSent: "2 days ago", avatar: "http://placehold.co/40x40" },
+// 	{ name: "Riley Martin", timeSent: "1 week ago", avatar: "http://placehold.co/40x40" }
 // ];
 
 // interface RequestProps {
@@ -164,7 +164,7 @@ export const RequestsSection = createComponent(() => {
 		requests = data.pending.map((req: any) => ({
 			nickname: req.nickname,
 			timeSent: formatTimeSent(req.created_at || Date.now()),
-			avatar: req.avatar || "https://placehold.co/40x40",
+			avatar: req.avatar || "http://placehold.co/40x40",
 			userId: store.userId,
 			fromUser: req.from_user || req.id
 		}));

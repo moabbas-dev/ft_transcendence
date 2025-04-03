@@ -3,7 +3,7 @@ import axios from "axios";
 
 
 // Configure authentication service API URL
-const AUTH_API_URL = "https://localhost:8001";
+const AUTH_API_URL = "http://localhost:8001";
 
 // Helper function to get user from auth service API
 export async function getUserFromAuth(userId) {

@@ -8,10 +8,10 @@ import { auth } from './src/middlewares/auth.js'
 
 const fastify = Fastify({
 	logger: true,
-	https: {
-	  key: fs.readFileSync('./ssl/server.key'),
-	  cert: fs.readFileSync('./ssl/server.crt'),
-	}
+	// https: {
+	//   key: fs.readFileSync('./ssl/server.key'),
+	//   cert: fs.readFileSync('./ssl/server.crt'),
+	// }
 })
 
 fastify.register(fastifyCors, {

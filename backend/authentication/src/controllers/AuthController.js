@@ -133,7 +133,7 @@ class AuthController {
 			const userId = user.id;
 			const uuid = crypto.randomUUID();
 			try {
-				await axios.post(`https://localhost:8000/notifications/email/${userId}`, {
+				await axios.post(`http://localhost:8000/notifications/email/${userId}`, {
 					email: user.email,
 					subject: "Reset password email",
 					body: passwordResetEmailMessage(user.full_name, uuid),
@@ -227,7 +227,7 @@ class AuthController {
 				return reply.code(400).send({ message: "Google email is not verified" });
 			}
 			// Fetch user info from Google
-			const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+			const userInfoResponse = await fetch('http://www.googleapis.com/oauth2/v2/userinfo', {
 				headers: {
 					Authorization: `Bearer ${token.token.access_token}`,
 				},

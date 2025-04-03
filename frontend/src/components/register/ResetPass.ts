@@ -64,7 +64,7 @@ export const ResetPass = createComponent((params: { [key: string]: string | numb
 					password: passwordInput.value,
 					verifyPassword: confirmPasswordInput.value
 				};
-				await axios.post(`https://localhost:8001/auth/resetPassword/reset/${uuid}`, body, {headers: {"x-api-key": import.meta.env.VITE_AUTHENTICATION_API_KEY}});
+				await axios.post(`http://localhost:8001/auth/resetPassword/reset/${uuid}`, body, {headers: {"x-api-key": import.meta.env.VITE_AUTHENTICATION_API_KEY}});
 				Toast.show("Password changed successfully!", "success");
 				navigate("/register");
 			}
