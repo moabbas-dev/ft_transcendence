@@ -19,7 +19,7 @@ fastify.register(cors, {
 	methods: ['GET', 'POST', 'PUT', 'DELETE'],
 });
 
-fastify.addHook("preHandler", auth)
+// fastify.addHook("preHandler", auth)
 
 createTable();
 
