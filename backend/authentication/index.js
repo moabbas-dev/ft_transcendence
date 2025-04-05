@@ -17,10 +17,10 @@ const fs = require('fs');
 
 const fastify = Fastify({
 	logger: true,
-	https: {
-	  key: fs.readFileSync('./ssl/server.key'),
-	  cert: fs.readFileSync('./ssl/server.crt'),
-	}
+	// https: {
+	//   key: fs.readFileSync('./ssl/server.key'),
+	//   cert: fs.readFileSync('./ssl/server.crt'),
+	// }
 })  
 
 // Register multipart plugin to handle file uploads
@@ -106,7 +106,7 @@ process.on('SIGTERM', () => handleShutdown('SIGTERM'));
 const start = async () => {
 	try {
 		await fastify.listen({ port: 8001, host: '0.0.0.0' });
-		fastify.log.info(`Server listening on https://localhost:${fastify.server.address().port}`);
+		fastify.log.info(`Server listening on http://localhost:${fastify.server.address().port}`);
 	} catch (err) {
 		fastify.log.error(err);
 		process.exit(1);

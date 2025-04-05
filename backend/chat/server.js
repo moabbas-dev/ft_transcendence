@@ -3,10 +3,13 @@ import fastifyCors from "@fastify/cors";
 import { registerWebSocketAdapter } from "./src/services/WebSocketAdapter.js";
 import { setupWebSocketHandlers } from "./src/controllers/websocketController.js";
 import { initDatabase, closeDatabase } from "./src/db/initDB.js";
+import auth from "./middlewares/auth.js";
 
 const fastify = Fastify({
   logger: true,
 });
+
+fastify.addHook("preHandler", auth);
 
 fastify.register(fastifyCors, {
   origin: true,
