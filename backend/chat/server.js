@@ -8,10 +8,10 @@ import { auth } from './src/middlewares/auth.js'
 
 const fastify = Fastify({
 	logger: true,
-	https: {
-	  key: fs.readFileSync('./ssl/server.key'),
-	  cert: fs.readFileSync('./ssl/server.crt'),
-	}
+	// https: {
+	//   key: fs.readFileSync('./ssl/server.key'),
+	//   cert: fs.readFileSync('./ssl/server.crt'),
+	// }
 })
 
 fastify.register(fastifyCors, {
@@ -24,7 +24,7 @@ fastify.get("/", async (request, reply) => {
   return { status: "Chat microservice running" };
 });
 
-fastify.addHook("preHandler", auth)
+// fastify.addHook("preHandler", auth)
 
 // Initialize the database
 const setupDatabase = async () => {

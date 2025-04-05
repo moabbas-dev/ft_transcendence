@@ -1,11 +1,24 @@
+import store from '../store/store.js';
 import './router.js';
 // import  io  from "socket.io-client";
 // const messageForm = document.getElementById('send-container');
 // const messageInput = document.getElementById('message-input') as HTMLInputElement | null;;
-// const socket = io('https://localhost:8000');
+// const socket = io('http://localhost:8000');
 
 // console.log('App initialized!');
 
+// userId: string | null = sessionStorage.getItem("userId");
+// nickname: string | null = sessionStorage.getItem("nickname");
+// email: string | null = sessionStorage.getItem("email");
+// fullName: string | null = sessionStorage.getItem("fullName");
+// age: string | null = sessionStorage.getItem("age");
+// country: string | null = sessionStorage.getItem("country");
+// avatarUrl: string | null = sessionStorage.getItem("avatarUrl");
+// isLoggedIn: boolean = sessionStorage.getItem("isLoggedIn") === "true";
+// accessToken: string | null = sessionStorage.getItem("accessToken");
+// refreshToken: string | null = sessionStorage.getItem("refreshToken");
+// sessionId: string | null = sessionStorage.getItem("sessionId");
+// createdAt: string | null = sessionStorage.getItem("createdAt");
 
 // Attach event listeners after rendering
 // document.addEventListener('DOMContentLoaded', () => {

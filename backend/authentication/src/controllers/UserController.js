@@ -18,6 +18,7 @@ class UserController {
 				<div>
 					<h1>Welcome ${full_name} to our website!</h1>
 					<p>Please click on the link below to activate your account</p>
+					<a href="${process.env.BACKEND_DOMAIN}/auth/activate/${activationToken}">Activate your account</a>
 					<p>${process.env.BACKEND_DOMAIN}/auth/activate/${activationToken}</p>
 					<p>Have a nice day!</p>
 				</div>
@@ -41,7 +42,7 @@ class UserController {
 			const activationToken = crypto.randomUUID();
 			await UserToken.create({ userId, activationToken, tokenType: "account_activation" });
 			try {
-				await axios.post(`https://localhost:8000/notifications/email/${userId}`, {
+				await axios.post(`http://localhost:8000/notifications/email/${userId}`, {
 					email: email,
 					subject: "New account is here!",
 					body: activationEmailHtml(activationToken, full_name),

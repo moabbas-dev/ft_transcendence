@@ -1,10 +1,12 @@
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 import { defineConfig } from 'vite'
-import mkcert from 'vite-plugin-mkcert';
-import https from 'https';
 
 export default defineConfig({
   plugins: [],
-  server: {},
+  server: {
+    host: true, // allow all hosts or use `pong.local` directly
+    port: 5173,
+    allowedHosts: ['pong.local'],
+  },
 })

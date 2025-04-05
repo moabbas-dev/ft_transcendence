@@ -8,14 +8,14 @@ const fs = require('fs')
 
 const fastify = Fastify({
 	logger: true,
-	https: {
-	  key: fs.readFileSync('./ssl/server.key'),
-	  cert: fs.readFileSync('./ssl/server.crt'),
-	}
+	// https: {
+	//   key: fs.readFileSync('./ssl/server.key'),
+	//   cert: fs.readFileSync('./ssl/server.crt'),
+	// }
 })  
 
 fastify.register(cors, {
-	origin: 'https://localhost:5173', // Set this to your specific frontend domain for production
+	origin: 'http://localhost:5173', // Set this to your specific frontend domain for production
 	methods: ['GET', 'POST', 'PUT', 'DELETE'],
 });
 
@@ -51,7 +51,7 @@ process.on('SIGTERM', () => handleShutdown('SIGTERM'));
 const start = async () => {
 	try {
 		await fastify.listen({ port: 8000, host: '0.0.0.0' });
-		fastify.log.info(`Server listening on https://localhost:${fastify.server.address().port}`);
+		fastify.log.info(`Server listening on http://localhost:${fastify.server.address().port}`);
 	} catch (err) {
 		fastify.log.error(err);
 		process.exit(1);

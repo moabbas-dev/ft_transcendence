@@ -11,7 +11,7 @@ class ChatWebSocketService {
   private username: string | null = null;
   private userId: any;
 
-  constructor(serverUrl: string = "wss://localhost:3002") {
+  constructor(serverUrl: string = "ws://localhost:3002") {
     this.serverUrl = serverUrl;
   }
 

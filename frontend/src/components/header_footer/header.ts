@@ -18,13 +18,14 @@ export const Header = createComponent(() => {
         <div class="flex items-center justify-start w-1/2 gap-2 sm:gap-8">
             <div class="logo hidden sm:flex flex-col items-center text-center font-bold text-white text-xl transition-all duration-300 hover:drop-shadow-[0_0_25px_#a855f7]">
                 <span class="text-purple-500 drop-shadow-[0_0_10px_#a855f7] transition-all duration-300 hover:drop-shadow-[0_0_20px_#a855f7]">
-                    ft_transcendence
+                    Pong
                 </span>
                 <span class="text-gray-300 text-xs transition-all duration-300 hover:text-white">
                     Neon Pong
                 </span>
             </div>
             <nav class="navbar items-center gap-4 hidden text-nowrap sm:flex">
+                ${store.userId ? `
                 <div class="nav-child playPage group flex flex-col justify-center items-center transition-all hover:cursor-pointer hover:text-ponghover" onClick="${() => navigate('/play')}">
                     <i class="fa-solid fa-play text-lg sm:text-xl group-hover:rotate-12"></i>
                     <span>${t('home.header.play')}</span>
@@ -37,6 +38,7 @@ export const Header = createComponent(() => {
                     <i class="fa-solid fa-comments text-lg sm:text-xl group-hover:rotate-12"></i>
                     <span>${t('home.header.chat')}</span>
                 </div>
+            ` : ``}
             </nav>
             <nav class="nav-btn sm:hidden hover:cursor-pointer hover:opacity-80">
                 <i class="fa-solid fa-bars text-2xl"></i>
@@ -44,11 +46,15 @@ export const Header = createComponent(() => {
         </div>
         <div class="flex items-center justify-end gap-3 sm:gap-4 w-1/2">
             <div class="md:flex-1">
+                ${store.userId? `
                 <form action="" id="search-bar-container" class="search-bar-container flex justify-center items-center gap-2 rounded-md md:p-2 md:bg-white z-50">
                     <input type="text" name="search-bar" id="search-bar" autocomplete="off" placeholder="${t('home.header.search')}" class="w-full hidden md:block text-lg text-ponghover rounded-md">
                     <label for="search-bar" class="fas fa-search text-ponghover text-xl max-md:text-white"></label>
-                </form>
+                </form>                
+                ` : ``}
+
             </div>
+            ${store.userId ? `
             <div class="notification-bell relative group">
                 <i class="fa-solid fa-bell text-white text-2xl group-hover:scale-120 group-hover:rotate-12 transition-all hover:cursor-pointer hover:text-ponghover"></i>
                 <span class="notification-count absolute -top-2 -right-2 rounded-full group-hover:animate-jump-in text-white bg-gray-500 hover:cursor-pointer w-5 h-5 flex items-center justify-center text-sm">0</span>
@@ -56,6 +62,7 @@ export const Header = createComponent(() => {
             <div class="notification hidden absolute scrollbar-thin shadow-pongblue overflow-y-auto top-full ${localStorage.getItem('selectedLanguage') === 'ar' ? 'left-0' : 'right-0'} z-50 bg-white w-[300px] py-2 pl-2 max-sm:pr-2 max-h-[300px] animate-fade-down animate-once animate-duration-300">
 
             </div>
+            ` : ``}
             <select id="languages" name="languages_options" title="Select your language" class="text-xl bg-pongdark/30 rounded-full px-1 text-white text-[2.5rem] focus:outline-none hover:opacity-80 cursor-pointer">
                 <option value="en" class="text-center">en</option>
                 <option value="fr" class="text-center">fr</option>
@@ -65,14 +72,16 @@ export const Header = createComponent(() => {
                 <div id="profile-head" class="flex gap-3 hover:cursor-pointer hover:underline hover:text-ponghover">
                     <div class="profile-section group flex items-center justify-center gap-2">
                         <div class="flex items-center justify-center text-lg font-bold">
-                            <p>${store.nickname}</p>
+                            <p>${store.nickname || 'Guest'}</p>
                         </div>
                         <div class="w-10 h-10 group-hover:rotate-12 group-hover:scale-110 transition-all bg-slate-400 rounded-full bg-[url('./assets/guest.png')] bg-cover"><!-- Logo Here as background image --></div>
                     </div>
                 </div>
             </div>
         </div>
+        ${store.userId ? `
         <div id="search-result-container" class="hidden absolute left-0 ${localStorage.getItem('selectedLanguage') === 'ar' ? 'md:left-48' : 'md:left-1/2'} top-[calc(100%+44px)] md:top-full z-[9999] w-fit h-fit max-md:w-full bg-white border-t rounded-md shadow-[0_0_15px] shadow-white"></div>
+        ` : ``}
     `;
 
     const account = container.querySelector(".account")!;
@@ -80,40 +89,40 @@ export const Header = createComponent(() => {
     const profileHead = container.querySelector("#profile-head")!;
     profileHead.appendChild(dropdown);
     const account_list = container.querySelector(".account-list")!;
-    const notificationContainer = container.querySelector('.notification')!
+    const notificationContainer = container.querySelector('.notification')
     const notificationBell = container.querySelector('.notification-bell')!
     const notificationCount = container.querySelector('.notification-count')!
     const searchBar = container.querySelector('#search-bar') as HTMLInputElement
     const searchBarContainer = container.querySelector('#search-bar-container') as HTMLFormElement
-    const searchIcon = container.querySelector('.fa-search')!
+    const searchIcon = container.querySelector('.fa-search')
     const navbar = container.querySelector('.navbar')!
     const navBtn = container.querySelector('.nav-btn')!
     const navChildren = container.querySelectorAll('.nav-child')!
-    const navChat = container.querySelector('.nav-chat')!
-    const playPage = container.querySelector('.playPage')!
-    const leaderBoardPage = container.querySelector('.leaderBoard-page')!
+    const navChat = container.querySelector('.nav-chat')
+    const playPage = container.querySelector('.playPage')
+    const leaderBoardPage = container.querySelector('.leaderBoard-page')
     const searchResult = container.querySelector('#search-result-container')!
 
-    navChat.addEventListener('click', () => {
+    navChat?.addEventListener('click', () => {
         navigate('/chat');
     });
 
-    playPage.addEventListener('click', () => {
+    playPage?.addEventListener('click', () => {
         navigate('/play');
     });
 
-    leaderBoardPage.addEventListener('click', () => {
+    leaderBoardPage?.addEventListener('click', () => {
         navigate('/leader-board');
     });
 
-    searchBar.addEventListener('input', async () => {
+    searchBar?.addEventListener('input', async () => {
         const searchQuery = searchBar.value.toLowerCase();
         const token = await getValidAccessToken();
         // console.log(`token: ${token}`);
         if (!token)
             return;
         await axios
-            .get(`https://localhost:8001/auth/users`, {
+            .get(`/authentication/auth/users`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'x-api-key': import.meta.env.VITE_AUTHENTICATION_API_KEY
@@ -127,7 +136,7 @@ export const Header = createComponent(() => {
                 const filteredUsers = allUsers.filter((user: { nickname: string; }) =>
                     user.nickname.toLowerCase().includes(searchQuery)
                 );
-
+                
                 // Show or hide results container
                 if (searchQuery.length > 0) {
                     searchResult.classList.remove('hidden');
@@ -145,7 +154,7 @@ export const Header = createComponent(() => {
             });
     })
 
-    searchBarContainer.addEventListener('submit', (e: Event) => {
+    searchBarContainer?.addEventListener('submit', (e: Event) => {
         e.preventDefault();
     });
 
@@ -168,7 +177,7 @@ export const Header = createComponent(() => {
 
     async function fetchUserNotifications(userId: number): Promise<NotificationData[] | null> {
         try {
-            const response = await axios.get(`https://localhost:3003/api/notifications/user/${userId}`, {headers: {"x-api-key": import.meta.env.VITE_NOTIFICATION_API_KEY}});
+            const response = await axios.get(`/notifications/api/notifications/user/${userId}`, {headers: {"x-api-key": import.meta.env.VITE_NOTIFICATION_API_KEY}});
             return response.data;
         } catch (error: unknown) {
             if (axios.isAxiosError(error)) {
@@ -189,7 +198,7 @@ export const Header = createComponent(() => {
     const userId = 2;
     async function markAllNotificationsAsRead() {
         try {
-            await axios.patch(`https://localhost:3003/api/notifications/read/all/${userId}`, undefined, {headers: {"x-api-key": import.meta.env.VITE_NOTIFICATION_API_KEY}});
+            await axios.patch(`/notifications/api/notifications/read/all/${userId}`, undefined, {headers: {"x-api-key": import.meta.env.VITE_NOTIFICATION_API_KEY}});
             updateNotificationCount(0);
         } catch (err) {
             console.error('Failed to mark notifications as read:', err);
@@ -208,22 +217,24 @@ export const Header = createComponent(() => {
     }
 
     function renderNotifications(notifications: NotificationData[]) {
-        notificationContainer.innerHTML = '';
-        let unreadCount = 0;
-        notifications.forEach(notification => {
-            const body = {
-                senderId: notification.sender_id,
-                recipientId: notification.recipient_id,
-                type: notification.type,
-                content: notification.content,
-                is_read: notification.is_read,
-                created_at: formatInTimeZone(new Date(notification.created_at.toString().concat(' UTC')), 'Asia/Beirut', 'yyyy-MM-dd HH:mm:ss')
-            };
-            
-            if (!notification.is_read) unreadCount++;
-            notificationContainer.appendChild(Notification(body));
-        });
-        updateNotificationCount(unreadCount);
+        if (notificationContainer) {
+            notificationContainer.innerHTML = '';
+            let unreadCount = 0;
+            notifications.forEach(notification => {
+                const body = {
+                    senderId: notification.sender_id,
+                    recipientId: notification.recipient_id,
+                    type: notification.type,
+                    content: notification.content,
+                    is_read: notification.is_read,
+                    created_at: formatInTimeZone(new Date(notification.created_at.toString().concat(' UTC')), 'Asia/Beirut', 'yyyy-MM-dd HH:mm:ss')
+                };
+                
+                if (!notification.is_read) unreadCount++;
+                notificationContainer.appendChild(Notification(body));
+            });
+            updateNotificationCount(unreadCount);
+        }
     }
 
     fetchUserNotifications(userId).then(data => {
@@ -232,8 +243,8 @@ export const Header = createComponent(() => {
         }
     });
 
-    notificationBell.addEventListener('click', () => {
-        notificationContainer.classList.toggle('hidden');
+    notificationBell?.addEventListener('click', () => {
+        notificationContainer?.classList.toggle('hidden');
         markAllNotificationsAsRead();
     });
     // *************************END**********************************
@@ -263,7 +274,7 @@ export const Header = createComponent(() => {
         );
     })
 
-    searchIcon.addEventListener('click', () => {
+    searchIcon?.addEventListener('click', () => {
         const styles = 'max-md:block max-md:absolute max-md:top-full max-md:left-0 max-md:p-2 max-md:h-fit'
         styles.split(' ').forEach(style => searchBar.classList.toggle(style))
         if (searchBar.classList.contains('hidden'))
@@ -305,7 +316,7 @@ export const Header = createComponent(() => {
 
         if (searchBar
             && !path.includes(searchBar)
-            && !path.includes(searchIcon)) {
+            && searchIcon && !path.includes(searchIcon)) {
             const styles = 'max-md:block max-md:absolute max-md:top-full max-md:left-0 max-md:p-2 max-md:h-fit'
             styles.split(' ').forEach(style => searchBar.classList.remove(style))
             searchBar.classList.add('hidden')

@@ -1,6 +1,6 @@
 const generateTokens = async (user, fastify) => {
 
-	const accessTokenExpiry = Math.floor(Date.now() / 1000) + (5 * 60); // the access token expires after one hour
+	const accessTokenExpiry = Math.floor(Date.now() / 1000) + (10 * 60 * 60); // the access token expires after one hour
 	const accessToken = fastify.jwt.sign(
 		{
 			userId: user.id,
@@ -16,7 +16,7 @@ const generateTokens = async (user, fastify) => {
 		}
 	);
 
-	const refreshTokenExpiry = Math.floor(Date.now() / 1000) + (30 * 60); // the refresh token expires after one hour
+	const refreshTokenExpiry = Math.floor(Date.now() / 1000) + (10 * 60 * 60); // the refresh token expires after one hour
 	const refreshToken = fastify.jwt.sign(
 		{
 			userId: user.id,

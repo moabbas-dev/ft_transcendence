@@ -33,7 +33,7 @@ export const DropDown = createComponent((props: DropDownProps) => {
 	const viewProfile = container.querySelector('#view-profile');
 	viewProfile?.addEventListener('click', () => {
 		const profielPopUp = document.querySelector(".profile");
-        const profile = Profile();
+        const profile = Profile({uName: store.nickname});
         profielPopUp?.appendChild(profile);
 	})
 

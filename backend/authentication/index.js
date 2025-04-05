@@ -26,7 +26,7 @@ const fastify = Fastify({
 
 // Register multipart plugin to handle file uploads
 fastify.register(require('@fastify/multipart'));
-fastify.addHook("preHandler", auth)
+// fastify.addHook("preHandler", auth)
 fastify.register(require('@fastify/static'), {
 	root: path.join(__dirname, 'uploads'),
 	prefix: '/uploads/',
@@ -107,7 +107,7 @@ process.on('SIGTERM', () => handleShutdown('SIGTERM'));
 const start = async () => {
 	try {
 		await fastify.listen({ port: 8001, host: '0.0.0.0' });
-		fastify.log.info(`Server listening on https://localhost:${fastify.server.address().port}`);
+		fastify.log.info(`Server listening on http://localhost:${fastify.server.address().port}`);
 	} catch (err) {
 		fastify.log.error(err);
 		process.exit(1);
