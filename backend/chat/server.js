@@ -14,6 +14,8 @@ const fastify = Fastify({
 	// }
 })
 
+fastify.addHook("preHandler", auth);
+
 fastify.register(fastifyCors, {
   origin: true,
   methods: ["GET", "POST"],
