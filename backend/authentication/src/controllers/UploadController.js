@@ -10,7 +10,7 @@ class UploadController {
 		const { id } = request.params;
 		const authHeader = request.headers.authorization;
 		try {
-			if (!authHeader || !authHeader.startsWith('Bearer '))
+			if (!authHeader || !authHeader.startsWith('Bearer'))
 				return reply.status(401).send({ error: 'Unauthorized: No token provided' });
 			const accessToken = authHeader.split(' ')[1];
 			let decoded;

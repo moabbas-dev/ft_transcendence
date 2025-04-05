@@ -8,6 +8,8 @@ const fastifySession = require('@fastify/session');
 const path = require('path');
 const fs = require('fs');
 const { auth } = require('./src/middlewares/auth')
+const fastifyMultipart = require('@fastify/multipart');
+
 
 // const fastify = Fastify({
 // 	// https: {
@@ -23,9 +25,12 @@ const fastify = Fastify({
 	//   cert: fs.readFileSync('./ssl/server.crt'),
 	// }
 })  
-
-// Register multipart plugin to handle file uploads
-fastify.register(require('@fastify/multipart'));
+fastify.register(fastifyMultipart, {
+	limits: {
+	  fileSize: 10 * 1024 * 1024 // 10 MB limit (change as needed)
+	}
+});
+  
 // fastify.addHook("preHandler", auth)
 fastify.register(require('@fastify/static'), {
 	root: path.join(__dirname, 'uploads'),

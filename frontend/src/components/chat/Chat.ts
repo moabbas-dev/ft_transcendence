@@ -6,6 +6,7 @@ import bgImage2 from "../../assets/chatBg5.gif"
 import { emoticons, emoticonsMap } from "./emoticons.js";
 import { Profile } from "../profile/UserProfile.js";
 import { t } from "../../languages/LanguageController.js";
+import axios from "axios";
 
 interface Message {
   id: number;
@@ -324,10 +325,8 @@ export const Chat = createComponent(
       });
     };
 
-    const sendMessage = () => {
-      const messageInput = container.querySelector(
-        "#message-input"
-      ) as HTMLDivElement;
+    const sendMessage = async () => {
+      const messageInput = container.querySelector("#message-input") as HTMLDivElement;
       const content = messageInput.innerText.trim();
 
       if (!content || !activeUser || !chatService.isConnected()) return;
@@ -340,6 +339,15 @@ export const Chat = createComponent(
         console.error("Current user not found");
         return;
       }
+
+      const body = {
+        senderId: parseInt(currentUser),
+        recipientId: activeUser.id,
+        content,
+      }
+      await axios.post('/notifications/api/notifications/user-message', body).catch(err => {
+        console.error("Error sending message:", err);
+      })
 
       // Create temporary message for optimistic update
       const tempMessage: Message = {

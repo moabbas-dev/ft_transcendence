@@ -9,6 +9,7 @@ import getValidAccessToken from "../../../refresh/RefreshToken.js";
 import { Notification } from "../Notifications/Notification.js";
 import { formatInTimeZone } from 'date-fns-tz';
 import { NotificationData } from "../../types/types.js";
+import defaultImage from "../../assets/guests.png";
 
 export const Header = createComponent(() => {
     const container = document.createElement("header");
@@ -74,7 +75,9 @@ export const Header = createComponent(() => {
                         <div class="flex items-center justify-center text-lg font-bold">
                             <p>${store.nickname || 'Guest'}</p>
                         </div>
-                        <div class="w-10 h-10 group-hover:rotate-12 group-hover:scale-110 transition-all bg-slate-400 rounded-full bg-[url('./assets/guest.png')] bg-cover"><!-- Logo Here as background image --></div>
+                        <div class="w-10 h-10 group-hover:rotate-12 group-hover:scale-110 transition-all bg-slate-400 rounded-full bg-cover">
+                            <img src="${store.avatarUrl || defaultImage}" class="size-full rounded-full"/>
+                        </div>
                     </div>
                 </div>
             </div>

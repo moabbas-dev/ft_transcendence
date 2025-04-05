@@ -66,8 +66,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
               <p class="inline-block font-semibold">${t('profile.infoTab.memberSince')}</P>
               <span>${store.createdAt?.split(" ")[0]}</span>
             </div>
-            ${!props.uName? ""
-            : `<div class="flex flex-col gap-2">
+            ${store.nickname !== props.uName? "" : `<div class="flex flex-col gap-2">
           <!-- 2FA Toggle -->
           <div class="flex flex-col gap-4">
               <div class="flex items-center gap-2">
@@ -81,9 +80,10 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
                         after:content-[''] after:absolute after:top-0.5 after:left-[2px] 
                       after:bg-white after:border-gray-300 after:border 
                         after:rounded-full after:h-5 after:w-5 after:transition-all
-                      peer-checked:bg-pongblue"></div>
+                      peer-checked:bg-pongblue">
+                      </div>
                     </label>
-                </div>
+              </div>
             
             <!-- QR Code Container (initially hidden) -->
             <div id="qrCodeContainer" class="hidden">
