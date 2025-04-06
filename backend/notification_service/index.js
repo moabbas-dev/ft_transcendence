@@ -12,10 +12,10 @@ database.initializeTables()
 
 const fastify = Fastify({
   logger: true,
-  // https: {
-  //   key: fs.readFileSync('./ssl/server.key'),
-  //   cert: fs.readFileSync('./ssl/server.crt'),
-  // }
+//   https: {
+//     key: fs.readFileSync('./ssl/server.key'),
+//     cert: fs.readFileSync('./ssl/server.crt'),
+//   }
 })
 
 dotenv.config();
@@ -33,7 +33,7 @@ fastify.register(NotificationRoutes, {
   prefix: '/api/notifications'
 });
 
-fastify.addHook("preHandler", auth)
+// fastify.addHook("preHandler", auth)
 
 fastify.get('/', async (request, reply) => {
     return { message: 'Notifications API WOOOOOOO!' };

@@ -7,6 +7,7 @@ const fastifyCookie = require('@fastify/cookie');
 const fastifySession = require('@fastify/session');
 const path = require('path');
 const fs = require('fs');
+const { auth } = require('./src/middlewares/auth')
 
 // const fastify = Fastify({
 // 	// https: {
@@ -25,7 +26,7 @@ const fastify = Fastify({
 
 // Register multipart plugin to handle file uploads
 fastify.register(require('@fastify/multipart'));
-
+// fastify.addHook("preHandler", auth)
 fastify.register(require('@fastify/static'), {
 	root: path.join(__dirname, 'uploads'),
 	prefix: '/uploads/',

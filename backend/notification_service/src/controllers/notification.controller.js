@@ -64,6 +64,21 @@ class NotificationController {
 	async getAllNotifications() {
 		return await this.notificationModel.getAllNotifications();
 	}
-}
 
+	static async sendEmailNotification(request, reply) {
+		const { userId } = request.params;
+		const { email, subject, body } = request.body;
+		try {
+			await this.notificationModel.create({ senderId: null, receiverId: userId, type: "email", content: body });
+			try {
+				await sendEmail(email, subject, null, body);
+			} catch (err) {
+				return reply.code(500).send({ message: "Error sending the email!", error: err.message });
+			}
+			return reply.code(200).send({ message: "Email message sent successfully!" });
+		} catch (err) {
+			return reply.code(500).send({ message: "Error sending the email!", error: err.message });
+		}
+	}	
+}
 export default NotificationController

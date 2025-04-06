@@ -2,7 +2,6 @@
 /data
 /node_modules
 /uploads
-/ssl
 
 # debug
 npm-debug.log*

@@ -2,6 +2,7 @@ import { createComponent } from "../../utils/StateManager.js";
 import store from "../../../store/store.js";
 import axios from "axios";
 import { t } from "../../languages/LanguageController.js";
+import countryList from "country-list";
 
 interface UserInfoProps {
   uName: string;
@@ -12,9 +13,10 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
     const token = store.accessToken;
     // Make the API call with proper authorization headers
     axios
-      .get(`http://localhost:8001/auth/users/nickname/${props.uName}`, {
+      .get(`/authentication/auth/users/nickname/${props.uName}`, {
         headers: {
           Authorization: `Bearer ${token}`,
+          'x-api-key': import.meta.env.VITE_AUTHENTICATION_API_KEY
         },
       })
       .then((response) => {
@@ -31,34 +33,41 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
   const container = document.createElement("div");
   container.innerHTML = `
         <div class="flex flex-col gap-4">
-          <div class="flex justify-center flex-wrap gap-2 overflow-y-auto">
+          <div class="flex justify-center flex-wrap gap-2 overflow-y-auto pb-1 px-1">
               <div class="flex-1 min-w-[250px]">
                 <label class="block font-semibold">${t('profile.infoTab.fullname')}</label>
-                <input type="text" class="border border-gray-300 p-1 w-full" placeholder="Full name" id="fullName" value=${
-                  store.fullName
-                }>
-              </div>  
+                <input id="fullName" type="text" class="border border-gray-300 p-1 w-full
+                 rounded-md focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue" placeholder="Full name" id="fullName" value="Loading...">
+              </div>
+              <div class="flex-1 min-w-[250px]">
+                <label class="block font-semibold">Nickname</label>
+                <input id="nickname-value" type="text" class="border border-gray-300 p-1 w-full
+                rounded-md focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue" value="Loading...">
+              </div>
               <div class="flex-1 min-w-[250px]">
                 <label class="block font-semibold">${t('profile.infoTab.age')}</label>
-                <input type="text" class="border border-gray-300 p-1 w-full" placeholder="Age" value="23">
+                <input type="text" class="border border-gray-300 p-1 w-full
+                rounded-md focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue" placeholder="Age" value="Loading...">
               </div>
               <div class="flex-1 min-w-[250px]">
                 <label class="block font-semibold">${t('profile.infoTab.country')}</label>
-                <input type="text" class="border border-gray-300 p-1 w-full" placeholder="Country" value="Lebanon">
+                <select id="country-select" name="country" 
+                class="w-full p-1 border cursor-pointer border-gray-300 rounded-md focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue appearance-none bg-white">
+                  <option value="" disabled selected>Loding...</option>
+                </select>
               </div>
               <div class="flex-1 min-w-[250px]">
                 <label class="block font-semibold">Email:</label>
-                <input type="text" class="border border-gray-300 p-1 w-full" placeholder="Email" value="${store.email}">
+                <input type="text" class="border border-gray-300 p-1 w-full
+                rounded-md focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue" placeholder="Email" value="Loading...">
               </div>
             </div>
             <div class="flex-1 min-w-[250px] border-b-2">
-              <p class="block font-semibold">${t('profile.infoTab.memberSince')}</P>
-              <p>18/3/2025</p>
+              <p class="inline-block font-semibold">${t('profile.infoTab.memberSince')}</P>
+              <span>${store.createdAt?.split(" ")[0]}</span>
             </div>
-            ${
-              props.uName
-                ? " "
-                : `<div class="flex flex-col gap-2">
+            ${!props.uName? ""
+            : `<div class="flex flex-col gap-2">
           <!-- 2FA Toggle -->
           <div class="flex flex-col gap-4">
               <div class="flex items-center gap-2">
@@ -104,49 +113,68 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
         </div>
         </div>            
     </div>`
-            }
+    }
           
     `;
+    const countryInput = container.querySelector("#country-select") as HTMLSelectElement;
+    const countries = countryList.getNames();
+    
+    countries.forEach(country => {
+      const option = document.createElement("option");
+      option.value = country;
+      option.textContent = country;
+    
+      countryInput.appendChild(option);
+    });
+    
 
   function updateUIWithUserData(userData: any, container: HTMLDivElement) {
     // Update nickname
-    const fullNameElement = container.querySelector(
-      "#fullName"
-    ) as HTMLInputElement;
+    const fullNameElement = container.querySelector("#fullName") as HTMLInputElement;
     if (fullNameElement) {
       fullNameElement.value = userData.full_name;
-      fullNameElement.readOnly = true;
-      fullNameElement.classList.add('bg-gray-200'); 
 
+      if (store.nickname !== userData.nickname) {
+        fullNameElement.readOnly = true;
+      }
+      // fullNameElement.classList.add('bg-gray-200');
     }
     // Update age
-    const ageInput = container.querySelector(
-      'input[placeholder="Age"]'
-    ) as HTMLInputElement;
+    const ageInput = container.querySelector('input[placeholder="Age"]') as HTMLInputElement;
     if (ageInput) {
       ageInput.value = userData.age?.toString();
-      ageInput.readOnly = true;
-      ageInput.classList.add('bg-gray-200'); 
-    }
-
-    // Update country
-    const countryInput = container.querySelector(
-      'input[placeholder="Country"]'
-    ) as HTMLInputElement;
-    if (countryInput) {
-      countryInput.value = userData.country;
-      countryInput.readOnly = true;
-      countryInput.classList.add('bg-gray-200'); 
+      if (store.nickname !== userData.nickname) {
+        ageInput.readOnly = true;
+      }
+      // ageInput.classList.add('bg-gray-200');
     }
 
     // Update email
-    const emailInput = container.querySelector(
-      'input[placeholder="Email"]'
-    ) as HTMLInputElement;
+    const emailInput = container.querySelector('input[placeholder="Email"]') as HTMLInputElement;
     if (emailInput) {
       emailInput.value = userData.email;
-      emailInput.readOnly = true;
-      emailInput.classList.add('bg-gray-200'); 
+      if (store.nickname !== userData.nickname) {
+        emailInput.readOnly = true;
+      }
+      // emailInput.readOnly = true;
+      // emailInput.classList.add('bg-gray-200');
+    }
+
+    const nicknameInput =  container.querySelector('#nickname-value') as HTMLInputElement;
+    if (nicknameInput) {
+      nicknameInput.value = userData.nickname;
+      if (store.nickname !== userData.nickname) {
+        nicknameInput.readOnly = true;
+      }
+      // nicknameInput.classList.add('bg-gray-200');
+    }
+
+    // Update country
+    const selectedCountry = countryInput.querySelector(`option[value="${userData.country}"]`) as HTMLOptionElement;
+    selectedCountry.selected = true;
+    if (store.nickname !== userData.nickname) {
+      countryInput.disabled = true;
+      selectedCountry.disabled = true;
     }
   }
 

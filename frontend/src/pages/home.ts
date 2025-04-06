@@ -31,6 +31,29 @@ export default {
               </p>
             </div>
             <div class="flex flex-wrap justify-center sm:justify-start items-center gap-4">
+              ${store.userId ? `
+              <button id="chat-friends-btn" class="group relative text-lg rounded-lg text-white flex justify-center items-center bg-pongblue px-6 py-3 
+                transition-all duration-300 ease-in-out
+                hover:bg-pongblue/90 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]
+                focus:outline-none focus:ring-2 focus:ring-pongblue focus:ring-offset-2
+                animate-fade-up animate-duration-700 animate-delay-1000 animate-ease-linear">
+                <span class="relative z-10">Chat with Friends</span>
+              </button>
+              <button id="play-online-btn" class="group relative text-lg rounded-lg text-white flex justify-center items-center bg-pongblue px-6 py-3 
+                transition-all duration-300 ease-in-out
+                hover:bg-pongblue/90 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]
+                focus:outline-none focus:ring-2 focus:ring-pongblue focus:ring-offset-2
+                animate-fade-up animate-duration-700 animate-delay-[1200ms] animate-ease-linear">
+                <span class="relative z-10">Play Online</span>
+              </button>
+              <button id="start-tournament-btn" class="group relative text-lg rounded-lg text-white flex justify-center items-center bg-pongblue px-6 py-3 
+                transition-all duration-300 ease-in-out
+                hover:bg-pongblue/90 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]
+                focus:outline-none focus:ring-2 focus:ring-pongblue focus:ring-offset-2
+                animate-fade-up animate-duration-700 animate-delay-[1400ms] animate-ease-linear">
+                <span class="relative z-10">Start a Tournament</span>
+              </button>
+              ` : `
               <button id="register-btn" class="group relative text-lg rounded-lg text-white flex justify-center items-center bg-pongblue px-6 py-3 
                 transition-all duration-300 ease-in-out
                 hover:bg-pongblue/90 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]
@@ -52,6 +75,8 @@ export default {
                 animate-fade-up animate-duration-700 animate-delay-[1400ms] animate-ease-linear">
                 <span class="relative z-10">${t("home.playLocaly")}</span>
               </button>
+              `}
+
             </div>
           </div>
         </div>
@@ -68,7 +93,7 @@ export default {
         const userId = store.userId;
 
         if (!username || !userId) {
-          console.error("User information not found in localStorage");
+          // console.error("User information not found in sessionStorage");
           return;
         }
 
@@ -91,16 +116,28 @@ export default {
     const footerComp = Footer()
     container.appendChild(footerComp)
 
-    container.querySelector("#register-btn")!.addEventListener("click", () => {
+    container.querySelector("#register-btn")?.addEventListener("click", () => {
       navigate("/register");
     });
 
-    container.querySelector('#local-btn')!.addEventListener('click', () => {
+    container.querySelector('#local-btn')?.addEventListener('click', () => {
       navigate('/play/local-multi')
     })
 
-    container.querySelector('#ai-btn')!.addEventListener('click', () => {
+    container.querySelector('#ai-btn')?.addEventListener('click', () => {
       navigate('/play/local-ai')
+    })
+
+    container.querySelector("#play-online-btn")?.addEventListener("click", () => {
+      navigate("/play/online-game");
+    })
+
+    container.querySelector("#chat-friends-btn")?.addEventListener("click", () => {
+      navigate("/chat");
+    })
+
+    container.querySelector("#start-tournament-btn")?.addEventListener("click", () => {
+      navigate("/play/tournaments");
     })
 
     const canvas = document.getElementById("pongCanvas") as HTMLCanvasElement;
