@@ -1,5 +1,5 @@
 import { createComponent } from "../../utils/StateManager.js";
-import logoUrl from "/src/assets/profile.jpeg";
+import logoUrl from "../../assets/guests.png";
 import goldRank from "/src/assets/gold-medal.png";
 import { GamesHistory } from "./GmaesHistory.js";
 import { UserInfo } from "./UserInfo.js";
@@ -45,7 +45,7 @@ export const Profile = createComponent((props: ProfileProps) => {
           targetUserId: userData.id
         });
 
-        addFriendButton?.addEventListener("click", () => {
+        addFriendButton?.addEventListener("click", async () => {
           const fromUserId = store.userId;
           const toUsername = props.uName;
 
@@ -63,6 +63,15 @@ export const Profile = createComponent((props: ProfileProps) => {
                 from: fromUserId,
                 to: userData.id,
               });
+
+              // const body = {
+              //   senderId: parseInt(fromUserId),
+              //   recipientId: userData.id,
+              //   // content: ,
+              // }
+              // await axios.post('/notifications/api/notifications/friend-request', body).catch(err => {
+              //   console.error("Error sending message:", err);
+              // })
 
               // Update UI immediately - don't wait for server response
               addFriendButton.textContent = t("profile.requestSent");
@@ -204,8 +213,9 @@ export const Profile = createComponent((props: ProfileProps) => {
           </div>
           <div class="relative">
             <img 
-                src="${logoUrl}" 
+                src="${store.avatarUrl || logoUrl}" 
                 alt="profile picture" 
+                id="profile-picture"
                 class="size-14 sm:size-20 object-cover rounded-full border-2 border-pongblue"
             >
             <span class="absolute bottom-0 left-0 size-4 rounded-full
@@ -278,6 +288,51 @@ export const Profile = createComponent((props: ProfileProps) => {
   const messageUserButton = container.querySelector("#message-user") as HTMLButtonElement;
   const profileTabs = container.querySelector("#profile-tabs")!
   const friendsTab = container.querySelector("#friends-tab")!
+  const uploadImage = container.querySelector('#upload-photo')
+
+  uploadImage?.addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.className = 'hidden';
+    input.type = 'file';
+    input.accept = 'image/png, image/jpeg';
+  
+    input.addEventListener('change', async () => {
+      const file = input.files && input.files[0];
+      if (!file) return;
+  
+      const fileName = file.name.toLowerCase();
+      if (!(fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.jpeg'))) {
+        alert('Please upload a PNG or JPG image.');
+        return;
+      }
+  
+      // console.log('Selected file:', file);
+      // here we will send the file to the server then update the profile picture
+      // console.log(store.accessToken);
+      const formData = new FormData();
+      formData.append('avatar', file);
+      console.log(`Bearer ${store.accessToken}`);
+      
+      await axios.post(`/authentication/auth/uploads/${store.userId}`, formData, {
+        headers: {
+          authorization: `Bearer ${store.accessToken}`,
+          "x-api-key": import.meta.env.VITE_AUTHENTICATION_API_KEY,
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then((response) => {
+        console.log(response.data);
+        const imageUrl = `https://pong.local/${response.data.url}`;
+        const profileImage = container.querySelector('#profile-picture') as HTMLImageElement;
+        if (profileImage) {
+          profileImage.src = imageUrl;
+        }
+        store.update('avatarUrl', imageUrl)
+      }).catch((error) => {
+        console.error("gggg uploading image:", error);
+      })
+    });
+    input.click();
+  })
 
   overlay.addEventListener("click", () => {
     container.remove();
