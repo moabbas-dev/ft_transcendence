@@ -83,7 +83,7 @@ export const SignIn = createComponent((props: SignInProps) => {
 					const decodedToken: any = jwtDecode(signIn.data.accessToken);
 					store.update("accessToken", signIn.data.accessToken);
 					store.update("refreshToken", signIn.data.refreshToken);
-					store.update("sessionId", signIn.data.sessionId);
+					store.update("sessionUUID", signIn.data.sessUUID);
 					store.update("userId", decodedToken.userId);
 					store.update("email", decodedToken.email);
 					store.update("nickname", decodedToken.nickname);
@@ -94,11 +94,11 @@ export const SignIn = createComponent((props: SignInProps) => {
 					store.update("avatarUrl", decodedToken.avatarUrl);
 					store.update("isLoggedIn", true);
 					navigate("/play");
-					Toast.show(`Login successful, Welcome ${store.fullName}!`, "success");
+					Toast.show(`Login successful, Welcome ${decodedToken.fullName}!`, "success");
 				}
 			}
 			else {
-				store.update("sessionId", signIn.data.sessionId);
+				store.update("sessionUUID", signIn.data.sessUUID);
 				navigate("/register/twofactor");
 				Toast.show("First step is complete! Now moving to the 2fa code validation", "success");
 			}
@@ -161,10 +161,10 @@ export const SignIn = createComponent((props: SignInProps) => {
 		eyeIcon.classList.add(wasPassword ? 'bx-show' : 'bx-hide');
 	};
 
-	const googleBtn = form.querySelector('#google-sign');
-	googleBtn?.addEventListener('click', () => {
-		localStorage.setItem("googleAuth", "true");
-	});
+	// const googleBtn = form.querySelector('#google-sign');
+	// googleBtn?.addEventListener('click', () => {
+	// 	localStorage.setItem("googleAuth", "true");
+	// });
 
 	togglePassword.addEventListener('click', handleTogglePassword);
 	useCleanup(() => togglePassword.removeEventListener('click', handleTogglePassword))

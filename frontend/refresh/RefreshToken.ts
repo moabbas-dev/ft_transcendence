@@ -11,7 +11,7 @@ const getValidAccessToken = async (): Promise<string | null> => {
         if (error.response && error.response.status === 401) {
             try {
                 const { data } = await axios.post<{ accessToken: string }>(
-                    `http://localhost:8001/auth/jwt/refresh/${store.sessionId}`, 
+                    `http://localhost:8001/auth/jwt/refresh/${store.sessionUUID}`, 
                     { refreshToken: store.refreshToken }
                 );
                 

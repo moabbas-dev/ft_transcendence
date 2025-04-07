@@ -8,10 +8,10 @@ const qrcode = require('qrcode');
 class TwoFactorCodeController {
 
 	static async validateLoginCode(request, reply) {
-		const { sessionId } = request.params;
+		const { sessionUUID } = request.params;
 		const { code } = request.body;
 		try {
-			const session = await Session.getById(sessionId);
+			const session = await Session.getByUUID(sessionUUID);
 			if (!session)
 				return reply.code(404).send({ key: "session", message: "Session not found!" });
 
@@ -38,7 +38,7 @@ class TwoFactorCodeController {
 
 			// Generate tokens and update session
 			const { accessToken, refreshToken } = await generateTokens(user, reply.server);
-			await Session.updateAccessAndRefresh(sessionId, { refreshToken, accessToken });
+			await Session.updateAccessAndRefresh(session.id, { refreshToken, accessToken });
 			await User.updateUserStatus(userId, { status: "online" });
 
 			return reply.code(200).send({

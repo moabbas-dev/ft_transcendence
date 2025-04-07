@@ -147,3 +147,4 @@ import './router.js';
 //         : messageContainer.appendChild(messageWrapper);
 // }
 // });
+localStorage.setItem("isLoggedIn", localStorage.getItem("sessionUUID") ? "true" : "false");

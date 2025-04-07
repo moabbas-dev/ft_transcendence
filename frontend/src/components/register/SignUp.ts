@@ -171,7 +171,6 @@ export const SignUp = createComponent((props: SignUpProps) => {
 					country: countryInput.value,
 					google_id: null
 				};
-				
 				await axios.post("http://localhost:8001/auth/users", body);
 				Toast.show(`SignUp successful! Go to your email ${emailInput.value} to activate your account`, "success");
 				// navigate('/register'); // You can edit it
@@ -218,10 +217,10 @@ export const SignUp = createComponent((props: SignUpProps) => {
 		});
 	};
 
-	const googleBtn = form.querySelector('#google-sign');
-	googleBtn?.addEventListener('click', () => {
-		localStorage.setItem("googleAuth", "true");
-	});
+	// const googleBtn = form.querySelector('#google-sign');
+	// googleBtn?.addEventListener('click', () => {
+	// 	localStorage.setItem("googleAuth", "true");
+	// });
 
 	togglePasswordElements.forEach(element => {
 		element.addEventListener('click', handleTogglePassword);
