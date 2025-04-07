@@ -72,20 +72,29 @@ export default {
 			)
 		}
 
-		const renderTwoFactor = () => {
+		const renderTwoFactor = (params?: { [key: string]: string | number }) => {
 			animateTransition(() =>
 				TwoFactorSend(
-					{ onSwitchToSignIn: renderSignIn }
+					params
 				)
 			)
 		}
 
-		if (params?.uuid)
+		// if (params?.uuid)
+		// 	renderResetPass(params);
+		// else if (window.location.pathname === "/register/twofactor")
+		// 	renderTwoFactor();
+		// else
+		// 	renderSignIn();
+		if (params?.uuid && window.location.pathname.startsWith("/reset_password")) {
 			renderResetPass(params);
-		else if (window.location.pathname === "/register/twofactor")
+		} else if (params?.uuid && window.location.pathname.startsWith("/register/twofactor")) {
+			renderTwoFactor(params); // pass uuid if needed
+		} else if (window.location.pathname === "/register/twofactor") {
 			renderTwoFactor();
-		else
+		} else {
 			renderSignIn();
+		}
 
 		const canvas = document.getElementById('pongCanvas') as HTMLCanvasElement;
 		if (canvas)

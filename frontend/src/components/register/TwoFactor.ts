@@ -11,7 +11,7 @@ interface TwoFactorSendProps {
 	onSwitchToSignIn: () => void,
 }
 
-export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
+export const TwoFactorSend = createComponent((params?: { [key: string]: string } ) => {
 	const form = document.createElement('div');
 	form.className = `w-[93vw] sm:w-96 xl:w-[30vw] bg-white rounded-lg p-4 sm:p-8`;
 	form.innerHTML = `
@@ -33,17 +33,41 @@ export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
 		</div>
 	`;
 
-	if (localStorage.getItem("googleAuth") && localStorage.getItem("googleAuth") === "true") {
+	// if (localStorage.getItem("googleAuth") && localStorage.getItem("googleAuth") === "true") {
+	// 	(async () => {
+	// 		try {
+	// 			const googleData = await axios.get("http://localhost:8001/auth/google/signIn", {
+	// 				withCredentials: true
+	// 			});
+	// 			store.update("sessionId", googleData.data.sessionId);
+	// 			Toast.show("First step is complete! Now moving to the 2FA code validation", "success");
+	// 			localStorage.removeItem("googleAuth");
+	// 		} catch (error: any) {
+	// 			localStorage.removeItem("googleAuth");
+	// 			if (error.response) {
+	// 				if (error.response.status === 401) {
+	// 					if (error.response.data.key !== "cookie")
+	// 						Toast.show(`Error: ${error.response.data.message}`, "error");
+	// 				}
+	// 				else if (error.response.status === 500)
+	// 					Toast.show(`Server error: ${error.response.data.error}`, "error");
+	// 				else
+	// 					Toast.show(`Unexpected error: ${error.response}`, "error");
+	// 			} else if (error.request)
+	// 				Toast.show(`No response from server: ${error.request}`, "error");
+	// 			else
+	// 				Toast.show(`Error setting up the request: ${error.message}`, "error");
+	// 		}
+	// 	})();
+	// }
+	if (params?.uuid) {
 		(async () => {
 			try {
-				const googleData = await axios.get("https://localhost:8001/auth/google/signIn", {
-					withCredentials: true
-				});
-				store.update("sessionId", googleData.data.sessionId);
+				const data = await axios.get(`http://localhost:8001/auth/google/signIn/${params.uuid}`);
+				store.update("sessionUUID", data.data.sessUUID);
 				Toast.show("First step is complete! Now moving to the 2FA code validation", "success");
-				localStorage.removeItem("googleAuth");
+				return navigate("/register/twofactor");
 			} catch (error: any) {
-				localStorage.removeItem("googleAuth");
 				if (error.response) {
 					if (error.response.status === 401) {
 						if (error.response.data.key !== "cookie")
@@ -77,7 +101,7 @@ export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
 				code: code
 			};
 			try {
-				const userData = await axios.post(`https://localhost:8001/auth/twoFactor/login/${store.sessionId}`, body);
+				const userData = await axios.post(`http://localhost:8001/auth/twoFactor/login/${store.sessionUUID}`, body);
 				const decodedToken: any = jwtDecode(userData.data.accessToken);
 				store.update("accessToken", userData.data.accessToken);
 				store.update("refreshToken", userData.data.refreshToken);
@@ -91,7 +115,7 @@ export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
 				store.update("avatarUrl", decodedToken.avatarUrl);
 				store.update("isLoggedIn", true);
 				navigate("/play");
-				Toast.show(`Login successful, Welcome ${store.fullName}!`, "success");
+				Toast.show(`Login successful, Welcome ${decodedToken.fullName}!`, "success");
 			} catch (err: any) {
 				if (err.response) {
 					if (err.response.status === 400 || err.response.status === 403 || err.response.status === 404)
