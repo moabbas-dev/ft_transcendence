@@ -2,6 +2,7 @@ import { createComponent } from "../../utils/StateManager.js";
 import store from "../../../store/store.js";
 import axios from "axios";
 import { t } from "../../languages/LanguageController.js";
+import Toast from "../../toast/Toast.js";
 
 interface UserInfoProps {
   uName: string;
@@ -34,9 +35,8 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
           <div class="flex justify-center flex-wrap gap-2 overflow-y-auto">
               <div class="flex-1 min-w-[250px]">
                 <label class="block font-semibold">${t('profile.infoTab.fullname')}</label>
-                <input type="text" class="border border-gray-300 p-1 w-full" placeholder="Full name" id="fullName" value=${
-                  store.fullName
-                }>
+                <input type="text" class="border border-gray-300 p-1 w-full" placeholder="Full name" id="fullName" value=${store.fullName
+    }>
               </div>  
               <div class="flex-1 min-w-[250px]">
                 <label class="block font-semibold">${t('profile.infoTab.age')}</label>
@@ -55,10 +55,9 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
               <p class="block font-semibold">${t('profile.infoTab.memberSince')}</P>
               <p>18/3/2025</p>
             </div>
-            ${
-              props.uName
-                ? " "
-                : `<div class="flex flex-col gap-2">
+            ${props.uName
+      ? " "
+      : `<div class="flex flex-col gap-2">
           <!-- 2FA Toggle -->
           <div class="flex flex-col gap-4">
               <div class="flex items-center gap-2">
@@ -91,9 +90,19 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
                     </div>
 
                     <div class="mt-4">
+                        <div id="auth-code" class="flex gap-4 justify-center">
+					                <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+					                <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+					                <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+					                <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+					                <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+					                <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+				                </div>
+                        <!--
                         <button id="regenerateQrBtn" class="bg-pongblue text-white px-4 py-1 rounded hover:bg-blue-700 transition-colors">
                             <i class="fas fa-sync-alt mr-1"></i> ${t('profile.infoTab.generateNewQrcode')}
                         </button>
+                        -->
                     </div>
                 </div>
             </div>
@@ -104,10 +113,9 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
         </div>
         </div>            
     </div>`
-            }
+    }
           
     `;
-
   function updateUIWithUserData(userData: any, container: HTMLDivElement) {
     // Update nickname
     const fullNameElement = container.querySelector(
@@ -116,7 +124,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
     if (fullNameElement) {
       fullNameElement.value = userData.full_name;
       fullNameElement.readOnly = true;
-      fullNameElement.classList.add('bg-gray-200'); 
+      fullNameElement.classList.add('bg-gray-200');
 
     }
     // Update age
@@ -126,7 +134,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
     if (ageInput) {
       ageInput.value = userData.age?.toString();
       ageInput.readOnly = true;
-      ageInput.classList.add('bg-gray-200'); 
+      ageInput.classList.add('bg-gray-200');
     }
 
     // Update country
@@ -136,7 +144,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
     if (countryInput) {
       countryInput.value = userData.country;
       countryInput.readOnly = true;
-      countryInput.classList.add('bg-gray-200'); 
+      countryInput.classList.add('bg-gray-200');
     }
 
     // Update email
@@ -146,7 +154,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
     if (emailInput) {
       emailInput.value = userData.email;
       emailInput.readOnly = true;
-      emailInput.classList.add('bg-gray-200'); 
+      emailInput.classList.add('bg-gray-200');
     }
   }
 
@@ -154,7 +162,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
     "#twoFactorToggle"
   ) as HTMLInputElement;
   const qrCodeContainer = container.querySelector("#qrCodeContainer");
-  const qrCodeImage = container.querySelector("#qrCodeImage");
+  const qrCodeImage = container.querySelector("#qrCodeImage") as HTMLDivElement;
   const secretKeyElement = container.querySelector("#secretKey");
   const regenerateQrBtn = container.querySelector("#regenerateQrBtn");
 
@@ -279,11 +287,28 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
       if (this.checked) {
         // Show QR code when 2FA is enabled
         qrCodeContainer.classList.remove("hidden");
+        try {
+          const res = await axios.put(`http://localhost:8001/auth/twoFactor/enable/${store.userId}`, {}, {
+            headers: {
+              Authorization: `Bearer ${store.accessToken}`,
+            },
+          });
+          qrCodeImage.innerHTML = `<img src="${res.data.qrCodeDataUrl}" alt="QR Code" class="w-full h-full object-contain" />`;
+        } catch (error: any) {
+          if (error.response) {
+            if (error.response.status === 404 || error.response.status === 403 || error.response.status === 401)
+              Toast.show(`Error: ${error.response.data.message}`, "error");
+            else if (error.response.status === 500)
+              Toast.show(`Server error: ${error.response.data.error}`, "error");
+            else
+              Toast.show(`Unexpected error: ${error.response.data}`, "error");
+          } else if (error.request)
+            Toast.show(`No response from server: ${error.request}`, "error");
+          else
+            Toast.show(`Error setting up the request: ${error.message}`, "error");
+        }
 
-        // Generate a new 2FA setup
-        const secretKey = await setupNewTwoFactor();
-
-        console.log("2FA enabled, new secret generated:", secretKey);
+        // console.log("2FA enabled, new secret generated:", secretKey);
 
         // In a real app, you would send this to your server
         // to associate with the user's account
