@@ -7,12 +7,11 @@ interface ChatItemProps {
     fullname: string,
     isFriend: boolean,
     status: string,
-    unreadCount: number, // to be handled later
+    unreadCount: number,
     onChatSelect?: (user: { nickname: string, id: number, full_name: string }) => void
 }
 
 export const ChatItem = createComponent((props: ChatItemProps) => {
-    props.unreadCount = 20;
     const chatItem = document.createElement('div');
     chatItem.className = 'user-item flex items-center p-3 rounded-lg transition-all duration-200 hover:bg-ponghover hover:cursor-pointer hover:shadow-md border-b';
     

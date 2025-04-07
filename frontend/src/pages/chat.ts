@@ -57,6 +57,48 @@ export default {
 
         `;
 
+    // Add this at the beginning of your render function in chat.ts
+let unreadMessageCounts = new Map<number, number>();
+
+// Add a function to get unread counts
+const getUnreadCount = (userId: number): number => {
+  return unreadMessageCounts.get(userId) || 0;
+};
+
+// Set up event listener for unread message counts
+chatService.on("messages:unread", (data: any) => {
+  if (data && data.unreadCounts) {
+    // Convert the data to a Map
+    unreadMessageCounts = new Map(
+      Object.entries(data.unreadCounts).map(([key, value]) => [parseInt(key), value as number])
+    );
+
+    updateUnreadCountBadges();
+  }
+});
+    
+
+  // Add this new function to update only the unread badges
+function updateUnreadCountBadges() {
+  const userItems = friendsList.querySelectorAll(".user-item");
+  userItems.forEach((item) => {
+    const userId = parseInt((item as HTMLElement).dataset.userId || "0");
+    if (userId) {
+      const unreadCount = getUnreadCount(userId);
+      const badgeElement = item.querySelector(".unread-badge");
+      
+      if (badgeElement) {
+        if (unreadCount > 0) {
+          badgeElement.textContent = unreadCount.toString();
+          badgeElement.classList.remove("hidden");
+        } else {
+          badgeElement.classList.add("hidden");
+        }
+      }
+    }
+  });
+}
+
     // Get references to elements
     const friendsList = container.querySelector(".friends-list")!;
     const chat = container.querySelector(".chat")!;
@@ -168,6 +210,11 @@ export default {
           chatService.send("friends:get", {
             userId: store.userId,
           });
+
+          // request unread message counts
+          chatService.send("messages:unread:get", {
+          userId: store.userId
+          });
         }
       } catch (error) {
         console.error("Error loading friends list:", error);
@@ -211,6 +258,7 @@ export default {
         onlineTitle.textContent = "Online";
         friendsList.appendChild(onlineTitle);
 
+
         // Render online friends
         onlineFriends.forEach((friend) => {
           const chatItemElement = ChatItem({
@@ -219,12 +267,14 @@ export default {
             fullname: friend.full_name,
             isFriend: true,
             status: true,
+            unreadCount: getUnreadCount(friend.id),
             onChatSelect: (user: any) => {
               (chatComponent as any).setActiveUser(user);
               updateActiveChatItem(friend.nickname);
             },
           });
           chatItemElement.dataset.username = friend.nickname;
+          chatItemElement.dataset.userId = friend.id.toString();
           friendsList.appendChild(chatItemElement);
         });
       }
@@ -248,12 +298,14 @@ export default {
             fullname: friend.full_name,
             isFriend: true,
             isOnline: false,
+            unreadCount: getUnreadCount(friend.id),
             onChatSelect: (user: any) => {
               (chatComponent as any).setActiveUser(user);
               updateActiveChatItem(friend.nickname);
             },
           });
           chatItemElement.dataset.username = friend.nickname;
+          chatItemElement.dataset.userId = friend.id.toString();
           friendsList.appendChild(chatItemElement);
         });
       }

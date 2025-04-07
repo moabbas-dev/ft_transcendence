@@ -66,6 +66,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
               <span>${store.createdAt?.split(" ")[0]}</span>
             </div>
             ${store.nickname !== props.uName? "" : `<div class="flex flex-col gap-2">
+            
           <!-- 2FA Toggle -->
           <div class="flex flex-col gap-4">
               <div class="flex items-center gap-2">

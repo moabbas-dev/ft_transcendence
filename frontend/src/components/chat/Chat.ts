@@ -187,7 +187,6 @@ export const Chat = createComponent(
             .map((message) => {
               const isCurrentUser = message.senderId == currentUserId;
 
-              console.log(isCurrentUser);
               const messageTime = new Date(
                 message.timestamp
               ).toLocaleTimeString([], {
@@ -281,8 +280,6 @@ export const Chat = createComponent(
         // Clear existing emoticons
         emoticonContainer.innerHTML = "";
 
-        // Define your emoticons - this is a subset from your paste.txt
-
         // Create emoticon elements
         emoticons.forEach((emo) => {
           const emoticonDiv = document.createElement("div");
@@ -362,6 +359,9 @@ export const Chat = createComponent(
       renderChat();
       scrollToBottom();
 
+      // Clear input
+      messageInput.innerText = "";
+
       // Create proper message payload
       const newMessage = {
         from: currentUser,
@@ -372,9 +372,6 @@ export const Chat = createComponent(
 
       // Send via WebSocket
       chatService.send("message:private", newMessage);
-
-      // Clear input
-      messageInput.innerText = "";
     };
 
     const scrollToBottom = () => {
@@ -403,6 +400,7 @@ export const Chat = createComponent(
         // Get message history for this room
         if (chatService.isConnected()) {
           chatService.getMessageHistory(roomId);
+          chatService.markMessagesAsRead(roomId);
         }
       }
 
@@ -413,11 +411,19 @@ export const Chat = createComponent(
     const initWebSocketEvents = () => {
       // Listen for received messages
       chatService.on("message:received", (data: any) => {
+        console.log("Received message:", data);
+        
+        if (!data || !data.message) {
+          console.error("Invalid message data received");
+          return;
+        }
+        
         const { message, roomId: msgRoomId } = data;
-
+        
         // Only add message if it's for the current room
         if (msgRoomId === roomId) {
-          messages.unshift(message);
+          // Add the new message to the messages array
+          messages = [message, ...messages];
           renderChat();
           scrollToBottom();
         }
@@ -425,11 +431,25 @@ export const Chat = createComponent(
 
       // Listen for sent message confirmations
       chatService.on("message:sent", (data: any) => {
+        console.log("Message sent confirmation:", data);
+        
+        if (!data || !data.message) {
+          console.error("Invalid message sent data received");
+          return;
+        }
+        
         const { message, roomId: msgRoomId } = data;
-
-        // Only add message if it's for the current room
-        if (msgRoomId === roomId) {
-          messages.unshift(message);
+        
+        // Check if this message is already in our messages array
+        // (to avoid duplicates from the optimistic update)
+        const messageExists = messages.some(m => 
+          m.content === message.content && 
+          m.timestamp === message.timestamp
+        );
+        
+        // Only add message if it's for the current room and doesn't already exist
+        if (msgRoomId === roomId && !messageExists) {
+          messages = [message, ...messages];
           renderChat();
           scrollToBottom();
         }

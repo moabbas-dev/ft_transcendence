@@ -1,7 +1,7 @@
 import { blockUser, getBlockedUsers, unblockUser } from "../services/blockService.js";
 import { getUser, createOrUpdateUser, getUserByUsername, createChatRoom, getUsersFromAuth } from "../services/userService.js";
 import { createFriendRequest, cancelFriendRequest, addFriend, getPendingFriendRequests, removeFriend, getFriendshipStatus } from "../services/friendService.js"
-import { saveMessage, getMessages } from "../services/chatService.js"
+import { saveMessage, getMessages, getUnreadMessageCount, markMessagesAsRead } from "../services/chatService.js"
 
 export function setupWebSocketHandlers(wsAdapter, fastify) {
   // Track online users mapping username to clientId
@@ -30,7 +30,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       }
 
       // Track user as online
-      onlineUsers.set(clientId, username);
+      onlineUsers.set(clientId, userId);
 
       //   // Send friend list to user with online status
       //   const friendsWithStatus = await Promise.all(
@@ -260,9 +260,23 @@ wsAdapter.on("friend:decline", async ({ clientId, payload }) => {
       await saveMessage(newMessage, roomId);
 
       // Send the message to recipient if online
-      // const toClientId = onlineUsers.get(to);
-      // if (toClientId) {
-      wsAdapter.sendTo(to, "message:received", {
+      let recipientClientId = null;
+      for (const [wsClientId, userId] of onlineUsers.entries()) {
+        if (userId === to.toString()) {
+          recipientClientId = wsClientId;
+          break;
+        }
+      }
+  
+      // Send the message to recipient if online
+      if (recipientClientId) {
+        wsAdapter.sendTo(recipientClientId, "message:received", {
+          roomId,
+          message: newMessage,
+        });
+      }
+      // Also send confirmation to sender
+      wsAdapter.sendTo(clientId, "message:sent", {
         roomId,
         message: newMessage,
       });
@@ -271,13 +285,11 @@ wsAdapter.on("friend:decline", async ({ clientId, payload }) => {
       wsAdapter.sendTo(to, "messages:unread", {
         unreadCounts
       });
-      // }
 
-      // Also send confirmation to sender
-      // wsAdapter.sendTo(clientId, "message:sent", {
-      //   roomId,
-      //   message: newMessage,
-      // });
+      // console.log("nb of msgs: ",unreadCounts);
+      
+
+
     } catch (error) {
       fastify.log.error("Error in message:private handler", error);
       wsAdapter.sendTo(clientId, "error", {
@@ -285,6 +297,67 @@ wsAdapter.on("friend:decline", async ({ clientId, payload }) => {
       });
     }
   });
+
+
+  wsAdapter.on("messages:unread:get", async ({ clientId, payload }) => {
+    try {
+      const { userId } = payload;
+      
+      // Get unread message counts from database
+      const unreadCounts = await getUnreadMessageCount(userId);
+      
+      // Send to client
+      wsAdapter.sendTo(clientId, "messages:unread", {
+        unreadCounts
+      });
+    } catch (error) {
+      console.error("Error getting unread message counts:", error);
+      wsAdapter.sendTo(clientId, "error", {
+        message: "Failed to get unread message counts",
+        details: error.message
+      });
+    }
+  });
+
+
+  // Add this new event handler in websocketController.js where other message handlers are
+wsAdapter.on("messages:mark_read", async ({ clientId, payload }) => {
+  try {
+    const { roomId, userId } = payload;
+    
+    // Validate input
+    if (!roomId || !userId) {
+      throw new Error('Missing roomId or userId');
+    }
+    
+    console.log(`Marking messages as read in room ${roomId} for user ${userId}`);
+    
+    // Update message read status in database
+    // This would be a new function you need to add to chatService.js
+    await markMessagesAsRead(roomId, userId);
+    
+    // Send confirmation back to client
+    wsAdapter.sendTo(clientId, "messages:marked_read", {
+      roomId,
+      success: true
+    });
+    
+    // Get the updated unread counts for this user
+    const unreadCounts = await getUnreadMessageCount(userId);
+    
+    // Send updated unread counts to user
+    wsAdapter.sendTo(clientId, "messages:unread", {
+      unreadCounts
+    });
+    
+  } catch (error) {
+    console.error("Error marking messages as read:", error);
+    wsAdapter.sendTo(clientId, "error", {
+      message: "Failed to mark messages as read",
+      details: error.message
+    });
+  }
+});
 
   // Handle message history request
   wsAdapter.on("messages:history", async ({ clientId, payload }) => {
@@ -460,6 +533,3 @@ wsAdapter.on("friend:decline", async ({ clientId, payload }) => {
     }
   });
 }
-
-
-
