@@ -205,6 +205,21 @@ class ChatWebSocketService {
   }
 
   /**
+ * Mark all messages in a room as read
+ */
+public markMessagesAsRead(roomId: string): void {
+  if (!this.userId) {
+    console.error("Not authenticated");
+    return;
+  }
+
+  this.send("messages:mark_read", {
+    roomId,
+    userId: this.userId
+  });
+}
+
+  /**
    * Get list of pending friend requests
    */
   public getPendingFriendRequests(): void {
