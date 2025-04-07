@@ -1,4 +1,4 @@
-export async function auth(request, reply) {
+export default async function auth(request, reply) {
 	const apiKey = request.headers['x-api-key']
 	const knownKey = process.env.API_KEY
 	

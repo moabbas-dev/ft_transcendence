@@ -93,9 +93,9 @@ async function NotificationRoutes(fastify, options) {
 		  return reply.code(400).send({ error: error.message });
 		}
 	});
-	fastify.post('/email/:userId', async (req, reply) => {
+	fastify.post('/email', async (req, reply) => {
 		try {
-			await notificationController.sendEmailNotification()
+			await notificationController.sendEmailNotification(req, reply)
 		} catch (error) {
 			return reply.code(400).send({ error: error.message });
 		}

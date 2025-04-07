@@ -6,7 +6,8 @@ const NotificationSchema = z.object({
 		'TOURNAMENT_ALERT',
 		'FRIEND_REQUEST',
 		'FRIEND_ACCEPTED',
-		'GAME_CHALLENGE'
+		'GAME_CHALLENGE',
+		'email'
 	]),
 	senderId: z.number().optional(),
 	recipientId: z.number(),

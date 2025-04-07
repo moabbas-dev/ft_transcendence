@@ -345,7 +345,7 @@ export const Chat = createComponent(
         recipientId: activeUser.id,
         content,
       }
-      await axios.post('/notifications/api/notifications/user-message', body).catch(err => {
+      await axios.post('http://localhost:3003/api/notifications/user-message', body).catch(err => {
         console.error("Error sending message:", err);
       })
 

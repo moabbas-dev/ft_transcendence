@@ -1,33 +1,42 @@
-require('dotenv').config();
-const Fastify = require('fastify');
-const cors = require('@fastify/cors');
-const { createTable, closeDatabase } = require('./src/db/initDb');
-const {auth} = require('./src/middlewares/auth')
-const fs = require('fs')
-// Enable CORS on Fastify
+import Fastify from 'fastify';
+import cors from '@fastify/cors';
+import dotenv from 'dotenv';
+import database from './src/config/database.js';
+import NotificationModel from './src/models/notification.model.js';
+import NotificationController from './src/controllers/notification.controller.js';
+import NotificationRoutes from './src/routes/notification.routes.js';
+import auth from './src/middlewares/auth.js';
+import fs from 'fs'
+
+dotenv.config();
+database.initializeTables()
 
 const fastify = Fastify({
-	logger: true,
-	// https: {
-	//   key: fs.readFileSync('./ssl/server.key'),
-	//   cert: fs.readFileSync('./ssl/server.crt'),
-	// }
-})  
+  logger: true,
+//   https: {
+//     key: fs.readFileSync('./ssl/server.key'),
+//     cert: fs.readFileSync('./ssl/server.crt'),
+//   }
+})
+
+
+const notificationModel = new NotificationModel(database.getInstance());
+const notificationService = new NotificationController(notificationModel);
+fastify.decorate('NotificationController', notificationService);
 
 fastify.register(cors, {
-	origin: 'http://localhost:5173', // Set this to your specific frontend domain for production
-	methods: ['GET', 'POST', 'PUT', 'DELETE'],
+	origin: process.env.FRONTEND_DOMAIN,
+	methods: ['GET', 'POST', 'PATCH'],
+});
+
+fastify.register(NotificationRoutes, {
+  prefix: '/api/notifications'
 });
 
 // fastify.addHook("preHandler", auth)
 
-createTable();
-
-fastify.register(require('./src/routes/NotificationRoutes'));
-
-// Test route
 fastify.get('/', async (request, reply) => {
-	return { message: 'Hello from the notifications service!' };
+    return { message: 'Notifications API WOOOOOOO!' };
 });
 
 const handleShutdown = async (signal) => {
@@ -47,15 +56,15 @@ const handleShutdown = async (signal) => {
 process.on('SIGINT', () => handleShutdown('SIGINT'));
 process.on('SIGTERM', () => handleShutdown('SIGTERM'));
 
-// Start the server
 const start = async () => {
-	try {
-		await fastify.listen({ port: 8000, host: '0.0.0.0' });
-		fastify.log.info(`Server listening on http://localhost:${fastify.server.address().port}`);
-	} catch (err) {
-		fastify.log.error(err);
-		process.exit(1);
-	}
+  try {
+    await fastify.listen({ port: process.env.PORT, host: '0.0.0.0' }, () => {
+      
+    });
+  } catch (err) {
+    fastify.log.error(err);
+    process.exit(1);
+  }
 };
 
 start();

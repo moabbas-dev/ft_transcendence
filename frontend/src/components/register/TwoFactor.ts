@@ -36,7 +36,7 @@ export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
 	if (localStorage.getItem("googleAuth") && localStorage.getItem("googleAuth") === "true") {
 		(async () => {
 			try {
-				const googleData = await axios.get("/authentication/auth/google/signIn", {
+				const googleData = await axios.get("http://localhost:8001/auth/google/signIn", {
 					withCredentials: true
 				});
 				store.update("sessionId", googleData.data.sessionId);
@@ -77,7 +77,7 @@ export const TwoFactorSend = createComponent((props: TwoFactorSendProps) => {
 				code: code
 			};
 			try {
-				const userData = await axios.post(`/authentication/auth/twoFactor/login/${store.sessionId}`, body, {headers: {"x-api-key": import.meta.env.VITE_AUTHENTICATION_API_KEY}});
+				const userData = await axios.post(`http://localhost:8001/auth/twoFactor/login/${store.sessionId}`, body);
 				const decodedToken: any = jwtDecode(userData.data.accessToken);
 				store.update("accessToken", userData.data.accessToken);
 				store.update("refreshToken", userData.data.refreshToken);

@@ -40,7 +40,7 @@ fastify.register(require('@fastify/static'), {
 // Enable CORS on Fastify
 fastify.register(cors, {
 	origin: process.env.FRONTEND_DOMAIN, // Set this to your specific frontend domain for production
-	methods: ['GET', 'POST', 'PUT', 'DELETE'],
+	methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
 	credentials: true,
 });
 

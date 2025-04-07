@@ -6,7 +6,7 @@ import axios from "axios";
 export const FriendRequestNotification = createComponent((props: NotificationProps) => {
     const fetchSenderNickname = async (senderId:number) => {
 		try {
-			const response = await axios.get(`/authentication/auth/users/id/${senderId}`, {headers: {'x-api-key': import.meta.env.VITE_AUTHENTICATION_API_KEY}})
+			const response = await axios.get(`http://localhost:8001/auth/users/id/${senderId}`)
 			return response.data
 		} catch(err) {
 			console.error(err);
