@@ -533,6 +533,3 @@ wsAdapter.on("messages:mark_read", async ({ clientId, payload }) => {
     }
   });
 }
-
-
-

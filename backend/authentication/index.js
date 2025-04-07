@@ -10,21 +10,8 @@ const fs = require('fs');
 const { auth } = require('./src/middlewares/auth')
 const fastifyMultipart = require('@fastify/multipart');
 
-
-
-// const fastify = Fastify({
-// 	// https: {
-// 	// 	key: fs.readFileSync(path.join(__dirname, 'ssl/server.key')),
-// 	// 	cert: fs.readFileSync(path.join(__dirname, 'ssl/server.cert')),
-// 	// }
-// });
-
 const fastify = Fastify({
 	logger: true,
-	// https: {
-	//   key: fs.readFileSync('./ssl/server.key'),
-	//   cert: fs.readFileSync('./ssl/server.crt'),
-	// }
 })  
 
 fastify.register(fastifyMultipart, {
