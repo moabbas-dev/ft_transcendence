@@ -30,7 +30,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       }
 
       // Track user as online
-      onlineUsers.set(clientId, username);
+      onlineUsers.set(clientId, userId);
 
       //   // Send friend list to user with online status
       //   const friendsWithStatus = await Promise.all(
@@ -260,24 +260,34 @@ wsAdapter.on("friend:decline", async ({ clientId, payload }) => {
       await saveMessage(newMessage, roomId);
 
       // Send the message to recipient if online
-      // const toClientId = onlineUsers.get(to);
-      // if (toClientId) {
-      wsAdapter.sendTo(to, "message:received", {
+      let recipientClientId = null;
+      for (const [wsClientId, userId] of onlineUsers.entries()) {
+        if (userId === to.toString()) {
+          recipientClientId = wsClientId;
+          break;
+        }
+      }
+  
+      // Send the message to recipient if online
+      if (recipientClientId) {
+        wsAdapter.sendTo(recipientClientId, "message:received", {
+          roomId,
+          message: newMessage,
+        });
+      }
+      // Also send confirmation to sender
+      wsAdapter.sendTo(clientId, "message:sent", {
         roomId,
         message: newMessage,
       });
 
-      const unreadCounts = await getUnreadMessageCount(to);
-      wsAdapter.sendTo(to, "messages:unread", {
-        unreadCounts
-      });
-      // }
-
-      // Also send confirmation to sender
-      // wsAdapter.sendTo(clientId, "message:sent", {
-      //   roomId,
-      //   message: newMessage,
+      // const unreadCounts = await getUnreadMessageCount(to);
+      // wsAdapter.sendTo(to, "messages:unread", {
+      //   unreadCounts
       // });
+      
+
+
     } catch (error) {
       fastify.log.error("Error in message:private handler", error);
       wsAdapter.sendTo(clientId, "error", {

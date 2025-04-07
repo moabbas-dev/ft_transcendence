@@ -126,7 +126,7 @@ export const Header = createComponent(() => {
         if (!token)
             return;
         await axios
-            .get(`/authentication/auth/users`, {
+            .get(`http://localhost:8001/auth/users`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'x-api-key': import.meta.env.VITE_AUTHENTICATION_API_KEY

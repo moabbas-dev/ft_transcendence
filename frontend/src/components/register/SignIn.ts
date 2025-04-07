@@ -58,7 +58,7 @@ export const SignIn = createComponent((props: SignInProps) => {
       	</div>
     </div>
 	<div class="flex flex-col gap-3" id="google-btn">
-		<a href="/authentication/auth/google" id="google-sign" class="w-full flex items-center gap-2 justify-center py-2 text-white bg-pongblue hover:cursor-pointer hover:opacity-80 rounded-md transition-all duration-300">
+		<a href="http://localhost:8001/auth/google" id="google-sign" class="w-full flex items-center gap-2 justify-center py-2 text-white bg-pongblue hover:cursor-pointer hover:opacity-80 rounded-md transition-all duration-300">
 			<i class='bx bxl-google text-2xl'></i>
 			<span class="text-center">${t('register.continueGoogle')}</span>
 		</a>
@@ -77,7 +77,7 @@ export const SignIn = createComponent((props: SignInProps) => {
 				email: emailData,
 				password: passwordData
 			};
-			const signIn = await axios.post("/authentication/auth/login", data, {headers: {"x-api-key": import.meta.env.VITE_AUTHENTICATION_API_KEY}});
+			const signIn = await axios.post("http://localhost:8001/auth/login", data, {headers: {"x-api-key": import.meta.env.VITE_AUTHENTICATION_API_KEY}});
 			if (signIn.data.require2FA == false) {
 				if (signIn.data.accessToken) {
 					const decodedToken: any = jwtDecode(signIn.data.accessToken);
