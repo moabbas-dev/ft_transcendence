@@ -6,6 +6,7 @@ import { navigate } from '../../router.js';
 import store from '../../../store/store.js';
 import { jwtDecode } from "jwt-decode";
 import Toast from '../../toast/Toast.js';
+import { handleLoginWithGoogle } from '../../main.js';
 
 interface SignInProps {
 	styles: string,
@@ -58,10 +59,10 @@ export const SignIn = createComponent((props: SignInProps) => {
       	</div>
     </div>
 	<div class="flex flex-col gap-3" id="google-btn">
-		<a href="http://localhost:8001/auth/google" id="google-sign" class="w-full flex items-center gap-2 justify-center py-2 text-white bg-pongblue hover:cursor-pointer hover:opacity-80 rounded-md transition-all duration-300">
+		<button id="google-sign" class="w-full flex items-center gap-2 justify-center py-2 text-white bg-pongblue hover:cursor-pointer hover:opacity-80 rounded-md transition-all duration-300">
 			<i class='bx bxl-google text-2xl'></i>
 			<span class="text-center">${t('register.continueGoogle')}</span>
-		</a>
+		</button>
 		<div class="w-full text-center">
 			${t('register.signin.acc_question')} <span class="signup-link hover:cursor-pointer hover:underline text-pongblue">${t('register.signin.signup_btn')}</span>
 		</div>
@@ -115,6 +116,8 @@ export const SignIn = createComponent((props: SignInProps) => {
 				Toast.show(`No response from server: ${error.request}`, "error");
 			else
 				Toast.show(`Error setting up the request: ${error.message}`, "error");
+			console.log(error);
+			
 		}
 	};
 
@@ -165,7 +168,7 @@ export const SignIn = createComponent((props: SignInProps) => {
 	// googleBtn?.addEventListener('click', () => {
 	// 	localStorage.setItem("googleAuth", "true");
 	// });
-
+	handleLoginWithGoogle(form)
 	togglePassword.addEventListener('click', handleTogglePassword);
 	useCleanup(() => togglePassword.removeEventListener('click', handleTogglePassword))
 	return form;

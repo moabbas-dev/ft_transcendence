@@ -1,6 +1,9 @@
 const generateTokens = async (user, fastify) => {
 
 	const accessTokenExpiry = Math.floor(Date.now() / 1000) + (10 * 60 * 60); // the access token expires after one hour
+	const { randomUUID } = require('crypto')
+	const tokenId = randomUUID();
+	// generate a unique token ID
 	const accessToken = fastify.jwt.sign(
 		{
 			userId: user.id,

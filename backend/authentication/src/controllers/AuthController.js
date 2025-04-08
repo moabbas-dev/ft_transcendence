@@ -70,7 +70,9 @@ class AuthController {
 			const user = await authenticateUser(email, password);
 			const userId = user.id;
 			if (!user.is_2fa_enabled) {
+				console.log('RRRRRRR');
 				const { accessToken, refreshToken } = await generateTokens(user, reply.server);
+				console.log('HHHHHH');
 				const sessId = await Session.create({ userId, accessToken, refreshToken });
 				const session = await Session.getById(sessId);
 				await User.updateUserStatus(userId, { status: "online" });
