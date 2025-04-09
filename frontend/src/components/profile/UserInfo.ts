@@ -197,14 +197,50 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
   const secretKeyElement = container.querySelector("#secretKey");
   const validateCodeBtn = container.querySelector("#validateCodeBtn");
 
-  if (!props.uName) {
+  if (props.uName) {
     const saveBtn = container.querySelector("#save-btn")!;
-    // Save button interactions
+    const nicknameInput = container.querySelector("#nickname-value") as HTMLInputElement;
+    const fullNameInput = container.querySelector("#fullName") as HTMLInputElement;
+    const ageInput = container.querySelector('input[placeholder="Age"]') as HTMLInputElement;
+    const emailInput = container.querySelector('input[placeholder="Email"]') as HTMLInputElement;
+    const countryInput = container.querySelector("#country-select") as HTMLSelectElement;
+
     if (saveBtn) {
-      saveBtn.addEventListener("click", (e: Event) => {
-        e.preventDefault();
-        // Here you would add the logic to save user info
-        console.log("Saving user info...");
+      saveBtn.addEventListener("click", async () => {
+        const data: {
+          nickname?: string;
+          full_name?: string;
+          age?: string;
+          email?: string;
+          country?: string;
+        } = {};
+        if (store.nickname !== nicknameInput.value)
+          data.nickname = nicknameInput.value;
+        if (store.fullName !== fullNameInput.value)
+          data.full_name = fullNameInput.value;
+        if (ageInput.value !== 'undefined' && store.age !== ageInput.value)
+          data.age = ageInput.value;
+        if (store.email !== emailInput.value)
+          data.email = emailInput.value;
+        if (store.country !== countryInput.value)
+          data.country = countryInput.value;
+
+        if (Object.keys(data).length === 0){
+          Toast.show("No changes detected", "warn");
+          return;
+        }
+        
+        try {
+          await axios.put(`http://localhost:8001/auth/users/${store.userId}`, data, {
+            headers: {
+              authorization: `Bearer ${store.accessToken}`,
+            }
+          })
+          Toast.show("Your data are updated sucessfuly", "success");
+        } catch(err) {
+          console.log(err);
+          Toast.show(`Error: ${err}`, "error");
+        }
       });
 
       saveBtn.addEventListener("mouseenter", function () {
