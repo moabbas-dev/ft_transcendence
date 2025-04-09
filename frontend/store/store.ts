@@ -1,6 +1,7 @@
 import axios from "axios";
 import Toast from "../src/toast/Toast";
 import { navigate } from "../src/router";
+import { account } from "../src/appwriteConfig";
 
 class Store {
 	userId: string | null = localStorage.getItem("userId");
@@ -47,6 +48,10 @@ class Store {
 			this.update("refreshToken", null);
 			this.update("sessionUUID", null);
 			this.update("createdAt", null);
+			if (localStorage.getItem("googleAuth") === "true") {
+				await account.deleteSession('current');
+				localStorage.removeItem("googleAuth");
+			}
 			navigate('/register');
 		}
 		catch (error: any) {

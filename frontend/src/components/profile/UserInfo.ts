@@ -66,7 +66,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
               <p class="inline-block font-semibold">${t('profile.infoTab.memberSince')}</P>
               <span>${store.createdAt?.split(" ")[0]}</span>
             </div>
-            ${store.nickname !== props.uName? "" : `<div class="flex flex-col gap-2">
+            ${store.nickname !== props.uName ? "" : `<div class="flex flex-col gap-2">
             
           <!-- 2FA Toggle -->
           <div class="flex flex-col gap-4">
@@ -101,19 +101,19 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
                     </div>
 
                     <div class="mt-4">
-                        <div id="auth-code" class="flex gap-4 justify-center">
-					                <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
-					                <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
-					                <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
-					                <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
-					                <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
-					                <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
-				                </div>
-                        <!--
-                        <button id="regenerateQrBtn" class="bg-pongblue text-white px-4 py-1 rounded hover:bg-blue-700 transition-colors">
-                            <i class="fas fa-sync-alt mr-1"></i> ${t('profile.infoTab.generateNewQrcode')}
-                        </button>
-                        -->
+                        <form class="flex flex-col gap-4" id="code-form">
+				                  <div id="auth-code" class="flex gap-4 justify-center">
+					                  <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+					                  <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+					                  <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+					                  <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+					                  <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+					                  <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+				                  </div>
+                          <button id="validateCodeBtn" class="bg-pongblue text-white px-4 py-1 rounded hover:bg-blue-700 transition-colors">
+                               ${t('profile.infoTab.generateNewQrcode')}
+                          </button>
+			                  </form>
                     </div>
                 </div>
             </div>
@@ -127,17 +127,17 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
     }
           
     `;
-    const countryInput = container.querySelector("#country-select") as HTMLSelectElement;
-    const countries = countryList.getNames();
-    
-    countries.forEach(country => {
-      const option = document.createElement("option");
-      option.value = country;
-      option.textContent = country;
-    
-      countryInput.appendChild(option);
-    });
-    
+  const countryInput = container.querySelector("#country-select") as HTMLSelectElement;
+  const countries = countryList.getNames();
+
+  countries.forEach(country => {
+    const option = document.createElement("option");
+    option.value = country;
+    option.textContent = country;
+
+    countryInput.appendChild(option);
+  });
+
 
   function updateUIWithUserData(userData: any, container: HTMLDivElement) {
     // Update nickname
@@ -171,7 +171,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
       // emailInput.classList.add('bg-gray-200');
     }
 
-    const nicknameInput =  container.querySelector('#nickname-value') as HTMLInputElement;
+    const nicknameInput = container.querySelector('#nickname-value') as HTMLInputElement;
     if (nicknameInput) {
       nicknameInput.value = userData.nickname;
       if (store.nickname !== userData.nickname) {
@@ -195,7 +195,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
   const qrCodeContainer = container.querySelector("#qrCodeContainer");
   const qrCodeImage = container.querySelector("#qrCodeImage") as HTMLDivElement;
   const secretKeyElement = container.querySelector("#secretKey");
-  const regenerateQrBtn = container.querySelector("#regenerateQrBtn");
+  const validateCodeBtn = container.querySelector("#validateCodeBtn");
 
   if (!props.uName) {
     const saveBtn = container.querySelector("#save-btn")!;
@@ -355,8 +355,8 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
   }
 
   // Regenerate QR code button
-  if (regenerateQrBtn) {
-    regenerateQrBtn.addEventListener("click", async () => {
+  if (validateCodeBtn) {
+    validateCodeBtn.addEventListener("click", async () => {
       const secretKey = await setupNewTwoFactor();
       console.log("QR code regenerated, new secret:", secretKey);
 
