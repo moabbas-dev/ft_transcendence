@@ -4,6 +4,7 @@ import axios from "axios";
 import { t } from "../../languages/LanguageController.js";
 import countryList from "country-list";
 import Toast from "../../toast/Toast.js";
+import { refreshRouter } from "../../router.js";
 
 interface UserInfoProps {
   uName: string;
@@ -236,6 +237,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
               authorization: `Bearer ${store.accessToken}`,
             }
           })
+          refreshRouter()
           Toast.show("Your data are updated sucessfuly", "success");
         } catch(err) {
           console.log(err);
