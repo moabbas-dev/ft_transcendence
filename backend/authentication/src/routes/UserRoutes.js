@@ -6,6 +6,6 @@ module.exports = async (fastify) => {
 	fastify.get('/auth/users/id/:id', UserController.getUserById);
 	fastify.get('/auth/users/email/:email', UserController.getUserByEmail)
 	fastify.get('/auth/users/nickname/:nickname', UserController.getUserByNickname);
-	fastify.put('/auth/users/:ikd', UserController.updateUser);
+	fastify.put('/auth/users/:id', UserController.updateUser);
 	fastify.delete('/auth/users/:id', UserController.deleteUser);
 };

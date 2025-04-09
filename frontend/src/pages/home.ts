@@ -149,12 +149,45 @@ export default {
       new PongAnimation(canvas);
     }
 
+    const getGoogleProfilePhoto = async (): Promise<string | null> => {
+      try {
+        // Get current session and access token
+        const session = await account.getSession('current');
+        const accessToken = session.providerAccessToken;
+    
+        if (!accessToken) {
+          throw new Error('No Google access token available');
+        }
+    
+        // Fetch user profile from Google People API
+        const response = await axios.get(
+          'https://people.googleapis.com/v1/people/me?personFields=photos',
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+    
+        // Extract profile photo URL
+        const [profilePhoto] = response.data.photos || [];
+        return profilePhoto?.url || null;
+      } catch (error) {
+        console.error('Error fetching Google profile photo:', error);
+        return null;
+      }
+    };
     const checkUserAfterAuth = async (): Promise<void> => {
       try {
         // localStorage.removeItem("googleAuth");
         const appwiteUser = await account.get();
+        console.log(appwiteUser.$id);
+        const photoUrl = await getGoogleProfilePhoto();
+        console.log(photoUrl); // this works 100%
+
+        const session = await account.getSession('current');
         try {
-          const data = await axios.post("http://localhost:8001/auth/google/signIn", { email: appwiteUser.email, name: appwiteUser.name });
+          const data = await axios.post("http://localhost:8001/auth/google/signIn", { email: appwiteUser.email, name: appwiteUser.name, country: session.countryName});
           if (!data.data.require2FA) {
             if (data.data.accessToken) {
               const decodedToken: any = jwtDecode(data.data.accessToken);
@@ -170,7 +203,7 @@ export default {
               store.update("createdAt", decodedToken.createdAt);
               store.update("avatarUrl", decodedToken.avatarUrl);
               store.update("isLoggedIn", true);
-              navigate("/play");
+              navigate("/");
               Toast.show(`Login successful, Welcome ${decodedToken.fullName}!`, "success");
             }
           } else {

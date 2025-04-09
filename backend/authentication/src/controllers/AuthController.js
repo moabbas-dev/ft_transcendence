@@ -331,7 +331,7 @@ class AuthController {
 	// 	}
 	// }
 	static async googlesignIn(request, reply) {
-		const { email, name } = request.body;
+		const { email, name, country } = request.body;
 		try {
 			let user = await User.findByEmail(email);
 			if (!user) {
@@ -341,7 +341,7 @@ class AuthController {
 					nickname: null,
 					full_name: capitalizeFullName(name),
 					age: null,
-					country: null,
+					country: country,
 				};
 				const newUserId = await User.create(userData);
 				if (!newUserId) {

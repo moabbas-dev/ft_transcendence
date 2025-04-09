@@ -18,21 +18,6 @@ export const handleLoginWithGoogle = (container: HTMLElement) => {
 			'http://localhost:5173/register' // if fail redirect to this url
 		)
 	}
-
-    // const fetchUserData = async () => {
-    //     try {
-    //         const user = await account.get();
-    //         const session = await account.getSession('current');
-    //         console.log('User:', user);
-    //         console.log('Session:', session);
-	// 		// await account.deleteSession('current'); // when we logout we should delete the session
-	// 		// await account.deleteSessions(); // and this to logout from all loggedin devices [i think we dont need this]
-    //     } catch (error) {
-    //         console.error('Error fetching user data:', error);
-    //     }
-    // };
-
-    // fetchUserData();
 	signBtn.addEventListener('click', () => handleLogin());
 }
 

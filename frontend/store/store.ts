@@ -49,7 +49,7 @@ class Store {
 			this.update("sessionUUID", null);
 			this.update("createdAt", null);
 			if (localStorage.getItem("googleAuth") === "true") {
-				await account.deleteSession('current');
+				await account.deleteSessions();
 				localStorage.removeItem("googleAuth");
 			}
 			navigate('/register');
