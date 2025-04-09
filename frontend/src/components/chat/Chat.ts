@@ -337,6 +337,15 @@ export const Chat = createComponent(
         return;
       }
 
+      const body = {
+        senderId: parseInt(currentUser),
+        recipientId: activeUser.id,
+        content,
+      }
+      await axios.post('http://localhost:3003/api/notifications/user-message', body).catch(err => {
+        console.error("Error sending message:", err);
+      })
+
       // Create temporary message for optimistic update
       const tempMessage: Message = {
         id: Date.now(), // Temporary ID (replace with real ID from server later)

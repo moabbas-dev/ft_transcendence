@@ -3,6 +3,7 @@ import store from "../../../store/store.js";
 import axios from "axios";
 import { t } from "../../languages/LanguageController.js";
 import countryList from "country-list";
+import Toast from "../../toast/Toast.js";
 
 interface UserInfoProps {
   uName: string;
@@ -16,7 +17,6 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
       .get(`http://localhost:8001/auth/users/nickname/${props.uName}`, {
         headers: {
           Authorization: `Bearer ${token}`,
-          'x-api-key': import.meta.env.VITE_AUTHENTICATION_API_KEY
         },
       })
       .then((response) => {
@@ -101,9 +101,19 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
                     </div>
 
                     <div class="mt-4">
+                        <div id="auth-code" class="flex gap-4 justify-center">
+					                <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+					                <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+					                <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+					                <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+					                <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+					                <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+				                </div>
+                        <!--
                         <button id="regenerateQrBtn" class="bg-pongblue text-white px-4 py-1 rounded hover:bg-blue-700 transition-colors">
                             <i class="fas fa-sync-alt mr-1"></i> ${t('profile.infoTab.generateNewQrcode')}
                         </button>
+                        -->
                     </div>
                 </div>
             </div>
@@ -183,7 +193,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
     "#twoFactorToggle"
   ) as HTMLInputElement;
   const qrCodeContainer = container.querySelector("#qrCodeContainer");
-  const qrCodeImage = container.querySelector("#qrCodeImage");
+  const qrCodeImage = container.querySelector("#qrCodeImage") as HTMLDivElement;
   const secretKeyElement = container.querySelector("#secretKey");
   const regenerateQrBtn = container.querySelector("#regenerateQrBtn");
 
@@ -308,11 +318,28 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
       if (this.checked) {
         // Show QR code when 2FA is enabled
         qrCodeContainer.classList.remove("hidden");
+        try {
+          const res = await axios.put(`http://localhost:8001/auth/twoFactor/enable/${store.userId}`, {}, {
+            headers: {
+              Authorization: `Bearer ${store.accessToken}`,
+            },
+          });
+          qrCodeImage.innerHTML = `<img src="${res.data.qrCodeDataUrl}" alt="QR Code" class="w-full h-full object-contain" />`;
+        } catch (error: any) {
+          if (error.response) {
+            if (error.response.status === 404 || error.response.status === 403 || error.response.status === 401)
+              Toast.show(`Error: ${error.response.data.message}`, "error");
+            else if (error.response.status === 500)
+              Toast.show(`Server error: ${error.response.data.error}`, "error");
+            else
+              Toast.show(`Unexpected error: ${error.response.data}`, "error");
+          } else if (error.request)
+            Toast.show(`No response from server: ${error.request}`, "error");
+          else
+            Toast.show(`Error setting up the request: ${error.message}`, "error");
+        }
 
-        // Generate a new 2FA setup
-        const secretKey = await setupNewTwoFactor();
-
-        console.log("2FA enabled, new secret generated:", secretKey);
+        // console.log("2FA enabled, new secret generated:", secretKey);
 
         // In a real app, you would send this to your server
         // to associate with the user's account

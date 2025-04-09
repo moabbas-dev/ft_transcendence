@@ -3,10 +3,11 @@ const { db } = require('../db/initDb');
 class Session {
 
 	static async create({ userId, accessToken, refreshToken }) {
-		const query = `INSERT INTO Sessions(user_id, access_token, refresh_token)
-                        VALUES (?, ?, ?)`;
+		const uuid = crypto.randomUUID();
+		const query = `INSERT INTO Sessions(user_id, uuid, access_token, refresh_token)
+                        VALUES (?, ?, ?, ?)`;
 		return new Promise((resolve, reject) => {
-			db.run(query, [userId, accessToken, refreshToken], function(err) {
+			db.run(query, [userId, uuid, accessToken, refreshToken], function(err) {
 				if (err) reject(err);
 				else resolve(this.lastID);
 			});
@@ -27,6 +28,16 @@ class Session {
 		const query = `SELECT * FROM Sessions WHERE id = ?`;
 		return new Promise((resolve, reject) => {
 			db.get(query, [id], function(err, row) {
+				if (err) reject(err);
+				else resolve(row);
+			});
+		});
+	}
+
+	static async getByUUID(uuid) {
+		const query = `SELECT * FROM Sessions WHERE uuid = ?`;
+		return new Promise((resolve, reject) => {
+			db.get(query, [uuid], function(err, row) {
 				if (err) reject(err);
 				else resolve(row);
 			});
@@ -71,6 +82,16 @@ class Session {
 		const query = `DELETE FROM Sessions WHERE id = ?`;
 		return new Promise((resolve, reject) => {
 			db.run(query, [id], function(err) {
+				if (err) reject(err);
+				else resolve(this.changes);
+			});
+		});
+	}
+
+	static async deleteByUUID(uuid) {
+		const query = `DELETE FROM Sessions WHERE uuid = ?`;
+		return new Promise((resolve, reject) => {
+			db.run(query, [uuid], function(err) {
 				if (err) reject(err);
 				else resolve(this.changes);
 			});

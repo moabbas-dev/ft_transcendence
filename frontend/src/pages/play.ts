@@ -9,7 +9,7 @@ import { jwtDecode } from "jwt-decode";
 import Toast from "../toast/Toast.js";
 
 export default {
-  render: async (container: HTMLElement) => {
+  render: async (container: HTMLElement, params?: { [key: string]: string }) => {
     container.innerHTML = `
     <div class="profile"></div>
     <div class="header bg-pongblue w-full h-fit"></div>
@@ -70,15 +70,50 @@ export default {
     <div class="footer"></div>
 `;
 
-    if (localStorage.getItem("googleAuth") && localStorage.getItem("googleAuth") === "true") {
+    // if (localStorage.getItem("googleAuth") && localStorage.getItem("googleAuth") === "true") {
+    //   try {
+    //     const googleData = await axios.get("http://localhost:8001/auth/google/signIn", {
+    //       withCredentials: true,
+    //     });
+    //     const decodedToken: any = jwtDecode(googleData.data.accessToken);
+    //     store.update("accessToken", googleData.data.accessToken);
+    //     store.update("refreshToken", googleData.data.refreshToken);
+    //     store.update("sessionId", googleData.data.sessionId);
+    //     store.update("userId", decodedToken.userId);
+    //     store.update("email", decodedToken.email);
+    //     store.update("nickname", decodedToken.nickname);
+    //     store.update("fullName", decodedToken.fullName);
+    //     store.update("age", decodedToken.age);
+    //     store.update("country", decodedToken.country);
+    //     store.update("createdAt", decodedToken.createdAt);
+    //     store.update("avatarUrl", decodedToken.avatarUrl);
+    //     store.update("isLoggedIn", true);
+    //     Toast.show(`Login successful, Welcome ${store.fullName}!`, "success");
+    //     localStorage.removeItem("googleAuth");
+    //   } catch (error: any) {
+    //     localStorage.removeItem("googleAuth");
+    //     if (error.response) {
+    //       if (error.response.status === 401) {
+    //         if (error.response.data.key !== "cookie")
+    //           Toast.show(`Error: ${error.response.data.message}`, "error");
+    //       }
+    //       else if (error.response.status === 500)
+    //         Toast.show(`Server error: ${error.response.data.error}`, "error");
+    //       else
+    //         Toast.show(`Unexpected error: ${error.response}`, "error");
+    //     } else if (error.request)
+    //       Toast.show(`No response from server: ${error.request}`, "error");
+    //     else
+    //       Toast.show(`Error setting up the request: ${error.message}`, "error");
+    //   }
+    // }
+    if (params?.uuid) {
       try {
-        const googleData = await axios.get("http://localhost:8001/auth/google/signIn", {
-          withCredentials: true,
-        });
-        const decodedToken: any = jwtDecode(googleData.data.accessToken);
-        store.update("accessToken", googleData.data.accessToken);
-        store.update("refreshToken", googleData.data.refreshToken);
-        store.update("sessionId", googleData.data.sessionId);
+        const data = await axios.get(`http://localhost:8001/auth/google/signIn/${params.uuid}`);
+        const decodedToken: any = jwtDecode(data.data.accessToken);
+        store.update("accessToken", data.data.accessToken);
+        store.update("refreshToken", data.data.refreshToken);
+        store.update("sessionUUID", data.data.sessUUID);
         store.update("userId", decodedToken.userId);
         store.update("email", decodedToken.email);
         store.update("nickname", decodedToken.nickname);
@@ -88,10 +123,9 @@ export default {
         store.update("createdAt", decodedToken.createdAt);
         store.update("avatarUrl", decodedToken.avatarUrl);
         store.update("isLoggedIn", true);
-        Toast.show(`Login successful, Welcome ${store.fullName}!`, "success");
-        localStorage.removeItem("googleAuth");
+        Toast.show(`Login successful, Welcome ${decodedToken.fullName}!`, "success");
+        return navigate("/play");
       } catch (error: any) {
-        localStorage.removeItem("googleAuth");
         if (error.response) {
           if (error.response.status === 401) {
             if (error.response.data.key !== "cookie")

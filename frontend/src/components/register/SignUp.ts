@@ -4,6 +4,7 @@ import { t } from "../../languages/LanguageController.js";
 import axios from "axios";
 import Toast from "../../toast/Toast.js";
 import countryList from "country-list";
+import { handleLoginWithGoogle } from "../../main.js";
 
 interface SignUpProps {
 	styles: string,
@@ -120,11 +121,10 @@ export const SignUp = createComponent((props: SignUpProps) => {
       </div>
       
       <div class="flex flex-col w-full gap-3" id="google-btn">
-
-        <a href="http://localhost:8001/auth/google" id="google-sign" class="flex items-center justify-center gap-2 w-full py-2 bg-pongblue text-white rounded-lg hover:cursor-pointer hover:bg-opacity-90 transition-all duration-300">
+        <button id="google-sign" class="flex items-center justify-center gap-2 w-full py-2 bg-pongblue text-white rounded-lg hover:cursor-pointer hover:bg-opacity-90 transition-all duration-300">
           <i class='bx bxl-google text-xl'></i>
           <span>${t('register.continueGoogle')}</span>
-        </a>
+        </button>
 
         <div class="text-center text-gray-600">
           ${t('register.signup.acc_question')} 
@@ -144,7 +144,7 @@ export const SignUp = createComponent((props: SignUpProps) => {
 	const fullname = form.querySelector("#fullname") as HTMLInputElement;
 	const ageInput = form.querySelector("#age") as HTMLInputElement;
 	const countryInput = form.querySelector("#country-select") as HTMLSelectElement;
-
+	handleLoginWithGoogle(form)
 	// fill the coutries <select> automatically through a third party list of coutries
 	const countries = countryList.getNames();
 	countries.forEach(country => {
@@ -172,8 +172,7 @@ export const SignUp = createComponent((props: SignUpProps) => {
 					country: countryInput.value,
 					google_id: null
 				};
-				
-				await axios.post("http://localhost:8001/auth/users", body, {headers: {"x-api-key": import.meta.env.VITE_AUTHENTICATION_API_KEY}});
+				await axios.post("http://localhost:8001/auth/users", body);
 				Toast.show(`SignUp successful! Go to your email ${emailInput.value} to activate your account`, "success");
 				// navigate('/register'); // You can edit it
 			} catch (err: any) {
@@ -219,10 +218,10 @@ export const SignUp = createComponent((props: SignUpProps) => {
 		});
 	};
 
-	const googleBtn = form.querySelector('#google-sign');
-	googleBtn?.addEventListener('click', () => {
-		localStorage.setItem("googleAuth", "true");
-	});
+	// const googleBtn = form.querySelector('#google-sign');
+	// googleBtn?.addEventListener('click', () => {
+	// 	localStorage.setItem("googleAuth", "true");
+	// });
 
 	togglePasswordElements.forEach(element => {
 		element.addEventListener('click', handleTogglePassword);

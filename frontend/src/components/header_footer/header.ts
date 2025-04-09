@@ -129,7 +129,6 @@ export const Header = createComponent(() => {
             .get(`http://localhost:8001/auth/users`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
-                    'x-api-key': import.meta.env.VITE_AUTHENTICATION_API_KEY
                 },
             })
             .then((response) => {
@@ -181,7 +180,7 @@ export const Header = createComponent(() => {
 
     async function fetchUserNotifications(userId: number): Promise<NotificationData[] | null> {
         try {
-            const response = await axios.get(`/notifications/api/notifications/user/${userId}`, {headers: {"x-api-key": import.meta.env.VITE_NOTIFICATION_API_KEY}});
+            const response = await axios.get(`http://localhost:3003/api/notifications/user/${userId}`);
             return response.data;
         } catch (error: unknown) {
             if (axios.isAxiosError(error)) {
@@ -202,7 +201,7 @@ export const Header = createComponent(() => {
     const userId = 2;
     async function markAllNotificationsAsRead() {
         try {
-            await axios.patch(`/notifications/api/notifications/read/all/${userId}`, undefined, {headers: {"x-api-key": import.meta.env.VITE_NOTIFICATION_API_KEY}});
+            await axios.patch(`http://localhost:3003/api/notifications/read/all/${userId}`, undefined);
             updateNotificationCount(0);
         } catch (err) {
             console.error('Failed to mark notifications as read:', err);

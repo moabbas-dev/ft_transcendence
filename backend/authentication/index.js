@@ -1,5 +1,5 @@
 require('dotenv').config();
-const Fastify = require('fastify');
+const fastify = require('fastify')({ logger: true });
 const cors = require('@fastify/cors');
 const { createTables, closeDatabase } = require('./src/db/initDb');
 const fastifyOauth2 = require('@fastify/oauth2');
@@ -10,9 +10,13 @@ const fs = require('fs');
 const { auth } = require('./src/middlewares/auth')
 const fastifyMultipart = require('@fastify/multipart');
 
-const fastify = Fastify({
-	logger: true,
-})  
+// const fastify = Fastify({
+// 	logger: true,
+// 	https: {
+// 	  key: fs.readFileSync('./ssl/server.key'),
+// 	  cert: fs.readFileSync('./ssl/server.crt'),
+// 	}
+// })  
 
 fastify.register(fastifyMultipart, {
 	limits: {
@@ -30,7 +34,7 @@ fastify.register(require('@fastify/static'), {
 // Enable CORS on Fastify
 fastify.register(cors, {
 	origin: process.env.FRONTEND_DOMAIN, // Set this to your specific frontend domain for production
-	methods: ['GET', 'POST', 'PUT', 'DELETE'],
+	methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
 	credentials: true,
 });
 

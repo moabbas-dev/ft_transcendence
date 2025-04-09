@@ -34,6 +34,7 @@ const createTables = () => {
 				);`,
 		`CREATE TABLE IF NOT EXISTS Sessions (
 					id INTEGER PRIMARY KEY AUTOINCREMENT,
+					uuid TEXT NOT NULL UNIQUE,
 					user_id INTEGER NOT NULL,
 					access_token TEXT,
 					refresh_token TEXT,
@@ -47,10 +48,15 @@ const createTables = () => {
 					id INTEGER PRIMARY KEY AUTOINCREMENT,
 					user_id INTEGER NOT NULL,
 					activation_token TEXT NOT NULL UNIQUE,
-					token_type TEXT NOT NULL CHECK (token_type IN ('account_activation', 'reset_password')),
-					expires_at TIMESTAMP NOT NULL DEFAULT (DATETIME('now' + '24 hours')),
+					token_type TEXT NOT NULL CHECK (token_type IN ('account_activation', 'reset_password', 'remote_authentication')),
+					session_uuid TEXT,
+					expires_at TIMESTAMP NOT NULL DEFAULT (DATETIME('now', '+24 hours')),
 					created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-					FOREIGN KEY (user_id) REFERENCES Users(id)
+					FOREIGN KEY (user_id) REFERENCES Users(id),
+					CHECK (
+						(token_type = 'remote_authentication' AND session_uuid IS NOT NULL) OR
+						(token_type != 'remote_authentication' AND session_uuid IS NULL)
+					)
 				);`
 	];
 	queries.forEach((query) => {
@@ -62,24 +68,24 @@ const createTables = () => {
 };
 
 // Cleanup expired sessions from the Sessions table
-const cleanupExpiredSessions = () => {
-	const query = `
-	  DELETE FROM Sessions
-	  WHERE expires_at < DATETIME('now')
-		AND refresh_expires_at < DATETIME('now')
-		AND DATETIME('now') > DATETIME(expires_at, '+1 hour');
-	`;
-	db.run(query, function (err) {
-		if (err) {
-			console.error('Error cleaning up expired sessions:', err);
-		} else {
-			console.log('Expired sessions cleaned up successfully');
-		}
-	});
-};
+// const cleanupExpiredSessions = () => {
+// 	const query = `
+// 	  DELETE FROM Sessions
+// 	  WHERE expires_at < DATETIME('now')
+// 		AND refresh_expires_at < DATETIME('now')
+// 		AND DATETIME('now') > DATETIME(expires_at, '+1 hour');
+// 	`;
+// 	db.run(query, function (err) {
+// 		if (err) {
+// 			console.error('Error cleaning up expired sessions:', err);
+// 		} else {
+// 			console.log('Expired sessions cleaned up successfully');
+// 		}
+// 	});
+// };
 
-// Periodically clean up expired sessions every 10 minutes
-setInterval(cleanupExpiredSessions, 10 * 60 * 1000); // 10 minutes
+// // Periodically clean up expired sessions every 10 minutes
+// setInterval(cleanupExpiredSessions, 10 * 60 * 1000); // 10 minutes
 
 // Graceful shutdown handling
 const closeDatabase = () => {

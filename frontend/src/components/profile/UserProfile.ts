@@ -30,7 +30,6 @@ export const Profile = createComponent((props: ProfileProps) => {
       .get(`http://localhost:8001/auth/users/nickname/${props.uName}`, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "x-api-key": import.meta.env.VITE_AUTHENTICATION_API_KEY
         },
       })
       .then((response) => {
@@ -316,7 +315,6 @@ export const Profile = createComponent((props: ProfileProps) => {
       await axios.post(`http://localhost:8001/auth/uploads/${store.userId}`, formData, {
         headers: {
           authorization: `Bearer ${store.accessToken}`,
-          "x-api-key": import.meta.env.VITE_AUTHENTICATION_API_KEY,
           'Content-Type': 'multipart/form-data'
         }
       }).then((response) => {
