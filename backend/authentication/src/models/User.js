@@ -176,6 +176,35 @@ class User {
 			});
 		});
 	}
+
+	static async updateProfile(id, fields = {}) {
+		const allowed = ['nickname', 'full_name', 'age', 'country', 'email'];
+		const setClauses = [];
+		const values = [];
+		
+		for (const [key, val] of Object.entries(fields)) {
+			if (allowed.includes(key)) {
+				setClauses.push(`${key} = ?`);
+				values.push(val);
+			}
+		}
+		
+		if (setClauses.length === 0) {
+			throw new Error('No valid fields provided to update.');
+		}
+		
+		setClauses.push('updated_at = CURRENT_TIMESTAMP');
+
+		const sql = `UPDATE Users SET ${setClauses.join(', ')} WHERE id = ?`;
+		values.push(id);
+		
+		return new Promise((resolve, reject) => {
+			db.run(sql, values, function(err) {
+				if (err) return reject(err);
+				resolve(this.changes);
+			});
+		});
+	}
 }
 
 module.exports = User;

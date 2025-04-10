@@ -319,7 +319,7 @@ export const Profile = createComponent((props: ProfileProps) => {
         }
       }).then((response) => {
         console.log(response.data);
-        const imageUrl = `https://pong.local/${response.data.url}`;
+        const imageUrl = `${response.data.url}`;
         const profileImage = container.querySelector('#profile-picture') as HTMLImageElement;
         if (profileImage) {
           profileImage.src = imageUrl;

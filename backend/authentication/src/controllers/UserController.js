@@ -186,6 +186,57 @@ class UserController {
 			reply.code(500).send({ message: 'Error deleting the user', error: err.message });
 		}
 	}
+
+	static async patchUser(request, reply) {
+		try {
+			const { id } = request.params;
+      		const updates = Object.keys(request.body);
+			const allowedUpdates = ['nickname', 'full_name', 'age', 'country', 'email'];
+			const isValidOperation = updates.every((update) => allowedUpdates.includes(update));
+			const authHeader = request.headers.authorization;
+			if (!authHeader || !authHeader.startsWith('Bearer '))
+				return reply.status(401).send({ error: 'Unauthorized: No token provided' });
+			const accessToken = authHeader.split(' ')[1];
+			let decoded;
+			try {
+				decoded = request.server.jwt.verify(accessToken, SECRET_KEY);
+			} catch (err) {
+				if (err.name === 'TokenExpiredError')
+					return reply.code(401).send({ message: "Access token expired!" });
+				return reply.code(401).send({ message: "Invalid access token" });
+			}
+			if (!isValidOperation) {
+				return reply.code(400).send({ message: 'Invalid updates!' });
+			}
+			if (decoded.userId != id)
+				return reply.code(403).send({ message: "Token does not belong to this user!" });
+			const { email, nickname, full_name, age, country } = request.body;
+			if (typeof email !== 'undefined' && !validateEmail(email))
+				return reply.code(400).send({ message: "Invalid email address!" });
+			if (typeof nickname !== 'undefined' && !validateNickname(nickname))
+				return reply.code(400).send({ message: "Invalid nickname!" });
+			if (typeof full_name !== 'undefined' && !validateFullName(full_name))
+				return reply.code(400).send({ message: "Invalid full name!" });
+			if (typeof age !== 'undefined' && !validateAge(Number(age)))
+				return reply.code(400).send({ message: "Invalid age!" });
+			if (typeof country !== 'undefined' && !country)
+				return reply.code(400).send({ message: "Invalid country!" });
+
+			const updateData = {};
+			if (email !== undefined)     updateData.email      = email;
+			if (nickname !== undefined)  updateData.nickname   = nickname;
+			if (full_name !== undefined) updateData.full_name  = capitalizeFullName(full_name);
+			if (age !== undefined)       updateData.age        = age;
+			if (country !== undefined)   updateData.country    = country;
+			const changes = await User.updateProfile(id, updateData);
+			if (changes == 0)
+				reply.code(404).send({ message: 'User not found!' });
+			else
+				reply.code(200).send({ message: 'User updated successfully!' });
+		} catch (err) {
+			reply.code(500).send({ message: 'Error Editing User info', error: err.message });
+		}
+	}
 }
 
 module.exports = UserController;
