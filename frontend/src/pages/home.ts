@@ -1,10 +1,14 @@
 import { navigate } from "../router.js";
 import { t } from "../languages/LanguageController.js";
 import { PongAnimation } from "../components/partials/PingPongAnimation.js";
-import {Header}  from "../components/header_footer/header.js";
+import { Header } from "../components/header_footer/header.js";
 import { Footer } from "../components/header_footer/footer.js";
 import chatService from "../utils/chatWebSocketService.js";
 import store from "../../store/store.js";
+import { account } from '../appwriteConfig.js';
+import axios from "axios";
+import Toast from "../toast/Toast.js";
+import { jwtDecode } from "jwt-decode";
 
 export default {
   render: async (container: HTMLElement) => {
@@ -106,7 +110,7 @@ export default {
       } finally {
       }
     }
-  
+
     //header
     const headerNav = container.querySelector(".header");
     const header = Header();
@@ -144,5 +148,92 @@ export default {
     if (canvas) {
       new PongAnimation(canvas);
     }
+
+    const getGoogleProfilePhoto = async (): Promise<string | null> => {
+      try {
+        // Get current session and access token
+        const session = await account.getSession('current');
+        const accessToken = session.providerAccessToken;
+    
+        if (!accessToken) {
+          throw new Error('No Google access token available');
+        }
+    
+        // Fetch user profile from Google People API
+        const response = await axios.get(
+          'https://people.googleapis.com/v1/people/me?personFields=photos',
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+    
+        // Extract profile photo URL
+        const [profilePhoto] = response.data.photos || [];
+        return profilePhoto?.url || null;
+      } catch (error) {
+        console.error('Error fetching Google profile photo:', error);
+        return null;
+      }
+    };
+    const checkUserAfterAuth = async (): Promise<void> => {
+      try {
+        // localStorage.removeItem("googleAuth");
+        const appwiteUser = await account.get();
+        console.log(appwiteUser.$id);
+        const photoUrl = await getGoogleProfilePhoto();
+        console.log(photoUrl); // this works 100%
+
+        const session = await account.getSession('current');
+        try {
+          const data = await axios.post("http://localhost:8001/auth/google/signIn", { email: appwiteUser.email, name: appwiteUser.name, country: session.countryName});
+          if (!data.data.require2FA) {
+            if (data.data.accessToken) {
+              const decodedToken: any = jwtDecode(data.data.accessToken);
+              store.update("accessToken", data.data.accessToken);
+              store.update("refreshToken", data.data.refreshToken);
+              store.update("sessionUUID", data.data.sessUUID);
+              store.update("userId", decodedToken.userId);
+              store.update("email", decodedToken.email);
+              store.update("nickname", decodedToken.nickname);
+              store.update("fullName", decodedToken.fullName);
+              store.update("age", decodedToken.age);
+              store.update("country", decodedToken.country);
+              store.update("createdAt", decodedToken.createdAt);
+              store.update("avatarUrl", decodedToken.avatarUrl);
+              store.update("isLoggedIn", true);
+              navigate("/");
+              Toast.show(`Login successful, Welcome ${decodedToken.fullName}!`, "success");
+            }
+          } else {
+            store.update("sessionUUID", data.data.sessUUID);
+            navigate("/register/twofactor");
+            Toast.show("First step is complete! Now moving to the 2fa code validation", "success");
+          }
+          localStorage.removeItem("googleAuthClicked");
+        } catch (err: any) {
+          localStorage.removeItem("googleAuthClicked");
+          if (err.response) {
+            if (err.response.status === 404 || err.response.status === 403)
+              Toast.show(`Error: ${err.response.data.message}`, "error");
+            else if (err.response.status === 500)
+              Toast.show(`Server error: ${err.response.data.error}`, "error");
+            else
+              Toast.show(`Unexpected error: ${err.response.data}`, "error");
+          } else if (err.request)
+            Toast.show(`No response from server: ${err.request}`, "error");
+          else
+            Toast.show(`Error setting up the request: ${err.message}`, "error");
+          console.log(err);
+        }
+      } catch (err: any) {
+        localStorage.removeItem("googleAuthClicked");
+        Toast.show(`Error! cannot fetch user data! ${err.message}`, "error");
+      }
+    }
+
+    if (localStorage.getItem("googleAuthClicked") === "true")
+      await checkUserAfterAuth();
   },
 };

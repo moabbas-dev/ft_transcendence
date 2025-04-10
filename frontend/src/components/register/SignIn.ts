@@ -166,7 +166,7 @@ export const SignIn = createComponent((props: SignInProps) => {
 
 	// const googleBtn = form.querySelector('#google-sign');
 	// googleBtn?.addEventListener('click', () => {
-	// 	localStorage.setItem("googleAuth", "true");
+	// 	localStorage.setItem("googleAuthClicked", "true");
 	// });
 	handleLoginWithGoogle(form)
 	togglePassword.addEventListener('click', handleTogglePassword);

@@ -4,6 +4,7 @@ import axios from "axios";
 import { t } from "../../languages/LanguageController.js";
 import countryList from "country-list";
 import Toast from "../../toast/Toast.js";
+import { refreshRouter } from "../../router.js";
 
 interface UserInfoProps {
   uName: string;
@@ -66,7 +67,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
               <p class="inline-block font-semibold">${t('profile.infoTab.memberSince')}</P>
               <span>${store.createdAt?.split(" ")[0]}</span>
             </div>
-            ${store.nickname !== props.uName? "" : `<div class="flex flex-col gap-2">
+            ${store.nickname !== props.uName ? "" : `<div class="flex flex-col gap-2">
             
           <!-- 2FA Toggle -->
           <div class="flex flex-col gap-4">
@@ -101,19 +102,19 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
                     </div>
 
                     <div class="mt-4">
-                        <div id="auth-code" class="flex gap-4 justify-center">
-					                <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
-					                <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
-					                <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
-					                <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
-					                <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
-					                <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
-				                </div>
-                        <!--
-                        <button id="regenerateQrBtn" class="bg-pongblue text-white px-4 py-1 rounded hover:bg-blue-700 transition-colors">
-                            <i class="fas fa-sync-alt mr-1"></i> ${t('profile.infoTab.generateNewQrcode')}
-                        </button>
-                        -->
+                        <form class="flex flex-col gap-4" id="code-form">
+				                  <div id="auth-code" class="flex gap-4 justify-center">
+					                  <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+					                  <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+					                  <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+					                  <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+					                  <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+					                  <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
+				                  </div>
+                          <button id="validateCodeBtn" class="bg-pongblue text-white px-4 py-1 rounded hover:bg-blue-700 transition-colors">
+                               ${t('profile.infoTab.generateNewQrcode')}
+                          </button>
+			                  </form>
                     </div>
                 </div>
             </div>
@@ -127,17 +128,17 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
     }
           
     `;
-    const countryInput = container.querySelector("#country-select") as HTMLSelectElement;
-    const countries = countryList.getNames();
-    
-    countries.forEach(country => {
-      const option = document.createElement("option");
-      option.value = country;
-      option.textContent = country;
-    
-      countryInput.appendChild(option);
-    });
-    
+  const countryInput = container.querySelector("#country-select") as HTMLSelectElement;
+  const countries = countryList.getNames();
+
+  countries.forEach(country => {
+    const option = document.createElement("option");
+    option.value = country;
+    option.textContent = country;
+
+    countryInput.appendChild(option);
+  });
+
 
   function updateUIWithUserData(userData: any, container: HTMLDivElement) {
     // Update nickname
@@ -171,7 +172,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
       // emailInput.classList.add('bg-gray-200');
     }
 
-    const nicknameInput =  container.querySelector('#nickname-value') as HTMLInputElement;
+    const nicknameInput = container.querySelector('#nickname-value') as HTMLInputElement;
     if (nicknameInput) {
       nicknameInput.value = userData.nickname;
       if (store.nickname !== userData.nickname) {
@@ -195,16 +196,53 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
   const qrCodeContainer = container.querySelector("#qrCodeContainer");
   const qrCodeImage = container.querySelector("#qrCodeImage") as HTMLDivElement;
   const secretKeyElement = container.querySelector("#secretKey");
-  const regenerateQrBtn = container.querySelector("#regenerateQrBtn");
+  const validateCodeBtn = container.querySelector("#validateCodeBtn");
 
-  if (!props.uName) {
+  if (props.uName) {
     const saveBtn = container.querySelector("#save-btn")!;
-    // Save button interactions
+    const nicknameInput = container.querySelector("#nickname-value") as HTMLInputElement;
+    const fullNameInput = container.querySelector("#fullName") as HTMLInputElement;
+    const ageInput = container.querySelector('input[placeholder="Age"]') as HTMLInputElement;
+    const emailInput = container.querySelector('input[placeholder="Email"]') as HTMLInputElement;
+    const countryInput = container.querySelector("#country-select") as HTMLSelectElement;
+
     if (saveBtn) {
-      saveBtn.addEventListener("click", (e: Event) => {
-        e.preventDefault();
-        // Here you would add the logic to save user info
-        console.log("Saving user info...");
+      saveBtn.addEventListener("click", async () => {
+        const data: {
+          nickname?: string;
+          full_name?: string;
+          age?: string;
+          email?: string;
+          country?: string;
+        } = {};
+        if (store.nickname !== nicknameInput.value)
+          data.nickname = nicknameInput.value;
+        if (store.fullName !== fullNameInput.value)
+          data.full_name = fullNameInput.value;
+        if (ageInput.value !== 'undefined' && store.age !== ageInput.value)
+          data.age = ageInput.value;
+        if (store.email !== emailInput.value)
+          data.email = emailInput.value;
+        if (store.country !== countryInput.value)
+          data.country = countryInput.value;
+
+        if (Object.keys(data).length === 0){
+          Toast.show("No changes detected", "warn");
+          return;
+        }
+        
+        try {
+          await axios.put(`http://localhost:8001/auth/users/${store.userId}`, data, {
+            headers: {
+              authorization: `Bearer ${store.accessToken}`,
+            }
+          })
+          refreshRouter()
+          Toast.show("Your data are updated sucessfuly", "success");
+        } catch(err) {
+          console.log(err);
+          Toast.show(`Error: ${err}`, "error");
+        }
       });
 
       saveBtn.addEventListener("mouseenter", function () {
@@ -355,8 +393,8 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
   }
 
   // Regenerate QR code button
-  if (regenerateQrBtn) {
-    regenerateQrBtn.addEventListener("click", async () => {
+  if (validateCodeBtn) {
+    validateCodeBtn.addEventListener("click", async () => {
       const secretKey = await setupNewTwoFactor();
       console.log("QR code regenerated, new secret:", secretKey);
 

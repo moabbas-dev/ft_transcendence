@@ -166,7 +166,7 @@ export default {
 			enable2fa: "Enable 2FA",
 			qrcodeScan: "Scan this QR code with your authenticator app",
 			generating: "Generating...",
-			generateNewQrcode: " Generate New Code",
+			generateNewQrcode: "validate code",
 			saveBtn: "Save",
 		},
 		statisticsTab: {
