@@ -1,4 +1,5 @@
 const UploadController = require('../controllers/UploadController');
+const User = require('../models/User');
 
 module.exports = async (fastify) => {
     fastify.get('/auth/uploads/:id/:dirname', UploadController.getImageUrlsRoute);
@@ -15,9 +16,19 @@ module.exports = async (fastify) => {
             reply.status(400).send({ message: 'Invalid Base64 string' });
         }
     });
-    fastify.post('/auth/google_upload', async (req, reply) => {
+    fastify.post('/auth/google_upload/:id', async (req, reply) => {
         try {
-            
+            const { id } = req.params;
+            // const authHeader = request.headers.authorization;
+			// if (!authHeader || !authHeader.startsWith('Bearer '))
+			// 	return reply.status(401).send({ error: 'Unauthorized: No token provided' });
+            const photo = req.query.photo;
+
+            const changes = await User.updateProfile(id, { avatar_url:photo.split('=')[0] });
+			if (changes == 0)
+				reply.code(404).send({ message: 'User not found!' });
+			else
+				reply.code(200).send({ message: 'User Profile updated successfully!' });
         } catch (error) {
             reply.status(500).send({ message: 'Internal Server Error' });
         }

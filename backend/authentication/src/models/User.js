@@ -178,7 +178,7 @@ class User {
 	}
 
 	static async updateProfile(id, fields = {}) {
-		const allowed = ['nickname', 'full_name', 'age', 'country', 'email'];
+		const allowed = ['nickname', 'full_name', 'age', 'country', 'email', 'avatar_url'];
 		const setClauses = [];
 		const values = [];
 		

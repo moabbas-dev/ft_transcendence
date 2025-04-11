@@ -77,7 +77,7 @@ export const Header = createComponent(() => {
 
                         </div>
                         <div class="w-10 h-10 group-hover:rotate-12 group-hover:scale-110 transition-all bg-slate-400 rounded-full bg-cover">
-                            <img src="${store.avatarUrl || defaultImage}" class="size-full rounded-full"/>
+                            <img src="${store.avatarUrl || defaultImage}" class="size-full rounded-full" referrerpolicy="no-referrer"/>
                         </div>
                     </div>
                 </div>
@@ -134,7 +134,6 @@ export const Header = createComponent(() => {
             .then((response) => {
                 // Store or use the user data
                 const allUsers = response.data;
-                // console.log(allUsers);
                 // Filter users based on search query
                 const filteredUsers = allUsers.filter((user: { nickname: string; }) =>
                     user.nickname.toLowerCase().includes(searchQuery)

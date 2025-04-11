@@ -195,8 +195,6 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
   ) as HTMLInputElement;
   const qrCodeContainer = container.querySelector("#qrCodeContainer");
   const qrCodeImage = container.querySelector("#qrCodeImage") as HTMLDivElement;
-  const secretKeyElement = container.querySelector("#secretKey");
-  const validateCodeBtn = container.querySelector("#validateCodeBtn");
 
   if (props.uName) {
     const saveBtn = container.querySelector("#save-btn")!;
@@ -242,8 +240,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
           store.age = ageInput.value;
           store.email = emailInput.value;
           store.country = countryInput.value;
-          console.log(store);
-          
+
           refreshRouter()
           Toast.show("Your data are updated sucessfuly", "success");
         } catch(err: any) {
@@ -263,99 +260,6 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
       });
     }
   }
-
-  // Function to generate a random secret key
-  const generateSecretKey = () => {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"; // Base32 character set
-    let result = "";
-    for (let i = 0; i < 16; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-
-    // Format with dashes for readability
-    return result.match(/.{1,4}/g)?.join("-") || result;
-  };
-
-  // Function to generate a QR code SVG
-  const generateQrCode = async (secretKey: string) => {
-    if (!qrCodeImage) return;
-
-    // In a real application, you would make an API call to your server
-    // to generate the QR code or use a library like qrcode.js
-    // For now, we'll simulate this with a timeout and a placeholder SVG
-
-    qrCodeImage.innerHTML = `
-                    <div class="animate-pulse text-center text-gray-400">
-                        <div class="flex justify-center">
-                            <i class="fas fa-spinner fa-spin text-4xl mb-2"></i>
-                        </div>
-                        <p>Generating...</p>
-                    </div>
-                `;
-
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    // Generate a somewhat random-looking QR code SVG
-    // In a real app, this would be generated based on the secret key
-    const patternValue = secretKey
-      .replace(/[^A-Z0-9]/g, "")
-      .split("")
-      .reduce((acc, char) => {
-        return acc + char.charCodeAt(0);
-      }, 0);
-
-    // Create a pseudo-random but consistent pattern based on the secret
-    const paths = [];
-    for (let i = 0; i < 12; i++) {
-      const x = 40 + (i % 4) * 30;
-      const y = 40 + Math.floor(i / 4) * 30;
-      const seed = (patternValue + i) % 30;
-      if (seed % 3 !== 0) {
-        // 2/3 chance of adding a square
-        paths.push(
-          `<rect x="${x}" y="${y}" width="20" height="20" fill="black" />`
-        );
-      }
-    }
-
-    // Add the fixed position markers that all QR codes have
-    const qrSvg = `
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="160" height="160">
-                        <rect x="0" y="0" width="200" height="200" fill="white" />
-                        
-                        <!-- Position detection patterns (the three large squares in corners) -->
-                        <path d="M40,40 h40 v40 h-40 z M50,50 h20 v20 h-20 z" fill="black" />
-                        <path d="M120,40 h40 v40 h-40 z M130,50 h20 v20 h-20 z" fill="black" />
-                        <path d="M40,120 h40 v40 h-40 z M50,130 h20 v20 h-20 z" fill="black" />
-                        
-                        <!-- Dynamic pattern based on secret key -->
-                        ${paths.join("\n")}
-                        
-                        <!-- Timing patterns -->
-                        <path d="M90,40 h20 v5 h-20 z" fill="black" />
-                        <path d="M40,90 h5 v20 h-5 z" fill="black" />
-                    </svg>
-                `;
-
-    qrCodeImage.innerHTML = qrSvg;
-  };
-
-  // Function to handle generating a new 2FA setup
-  const setupNewTwoFactor = async () => {
-    if (!secretKeyElement) return;
-
-    // Generate a new secret key
-    const secretKey = generateSecretKey();
-
-    // Update the secret key display
-    secretKeyElement.textContent = secretKey;
-
-    // Generate and display the QR code
-    await generateQrCode(secretKey);
-
-    return secretKey;
-  };
 
   // 2FA toggle interactions
   if (twoFactorToggle && qrCodeContainer) {
@@ -384,31 +288,58 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
             Toast.show(`Error setting up the request: ${error.message}`, "error");
         }
 
-        // console.log("2FA enabled, new secret generated:", secretKey);
-
-        // In a real app, you would send this to your server
-        // to associate with the user's account
       } else {
         // Hide QR code when 2FA is disabled
         qrCodeContainer.classList.add("hidden");
         console.log("2FA disabled");
-
-        // In a real app, you would make an API call
-        // to remove 2FA from the user's account
       }
     });
   }
 
-  // Regenerate QR code button
-  if (validateCodeBtn) {
-    validateCodeBtn.addEventListener("click", async () => {
-      const secretKey = await setupNewTwoFactor();
-      console.log("QR code regenerated, new secret:", secretKey);
+  const inputs: NodeListOf<HTMLInputElement> = container.querySelectorAll("#auth-code input");
 
-      // In a real app, you would make an API call to update
-      // the user's 2FA settings with the new secret
-    });
-  }
+	if (inputs.length) {
+		requestAnimationFrame(() => {
+			inputs[0].focus();
+			inputs[0].select();
+		});
+	}
+
+  const formElement = container.querySelector("#code-form") as HTMLFormElement;
+  inputs.forEach((input, index) => {
+		input.addEventListener("input", (e: Event) => {
+			const target = e.target as HTMLInputElement;
+			const value = target.value;
+
+			if (!/^\d$/.test(value)) {
+				target.value = "";
+				return;
+			}
+
+			if (value.length >= 1 && index < inputs.length - 1) {
+				inputs[index + 1].focus();
+			}
+
+      if (index === 5) {
+
+        formElement.addEventListener("submit", (e) => {
+          e.preventDefault();
+          console.log("Form submitted via JS!");
+        });
+
+        const allFilled = Array.from(inputs).every(input => input.value.length === 1);
+        if (allFilled && index === 5)
+          formElement.requestSubmit();
+      }
+
+		});
+
+		// Handle backspace to move to previous field
+		input.addEventListener("keydown", (e: KeyboardEvent) => {
+			if (e.key === "Backspace" && input.value === "" && index > 0)
+				inputs[index - 1].focus();
+		});
+	});
 
   return container;
 });

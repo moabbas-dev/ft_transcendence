@@ -88,29 +88,6 @@ export default {
     </div> 
     `;
 
-    await initializeWebSocket();
-
-    // Initialize WebSocket connection
-    async function initializeWebSocket() {
-      try {
-        const username = store.nickname;
-        const userId = store.userId;
-
-        if (!username || !userId) {
-          // console.error("User information not found in sessionStorage");
-          return;
-        }
-
-        // Connect to WebSocket server
-        await chatService.connect();
-
-        console.log("Connected to chat service");
-      } catch (error) {
-        console.error("Failed to connect to chat service:", error);
-      } finally {
-      }
-    }
-
     //header
     const headerNav = container.querySelector(".header");
     const header = Header();
@@ -185,11 +162,9 @@ export default {
         console.log(appwiteUser.$id);
         const photoUrl = await getGoogleProfilePhoto();
         console.log(photoUrl); // this works 100%
-
         const session = await account.getSession('current');
         try {
           const data = await axios.post("http://localhost:8001/auth/google/signIn", { email: appwiteUser.email, name: appwiteUser.name, country: session.countryName});
-
           if (!data.data.require2FA) {
             if (data.data.accessToken) {
               const decodedToken: any = jwtDecode(data.data.accessToken);
@@ -212,6 +187,16 @@ export default {
             store.update("sessionUUID", data.data.sessUUID);
             navigate("/register/twofactor");
             Toast.show("First step is complete! Now moving to the 2fa code validation", "success");
+          }
+          try {
+            await axios.post(`http://localhost:8001/auth/google_upload/${store.userId}?photo=${photoUrl as string}`, undefined, {
+              headers:{
+                Authorization: `Bearer ${store.accessToken}`,
+              }
+            })
+            store.update("avatarUrl", photoUrl as string);
+          } catch(err) {
+            console.log(err);
           }
           localStorage.removeItem("googleAuthClicked");
         } catch (err: any) {
@@ -239,3 +224,28 @@ export default {
       await checkUserAfterAuth();
   },
 };
+
+window.addEventListener("DOMContentLoaded", async () => {
+  await initializeWebSocket();
+});
+
+// Initialize WebSocket connection
+async function initializeWebSocket() {
+  try {
+    const username = store.nickname;
+    const userId = store.userId;
+
+    if (!username || !userId) {
+      // console.error("User information not found in sessionStorage");
+      return;
+    }
+
+    // Connect to WebSocket server
+    await chatService.connect();
+
+    console.log("Connected to chat service");
+  } catch (error) {
+    console.error("Failed to connect to chat service:", error);
+  } finally {
+  }
+}

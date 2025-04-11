@@ -11,13 +11,13 @@ import { t } from "../../languages/LanguageController.js";
 import { chatService } from "../../utils/chatWebSocketService.js";
 import { UserFriends } from "./UserFriends.js";
 import { navigate } from "../../router.js";
+import { refreshUserData } from "../../main.js";
 
 interface ProfileProps {
   uName: string;
 }
 
 export const Profile = createComponent((props: ProfileProps) => {
-
   let currentFriendshipStatus = 'unknown';
   let currentInitiator: any = null;
   let currentDirection: any = null;
@@ -39,6 +39,7 @@ export const Profile = createComponent((props: ProfileProps) => {
         // Request friendship status via WebSocket
         console.log(userData);
         console.log(userData.id);
+
         chatService.send('friendship:check', {
           currentUserId: store.userId,
           targetUserId: userData.id
@@ -212,9 +213,9 @@ export const Profile = createComponent((props: ProfileProps) => {
           </div>
           <div class="relative">
             <img 
-                src="${store.avatarUrl || logoUrl}" 
                 alt="profile picture" 
                 id="profile-picture"
+                referrerpolicy="no-referrer"
                 class="size-14 sm:size-20 object-cover rounded-full border-2 border-pongblue"
             >
             <span class="absolute bottom-0 left-0 size-4 rounded-full
@@ -270,6 +271,8 @@ export const Profile = createComponent((props: ProfileProps) => {
       nicknameElement.textContent = userData.nickname || store.nickname;
     }
 
+    const avatarElement = container.querySelector("#profile-picture") as HTMLImageElement;
+    avatarElement.src = userData.avatar_url || store.avatarUrl || logoUrl;
     // Update other elements as needed
     // For example, rank, avatar image, etc.
 

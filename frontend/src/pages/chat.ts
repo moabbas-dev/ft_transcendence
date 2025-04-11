@@ -109,7 +109,9 @@ function updateUnreadCountBadges() {
     chat.appendChild(chatComponent);
 
     // Initialize WebSocket connection
-    await initializeWebSocket();
+    window.addEventListener("DOMContentLoaded", async () => {
+      await initializeWebSocket();
+    })
 
     // Setup event handlers
     setupEventHandlers();

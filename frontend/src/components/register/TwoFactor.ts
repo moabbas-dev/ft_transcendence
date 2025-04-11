@@ -7,10 +7,6 @@ import { navigate } from "../../router.js";
 import Toast from "../../toast/Toast.js";
 import { jwtDecode } from "jwt-decode";
 
-interface TwoFactorSendProps {
-	onSwitchToSignIn: () => void,
-}
-
 export const TwoFactorSend = createComponent((params?: { [key: string]: string } ) => {
 	const form = document.createElement('div');
 	form.className = `w-[93vw] sm:w-96 xl:w-[30vw] bg-white rounded-lg p-4 sm:p-8`;
