@@ -8,4 +8,5 @@ module.exports = async (fastify) => {
 	fastify.get('/auth/users/nickname/:nickname', UserController.getUserByNickname);
 	fastify.put('/auth/users/:id', UserController.updateUser);
 	fastify.delete('/auth/users/:id', UserController.deleteUser);
+	fastify.patch('/auth/users/:id', UserController.patchUser);
 };

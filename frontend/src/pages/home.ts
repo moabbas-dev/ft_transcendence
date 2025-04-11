@@ -177,6 +177,7 @@ export default {
         return null;
       }
     };
+
     const checkUserAfterAuth = async (): Promise<void> => {
       try {
         // localStorage.removeItem("googleAuth");
@@ -188,6 +189,7 @@ export default {
         const session = await account.getSession('current');
         try {
           const data = await axios.post("http://localhost:8001/auth/google/signIn", { email: appwiteUser.email, name: appwiteUser.name, country: session.countryName});
+
           if (!data.data.require2FA) {
             if (data.data.accessToken) {
               const decodedToken: any = jwtDecode(data.data.accessToken);

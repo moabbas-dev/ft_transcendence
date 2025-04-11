@@ -213,7 +213,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
           full_name?: string;
           age?: string;
           email?: string;
-          country?: string;
+            country?: string;
         } = {};
         if (store.nickname !== nicknameInput.value)
           data.nickname = nicknameInput.value;
@@ -232,16 +232,23 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
         }
         
         try {
-          await axios.put(`http://localhost:8001/auth/users/${store.userId}`, data, {
+          await axios.patch(`http://localhost:8001/auth/users/${store.userId}`, data, {
             headers: {
               authorization: `Bearer ${store.accessToken}`,
             }
           })
+          store.nickname = nicknameInput.value;
+          store.fullName = fullNameInput.value;
+          store.age = ageInput.value;
+          store.email = emailInput.value;
+          store.country = countryInput.value;
+          console.log(store);
+          
           refreshRouter()
           Toast.show("Your data are updated sucessfuly", "success");
-        } catch(err) {
+        } catch(err: any) {
           console.log(err);
-          Toast.show(`Error: ${err}`, "error");
+          Toast.show(`Error: ${err.response.data.message}`, "error");
         }
       });
 
