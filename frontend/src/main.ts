@@ -29,6 +29,8 @@ export const handleLoginWithGoogle = (container: HTMLElement) => {
 }
 
 export const refreshUserData = async () => {
+	if (store.userId === null)
+		return 
 	try {
 		const response = await axios.get(`http://localhost:8001/auth/users/id/${store.userId}`)
 		const data = response.data

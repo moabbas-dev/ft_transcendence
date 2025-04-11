@@ -95,7 +95,7 @@ export default {
       container.appendChild(overlay);
       container.classList.add('overflow-hidden', 'pointer-events-none', 'items-center', 'justify-center');  
       const loadingContainer = document.createElement('div');
-      loadingContainer.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-pongblue shadow-lg p-4 z-60';
+      loadingContainer.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[60] bg-white rounded-lg shadow-pongblue shadow-lg p-4 z-60';
       loadingContainer.appendChild(PongLoading({text: "Signing you in..."}));
       container.appendChild(loadingContainer);
     }
