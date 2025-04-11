@@ -57,7 +57,6 @@ export default {
 
         `;
 
-    // Add this at the beginning of your render function in chat.ts
 let unreadMessageCounts = new Map<number, number>();
 
 // Add a function to get unread counts
@@ -79,25 +78,25 @@ chatService.on("messages:unread", (data: any) => {
     
 
   // Add this new function to update only the unread badges
-function updateUnreadCountBadges() {
-  const userItems = friendsList.querySelectorAll(".user-item");
-  userItems.forEach((item) => {
-    const userId = parseInt((item as HTMLElement).dataset.userId || "0");
-    if (userId) {
-      const unreadCount = getUnreadCount(userId);
-      const badgeElement = item.querySelector(".unread-badge");
-      
-      if (badgeElement) {
-        if (unreadCount > 0) {
-          badgeElement.textContent = unreadCount.toString();
-          badgeElement.classList.remove("hidden");
-        } else {
-          badgeElement.classList.add("hidden");
+  function updateUnreadCountBadges() {
+    const userItems = document.querySelectorAll(".user-item");
+    userItems.forEach((item) => {
+      const userId = parseInt((item as HTMLElement).dataset.userId || "0");
+      if (userId) {
+        const unreadCount = getUnreadCount(userId);
+        const badgeElement = item.querySelector(".unread-badge");
+        
+        if (badgeElement) {
+          if (unreadCount > 0) {
+            badgeElement.textContent = unreadCount > 9 ? '9+' : unreadCount.toString();
+            badgeElement.classList.remove("hidden");
+          } else {
+            badgeElement.classList.add("hidden");
+          }
         }
       }
-    }
-  });
-}
+    });
+  }
 
     // Get references to elements
     const friendsList = container.querySelector(".friends-list")!;
@@ -158,6 +157,24 @@ function updateUnreadCountBadges() {
 
     // Setup WebSocket event handlers
     function setupEventHandlers() {
+
+      chatService.on("message:received", (data: any) => {
+        // Check if this message is from someone mwe're not currently chatting with
+        const currentChatUserId = chatComponent.activeUser?.id;
+        
+        if (data.message && data.message.senderId && data.message.senderId !== store.userId) {
+          if (currentChatUserId !== data.message.senderId) {
+            // Increment unread count for this sender
+            const senderId = parseInt(data.message.senderId);
+            const currentCount = unreadMessageCounts.get(senderId) || 0;
+            unreadMessageCounts.set(senderId, currentCount + 1);
+            
+            // Update UI
+            updateUnreadCountBadges();
+          }
+        }
+      });
+      
       // Handle friends list update
       chatService.on("friends:list", (data: any) => {
         renderFriendsList(data.friends);
