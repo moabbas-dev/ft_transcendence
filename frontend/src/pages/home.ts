@@ -9,6 +9,7 @@ import { account } from '../appwriteConfig.js';
 import axios from "axios";
 import Toast from "../toast/Toast.js";
 import { jwtDecode } from "jwt-decode";
+import { PongLoading } from "../components/partials/PongLoading.js";
 
 export default {
   render: async (container: HTMLElement) => {
@@ -87,6 +88,17 @@ export default {
       </div>
     </div> 
     `;
+
+    if(window.location.href.endsWith(':5173/#')) {
+      const overlay = document.createElement('div');
+      overlay.className = 'fixed inset-0 bg-black opacity-40 z-50';
+      container.appendChild(overlay);
+      container.classList.add('overflow-hidden', 'pointer-events-none', 'items-center', 'justify-center');  
+      const loadingContainer = document.createElement('div');
+      loadingContainer.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-pongblue shadow-lg p-4 z-60';
+      loadingContainer.appendChild(PongLoading({text: "Signing you in..."}));
+      container.appendChild(loadingContainer);
+    }
 
     //header
     const headerNav = container.querySelector(".header");
