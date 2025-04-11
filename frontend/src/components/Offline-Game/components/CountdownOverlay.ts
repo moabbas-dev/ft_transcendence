@@ -80,6 +80,9 @@ export const CountdownOverlay = createComponent((props: CountdownOverlayProps) =
   };
   
   (countdownOverlay as any).destroy = cleanup;
-  
+  window.addEventListener("beforeunload", cleanup);
+  window.addEventListener("hashchange", cleanup);
+  window.addEventListener("popstate", cleanup);
+
   return countdownOverlay;
 });

@@ -11,7 +11,6 @@ import { t } from "../../languages/LanguageController.js";
 import { chatService } from "../../utils/chatWebSocketService.js";
 import { UserFriends } from "./UserFriends.js";
 import { navigate } from "../../router.js";
-import { refreshUserData } from "../../main.js";
 
 interface ProfileProps {
   uName: string;
