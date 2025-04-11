@@ -15,4 +15,11 @@ module.exports = async (fastify) => {
             reply.status(400).send({ message: 'Invalid Base64 string' });
         }
     });
+    fastify.post('/auth/google_upload', async (req, reply) => {
+        try {
+            
+        } catch (error) {
+            reply.status(500).send({ message: 'Internal Server Error' });
+        }
+    });
 };

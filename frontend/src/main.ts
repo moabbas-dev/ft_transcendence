@@ -1,6 +1,8 @@
 import { OAuthProvider } from 'appwrite';
 import './router.js';
 import { account } from './appwriteConfig.js';
+import axios from 'axios';
+import store from '../store/store.js';
 
 export const handleLoginWithGoogle = (container: HTMLElement) => {
 	const signBtn: HTMLButtonElement = container.querySelector('#google-sign')!
@@ -20,5 +22,23 @@ export const handleLoginWithGoogle = (container: HTMLElement) => {
 	}
 	signBtn.addEventListener('click', () => handleLogin());
 }
+
+const refreshUserData = async () => {
+	try {
+		const response = await axios.get(`http://localhost:8001/auth/users/id/${store.userId}`)
+		const data = response.data
+		if (data) {
+			store.age = data.age
+			store.avatarUrl = data.avatarUrl
+			store.country = data.country
+			store.email = data.email
+			store.fullName = data.fullName
+			store.nickname = data.nickname
+		}
+	} catch (error) {
+		console.log(error);
+	}
+}
+refreshUserData()
 
 localStorage.setItem("isLoggedIn", localStorage.getItem("sessionUUID") ? "true" : "false");

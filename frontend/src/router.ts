@@ -21,7 +21,6 @@ const routes: { [key: string]: Page } = {
   "/register/twofactor/:uuid": RegisterPage,
   "/reset_password/:uuid": RegisterPage,
   "/play": PlayPage,
-  "/play/:uuid": PlayPage,
   "/play/local-ai": PlayVsAI,
   "/play/local-multi": LocalPongPage,
   "/play/online-game": OnlineGame,

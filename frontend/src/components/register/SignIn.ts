@@ -94,7 +94,7 @@ export const SignIn = createComponent((props: SignInProps) => {
 					store.update("createdAt", decodedToken.createdAt);
 					store.update("avatarUrl", decodedToken.avatarUrl);
 					store.update("isLoggedIn", true);
-					navigate("/play");
+					navigate("/");
 					Toast.show(`Login successful, Welcome ${decodedToken.fullName}!`, "success");
 				}
 			}
