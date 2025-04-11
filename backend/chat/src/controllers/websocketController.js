@@ -268,23 +268,26 @@ wsAdapter.on("friend:decline", async ({ clientId, payload }) => {
         }
       }
   
-      // Send the message to recipient if online
-      if (recipientClientId) {
-        wsAdapter.sendTo(recipientClientId, "message:received", {
-          roomId,
-          message: newMessage,
-        });
-      }
+    // Send the message to recipient if online
+    if (recipientClientId) {
+      wsAdapter.sendTo(recipientClientId, "message:received", {
+        roomId,
+        message: newMessage,
+      });
+
+      // Get updated unread counts and send them to the recipient
+      // const unreadCounts = await getUnreadMessageCount(to);
+      // wsAdapter.sendTo(recipientClientId, "messages:unread", {
+      //   unreadCounts
+      // });
+    }
       // Also send confirmation to sender
       wsAdapter.sendTo(clientId, "message:sent", {
         roomId,
         message: newMessage,
       });
 
-      const unreadCounts = await getUnreadMessageCount(to);
-      wsAdapter.sendTo(to, "messages:unread", {
-        unreadCounts
-      });
+
 
       // console.log("nb of msgs: ",unreadCounts);
       
@@ -320,44 +323,42 @@ wsAdapter.on("friend:decline", async ({ clientId, payload }) => {
   });
 
 
-  // Add this new event handler in websocketController.js where other message handlers are
-wsAdapter.on("messages:mark_read", async ({ clientId, payload }) => {
-  try {
-    const { roomId, userId } = payload;
-    
-    // Validate input
-    if (!roomId || !userId) {
-      throw new Error('Missing roomId or userId');
+  wsAdapter.on("messages:mark_read", async ({ clientId, payload }) => {
+    try {
+      const { roomId, userId } = payload;
+      
+      // Validate input
+      if (!roomId || !userId) {
+        throw new Error('Missing roomId or userId');
+      }
+      
+      console.log(`Marking messages as read in room ${roomId} for user ${userId}`);
+      
+      // Update message read status in database
+      await markMessagesAsRead(roomId, userId);
+      
+      // Send confirmation back to client
+      wsAdapter.sendTo(clientId, "messages:marked_read", {
+        roomId,
+        success: true
+      });
+      
+      // Get the updated unread counts for this user
+      const unreadCounts = await getUnreadMessageCount(userId);
+      
+      // Send updated unread counts to user
+      wsAdapter.sendTo(clientId, "messages:unread", {
+        unreadCounts
+      });
+      
+    } catch (error) {
+      console.error("Error marking messages as read:", error);
+      wsAdapter.sendTo(clientId, "error", {
+        message: "Failed to mark messages as read",
+        details: error.message
+      });
     }
-    
-    console.log(`Marking messages as read in room ${roomId} for user ${userId}`);
-    
-    // Update message read status in database
-    // This would be a new function you need to add to chatService.js
-    await markMessagesAsRead(roomId, userId);
-    
-    // Send confirmation back to client
-    wsAdapter.sendTo(clientId, "messages:marked_read", {
-      roomId,
-      success: true
-    });
-    
-    // Get the updated unread counts for this user
-    const unreadCounts = await getUnreadMessageCount(userId);
-    
-    // Send updated unread counts to user
-    wsAdapter.sendTo(clientId, "messages:unread", {
-      unreadCounts
-    });
-    
-  } catch (error) {
-    console.error("Error marking messages as read:", error);
-    wsAdapter.sendTo(clientId, "error", {
-      message: "Failed to mark messages as read",
-      details: error.message
-    });
-  }
-});
+  });
 
   // Handle message history request
   wsAdapter.on("messages:history", async ({ clientId, payload }) => {

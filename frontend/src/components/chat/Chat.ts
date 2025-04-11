@@ -105,6 +105,9 @@ export const Chat = createComponent(
             </div>
         `;
 
+
+        
+
       // Add event listeners after the HTML is rendered
       if (activeUser) {
         setupEventListeners();
@@ -388,7 +391,7 @@ export const Chat = createComponent(
       full_name: string;
     }) => {
       activeUser = user;
-
+    
       // Create room ID (combination of both usernames sorted alphabetically)
       const currentUserId = store.userId;
       if (currentUserId) {
@@ -396,14 +399,21 @@ export const Chat = createComponent(
         roomId = [currentUserId, user.id]
           .sort((a: any, b: any) => a - b)
           .join("-");
-
+    
         // Get message history for this room
         if (chatService.isConnected()) {
           chatService.getMessageHistory(roomId);
+          
+          // Mark messages as read when opening the chat
           chatService.markMessagesAsRead(roomId);
+          
+          // Request updated unread counts after marking messages as read
+          chatService.send("messages:unread:get", {
+            userId: store.userId
+          });
         }
       }
-
+    
       renderChat();
     };
 
@@ -500,6 +510,7 @@ export const Chat = createComponent(
     // Return the component with its public methods
     return Object.assign(container, {
       setActiveUser,
+      getCurrentActiveChatId: () => activeUser ? activeUser.id : null
     });
   }
 );
