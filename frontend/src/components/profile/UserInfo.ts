@@ -211,7 +211,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
           full_name?: string;
           age?: string;
           email?: string;
-            country?: string;
+          country?: string;
         } = {};
         if (store.nickname !== nicknameInput.value)
           data.nickname = nicknameInput.value;
@@ -224,17 +224,22 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
         if (store.country !== countryInput.value)
           data.country = countryInput.value;
 
-        if (Object.keys(data).length === 0){
+        if (Object.keys(data).length === 0) {
           Toast.show("No changes detected", "warn");
           return;
         }
-        
+
         try {
           await axios.patch(`http://localhost:8001/auth/users/${store.userId}`, data, {
             headers: {
               authorization: `Bearer ${store.accessToken}`,
             }
           })
+          if (store.email !== emailInput.value) {
+            await store.logout();
+            Toast.show(`Logged out, please go to your email ${emailInput.value} and activate your account`, "warn");
+            return ;
+          }
           store.nickname = nicknameInput.value;
           store.fullName = fullNameInput.value;
           store.age = ageInput.value;
@@ -243,9 +248,20 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
 
           refreshRouter()
           Toast.show("Your data are updated sucessfuly", "success");
-        } catch(err: any) {
+        } catch (err: any) {
+          if (err.response) {
+            const reqErrors = [400, 401, 403, 404, 409]
+            if (reqErrors.includes(err.response.status))
+              Toast.show(`Error: ${err.response.data.message}`, "error");
+            else if (err.response.status === 500)
+              Toast.show(`Server error: ${err.response.data.error}`, "error");
+            else
+              Toast.show(`Unexpected error: ${err.response.data}`, "error");
+          } else if (err.request)
+            Toast.show(`No response from server: ${err.request}`, "error");
+          else
+            Toast.show(`Error setting up the request: ${err.message}`, "error");
           console.log(err);
-          Toast.show(`Error: ${err.response.data.message}`, "error");
         }
       });
 
@@ -298,27 +314,27 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
 
   const inputs: NodeListOf<HTMLInputElement> = container.querySelectorAll("#auth-code input");
 
-	if (inputs.length) {
-		requestAnimationFrame(() => {
-			inputs[0].focus();
-			inputs[0].select();
-		});
-	}
+  if (inputs.length) {
+    requestAnimationFrame(() => {
+      inputs[0].focus();
+      inputs[0].select();
+    });
+  }
 
   const formElement = container.querySelector("#code-form") as HTMLFormElement;
   inputs.forEach((input, index) => {
-		input.addEventListener("input", (e: Event) => {
-			const target = e.target as HTMLInputElement;
-			const value = target.value;
+    input.addEventListener("input", (e: Event) => {
+      const target = e.target as HTMLInputElement;
+      const value = target.value;
 
-			if (!/^\d$/.test(value)) {
-				target.value = "";
-				return;
-			}
+      if (!/^\d$/.test(value)) {
+        target.value = "";
+        return;
+      }
 
-			if (value.length >= 1 && index < inputs.length - 1) {
-				inputs[index + 1].focus();
-			}
+      if (value.length >= 1 && index < inputs.length - 1) {
+        inputs[index + 1].focus();
+      }
 
       if (index === 5) {
 
@@ -332,14 +348,14 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
           formElement.requestSubmit();
       }
 
-		});
+    });
 
-		// Handle backspace to move to previous field
-		input.addEventListener("keydown", (e: KeyboardEvent) => {
-			if (e.key === "Backspace" && input.value === "" && index > 0)
-				inputs[index - 1].focus();
-		});
-	});
+    // Handle backspace to move to previous field
+    input.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.key === "Backspace" && input.value === "" && index > 0)
+        inputs[index - 1].focus();
+    });
+  });
 
   return container;
 });
