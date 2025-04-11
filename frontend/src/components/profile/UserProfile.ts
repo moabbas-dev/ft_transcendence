@@ -219,10 +219,12 @@ export const Profile = createComponent((props: ProfileProps) => {
             >
             <span class="absolute bottom-0 left-0 size-4 rounded-full
               bg-green-500 border border-white"></span>
-            <button id="upload-photo" class="absolute top-0 right-0 size-5 rounded-full hover:opacity-90 cursor-pointer bg-pongblue grid place-content-center">
-              <i class="fa-solid fa-pen text-white text-xs"></i>
-            </button>
-          </div>
+            ${props.uName === store.nickname ? `
+              <button id="upload-photo" class="absolute top-0 right-0 size-5 rounded-full hover:opacity-90 cursor-pointer bg-pongblue grid place-content-center">
+                <i class="fa-solid fa-pen text-white text-xs"></i>
+              </button>
+            ` : ''}
+            </div>
         </div>
       </div>
       <!-- Tabs (Statistics, History, Info) -->

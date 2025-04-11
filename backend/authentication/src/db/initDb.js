@@ -22,7 +22,7 @@ const createTables = () => {
 					country TEXT,
 					status TEXT NOT NULL DEFAULT 'offline' CHECK (status IN ('offline', 'online', 'in_game')),
 					elo INTEGER NOT NULL DEFAULT 1000,
-					avatar_url TEXT DEFAULT 'http://localhost:8001/uploads/binary.jpg',
+					avatar_url TEXT DEFAULT 'http://localhost:8001/uploads/binary.png',
 					google_id TEXT UNIQUE,
 					is_2fa_enabled BOOLEAN DEFAULT 0,
 					is_active BOOLEAN DEFAULT 0,
