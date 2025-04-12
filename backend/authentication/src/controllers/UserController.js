@@ -10,7 +10,7 @@ const axios = require('axios');
 const { log } = require('console');
 
 class UserController {
-	
+
 	static async createUser(request, reply) {
 		const { email, password, nickname, full_name, age, country, google_id } = request.body;
 		const activationEmailHtml = (activationToken, full_name) => {
@@ -188,9 +188,19 @@ class UserController {
 	}
 
 	static async patchUser(request, reply) {
+		const activationEmailHtml = (activationToken, email, full_name) => {
+			return `
+				<div>
+					<h1>Welcome ${full_name} to our website!</h1>
+					<p>After updating your email to ${email}, please click on the link below to activate your account</p>
+					<a href="${process.env.BACKEND_DOMAIN}/auth/activate/${activationToken}">Activate your account</a>
+					<p>Have a nice day!</p>
+				</div>
+			`;
+		}
 		try {
 			const { id } = request.params;
-      		const updates = Object.keys(request.body);
+			const updates = Object.keys(request.body);
 			const allowedUpdates = ['nickname', 'full_name', 'age', 'country', 'email'];
 			const isValidOperation = updates.every((update) => allowedUpdates.includes(update));
 			const authHeader = request.headers.authorization;
@@ -210,6 +220,9 @@ class UserController {
 			}
 			if (decoded.userId != id)
 				return reply.code(403).send({ message: "Token does not belong to this user!" });
+			const user = await User.findById(id);
+			if (!user)
+				return reply.code(404).send({ message: "User not found!" });
 			const { email, nickname, full_name, age, country } = request.body;
 			if (typeof email !== 'undefined' && !validateEmail(email))
 				return reply.code(400).send({ message: "Invalid email address!" });
@@ -223,17 +236,38 @@ class UserController {
 				return reply.code(400).send({ message: "Invalid country!" });
 
 			const updateData = {};
-			if (email !== undefined)     updateData.email      = email;
-			if (nickname !== undefined)  updateData.nickname   = nickname;
-			if (full_name !== undefined) updateData.full_name  = capitalizeFullName(full_name);
-			if (age !== undefined)       updateData.age        = age;
-			if (country !== undefined)   updateData.country    = country;
+			if (email !== undefined) updateData.email = email;
+			if (nickname !== undefined) updateData.nickname = nickname;
+			if (full_name !== undefined) updateData.full_name = capitalizeFullName(full_name);
+			if (age !== undefined) updateData.age = age;
+			if (country !== undefined) updateData.country = country;
+			if (updateData.email !== undefined) {
+				const activationToken = crypto.randomUUID();
+				await UserToken.create({ userId: id, activationToken, tokenType: "account_activation" });
+				try {
+					const fullName = typeof full_name !== 'undefined' ? full_name : user.full_name;
+					await axios.post(`http://localhost:3003/api/notifications/email`, {
+						recipientId: id,
+						content: {
+							subject: "Activating your account due to email changing",
+							email,
+							body: activationEmailHtml(activationToken, updateData.email, fullName)
+						}
+					});
+				} catch (err) {
+					return reply.code(500).send({ message: "Error sending email request!", error: err.message });
+				}
+			}
 			const changes = await User.updateProfile(id, updateData);
 			if (changes == 0)
 				reply.code(404).send({ message: 'User not found!' });
 			else
 				reply.code(200).send({ message: 'User updated successfully!' });
 		} catch (err) {
+			if (err.message.includes('Users.nickname'))
+				return reply.code(409).send({ key: "nickname", message: "Nickname is already in use!", error: err.message });
+			if (err.message.includes('Users.email'))
+				return reply.code(409).send({ key: "email", message: "Email is already in use!", error: err.message });
 			reply.code(500).send({ message: 'Error Editing User info', error: err.message });
 		}
 	}
