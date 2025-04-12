@@ -89,7 +89,7 @@ export default {
     </div> 
     `;
 
-    if(window.location.href.endsWith(':5173/#')) {
+    if(window.location.href.endsWith(':5173/#') && localStorage.getItem("googleAuthClicked")) {
       const overlay = document.createElement('div');
       overlay.className = 'fixed inset-0 bg-black opacity-40 z-50';
       container.appendChild(overlay);

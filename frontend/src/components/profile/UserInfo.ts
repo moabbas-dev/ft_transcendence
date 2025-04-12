@@ -324,7 +324,10 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
 
         formElement.addEventListener("submit", (e) => {
           e.preventDefault();
-          console.log("Form submitted via JS!");
+          let code = Array.from(inputs).map(input => input.value).join('');
+          console.log("Submitted code:", code);
+          inputs.forEach(input => { input.value = "" });
+          inputs[0].focus();
         });
 
         const allFilled = Array.from(inputs).every(input => input.value.length === 1);

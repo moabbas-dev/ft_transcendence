@@ -171,7 +171,8 @@ export const TwoFactorSend = createComponent((params?: { [key: string]: string }
 		e.preventDefault();
 		let code = Array.from(inputs).map(input => input.value).join('');
 		console.log("Entered code:", code);
-		// TODO: Send the 'code' to your server for verification
+		inputs.forEach(input => { input.value = "" });
+		inputs[0].focus();
 	});
 
 	return form;
