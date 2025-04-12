@@ -191,6 +191,7 @@ export default {
               store.update("country", decodedToken.country);
               store.update("createdAt", decodedToken.createdAt);
               store.update("avatarUrl", decodedToken.avatarUrl);
+              store.update("is2faEnabled", decodedToken.is2fa);
               store.update("isLoggedIn", true);
               navigate("/");
               Toast.show(`Login successful, Welcome ${decodedToken.fullName}!`, "success");

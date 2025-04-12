@@ -5,6 +5,7 @@ import { t } from "../../languages/LanguageController.js";
 import countryList from "country-list";
 import Toast from "../../toast/Toast.js";
 import { refreshRouter } from "../../router.js";
+import getValidAccessToken from "../../../refresh/RefreshToken.js";
 
 interface UserInfoProps {
   uName: string;
@@ -111,9 +112,11 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
 					                  <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
 					                  <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
 				                  </div>
+                          <!--
                           <button id="validateCodeBtn" class="bg-pongblue text-white px-4 py-1 rounded hover:bg-blue-700 transition-colors">
                                ${t('profile.infoTab.generateNewQrcode')}
                           </button>
+                          -->
 			                  </form>
                     </div>
                 </div>
@@ -193,6 +196,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
   const twoFactorToggle = container.querySelector(
     "#twoFactorToggle"
   ) as HTMLInputElement;
+  twoFactorToggle.checked = store.is2faEnabled;
   const qrCodeContainer = container.querySelector("#qrCodeContainer");
   const qrCodeImage = container.querySelector("#qrCodeImage") as HTMLDivElement;
 
@@ -238,7 +242,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
           if (store.email !== emailInput.value) {
             await store.logout();
             Toast.show(`Logged out, please go to your email ${emailInput.value} and activate your account`, "warn");
-            return ;
+            return;
           }
           store.nickname = nicknameInput.value;
           store.fullName = fullNameInput.value;
@@ -284,9 +288,10 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
         // Show QR code when 2FA is enabled
         qrCodeContainer.classList.remove("hidden");
         try {
+          const accessToken = await getValidAccessToken();
           const res = await axios.put(`http://localhost:8001/auth/twoFactor/enable/${store.userId}`, {}, {
             headers: {
-              Authorization: `Bearer ${store.accessToken}`,
+              Authorization: `Bearer ${accessToken}`,
             },
           });
           qrCodeImage.innerHTML = `<img src="${res.data.qrCodeDataUrl}" alt="QR Code" class="w-full h-full object-contain" />`;
@@ -306,8 +311,29 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
 
       } else {
         // Hide QR code when 2FA is disabled
-        qrCodeContainer.classList.add("hidden");
-        console.log("2FA disabled");
+        try {
+          const accessToken = await getValidAccessToken();
+          await axios.put(`http://localhost:8001/auth/twoFactor/disable/${store.userId}`, {}, {
+            headers: {
+              authorization: `Bearer ${accessToken}`,
+            }
+          });
+          store.update("is2faEnabled", "0");
+          qrCodeContainer.classList.add("hidden");
+          console.log("2FA disabled");
+        } catch (error: any) {
+          if (error.response) {
+            if (error.response.status === 404 || error.response.status === 403 || error.response.status === 401)
+              Toast.show(`Error: ${error.response.data.message}`, "error");
+            else if (error.response.status === 500)
+              Toast.show(`Server error: ${error.response.data.error}`, "error");
+            else
+              Toast.show(`Unexpected error: ${error.response.data}`, "error");
+          } else if (error.request)
+            Toast.show(`No response from server: ${error.request}`, "error");
+          else
+            Toast.show(`Error setting up the request: ${error.message}`, "error");
+        }
       }
     });
   }
@@ -345,21 +371,24 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
           inputs.forEach(input => { input.value = "" });
           inputs[0].focus();
           try {
-            const body = {code: code};
+            const accessToken = await getValidAccessToken();
+            const body = { code: code };
             await axios.post(`http://localhost:8001/auth/twoFactor/enable/validate/${store.userId}`, body, {
-              headers: {Authorization: `Bearer ${store.accessToken}`}
+              headers: { Authorization: `Bearer ${accessToken}` }
             })
             try {
               await axios.put(`http://localhost:8001/auth/twoFactor/enable/${store.userId}`, undefined, {
-                headers: {Authorization: `Bearer ${store.accessToken}`}
+                headers: { Authorization: `Bearer ${accessToken}` }
               })
               console.log("FFFFFFF");
-              
-              Toast.show(`2FA Enabled Successfully!`, "success");  
-            } catch(err:any) {
-              Toast.show(`Error: ${err.response.data.message}`, "error");  
+
+              Toast.show(`2FA Enabled Successfully!`, "success");
+              qrCodeContainer?.classList.add("hidden");
+              store.update("is2faEnabled", "1");
+            } catch (err: any) {
+              Toast.show(`Error: ${err.response.data.message}`, "error");
             }
-          } catch (error:any) {
+          } catch (error: any) {
             Toast.show(`Error: ${error.response.data.message}`, "error");
           }
         });

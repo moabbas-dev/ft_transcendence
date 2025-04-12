@@ -109,6 +109,7 @@ export const TwoFactorSend = createComponent((params?: { [key: string]: string }
 				store.update("country", decodedToken.country);
 				store.update("createdAt", decodedToken.createdAt);
 				store.update("avatarUrl", decodedToken.avatarUrl);
+				store.update("is2faEnabled", decodedToken.is2fa);
 				store.update("isLoggedIn", true);
 				navigate("/play");
 				Toast.show(`Login successful, Welcome ${decodedToken.fullName}!`, "success");
