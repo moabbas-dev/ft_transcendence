@@ -1,6 +1,6 @@
 import store from "../../../store/store.js";
 import { createComponent } from "../../utils/StateManager.js";
-import chatService from "../../utils/chatWebSocketService.js";
+import chatService from "../../utils/chatUtils/chatWebSocketService.js";
 import bgImage from "../../assets/bg1.png";
 import bgImage2 from "../../assets/chatBg5.gif"
 import { emoticons, emoticonsMap } from "./emoticons.js";

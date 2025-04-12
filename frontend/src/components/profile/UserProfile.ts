@@ -8,7 +8,7 @@ import Chart from "chart.js/auto";
 import store from "../../../store/store.js";
 import axios from "axios";
 import { t } from "../../languages/LanguageController.js";
-import { chatService } from "../../utils/chatWebSocketService.js";
+import { chatService } from "../../utils/chatUtils/chatWebSocketService.js";
 import { UserFriends } from "./UserFriends.js";
 import { navigate } from "../../router.js";
 

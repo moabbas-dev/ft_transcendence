@@ -1,12 +1,11 @@
 import store from "../../../store/store.js";
 import { createComponent } from "../../utils/StateManager.js";
-import chatService from "../../utils/chatWebSocketService.js";
+import chatService from "../../utils/chatUtils/chatWebSocketService.js";
 
 interface ChatItemProps {
     username: string,
     userId: number,
     fullname: string,
-    isFriend: boolean,
     status: string,
     unreadCount: number,
     onChatSelect?: (user: { nickname: string, id: number, full_name: string }) => void
@@ -36,12 +35,7 @@ export const ChatItem = createComponent((props: ChatItemProps) => {
                             ${props.unreadCount > 9 ? '9+' : props.unreadCount}
                         </div>
                         ` : ''}
-        
-                        ${props.status ?
-                    `<span class="status-indicator absolute bottom-0 right-0 h-3 w-3 rounded-full ${props.status ? 'bg-green-500' : 'bg-gray-400'
-                    } border border-white"></span>` :
-                    ``
-                }
+    
                     </div>
                     
                     <div class="user-info flex flex-col">
@@ -50,13 +44,7 @@ export const ChatItem = createComponent((props: ChatItemProps) => {
                     </div>
                 </div>
                 
-                ${!props.isFriend ? `
-                <div class="add-friend-container">
-                    <button class="add-friend p-2 rounded-full hover:bg-gray-100">
-                        <i class="fas fa-user-plus text-blue-500"></i>
-                    </button>
-                </div>
-                ` : ``}
+
             `;
         
             attachEventListeners();
