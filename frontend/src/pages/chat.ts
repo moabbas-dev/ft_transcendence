@@ -1,9 +1,10 @@
 import { Chat } from "../components/chat/Chat.js";
-import { ChatItem } from "../components/chat/ChatItem.js";
 import { navigate } from "../router.js";
 import chatService from "../utils/chatUtils/chatWebSocketService.js";
 import store from "../../store/store.js";
 import { t } from "../languages/LanguageController.js";
+import { FriendsList } from "../components/chat/FriendsList.js";
+import { RequestsList } from "../components/chat/RequestsList.js";
 
 interface USER {
   nickname: string;
@@ -36,10 +37,10 @@ export default {
           <div class="flex justify-center px-4 pb-2">
             <div class="flex bg-ponghover rounded-lg p-1 w-full">
               <button id="friends-tab" class="flex-1 text-white py-2 px-4 rounded-md bg-purple-500 text-center transition-all">
-                ${t('chat.friends')}
+                ${t('Friends')}
               </button>
               <button id="requests-tab" class="flex-1 text-white py-2 px-4 rounded-md text-center transition-all">
-                ${t('chat.messageRequests')}
+                ${t('Message Requests')}
               </button>
             </div>
           </div>
@@ -51,14 +52,7 @@ export default {
                 <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
               </div>
             </div>
-            
-            <div class="friends-list sm:flex flex-col scroll-pr-4 pl-4 flex-1 overflow-y-auto [scrollbar-width:thin] [scrollbar-color:white_pongdark]
-                [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2
-                [&::-webkit-scrollbar-track]:bg-ponghover [&::-webkit-scrollbar-track]:rounded
-                [&::-webkit-scrollbar-thumb]:bg-pongdark [&::-webkit-scrollbar-thumb]:rounded
-                [&::-webkit-scrollbar-thumb:hover]:bg-[#2d3748]">
-              <div class="loading text-center text-white py-4">${t('loadingFriends')}</div>
-            </div>
+            <div id="friends-list-content"></div>
           </div>
 
           <!-- Message Requests Container (Hidden by default) -->
@@ -68,14 +62,7 @@ export default {
                 <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
               </div>
             </div>
-            
-            <div class="message-requests-list sm:flex flex-col scroll-pr-4 pl-4 flex-1 overflow-y-auto [scrollbar-width:thin] [scrollbar-color:white_pongdark]
-                [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2
-                [&::-webkit-scrollbar-track]:bg-ponghover [&::-webkit-scrollbar-track]:rounded
-                [&::-webkit-scrollbar-thumb]:bg-pongdark [&::-webkit-scrollbar-thumb]:rounded
-                [&::-webkit-scrollbar-thumb:hover]:bg-[#2d3748]">
-              <div class="loading text-center text-white py-4">${t('loadingRequests')}</div>
-            </div>
+            <div id="requests-list-content"></div>
           </div>
         </div>
 
@@ -93,8 +80,8 @@ export default {
     const requestsTab = container.querySelector("#requests-tab") as HTMLButtonElement;
     const friendsContainer = container.querySelector("#friends-container") as HTMLElement;
     const requestsContainer = container.querySelector("#requests-container") as HTMLElement;
-    const friendsList = container.querySelector(".friends-list") as HTMLElement;
-    const requestsList = container.querySelector(".message-requests-list") as HTMLElement;
+    const friendsListContent = container.querySelector("#friends-list-content") as HTMLElement;
+    const requestsListContent = container.querySelector("#requests-list-content") as HTMLElement;
     const chat = container.querySelector(".chat") as HTMLElement;
     const loadingIndicator = container.querySelector(".loading-indicator") as HTMLElement;
     const requestsLoadingIndicator = container.querySelector(".requests-loading-indicator") as HTMLElement;
@@ -105,6 +92,48 @@ export default {
 
     // Initialize WebSocket connection
     await initializeWebSocket();
+
+    // Get unread count function
+    const getUnreadCount = (userId: number): number => {
+      return unreadMessageCounts.get(userId) || 0;
+    };
+
+    // Update active chat item (highlight selected chat)
+    function updateActiveChatItem(username: string, container: HTMLElement) {
+      // Remove active class from all items in both containers
+      const allUserItems = document.querySelectorAll(".user-item");
+      allUserItems.forEach((item) => {
+        item.classList.remove("bg-ponghover");
+      });
+
+      // Add active class to selected item
+      const userItems = container.querySelectorAll(".user-item");
+      userItems.forEach((item) => {
+        if ((item as HTMLElement).dataset.username === username) {
+          item.classList.add("bg-ponghover");
+        }
+      });
+    }
+
+    // Initialize friends list component
+    const friendsList = FriendsList({
+      onChatSelect: (user: any) => {
+        (chatComponent as any).setActiveUser(user);
+      },
+      getUnreadCount,
+      updateActiveChatItem
+    });
+    friendsListContent.appendChild(friendsList.element);
+
+    // Initialize message requests component
+    const requestsList = RequestsList({
+      onChatSelect: (user: any) => {
+        (chatComponent as any).setActiveUser(user);
+      },
+      getUnreadCount,
+      updateActiveChatItem
+    });
+    requestsListContent.appendChild(requestsList.element);
 
     // Setup event handlers
     setupEventHandlers();
@@ -131,7 +160,7 @@ export default {
       friendsContainer.classList.remove("flex");
 
       // Load message requests if they haven't been loaded yet
-      if (requestsList.querySelector(".loading")) {
+      if (requestsList.element.querySelector(".loading")) {
         loadMessageRequests();
       }
     });
@@ -141,62 +170,6 @@ export default {
     logoContainer.addEventListener("click", () => {
       navigate("/");
     });
-
-    // Get unread count
-    const getUnreadCount = (userId: number): number => {
-      return unreadMessageCounts.get(userId) || 0;
-    };
-
-    // Update chat item unread count
-    function updateChatItemUnreadCount(userId: number, count: number, container: HTMLElement, usersRequest: HTMLElement) {
-      const userItems = container.querySelectorAll(".user-item");
-      userItems.forEach((item) => {
-        if ((item as HTMLElement).dataset.userId === userId.toString()) {
-          const avatarContainer = item.querySelector(".avatar-container");
-          if (avatarContainer) {
-            // Remove existing unread count badge if any
-            const existingBadge = avatarContainer.querySelector("div.absolute.top-0.right-0");
-            if (existingBadge) {
-              existingBadge.remove();
-            }
-
-            // Add new badge if count > 0
-            if (count > 0) {
-              const badge = document.createElement("div");
-              badge.className =
-                "absolute top-0 right-0 bg-red-500 text-white rounded-full " +
-                "text-xs min-w-[20px] h-5 flex items-center justify-center px-1";
-              badge.textContent = count > 9 ? '9+' : count.toString();
-              avatarContainer.appendChild(badge);
-            }
-          }
-        }
-      });
-
-      const userItemss = usersRequest.querySelectorAll(".user-item");
-      userItemss.forEach((item) => {
-        if ((item as HTMLElement).dataset.userId === userId.toString()) {
-          const avatarContainer = item.querySelector(".avatar-container");
-          if (avatarContainer) {
-            // Remove existing unread count badge if any
-            const existingBadge = avatarContainer.querySelector("div.absolute.top-0.right-0");
-            if (existingBadge) {
-              existingBadge.remove();
-            }
-
-            // Add new badge if count > 0
-            if (count > 0) {
-              const badge = document.createElement("div");
-              badge.className =
-                "absolute top-0 right-0 bg-red-500 text-white rounded-full " +
-                "text-xs min-w-[20px] h-5 flex items-center justify-center px-1";
-              badge.textContent = count > 9 ? '9+' : count.toString();
-              avatarContainer.appendChild(badge);
-            }
-          }
-        }
-      });
-    }
 
     // Initialize WebSocket connection
     async function initializeWebSocket() {
@@ -229,13 +202,13 @@ export default {
       // Handle friends list update
       chatService.on("friends:list", (data: any) => {
         console.log(data);
-        renderFriendsList(data.friends);
+        friendsList.render(data.friends);
       });
 
       // Handle message requests list update
       chatService.on("message:requests", (data: any) => {
         console.log(data);
-        renderMessageRequestsList(data.requests);
+        requestsList.render(data.requests);
       });
 
       // Handle unread message counts
@@ -248,7 +221,8 @@ export default {
 
           // Update all chat items with new counts
           unreadMessageCounts.forEach((count, userId) => {
-            updateChatItemUnreadCount(userId, count, friendsList, requestsList);
+            friendsList.updateUnreadCount(userId, count);
+            requestsList.updateUnreadCount(userId, count);
           });
         }
       });
@@ -270,23 +244,25 @@ export default {
 
       // Handle user online status changes
       chatService.on("user:status", (data: any) => {
-        updateUserStatus(data.nickname, data.status);
+        const isOnline = data.status === "online";
+        friendsList.updateUserStatus(data.nickname, isOnline);
+        requestsList.updateUserStatus(data.nickname, isOnline);
       });
 
       // Handle blocked user confirmation
-      chatService.on("user:blocked", (data: any) => {
+      chatService.on("user:blocked", () => {
         loadFriendsList(); // Reload friends list to update UI
         loadMessageRequests(); // Reload message requests to update UI
       });
 
       // Handle unblocked user confirmation
-      chatService.on("user:unblocked", (data: any) => {
+      chatService.on("user:unblocked", () => {
         loadFriendsList(); // Reload friends list to update UI
         loadMessageRequests(); // Reload message requests to update UI
       });
 
       // Handle user added as friend
-      chatService.on("user:friend:added", (data: any) => {
+      chatService.on("user:friend:added", () => {
         loadFriendsList(); // Reload friends list
         loadMessageRequests(); // Reload message requests
       });
@@ -303,12 +279,10 @@ export default {
         loadMessageRequests(); // Reload message requests
       });
     }
-
     // Load friends list
     async function loadFriendsList() {
       try {
-        // Show loading state
-        friendsList.innerHTML = `<div class="loading text-center text-white py-4">${t('chat.loadingFriends')}</div>`;
+        // Show loading indicator
         loadingIndicator.classList.remove("hidden");
 
         // Request friends list from server
@@ -324,17 +298,17 @@ export default {
         }
       } catch (error) {
         console.error("Error loading friends list:", error);
-        friendsList.innerHTML = '<div class="text-red-500 text-center py-4">Failed to load friends</div>';
+        friendsList.element.innerHTML = '<div class="text-red-500 text-center py-4">Failed to load friends</div>';
       } finally {
         loadingIndicator.classList.add("hidden");
       }
+
     }
 
     // Load message requests
     async function loadMessageRequests() {
       try {
-        // Show loading state
-        requestsList.innerHTML = `<div class="loading text-center text-white py-4">${t('chat.loadingRequests')}</div>`;
+        // Show loading indicator
         requestsLoadingIndicator.classList.remove("hidden");
 
         // Request message requests from server
@@ -343,339 +317,16 @@ export default {
             userId: store.userId,
           });
 
-          // Request unread request counts
-          // chatService.send("messages:requests:unread:get", {
-          //   userId: store.userId
-          // });
+          chatService.send("messages:unread:get", {
+            userId: store.userId
+          });
         }
       } catch (error) {
         console.error("Error loading message requests:", error);
-        requestsList.innerHTML = '<div class="text-red-500 text-center py-4">Failed to load message requests</div>';
+        requestsList.element.innerHTML = '<div class="text-red-500 text-center py-4">Failed to load message requests</div>';
       } finally {
         requestsLoadingIndicator.classList.add("hidden");
       }
-    }
-
-    // Render friends list
-    function renderFriendsList(friends: USER[]) {
-      // Clear loading state
-      friendsList.innerHTML = "";
-
-      if (!friends || friends.length === 0) {
-        friendsList.innerHTML = '<div class="text-white text-center py-4 opacity-50">No friends yet</div>';
-        return;
-      }
-
-      // Add the search box at the top
-      const searchBox = document.createElement("div");
-      searchBox.className = "search-box mb-4 px-4";
-      searchBox.innerHTML = `
-        <div class="relative">
-          <input type="text" class="w-full bg-ponghover text-white rounded-full py-2 px-4 pl-10 focus:outline-none" placeholder="Search friends...">
-          <div class="absolute left-3 top-2.5 text-white">
-            <i class="fa-solid fa-search"></i>
-          </div>
-        </div>
-      `;
-      friendsList.appendChild(searchBox);
-
-      // Add section title for online friends
-      const onlineFriends = friends.filter(friend => friend.status === "online");
-      if (onlineFriends.length > 0) {
-        const onlineTitle = document.createElement("div");
-        onlineTitle.className = "text-white text-lg font-medium mt-2 mb-1 drop-shadow-[1px_1px_20px_white]";
-        onlineTitle.textContent = "Online";
-        friendsList.appendChild(onlineTitle);
-
-        // Render online friends
-        onlineFriends.forEach((friend) => {
-          const chatItemElement = ChatItem({
-            username: friend.nickname,
-            userId: friend.id,
-            fullname: friend.full_name,
-            status: true,
-            unreadCount: getUnreadCount(friend.id),
-            onChatSelect: (user: any) => {
-              (chatComponent as any).setActiveUser(user);
-              updateActiveChatItem(friend.nickname, friendsList);
-            },
-          });
-          chatItemElement.dataset.username = friend.nickname;
-          chatItemElement.dataset.userId = friend.id.toString();
-          friendsList.appendChild(chatItemElement);
-        });
-      }
-
-      // Add section title for offline friends
-      const offlineFriends = friends.filter(friend => friend.status === "offline");
-      if (offlineFriends.length > 0) {
-        const offlineTitle = document.createElement("div");
-        offlineTitle.className = "text-white text-lg font-medium mt-4 mb-1 drop-shadow-[1px_1px_20px_white]";
-        offlineTitle.textContent = "Offline";
-        friendsList.appendChild(offlineTitle);
-
-        // Render offline friends
-        offlineFriends.forEach((friend) => {
-          const chatItemElement = ChatItem({
-            username: friend.nickname,
-            userId: friend.id,
-            fullname: friend.full_name,
-            status: false,
-            unreadCount: getUnreadCount(friend.id),
-            onChatSelect: (user: any) => {
-              (chatComponent as any).setActiveUser(user);
-              updateActiveChatItem(friend.nickname, friendsList);
-            },
-          });
-          chatItemElement.dataset.username = friend.nickname;
-          chatItemElement.dataset.userId = friend.id.toString();
-          friendsList.appendChild(chatItemElement);
-        });
-      }
-
-      // Setup search functionality
-      const searchInput = searchBox.querySelector("input");
-      searchInput?.addEventListener("input", (e) => {
-        const target = e.target as HTMLInputElement;
-        const searchTerm = target.value.toLowerCase();
-
-        // Filter friends list based on search term
-        const userItems = friendsList.querySelectorAll(".user-item");
-        userItems.forEach((item) => {
-          const nameElement = item.querySelector(".user-info");
-          if (nameElement) {
-            const name = nameElement.textContent?.toLowerCase() || "";
-            if (name.includes(searchTerm)) {
-              item.classList.remove("hidden");
-            } else {
-              item.classList.add("hidden");
-            }
-          }
-        });
-
-        // Hide section titles if all items in that section are hidden
-        const sectionTitles = friendsList.querySelectorAll(".text-white.text-lg.font-medium");
-        sectionTitles.forEach((title) => {
-          let nextElement = title.nextElementSibling;
-          let hasVisibleItems = false;
-
-          // Check if any items in this section are visible
-          while (nextElement && !nextElement.classList.contains("text-white")) {
-            if (nextElement.classList.contains("user-item") && !nextElement.classList.contains("hidden")) {
-              hasVisibleItems = true;
-              break;
-            }
-            nextElement = nextElement.nextElementSibling;
-          }
-
-          if (hasVisibleItems) {
-            title.classList.remove("hidden");
-          } else {
-            title.classList.add("hidden");
-          }
-        });
-      });
-    }
-
-    // Render message requests list
-    function renderMessageRequestsList(data: USER[]) {
-      console.log(data);
-      // Clear loading state
-      requestsList.innerHTML = "";
-
-      // Extract the requests array from the data
-      const requests = data || [];
-
-      if (!requests || requests.length === 0) {
-        requestsList.innerHTML = '<div class="text-white text-center py-4 opacity-50">No message requests</div>';
-        return;
-      }
-
-      // Add the search box at the top
-      const searchBox = document.createElement("div");
-      searchBox.className = "search-box mb-4 px-4";
-      searchBox.innerHTML = `
-    <div class="relative">
-      <input type="text" class="w-full bg-ponghover text-white rounded-full py-2 px-4 pl-10 focus:outline-none" placeholder="Search requests...">
-      <div class="absolute left-3 top-2.5 text-white">
-        <i class="fa-solid fa-search"></i>
-      </div>
-    </div>
-  `;
-      requestsList.appendChild(searchBox);
-
-      // Add section title for online users
-      const onlineUsers = requests.filter((item: any) => item.user && item.user.status === "online");
-      if (onlineUsers.length > 0) {
-        const onlineTitle = document.createElement("div");
-        onlineTitle.className = "text-white text-lg font-medium mt-2 mb-1 drop-shadow-[1px_1px_20px_white]";
-        onlineTitle.textContent = "Online";
-        requestsList.appendChild(onlineTitle);
-
-        // Render online users
-        onlineUsers.forEach((item: any) => {
-          const user = item.user;
-          console.log(user);
-          if (!user) return;
-
-          const chatItemElement = ChatItem({
-            username: user.nickname,
-            userId: user.id,
-            fullname: user.full_name,
-            status: true,
-            unreadCount: getUnreadCount(user.id),
-            onChatSelect: (user: any) => {
-              (chatComponent as any).setActiveUser(user);
-              updateActiveChatItem(user.nickname, requestsList);
-            },
-          });
-          chatItemElement.dataset.username = user.nickname;
-          chatItemElement.dataset.userId = user.id.toString();
-          requestsList.appendChild(chatItemElement);
-        });
-      }
-
-      // Add section title for offline users
-      const offlineUsers = requests.filter((item: any) => item.user && item.user.status === "offline");
-      if (offlineUsers.length > 0) {
-        const offlineTitle = document.createElement("div");
-        offlineTitle.className = "text-white text-lg font-medium mt-4 mb-1 drop-shadow-[1px_1px_20px_white]";
-        offlineTitle.textContent = "Offline";
-        requestsList.appendChild(offlineTitle);
-
-        // Render offline users
-        offlineUsers.forEach((item: any) => {
-          const user = item.user;
-          console.log(user);
-          if (!user) return;
-
-          const chatItemElement = ChatItem({
-            username: user.nickname,
-            userId: user.id,
-            fullname: user.full_name,
-            status: false,
-            unreadCount: getUnreadCount(user.id),
-            onChatSelect: (user: any) => {
-              (chatComponent as any).setActiveUser(user);
-              updateActiveChatItem(user.nickname, requestsList);
-            },
-          });
-          chatItemElement.dataset.username = user.nickname;
-          chatItemElement.dataset.userId = user.id.toString();
-          requestsList.appendChild(chatItemElement);
-        });
-      }
-
-      // Setup search functionality
-      const searchInput = searchBox.querySelector("input");
-      searchInput?.addEventListener("input", (e) => {
-        const target = e.target as HTMLInputElement;
-        const searchTerm = target.value.toLowerCase();
-
-        // Filter requests list based on search term
-        const userItems = requestsList.querySelectorAll(".user-item");
-        userItems.forEach((item) => {
-          const nameElement = item.querySelector(".user-info");
-          if (nameElement) {
-            const name = nameElement.textContent?.toLowerCase() || "";
-            if (name.includes(searchTerm)) {
-              item.classList.remove("hidden");
-            } else {
-              item.classList.add("hidden");
-            }
-          }
-        });
-
-        // Hide section titles if all items in that section are hidden
-        const sectionTitles = requestsList.querySelectorAll(".text-white.text-lg.font-medium");
-        sectionTitles.forEach((title) => {
-          let nextElement = title.nextElementSibling;
-          let hasVisibleItems = false;
-
-          // Check if any items in this section are visible
-          while (nextElement && !nextElement.classList.contains("text-white")) {
-            if (nextElement.classList.contains("user-item") && !nextElement.classList.contains("hidden")) {
-              hasVisibleItems = true;
-              break;
-            }
-            nextElement = nextElement.nextElementSibling;
-          }
-
-          if (hasVisibleItems) {
-            title.classList.remove("hidden");
-          } else {
-            title.classList.add("hidden");
-          }
-        });
-      });
-    }
-
-    // Update user online status
-    function updateUserStatus(username: string, isOnline: boolean) {
-      // Update in friends list
-      updateUserStatusInContainer(username, isOnline, friendsList);
-
-      // Update in requests list
-      updateUserStatusInContainer(username, isOnline, requestsList);
-    }
-
-    // Helper function to update user status in a container
-    function updateUserStatusInContainer(username: string, isOnline: boolean, container: HTMLElement) {
-      const userItems = container.querySelectorAll(".user-item");
-      userItems.forEach((item) => {
-        if ((item as HTMLElement).dataset.username === username) {
-          // Update status indicator
-          const statusIndicator = item.querySelector(".relative");
-          if (statusIndicator) {
-            // Remove existing status indicator
-            const existingIndicator = statusIndicator.querySelector(".absolute");
-            if (existingIndicator) {
-              existingIndicator.remove();
-            }
-
-            // Add new status indicator if online
-            if (isOnline) {
-              const indicator = document.createElement("div");
-              indicator.className = "absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-pongdark";
-              statusIndicator.appendChild(indicator);
-            }
-          }
-
-          // Move the item to the appropriate section (online/offline)
-          if (isOnline) {
-            const onlineTitle = Array.from(
-              container.querySelectorAll(".text-white.text-lg.font-medium")
-            ).find((el) => el.textContent === "Online");
-            if (onlineTitle) {
-              onlineTitle.after(item);
-            }
-          } else {
-            const offlineTitle = Array.from(
-              container.querySelectorAll(".text-white.text-lg.font-medium")
-            ).find((el) => el.textContent === "Offline");
-            if (offlineTitle) {
-              offlineTitle.after(item);
-            }
-          }
-        }
-      });
-    };
-
-    // Update active chat item (highlight selected chat)
-    function updateActiveChatItem(username: string, container: HTMLElement) {
-      // Remove active class from all items in both containers
-      const allUserItems = document.querySelectorAll(".user-item");
-      allUserItems.forEach((item) => {
-        item.classList.remove("bg-ponghover");
-      });
-
-      // Add active class to selected item
-      const userItems = container.querySelectorAll(".user-item");
-      userItems.forEach((item) => {
-        if ((item as HTMLElement).dataset.username === username) {
-          item.classList.add("bg-ponghover");
-        }
-      });
     }
 
     // Add window resize event listener for mobile responsiveness
@@ -708,7 +359,6 @@ export default {
             // Remove the stored data to prevent reopening on refresh
             localStorage.removeItem('openChatWithUser');
 
-            // navigate(`chat/${userData.username}`);
             // Find the chat component that's already initialized
             if (typeof (chatComponent as any).setActiveUser === 'function') {
               console.log(userData);
@@ -721,7 +371,7 @@ export default {
               (chatComponent as any).setActiveUser(formattedUserData);
 
               // Find and highlight the user in the friends list
-              const userItems = friendsList.querySelectorAll(".user-item");
+              const userItems = friendsList.element.querySelectorAll(".user-item");
               userItems.forEach((item) => {
                 // Remove active class from all items
                 item.classList.remove("bg-ponghover");
