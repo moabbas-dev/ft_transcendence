@@ -167,12 +167,20 @@ export const TwoFactorSend = createComponent((params?: { [key: string]: string }
 		});
 	});
 
-	form.addEventListener("submit", (e: Event) => {
+	form.addEventListener("submit", async (e: Event) => {
 		e.preventDefault();
 		let code = Array.from(inputs).map(input => input.value).join('');
 		console.log("Entered code:", code);
 		inputs.forEach(input => { input.value = "" });
 		inputs[0].focus();
+		try {
+			const body = {code: code};
+			await axios.post(`http://localhost:8001/auth/twoFactor/enable/validate/${store.userId}`, body, {
+				headers: {Authorization: `Bearer ${store.accessToken}`}
+			})
+		} catch (error:any) {
+			Toast.show(`Error: ${error.response.data.message}`, "error");
+		}
 	});
 
 	return form;

@@ -322,12 +322,30 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
 
       if (index === 5) {
 
-        formElement.addEventListener("submit", (e) => {
+        formElement.addEventListener("submit", async (e) => {
           e.preventDefault();
           let code = Array.from(inputs).map(input => input.value).join('');
           console.log("Submitted code:", code);
           inputs.forEach(input => { input.value = "" });
           inputs[0].focus();
+          try {
+            const body = {code: code};
+            await axios.post(`http://localhost:8001/auth/twoFactor/enable/validate/${store.userId}`, body, {
+              headers: {Authorization: `Bearer ${store.accessToken}`}
+            })
+            try {
+              await axios.put(`http://localhost:8001/auth/twoFactor/enable/${store.userId}`, undefined, {
+                headers: {Authorization: `Bearer ${store.accessToken}`}
+              })
+              console.log("FFFFFFF");
+              
+              Toast.show(`2FA Enabled Successfully!`, "success");  
+            } catch(err:any) {
+              Toast.show(`Error: ${err.response.data.message}`, "error");  
+            }
+          } catch (error:any) {
+            Toast.show(`Error: ${error.response.data.message}`, "error");
+          }
         });
 
         const allFilled = Array.from(inputs).every(input => input.value.length === 1);
