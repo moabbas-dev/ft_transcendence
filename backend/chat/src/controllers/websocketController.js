@@ -1,5 +1,5 @@
 import { blockUser, getBlockedUsers, unblockUser } from "../services/blockService.js";
-import { getUser, createOrUpdateUser, getUserByUsername, createChatRoom, getUsersFromAuth, getUserFromAuth } from "../services/userService.js";
+import { getUser, createOrUpdateUser, getUserByUsername, createChatRoom, getUsersFromAuth, getMessageRequests } from "../services/userService.js";
 import { createFriendRequest, cancelFriendRequest, addFriend, getPendingFriendRequests, removeFriend, getFriendshipStatus } from "../services/friendService.js"
 import { saveMessage, getMessages, getUnreadMessageCount, markMessagesAsRead } from "../services/chatService.js";
 
@@ -507,65 +507,22 @@ wsAdapter.on("friend:decline", async ({ clientId, payload }) => {
   wsAdapter.on("message:requests:get", async ({ clientId, payload }) => {
     try {
       const { userId } = payload;
+      
       // Validate input
       if (!userId) {
         throw new Error('Missing userId');
       }
-     
+      
       console.log(`Fetching chat requests for user ${userId}`);
-     
-      const db = await getDatabase();
-     
-      // Get all rooms where the user is a participant
-      const rooms = await db.all(
-        `SELECT rp.room_id
-         FROM room_participants rp
-         WHERE rp.user_id = ?`,
-        [userId]
-      );
-     
-      const messageRequests = [];
-     
-      // For each room, check if it's with a non-friend
-      for (const room of rooms) {
-        const roomId = room.room_id;
-       
-        // Get the other user in this chat room
-        const otherUser = await db.get(
-          `SELECT user_id FROM room_participants
-           WHERE room_id = ? AND user_id != ?`,
-          [roomId, userId]
-        );
-       
-        if (!otherUser) continue;
-       
-        // Check if they are friends
-        const isFriend = await db.get(
-          `SELECT 1 FROM friends
-           WHERE user_id = ? AND friend_id = ?`,
-          [userId, otherUser.user_id]
-        );
-       
-        // If not friends, add to requests
-        if (!isFriend) {
-         
-          // Get user details
-          const userDetails = await getUserFromAuth(otherUser.user_id);
-         
-          if (userDetails) {
-            // Add online status information to the user details
-            messageRequests.push({
-                user: userDetails,
-            });
-          }
-        }
-      }
-     
+      
+      // Get message requests using the service function
+      const messageRequests = await getMessageRequests(userId);
+      
       // Send the non-friends chat list to client
       wsAdapter.sendTo(clientId, "message:requests", {
         requests: messageRequests
       });
-     
+      
     } catch (error) {
       console.error("Error fetching message requests:", error);
       wsAdapter.sendTo(clientId, "error", {
