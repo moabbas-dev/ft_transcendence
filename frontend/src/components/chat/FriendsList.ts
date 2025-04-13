@@ -36,7 +36,7 @@ export const FriendsList = (props: FriendsListProps) => {
     searchBox.className = "search-box mb-4 px-4";
     searchBox.innerHTML = `
       <div class="relative">
-        <input type="text" class="w-full bg-ponghover text-white rounded-full py-2 px-4 pl-10 focus:outline-none" placeholder="Search friends...">
+        <input type="text" class="w-full bg-ponghover text-white rounded-full py-2 px-4 pl-10 focus:outline-none drop-shadow-[1px_1px_1px_purple]" placeholder="Search friends...">
         <div class="absolute left-3 top-2.5 text-white">
           <i class="fa-solid fa-search"></i>
         </div>

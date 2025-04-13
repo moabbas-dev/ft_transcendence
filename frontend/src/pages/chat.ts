@@ -6,13 +6,6 @@ import { t } from "../languages/LanguageController.js";
 import { FriendsList } from "../components/chat/FriendsList.js";
 import { RequestsList } from "../components/chat/RequestsList.js";
 
-interface USER {
-  nickname: string;
-  id: number;
-  full_name: string;
-  status: string;
-}
-
 export default {
   render: async (container: HTMLElement) => {
     container.innerHTML = `
