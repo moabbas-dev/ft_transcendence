@@ -1,17 +1,11 @@
 const { db } = require('../db/initDb');
 
 class UserToken {
-    static async create({ userId, activationToken, tokenType, sessionUUID = null }) {
-        if (tokenType !== 'remote_authentication' && sessionUUID !== null) {
-            return Promise.reject(new Error('session_uuid must be null for non-remote authentication tokens'));
-        }
-        if (tokenType === 'remote_authentication' && sessionUUID === null) {
-            return Promise.reject(new Error('session_uuid is required for remote authentication tokens'));
-        }
-        const query = `INSERT INTO User_Tokens (user_id, activation_token, token_type, session_uuid)
-                        VALUES (?, ?, ?, ?)`;
+    static async create({ userId, activationToken, tokenType }) {
+        const query = `INSERT INTO User_Tokens (user_id, activation_token, token_type)
+                        VALUES (?, ?, ?)`;
         return new Promise((resolve, reject) => {
-            db.run(query, [userId, activationToken, tokenType, sessionUUID], function (err) {
+            db.run(query, [userId, activationToken, tokenType], function (err) {
                 if (err) reject(err);
                 else resolve(this.lastID);
             });

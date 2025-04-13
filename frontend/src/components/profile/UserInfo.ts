@@ -12,6 +12,7 @@ interface UserInfoProps {
 }
 
 export const UserInfo = createComponent((props: UserInfoProps) => {
+  const container = document.createElement("div");
   if (props && props.uName) {
     const token = store.accessToken;
     // Make the API call with proper authorization headers
@@ -32,7 +33,6 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
       });
   }
 
-  const container = document.createElement("div");
   container.innerHTML = `
         <div class="flex flex-col gap-4">
           <div class="flex justify-center flex-wrap gap-2 overflow-y-auto pb-1 px-1">
@@ -286,6 +286,8 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
     twoFactorToggle.addEventListener("change", async function () {
       if (this.checked) {
         // Show QR code when 2FA is enabled
+        if (store.is2faEnabled)
+          return ;
         qrCodeContainer.classList.remove("hidden");
         try {
           const accessToken = await getValidAccessToken();
@@ -376,18 +378,9 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
             await axios.post(`http://localhost:8001/auth/twoFactor/enable/validate/${store.userId}`, body, {
               headers: { Authorization: `Bearer ${accessToken}` }
             })
-            try {
-              await axios.put(`http://localhost:8001/auth/twoFactor/enable/${store.userId}`, undefined, {
-                headers: { Authorization: `Bearer ${accessToken}` }
-              })
-              console.log("FFFFFFF");
-
-              Toast.show(`2FA Enabled Successfully!`, "success");
-              qrCodeContainer?.classList.add("hidden");
-              store.update("is2faEnabled", "1");
-            } catch (err: any) {
-              Toast.show(`Error: ${err.response.data.message}`, "error");
-            }
+            Toast.show(`2FA Enabled Successfully!`, "success");
+            qrCodeContainer?.classList.add("hidden");
+            store.update("is2faEnabled", "1");
           } catch (error: any) {
             Toast.show(`Error: ${error.response.data.message}`, "error");
           }

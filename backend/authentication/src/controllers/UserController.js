@@ -5,9 +5,7 @@ const saltRounds = 10;
 const SECRET_KEY = process.env.JWT_SECRET_KEY;
 const { validateEmail, validatePassword, validateNickname, validateFullName, validateAge, capitalizeFullName } = require('../utils/validationUtils');
 const UserToken = require('../models/UserToken');
-const { v4: uuidv4 } = require('uuid');
 const axios = require('axios');
-const { log } = require('console');
 
 class UserController {
 

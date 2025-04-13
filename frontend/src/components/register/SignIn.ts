@@ -118,8 +118,7 @@ export const SignIn = createComponent((props: SignInProps) => {
 				Toast.show(`No response from server: ${error.request}`, "error");
 			else
 				Toast.show(`Error setting up the request: ${error.message}`, "error");
-			console.log(error);
-			
+			console.log(error);	
 		}
 	};
 

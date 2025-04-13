@@ -56,7 +56,8 @@ export default {
 		twoFactor: {
 			title: "Authentification à deux facteurs",
 			info: "Entrez le code à 6 chiffres de votre application d'authentification",
-			verifyBtn: "Vérifier"
+			verifyBtn: "Vérifier",
+			back: "Retour à la connexion",
 		},
 		or: "OU",
 		continueGoogle: "Continuer avec Google"

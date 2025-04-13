@@ -57,6 +57,7 @@ export default {
 			title: "Two-Factor Authentication",
 			info: "Enter the 6-digits code from your authenticator app",
 			verifyBtn: "Verify",
+			back: "Back to sign In",
 		},
 		or: "OR",
 		continueGoogle: "Continue with google"

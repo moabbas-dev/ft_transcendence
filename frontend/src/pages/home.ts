@@ -202,7 +202,7 @@ export default {
             Toast.show("First step is complete! Now moving to the 2fa code validation", "success");
           }
           try {
-            await axios.post(`http://localhost:8001/auth/google_upload/${store.userId}?photo=${photoUrl as string}`, undefined, {
+            await axios.post(`http://localhost:8001/auth/google_upload/${store.sessionUUID}?photo=${photoUrl as string}`, undefined, {
               headers:{
                 Authorization: `Bearer ${store.accessToken}`,
               }

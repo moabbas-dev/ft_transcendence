@@ -46,15 +46,10 @@ const createTables = () => {
 					id INTEGER PRIMARY KEY AUTOINCREMENT,
 					user_id INTEGER NOT NULL,
 					activation_token TEXT NOT NULL UNIQUE,
-					token_type TEXT NOT NULL CHECK (token_type IN ('account_activation', 'reset_password', 'remote_authentication')),
-					session_uuid TEXT,
+					token_type TEXT NOT NULL CHECK (token_type IN ('account_activation', 'reset_password')),
 					expires_at TIMESTAMP NOT NULL DEFAULT (DATETIME('now', '+24 hours')),
 					created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 					FOREIGN KEY (user_id) REFERENCES Users(id),
-					CHECK (
-						(token_type = 'remote_authentication' AND session_uuid IS NOT NULL) OR
-						(token_type != 'remote_authentication' AND session_uuid IS NULL)
-					)
 				);`
 	];
 	queries.forEach((query) => {
