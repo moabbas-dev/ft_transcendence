@@ -4,14 +4,14 @@ import Toast from "../src/toast/Toast";
 
 const getValidAccessToken = async (): Promise<string | null> => {
     try {
-        await axios.post(`https://localhost:8001/auth/jwt/verify/${store.userId}`, { accessToken: store.accessToken });
+        await axios.post(`http://localhost:8001/auth/jwt/verify/${store.userId}`, { accessToken: store.accessToken });
         return store.accessToken;
     } catch (error: any) {
         // Ensure error.response exists before accessing it
         if (error.response && error.response.status === 401) {
             try {
                 const { data } = await axios.post<{ accessToken: string }>(
-                    `https://localhost:8001/auth/jwt/refresh/${store.sessionId}`, 
+                    `http://localhost:8001/auth/jwt/refresh/${store.sessionUUID}`, 
                     { refreshToken: store.refreshToken }
                 );
                 
@@ -20,7 +20,7 @@ const getValidAccessToken = async (): Promise<string | null> => {
             } catch (err: any) {
                 if (err.response && err.response.status === 401) {
                     await store.logout();
-                    Toast.show("Session terminated, please sign up again!", "warn");
+                    Toast.show("Session terminated, please sign in again!", "warn");
                     return null;
                 }
                 return store.accessToken;

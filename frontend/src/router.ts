@@ -12,11 +12,13 @@ import { Lang, setLanguage } from "./languages/LanguageController.js";
 import TournamentPage from "./pages/tournaments.js";
 import OnlineGame from './pages/online-game.js';
 import CreateTournamentPage from './pages/create-tournament.js';
+import AccountVerifiedPage from './pages/account-verified.js';
 
 const routes: { [key: string]: Page } = {
   "/": HomePage,
   "/register": RegisterPage,
   "/register/twofactor": RegisterPage,
+//   "/register/twofactor/:uuid": RegisterPage,
   "/reset_password/:uuid": RegisterPage,
   "/play": PlayPage,
   "/play/local-ai": PlayVsAI,
@@ -27,7 +29,8 @@ const routes: { [key: string]: Page } = {
   "/chat": ChatPage,
   "/chat/:uName": ChatPage,
   "/leader-board": LeaderBoardPage,
-  "/about-us": AboutPage
+  "/about-us": AboutPage,
+  "/account-verified": AccountVerifiedPage,
 };
 
 // export function refreshRouter() {

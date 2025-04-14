@@ -8,10 +8,10 @@ const qrcode = require('qrcode');
 class TwoFactorCodeController {
 
 	static async validateLoginCode(request, reply) {
-		const { sessionId } = request.params;
+		const { sessionUUID } = request.params;
 		const { code } = request.body;
 		try {
-			const session = await Session.getById(sessionId);
+			const session = await Session.getByUUID(sessionUUID);
 			if (!session)
 				return reply.code(404).send({ key: "session", message: "Session not found!" });
 
@@ -21,10 +21,8 @@ class TwoFactorCodeController {
 				return reply.code(404).send({ key: "user", message: "User not found!" });
 			if (user && !user.is_active)
 				return reply.code(403).send({ message: "User not active!" });
-
 			// Retrieve the secret key from the user's database
 			const secret = user.two_factor_secret;
-
 			// Verify the TOTP code
 			const verified = speakeasy.totp.verify({
 				secret: secret,
@@ -32,13 +30,12 @@ class TwoFactorCodeController {
 				token: code,
 				window: 1 // Allow a 30-second window for time drift
 			});
-
 			if (!verified)
 				return reply.code(400).send({ key: "wrong", message: "Invalid code!" });
 
 			// Generate tokens and update session
 			const { accessToken, refreshToken } = await generateTokens(user, reply.server);
-			await Session.updateAccessAndRefresh(sessionId, { refreshToken, accessToken });
+			await Session.updateAccessAndRefresh(session.id, { refreshToken, accessToken });
 			await User.updateUserStatus(userId, { status: "online" });
 
 			return reply.code(200).send({
@@ -51,7 +48,7 @@ class TwoFactorCodeController {
 
 	static async enable2faForUser(request, reply) {
 		const { userId } = request.params;
-		const authHeader = request.headers.authorization; 
+		const authHeader = request.headers.authorization;
 		try {
 			if (!authHeader || !authHeader.startsWith('Bearer '))
 				return reply.code(401).send({ message: 'Unauthorized: No token provided' });

@@ -1,5 +1,5 @@
 require('dotenv').config();
-const Fastify = require('fastify');
+const fastify = require('fastify')({ logger: true, maxParamLength: 6000 });
 const cors = require('@fastify/cors');
 const { createTables, closeDatabase } = require('./src/db/initDb');
 const fastifyOauth2 = require('@fastify/oauth2');
@@ -7,25 +7,25 @@ const fastifyCookie = require('@fastify/cookie');
 const fastifySession = require('@fastify/session');
 const path = require('path');
 const fs = require('fs');
+const { auth } = require('./src/middlewares/auth')
+const fastifyMultipart = require('@fastify/multipart');
 
 // const fastify = Fastify({
-// 	// https: {
-// 	// 	key: fs.readFileSync(path.join(__dirname, 'ssl/server.key')),
-// 	// 	cert: fs.readFileSync(path.join(__dirname, 'ssl/server.cert')),
-// 	// }
-// });
+// 	logger: true,
+// 	https: {
+// 	  key: fs.readFileSync('./ssl/server.key'),
+// 	  cert: fs.readFileSync('./ssl/server.crt'),
+// 	}
+// })  
 
-const fastify = Fastify({
-	logger: true,
-	https: {
-	  key: fs.readFileSync('./ssl/server.key'),
-	  cert: fs.readFileSync('./ssl/server.crt'),
+fastify.register(fastifyMultipart, {
+	limits: {
+	  fileSize: 10 * 1024 * 1024 // 10 MB limit (change as needed)
 	}
-})  
+});
+  
 
-// Register multipart plugin to handle file uploads
-fastify.register(require('@fastify/multipart'));
-
+// fastify.addHook("preHandler", auth)
 fastify.register(require('@fastify/static'), {
 	root: path.join(__dirname, 'uploads'),
 	prefix: '/uploads/',
@@ -34,7 +34,7 @@ fastify.register(require('@fastify/static'), {
 // Enable CORS on Fastify
 fastify.register(cors, {
 	origin: process.env.FRONTEND_DOMAIN, // Set this to your specific frontend domain for production
-	methods: ['GET', 'POST', 'PUT', 'DELETE'],
+	methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
 	credentials: true,
 });
 
@@ -106,7 +106,7 @@ process.on('SIGTERM', () => handleShutdown('SIGTERM'));
 const start = async () => {
 	try {
 		await fastify.listen({ port: 8001, host: '0.0.0.0' });
-		fastify.log.info(`Server listening on https://localhost:${fastify.server.address().port}`);
+		fastify.log.info(`Server listening on http://localhost:${fastify.server.address().port}`);
 	} catch (err) {
 		fastify.log.error(err);
 		process.exit(1);

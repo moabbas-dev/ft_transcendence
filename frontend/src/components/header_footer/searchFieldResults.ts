@@ -1,7 +1,8 @@
 import { t } from "../../languages/LanguageController";
 import { Profile } from "../profile/UserProfile";
+import defaultAvatar from "../../assets/guests.png";
 
-export function displayResults(users: {nickname:string, status:string, avatar:string}[], container: HTMLElement): void {
+export function displayResults(users: {nickname:string, status:string, avatar_url:string}[], container: HTMLElement): void {
 	container.innerHTML = '';
 
 	if (users.length === 0) {
@@ -9,7 +10,7 @@ export function displayResults(users: {nickname:string, status:string, avatar:st
 		return;
 	}
 
-	users.forEach(user => {
+	users.forEach(user => {		
 		const userItem = document.createElement('div');
 		userItem.className = 'flex items-center rounded-md gap-3 p-3 hover:bg-gray-100 cursor-pointer';
 
@@ -17,7 +18,7 @@ export function displayResults(users: {nickname:string, status:string, avatar:st
 
 		userItem.innerHTML = `
 		<div class="w-10 h-10 rounded-full relative" id="user">
-		  <img src="${user.avatar}" alt="${user.nickname}" class="w-full h-full rounded-full object-cover">
+		  <img src="${user.avatar_url || defaultAvatar}" alt="${user.nickname}" class="w-full h-full rounded-full object-cover" referrerpolicy="no-referrer">
 		  <span class="absolute bottom-0 right-0 w-3 h-3 ${statusColor} rounded-full border-2 border-white"></span>
 		</div>
 		<div>

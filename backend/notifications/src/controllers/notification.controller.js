@@ -1,3 +1,4 @@
+import {sendEmail} from '../utils/emailUtils.js';
 class NotificationController {
 	constructor(notificationModel) {
 		this.notificationModel = notificationModel;
@@ -64,6 +65,15 @@ class NotificationController {
 	async getAllNotifications() {
 		return await this.notificationModel.getAllNotifications();
 	}
-}
 
+	async sendEmailNotification(request, reply) {
+		const { recipientId, content } = request.body;
+		try {
+			await sendEmail(content.email, content.subject, null, content.body);
+			return reply.code(200).send({ message: "Email message sent successfully!" });
+		} catch (err) {
+			return reply.code(500).send({ message: "Error email not sent!", error: err.message });
+		}
+	}	
+}
 export default NotificationController

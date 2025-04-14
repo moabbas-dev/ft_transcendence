@@ -1,10 +1,10 @@
 import { createComponent, useCleanup } from "../../utils/StateManager.js";
 import { Button } from "../partials/Button.js";
 import { t } from "../../languages/LanguageController.js";
-import axios, { AxiosError } from "axios";
-import { navigate } from "../../router.js";
+import axios from "axios";
 import Toast from "../../toast/Toast.js";
 import countryList from "country-list";
+import { handleLoginWithGoogle } from "../../main.js";
 
 interface SignUpProps {
 	styles: string,
@@ -20,7 +20,7 @@ export const SignUp = createComponent((props: SignUpProps) => {
       
       <!-- Form area - scrollable only on mobile -->
       <form class="flex flex-col gap-2 pb-2">
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-1 w-full overflow-y-auto max-h-[300px] md:max-h-none">
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-1 w-full overflow-y-auto max-h-[300px] md:max-h-none pb-1">
 			<div class="flex flex-col gap-1 px-1">
 				<label for="email" class="text-base font-medium text-gray-700">Email</label>
 				<div class="relative">
@@ -121,10 +121,10 @@ export const SignUp = createComponent((props: SignUpProps) => {
       </div>
       
       <div class="flex flex-col w-full gap-3" id="google-btn">
-        <a href="https://localhost:8001/auth/google" id="google-sign" class="flex items-center justify-center gap-2 w-full py-2 bg-pongblue text-white rounded-lg hover:cursor-pointer hover:bg-opacity-90 transition-all duration-300">
+        <button id="google-sign" class="flex items-center justify-center gap-2 w-full py-2 bg-pongblue text-white rounded-lg hover:cursor-pointer hover:bg-opacity-90 transition-all duration-300">
           <i class='bx bxl-google text-xl'></i>
           <span>${t('register.continueGoogle')}</span>
-        </a>
+        </button>
 
         <div class="text-center text-gray-600">
           ${t('register.signup.acc_question')} 
@@ -144,7 +144,7 @@ export const SignUp = createComponent((props: SignUpProps) => {
 	const fullname = form.querySelector("#fullname") as HTMLInputElement;
 	const ageInput = form.querySelector("#age") as HTMLInputElement;
 	const countryInput = form.querySelector("#country-select") as HTMLSelectElement;
-
+	handleLoginWithGoogle(form)
 	// fill the coutries <select> automatically through a third party list of coutries
 	const countries = countryList.getNames();
 	countries.forEach(country => {
@@ -172,10 +172,11 @@ export const SignUp = createComponent((props: SignUpProps) => {
 					country: countryInput.value,
 					google_id: null
 				};
-				await axios.post("https://localhost:8001/auth/users", body);
+				await axios.post("http://localhost:8001/auth/users", body);
 				Toast.show(`SignUp successful! Go to your email ${emailInput.value} to activate your account`, "success");
-				navigate('/'); // You can edit it
+				// navigate('/register'); // You can edit it
 			} catch (err: any) {
+				console.log(err)
 				if (err.response) {
 					if (err.response.status === 400 || err.response.status === 409)
 						Toast.show(`Error: ${err.response.data.message}`, "error");
@@ -217,10 +218,10 @@ export const SignUp = createComponent((props: SignUpProps) => {
 		});
 	};
 
-	const googleBtn = form.querySelector('#google-sign');
-	googleBtn?.addEventListener('click', () => {
-		localStorage.setItem("googleAuth", "true");
-	});
+	// const googleBtn = form.querySelector('#google-sign');
+	// googleBtn?.addEventListener('click', () => {
+	// 	localStorage.setItem("googleAuth", "true");
+	// });
 
 	togglePasswordElements.forEach(element => {
 		element.addEventListener('click', handleTogglePassword);

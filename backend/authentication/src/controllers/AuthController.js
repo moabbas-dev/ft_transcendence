@@ -2,13 +2,12 @@ const { db } = require('../db/initDb');
 const bcrypt = require('bcrypt');
 const Session = require('../models/Session');
 const User = require('../models/User');
-const SECRET_KEY = process.env.JWT_SECRET_KEY;
 const { generateTokens } = require('../utils/jwtUtils');
 const UserToken = require('../models/UserToken');
 const axios = require('axios');
 const { validatePassword, validateNickname, capitalizeFullName } = require('../utils/validationUtils');
-const { OAuth2Client } = require('google-auth-library');
-const client = new OAuth2Client(process.env.CLIENT_ID);
+// const { OAuth2Client } = require('google-auth-library');
+// const client = new OAuth2Client(process.env.CLIENT_ID);
 
 const authenticateUser = async (email, password) => {
 	const query = `SELECT * FROM Users WHERE email = ?`;
@@ -42,13 +41,13 @@ const authenticateUser = async (email, password) => {
 	});
 };
 
-async function verifyGoogleToken(idToken) {
-	const ticket = await client.verifyIdToken({
-		idToken: idToken,
-		audience: process.env.CLIENT_ID, // Must match your Google OAuth2 client ID
-	});
-	return ticket.getPayload();
-}
+// async function verifyGoogleToken(idToken) {
+// 	const ticket = await client.verifyIdToken({
+// 		idToken: idToken,
+// 		audience: process.env.CLIENT_ID, // Must match your Google OAuth2 client ID
+// 	});
+// 	return ticket.getPayload();
+// }
 
 const generateNickname = async (userId) => {
 	const randomString = Math.random().toString(36).substring(2, 7); // Generates a 5-letter string
@@ -72,16 +71,17 @@ class AuthController {
 			if (!user.is_2fa_enabled) {
 				const { accessToken, refreshToken } = await generateTokens(user, reply.server);
 				const sessId = await Session.create({ userId, accessToken, refreshToken });
+				const session = await Session.getById(sessId);
 				await User.updateUserStatus(userId, { status: "online" });
 				return reply.code(200).send({
-					require2FA: false, sessionId: sessId, accessToken: accessToken, refreshToken: refreshToken,
+					require2FA: false, sessUUID: session.uuid, accessToken: accessToken, refreshToken: refreshToken,
 					// userId: user.id, email: user.email, nickname: user.nickname, fullName: user.full_name,
 					// avatarUrl: user.avatar_url
 				});
 			} else {
 				const sessId = await Session.create({ userId, accessToken: null, refreshToken: null });
-				reply.server.log.info(`sessId: ${sessId}`);
-				return reply.code(200).send({ require2FA: true, sessionId: sessId });
+				const session = await Session.getById(sessId);
+				return reply.code(200).send({ require2FA: true, sessUUID: session.uuid });
 			}
 		} catch (err) {
 			// Handle specific error messages
@@ -97,13 +97,13 @@ class AuthController {
 
 	// Logout a user
 	static async logout(request, reply) {
-		const { sessionId } = request.params;
+		const { sessionUUID } = request.params;
 		try {
-			const session = await Session.getById(sessionId);
+			const session = await Session.getByUUID(sessionUUID);
 			if (!session)
 				return reply.code(404).send({ message: "Session not found!" });
 			else {
-				await Session.deleteById(session.id);
+				await Session.deleteByUUID(sessionUUID);
 				await User.updateUserStatus(session.user_id, { status: "offline" });
 				return reply.code(200).send({ message: "User logged out successfully!" });
 			}
@@ -133,10 +133,13 @@ class AuthController {
 			const userId = user.id;
 			const uuid = crypto.randomUUID();
 			try {
-				await axios.post(`https://localhost:8000/notifications/email/${userId}`, {
-					email: user.email,
-					subject: "Reset password email",
-					body: passwordResetEmailMessage(user.full_name, uuid),
+				await axios.post(`http://localhost:3003/api/notifications/email`, {
+					recipientId: userId,
+					content: {
+						subject: "Reset password email",
+						email: user.email,
+						body: passwordResetEmailMessage(user.full_name, uuid)
+					}
 				});
 				await UserToken.create({ userId, activationToken: uuid, tokenType: "reset_password" });
 				return reply.code(200).send({ message: "Email sent successfully!" });
@@ -202,7 +205,7 @@ class AuthController {
 
 			// Check if the token has expired (24 hours expiration)
 			if (currentTime > tokenExpirationTime) {
-				await UserToken.deleteByToken(UserToken); // Delete expired token
+				await UserToken.deleteByToken(token); // Delete expired token
 				await User.delete(userId);
 				return reply.code(400).send({ message: "Token has expired!" });
 			}
@@ -210,7 +213,7 @@ class AuthController {
 			if (!user)
 				return reply.code(404).send({ message: "User not found!" });
 			await User.activateUser(userId);
-			await UserToken.deleteByToken(UserToken); // Delete expired token
+			await UserToken.deleteByToken(token); // Delete expired token
 			// return reply.code(200).send({ message: "Account activation complete!" });
 			return reply.redirect(`${process.env.FRONTEND_DOMAIN}/`);
 		} catch (err) {
@@ -218,36 +221,125 @@ class AuthController {
 		}
 	}
 
-	static async googleRemoteAuthenticate(request, reply) {
+	// static async googleRemoteAuthenticate(request, reply) {
+	// 	try {
+	// 		const token = await request.server.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(request);
+	// 		const googleUser = await verifyGoogleToken(token.token.id_token);  // Verifies authenticity
+
+	// 		if (!googleUser.email_verified) {
+	// 			return reply.code(400).send({ message: "Google email is not verified" });
+	// 		}
+	// 		// Fetch user info from Google
+	// 		const userInfoResponse = await fetch('http://www.googleapis.com/oauth2/v2/userinfo', {
+	// 			headers: {
+	// 				Authorization: `Bearer ${token.token.access_token}`,
+	// 			},
+	// 		});
+
+	// 		const userInfo = await userInfoResponse.json();
+
+	// 		// Send response with user info
+	// 		let user = await User.findByEmail(userInfo.email);
+	// 		const hashedGoogleId = await bcrypt.hash(userInfo.id, 10);
+	// 		if (!user) {
+	// 			const userData = {
+	// 				email: userInfo.email,
+	// 				password: null,
+	// 				nickname: null,
+	// 				full_name: capitalizeFullName(userInfo.name),
+	// 				age: null,
+	// 				country: null,
+	// 				google_id: hashedGoogleId
+	// 			}
+	// 			const newUserId = await User.create(userData);
+	// 			if (!newUserId) {
+	// 				throw new Error("Failed to create user");
+	// 			}
+	// 			const nickname = await generateNickname(newUserId);
+	// 			await User.updateUserNickname(newUserId, { nickname: nickname });
+	// 			user = await User.findById(newUserId);
+	// 		}
+	// 		const userId = user.id;
+	// 		if (!user.googleId)
+	// 			await User.updateUserGoogleID(userId, { googleId: hashedGoogleId });
+	// 		if (!user.is_active)
+	// 			await User.activateUser(userId);
+	// 		let sessId;
+	// 		if (!user.is_2fa_enabled) {
+	// 			const { accessToken, refreshToken } = await generateTokens(user, request.server);
+	// 			sessId = await Session.create({ userId, accessToken, refreshToken });
+	// 			await User.updateUserStatus(userId, { status: "online" });
+	// 		} else
+	// 			sessId = await Session.create({ userId, accessToken: null, refreshToken: null });
+	// 		// reply.setCookie('sessionId', sessId, {
+	// 		// 	httpOnly: true,  // Prevents client-side JS access
+	// 		// 	secure: false,    // Ensures cookie is sent over HTTPS only
+	// 		// 	sameSite: 'Strict',  // Prevents cross-site request forgery (CSRF)
+	// 		// 	path: '/',       // Cookie accessible across the entire site
+	// 		// 	maxAge: 60 * 60 * 24 // Expires in 24 hours
+	// 		// });
+	// 		const remoteToken = crypto.randomUUID();
+	// 		const session = await Session.getById(sessId);
+	// 		await UserToken.create({
+	// 			userId,
+	// 			activationToken: remoteToken,
+	// 			tokenType: "remote_authentication",
+	// 			sessionUUID: session.uuid
+	// 		});
+	// 		const userToken = await UserToken.getByToken(remoteToken);
+	// 		console.log(`User token data: ${JSON.stringify(userToken, null, 2)}`);
+	// 		if (!user.is_2fa_enabled)
+	// 			return reply.redirect(`${process.env.FRONTEND_DOMAIN}/play/${remoteToken}`);
+	// 		else
+	// 			return reply.redirect(`${process.env.FRONTEND_DOMAIN}/register/twofactor/${remoteToken}`);
+	// 	} catch (err) {
+	// 		request.log.error(err);
+	// 		return reply.code(500).send({ message: 'Authentication failed', error: err.message });
+	// 	}
+	// }
+
+	// static async googlesignIn(request, reply) {
+	// 	const { token } = request.params;
+	// 	try {
+	// 		const tokenRecord = await UserToken.getByToken(token);
+	// 		if (!tokenRecord)
+	// 			return reply.code(401).send({ message: "Token record not found!" });
+	// 		if (tokenRecord.token_type !== "remote_authentication")
+	// 			return reply.code(403).send({ message: "Token is not for remote authentication!" });
+	// 		const expiresAt = tokenRecord.expires_at;
+	// 		const tokenExpirationTime = new Date(expiresAt).getTime(); // Get the expiration time in milliseconds
+	// 		const currentTime = new Date().getTime(); // Get the current time in milliseconds
+
+	// 		// Check if the token has expired (24 hours expiration)
+	// 		if (currentTime > tokenExpirationTime) {
+	// 			await UserToken.deleteByToken(token); // Delete expired token
+	// 			return reply.code(400).send({ message: "Token has expired!" });
+	// 		}
+	// 		const session = await Session.getByUUID(tokenRecord.session_uuid);
+	// 		if (!session)
+	// 			return reply.code(401).send({ message: "Session not found!" });
+	// 		await UserToken.deleteByToken(token);
+	// 		if (!session.access_token && !session.refresh_token)
+	// 			return reply.code(200).send({ sessUUID: session.uuid });
+	// 		else
+	// 			return reply.code(200).send({ sessUUID: session.uuid, accessToken: session.access_token, refreshToken: session.refresh_token });
+	// 	} catch (err) {
+	// 		return reply.code(500).send({ message: "Error with google sign in!", error: err.message });
+	// 	}
+	// }
+	static async googlesignIn(request, reply) {
+		const { email, name, country } = request.body;
 		try {
-			const token = await request.server.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(request);
-			const googleUser = await verifyGoogleToken(token.token.id_token);  // Verifies authenticity
-
-			if (!googleUser.email_verified) {
-				return reply.code(400).send({ message: "Google email is not verified" });
-			}
-			// Fetch user info from Google
-			const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-				headers: {
-					Authorization: `Bearer ${token.token.access_token}`,
-				},
-			});
-
-			const userInfo = await userInfoResponse.json();
-
-			// Send response with user info
-			let user = await User.findByEmail(userInfo.email);
-			const hashedGoogleId = await bcrypt.hash(userInfo.id, 10);
+			let user = await User.findByEmail(email);
 			if (!user) {
 				const userData = {
-					email: userInfo.email,
+					email: email,
 					password: null,
 					nickname: null,
-					full_name: capitalizeFullName(userInfo.name),
+					full_name: capitalizeFullName(name),
 					age: null,
-					country: null,
-					google_id: hashedGoogleId
-				}
+					country: country,
+				};
 				const newUserId = await User.create(userData);
 				if (!newUserId) {
 					throw new Error("Failed to create user");
@@ -257,49 +349,22 @@ class AuthController {
 				user = await User.findById(newUserId);
 			}
 			const userId = user.id;
-			if (!user.googleId)
-				await User.updateUserGoogleID(userId, { googleId: hashedGoogleId });
 			if (!user.is_active)
 				await User.activateUser(userId);
-			let sessId;
 			if (!user.is_2fa_enabled) {
-				const { accessToken, refreshToken } = await generateTokens(user, request.server);
-				sessId = await Session.create({ userId, accessToken, refreshToken });
+				const { accessToken, refreshToken } = await generateTokens(user, reply.server);
+				const sessId = await Session.create({ userId, accessToken, refreshToken });
+				const session = await Session.getById(sessId);
 				await User.updateUserStatus(userId, { status: "online" });
-			} else
-				sessId = await Session.create({ userId, accessToken: null, refreshToken: null });
-			reply.setCookie('sessionId', sessId, {
-				httpOnly: true,  // Prevents client-side JS access
-				secure: false,    // Ensures cookie is sent over HTTPS only
-				sameSite: 'Strict',  // Prevents cross-site request forgery (CSRF)
-				path: '/',       // Cookie accessible across the entire site
-				maxAge: 60 * 60 * 24 // Expires in 24 hours
-			});
-			if (!user.is_2fa_enabled)
-				return reply.redirect(`${process.env.FRONTEND_DOMAIN}/play`);
-			else
-				return reply.redirect(`${process.env.FRONTEND_DOMAIN}/register/twofactor`);
+				return reply.code(200).send({ require2FA: false, sessUUID: session.uuid, accessToken, refreshToken });
+			}
+			else {
+				const sessId = await Session.create({ userId, accessToken: null, refreshToken: null });
+				const session = await Session.getById(sessId);
+				return reply.code(200).send({ require2FA: true, sessUUID: session.uuid });
+			}
 		} catch (err) {
-			request.log.error(err);
-			return reply.code(500).send({ message: 'Authentication failed', error: err.message });
-		}
-	}
-
-	static async googlesignIn(request, reply) {
-		try {
-			console.log("Received cookies:", request.cookies);
-			const sessionId = request.cookies.sessionId;
-			if (!sessionId)
-				return reply.code(401).send({ key: "cookie", message: "No session ID found. Please log in." });
-			const session = await Session.getById(sessionId);
-			if (!session)
-				return reply.code(401).send({ key: "not-found", message: "Invalid session id! please login again" });
-			if (!session.access_token && !session.refresh_token)
-				return reply.code(200).send({ sessionId });
-			else
-				return reply.code(200).send({ sessionId, accessToken: session.access_token, refreshToken: session.refresh_token });
-		} catch (err) {
-			return reply.code(500).send({ message: "Error with google sign in!", error: err.message });
+			return reply.code(500).send({ message: "Error with remote authentication", error: err.message });
 		}
 	}
 }

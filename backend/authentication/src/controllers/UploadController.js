@@ -2,6 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const { pipeline } = require('stream/promises');
 const User = require('../models/User');
+const UserController = require('./UserController');
 const SECRET_KEY = process.env.JWT_SECRET_KEY;
 
 
@@ -10,7 +11,7 @@ class UploadController {
 		const { id } = request.params;
 		const authHeader = request.headers.authorization;
 		try {
-			if (!authHeader || !authHeader.startsWith('Bearer '))
+			if (!authHeader || !authHeader.startsWith('Bearer'))
 				return reply.status(401).send({ error: 'Unauthorized: No token provided' });
 			const accessToken = authHeader.split(' ')[1];
 			let decoded;
@@ -62,6 +63,9 @@ class UploadController {
 
 			// Return the URL that points to the static route for uploads
 			const url = `${process.env.BACKEND_DOMAIN}/uploads/user${id}/${filename}`;
+			const changes = await User.updateProfile(id, { avatar_url: url });
+			if (changes == 0)
+				reply.code(404).send({ message: 'User not found!' });
 			return reply.code(200).send({ url, message: "File uploaded!" });
 		} catch (err) {
 			return reply.code(500).send({ message: "Error uploading the image!", error: err.message });

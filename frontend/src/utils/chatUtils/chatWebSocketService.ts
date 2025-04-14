@@ -1,4 +1,4 @@
-import store from "../../store/store";
+import store from "../../../store/store";
 
 class ChatWebSocketService {
   private socket: WebSocket | null = null;
@@ -203,6 +203,32 @@ class ChatWebSocketService {
       timestamp: Date.now(),
     });
   }
+
+  /**
+ * Mark all messages in a room as read
+ */
+public markMessagesAsRead(roomId: string): void {
+  if (!this.isConnected()) {
+    console.error("WebSocket not connected");
+    return;
+  }
+  
+  const userId = store.userId;
+  if (!userId) {
+    console.error("User ID not found");
+    return;
+  }
+  
+  this.send("messages:mark_read", {
+    roomId,
+    userId
+  });
+  
+  // Also trigger an unread count update
+  this.send("messages:unread:get", {
+    userId
+  });
+}
 
   /**
    * Get list of pending friend requests

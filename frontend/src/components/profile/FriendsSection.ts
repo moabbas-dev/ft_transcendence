@@ -1,6 +1,6 @@
 import store from "../../../store/store.js";
 import { t } from "../../languages/LanguageController.js";
-import chatService from "../../utils/chatWebSocketService.js";
+import chatService from "../../utils/chatUtils/chatWebSocketService.js";
 import { createComponent } from "../../utils/StateManager.js";
 
 interface FriendProps {

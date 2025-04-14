@@ -46,6 +46,22 @@ export async function initDatabase() {
       FOREIGN KEY (tournament_id) REFERENCES tournaments (id),
       FOREIGN KEY (player_id) REFERENCES players (id)
     );
+
+
+    -- Friend invites/challenges
+CREATE TABLE match_invites (
+  id INTEGER PRIMARY KEY,
+  sender_id INTEGER NOT NULL,
+  receiver_id INTEGER NOT NULL,
+  status TEXT NOT NULL, -- 'pending', 'accepted', 'rejected', 'expired'
+  match_id INTEGER,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (sender_id) REFERENCES users(id),
+  FOREIGN KEY (receiver_id) REFERENCES users(id),
+  FOREIGN KEY (match_id) REFERENCES matches(id)
+);
+    
+    
   `);
 
   console.log("Database initialized");

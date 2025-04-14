@@ -1,109 +1,106 @@
+import store from "../../../store/store.js";
 import { createComponent } from "../../utils/StateManager.js";
-import chatService from "../../utils/chatWebSocketService.js";
+import chatService from "../../utils/chatUtils/chatWebSocketService.js";
 
 interface ChatItemProps {
     username: string,
     userId: number,
     fullname: string,
-    isFriend: boolean,
     status: string,
-    unreadCount: number, // to be handled later
+    unreadCount: number,
     onChatSelect?: (user: { nickname: string, id: number, full_name: string }) => void
 }
 
 export const ChatItem = createComponent((props: ChatItemProps) => {
-    props.unreadCount = 20;
     const chatItem = document.createElement('div');
     chatItem.className = 'user-item flex items-center p-3 rounded-lg transition-all duration-200 hover:bg-ponghover hover:cursor-pointer hover:shadow-md border-b';
-    
+
     // Set additional styles based on status
     if (props.status)
         chatItem.classList.add('border-l-4', 'border-l-green-500');
     else
         chatItem.classList.add('border-l-4', 'border-l-red-500');
-    
-    
-    const render = () => {
-        chatItem.innerHTML = `
-            <div class="flex items-center gap-3 flex-1">
-                <div class="avatar-container relative">
-                    <div class="avatar h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-xl font-semibold text-gray-700">
-                        ${props.fullname.charAt(0).toUpperCase()}
-                    </div>
-                    ${props.unreadCount > 0 ? `
-                    <div class="absolute top-0 right-0 bg-red-500 text-white rounded-full 
-                        text-xs min-w-[20px] h-5 flex items-center justify-center px-1">
-                        ${props.unreadCount > 9 ? '9+' : props.unreadCount}
-                    </div>
-                ` : ''}
 
-                    ${props.status ? 
-                        `<span class="status-indicator absolute bottom-0 right-0 h-3 w-3 rounded-full ${
-                            props.status ? 'bg-green-500' : 'bg-gray-400'
-                        } border border-white"></span>` : 
-                        ``
-                    }
+
+        const render = () => {
+            chatItem.innerHTML = `
+                <div class="flex items-center gap-3 flex-1">
+                    <div class="avatar-container relative">
+                        <div class="avatar h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-xl font-semibold text-gray-700">
+                            ${props.fullname.charAt(0).toUpperCase()}
+                        </div>
+                        ${props.unreadCount > 0 ? `
+                        <div class="absolute top-0 right-0 bg-red-500 text-white rounded-full 
+                            text-xs min-w-[20px] h-5 flex items-center justify-center px-1">
+                            ${props.unreadCount > 9 ? '9+' : props.unreadCount}
+                        </div>
+                        ` : ''}
+    
+                    </div>
+                    
+                    <div class="user-info flex flex-col">
+                        <span class="font-medium text-white">${props.fullname}</span>
+                        <span class="text-sm text-gray-400">@${props.username}</span>
+                    </div>
                 </div>
                 
-                <div class="user-info flex flex-col">
-                    <span class="font-medium text-white">${props.fullname}</span>
-                    <span class="text-sm text-gray-400">@${props.username}</span>
-                </div>
-            </div>
-            
-            ${!props.isFriend ? `
-            <div class="add-friend-container">
-                <button class="add-friend p-2 rounded-full hover:bg-gray-100">
-                    <i class="fas fa-user-plus text-blue-500"></i>
-                </button>
-            </div>
-            ` : ``}
-        `;
+
+            `;
         
-        attachEventListeners();
-    };
-    
+            attachEventListeners();
+        };
+
     const attachEventListeners = () => {
         // Add friend button click
         const addFriend = chatItem.querySelector('.add-friend');
         if (addFriend) {
             addFriend.addEventListener('click', (e) => {
                 e.stopPropagation();
-                
-                if (addFriend.firstChild instanceof Element && 
+
+                if (addFriend.firstChild instanceof Element &&
                     addFriend.firstChild.classList.contains('fa-user-clock')) {
                     return;
                 }
-                
+
                 console.log('Add Friend Clicked');
-                
+
                 // Send friend request via WebSocket
                 if (chatService.isConnected()) {
                     chatService.sendFriendRequest(props.username);
-                    
+
                     // Update UI to show pending status
                     addFriend.firstChild?.remove();
                     addFriend.innerHTML = `<i class="fas fa-user-clock text-yellow-500"></i>`;
                     addFriend.classList.add('bg-yellow-100');
-                    
+
                     // Add a subtle animation to indicate the request is pending
                     addFriend.classList.add('animate-pulse');
                 }
             });
         }
-        
+
         // Chat item click (select this chat)
         chatItem.addEventListener('click', () => {
+            // Mark messages as read when clicking on a chat
             if (props.unreadCount > 0) {
+                // Create room ID consistently
+                const currentUserId = store.userId;
+                const roomId = [currentUserId, props.userId].sort().join("-");
+                
+                // Mark messages as read
+                chatService.markMessagesAsRead(roomId);
+                
+                // Update the UI immediately (optimistic update)
                 props.unreadCount = 0;
-                render(); // Re-render with updated count
+                render();
             }
+            
             // Highlight the selected chat
             document.querySelectorAll('.user-item').forEach(item => {
                 item.classList.remove('bg-ponghover', 'shadow-md');
             });
             chatItem.classList.add('bg-ponghover', 'shadow-md');
-            
+        
             // Call the onChatSelect callback with user info
             if (props.onChatSelect) {
                 props.onChatSelect({
@@ -112,7 +109,7 @@ export const ChatItem = createComponent((props: ChatItemProps) => {
                     full_name: props.fullname
                 });
             }
-            
+        
             // Mobile view handling
             if (window.innerWidth < 640) {
                 const chatContainer = document.querySelector('.chat');
@@ -124,9 +121,9 @@ export const ChatItem = createComponent((props: ChatItemProps) => {
             }
         });
     };
-    
+
     // Initial render
     render();
-    
+
     return chatItem;
 });

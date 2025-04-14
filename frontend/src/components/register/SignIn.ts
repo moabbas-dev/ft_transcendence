@@ -6,6 +6,7 @@ import { navigate } from '../../router.js';
 import store from '../../../store/store.js';
 import { jwtDecode } from "jwt-decode";
 import Toast from '../../toast/Toast.js';
+import { handleLoginWithGoogle } from '../../main.js';
 
 interface SignInProps {
 	styles: string,
@@ -58,10 +59,10 @@ export const SignIn = createComponent((props: SignInProps) => {
       	</div>
     </div>
 	<div class="flex flex-col gap-3" id="google-btn">
-		<a href="https://localhost:8001/auth/google" id="google-sign" class="w-full flex items-center gap-2 justify-center py-2 text-white bg-pongblue hover:cursor-pointer hover:opacity-80 rounded-md transition-all duration-300">
+		<button id="google-sign" class="w-full flex items-center gap-2 justify-center py-2 text-white bg-pongblue hover:cursor-pointer hover:opacity-80 rounded-md transition-all duration-300">
 			<i class='bx bxl-google text-2xl'></i>
 			<span class="text-center">${t('register.continueGoogle')}</span>
-		</a>
+		</button>
 		<div class="w-full text-center">
 			${t('register.signin.acc_question')} <span class="signup-link hover:cursor-pointer hover:underline text-pongblue">${t('register.signin.signup_btn')}</span>
 		</div>
@@ -77,13 +78,14 @@ export const SignIn = createComponent((props: SignInProps) => {
 				email: emailData,
 				password: passwordData
 			};
-			const signIn = await axios.post("https://localhost:8001/auth/login", data);
+			const signIn = await axios.post("http://localhost:8001/auth/login", data);
 			if (signIn.data.require2FA == false) {
 				if (signIn.data.accessToken) {
 					const decodedToken: any = jwtDecode(signIn.data.accessToken);
+					console.log(`User id: ${decodedToken.userId}`);
 					store.update("accessToken", signIn.data.accessToken);
 					store.update("refreshToken", signIn.data.refreshToken);
-					store.update("sessionId", signIn.data.sessionId);
+					store.update("sessionUUID", signIn.data.sessUUID);
 					store.update("userId", decodedToken.userId);
 					store.update("email", decodedToken.email);
 					store.update("nickname", decodedToken.nickname);
@@ -92,13 +94,14 @@ export const SignIn = createComponent((props: SignInProps) => {
 					store.update("country", decodedToken.country);
 					store.update("createdAt", decodedToken.createdAt);
 					store.update("avatarUrl", decodedToken.avatarUrl);
+					store.update("is2faEnabled", decodedToken.is2fa);
 					store.update("isLoggedIn", true);
-					navigate("/play");
-					Toast.show(`Login successful, Welcome ${store.fullName}!`, "success");
+					navigate("/");
+					Toast.show(`Login successful, Welcome ${decodedToken.fullName}!`, "success");
 				}
 			}
 			else {
-				store.update("sessionId", signIn.data.sessionId);
+				store.update("sessionUUID", signIn.data.sessUUID);
 				navigate("/register/twofactor");
 				Toast.show("First step is complete! Now moving to the 2fa code validation", "success");
 			}
@@ -115,6 +118,7 @@ export const SignIn = createComponent((props: SignInProps) => {
 				Toast.show(`No response from server: ${error.request}`, "error");
 			else
 				Toast.show(`Error setting up the request: ${error.message}`, "error");
+			console.log(error);	
 		}
 	};
 
@@ -161,11 +165,11 @@ export const SignIn = createComponent((props: SignInProps) => {
 		eyeIcon.classList.add(wasPassword ? 'bx-show' : 'bx-hide');
 	};
 
-	const googleBtn = form.querySelector('#google-sign');
-	googleBtn?.addEventListener('click', () => {
-		localStorage.setItem("googleAuth", "true");
-	});
-
+	// const googleBtn = form.querySelector('#google-sign');
+	// googleBtn?.addEventListener('click', () => {
+	// 	localStorage.setItem("googleAuthClicked", "true");
+	// });
+	handleLoginWithGoogle(form)
 	togglePassword.addEventListener('click', handleTogglePassword);
 	useCleanup(() => togglePassword.removeEventListener('click', handleTogglePassword))
 	return form;

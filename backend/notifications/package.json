@@ -1,22 +1,22 @@
 {
   "name": "notifications",
   "version": "1.0.0",
+  "description": "Notifications Microservice",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "start": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
-    "@fastify/cors": "^11.0.0",
+    "@fastify/cors": "^11.0.1",
     "dotenv": "^16.4.7",
-    "fastify": "^5.2.1",
+    "fastify": "^5.2.2",
     "nodemailer": "^6.10.0",
-    "nodemon": "^3.1.9",
-    "notifications": "file:",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
   }
 }

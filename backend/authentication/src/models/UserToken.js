@@ -5,7 +5,7 @@ class UserToken {
         const query = `INSERT INTO User_Tokens (user_id, activation_token, token_type)
                         VALUES (?, ?, ?)`;
         return new Promise((resolve, reject) => {
-            db.run(query, [userId, activationToken, tokenType], function(err) {
+            db.run(query, [userId, activationToken, tokenType], function (err) {
                 if (err) reject(err);
                 else resolve(this.lastID);
             });
@@ -15,7 +15,7 @@ class UserToken {
     static async getById(id) {
         const query = `SELECT * FROM User_Tokens WHERE id = ?`;
         return new Promise((resolve, reject) => {
-            db.get(query, [id], function(err, row) {
+            db.get(query, [id], function (err, row) {
                 if (err) reject(err);
                 else resolve(row);
             });
@@ -25,7 +25,7 @@ class UserToken {
     static async getByToken(token) {
         const query = `SELECT * FROM User_Tokens WHERE activation_token = ?`;
         return new Promise((resolve, reject) => {
-            db.get(query, [token], function(err, row) {
+            db.get(query, [token], function (err, row) {
                 if (err) reject(err);
                 else resolve(row);
             });
@@ -35,7 +35,17 @@ class UserToken {
     static async getAll() {
         const query = `SELECT * FROM User_Tokens`;
         return new Promise((resolve, reject) => {
-            db.all(query, function(err, rows) {
+            db.all(query, function (err, rows) {
+                if (err) reject(err);
+                else resolve(rows);
+            });
+        });
+    }
+
+    static async getByUserId(userId) {
+        const query = `SELECT * FROM User_Tokens WHERE user_id = ?`;
+        return new Promise((resolve, reject) => {
+            db.all(query, [userId], function (err, rows) {
                 if (err) reject(err);
                 else resolve(rows);
             });
@@ -45,7 +55,7 @@ class UserToken {
     static async deleteById(id) {
         const query = `DELETE FROM User_Tokens WHERE id = ?`;
         return new Promise((resolve, reject) => {
-            db.run(query, [id], function(err) {
+            db.run(query, [id], function (err) {
                 if (err) reject(err);
                 else resolve(this.changes);
             });
@@ -55,7 +65,7 @@ class UserToken {
     static async deleteByToken(token) {
         const query = `DELETE FROM User_Tokens WHERE activation_token = ?`;
         return new Promise((resolve, reject) => {
-            db.run(query, [token], function(err) {
+            db.run(query, [token], function (err) {
                 if (err) reject(err);
                 else resolve(this.changes);
             });

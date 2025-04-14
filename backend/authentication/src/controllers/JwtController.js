@@ -48,7 +48,8 @@ class JwtController {
                     return reply.code(401).send({ message: "Access token expired!" });
                 return reply.code(401).send({ message: "Invalid access token!" });
             }
-            if (decoded.userId !== userId)
+			const id = Number(userId);
+            if (decoded.userId !== id)
                 return reply.code(403).send({ message: "Token does not belong to this user!" });
             return reply.code(200).send({ message: "The token is valid!" });
         } catch (err) {

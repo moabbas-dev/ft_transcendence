@@ -1,5 +1,5 @@
 import { createComponent } from "../../utils/StateManager.js";
-import logoUrl from "/src/assets/profile.jpeg";
+import logoUrl from "../../assets/guests.png";
 import goldRank from "/src/assets/gold-medal.png";
 import { GamesHistory } from "./GmaesHistory.js";
 import { UserInfo } from "./UserInfo.js";
@@ -8,7 +8,7 @@ import Chart from "chart.js/auto";
 import store from "../../../store/store.js";
 import axios from "axios";
 import { t } from "../../languages/LanguageController.js";
-import { chatService } from "../../utils/chatWebSocketService.js";
+import { chatService } from "../../utils/chatUtils/chatWebSocketService.js";
 import { UserFriends } from "./UserFriends.js";
 import { navigate } from "../../router.js";
 
@@ -17,7 +17,6 @@ interface ProfileProps {
 }
 
 export const Profile = createComponent((props: ProfileProps) => {
-
   let currentFriendshipStatus = 'unknown';
   let currentInitiator: any = null;
   let currentDirection: any = null;
@@ -27,7 +26,7 @@ export const Profile = createComponent((props: ProfileProps) => {
     const token = store.accessToken;
 
     axios
-      .get(`https://localhost:8001/auth/users/nickname/${props.uName}`, {
+      .get(`http://localhost:8001/auth/users/nickname/${props.uName}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -39,29 +38,13 @@ export const Profile = createComponent((props: ProfileProps) => {
         // Request friendship status via WebSocket
         console.log(userData);
         console.log(userData.id);
+
         chatService.send('friendship:check', {
           currentUserId: store.userId,
           targetUserId: userData.id
         });
 
-        // Existing event listeners...
-        // addFriendButton?.addEventListener("click", () => {
-        //   const fromUserId = store.userId;
-        //   const toUsername = props.uName;
-
-        //   if (!fromUserId || !toUsername) {
-        //     console.error("Missing user information for friend request");
-        //     return;
-        //   }
-
-        //   // Send the friend request via WebSocket
-        //   chatService.send("friend:request", {
-        //     from: fromUserId,
-        //     to: userData.id,
-        //   });
-        // });
-        // Remove the old listener and create a new one
-        addFriendButton?.addEventListener("click", () => {
+        addFriendButton?.addEventListener("click", async () => {
           const fromUserId = store.userId;
           const toUsername = props.uName;
 
@@ -79,6 +62,15 @@ export const Profile = createComponent((props: ProfileProps) => {
                 from: fromUserId,
                 to: userData.id,
               });
+
+              // const body = {
+              //   senderId: parseInt(fromUserId),
+              //   recipientId: userData.id,
+              //   // content: ,
+              // }
+              // await axios.post('/notifications/api/notifications/friend-request', body).catch(err => {
+              //   console.error("Error sending message:", err);
+              // })
 
               // Update UI immediately - don't wait for server response
               addFriendButton.textContent = t("profile.requestSent");
@@ -184,8 +176,8 @@ export const Profile = createComponent((props: ProfileProps) => {
 
       <!-- Header (Nickname, Online, Avatar, Rank) -->
       
-      <div class="flex items-center gap-4 sm:gap-8">
-        ${(props && props.uName) ? `
+      <div class="flex items-center justify-end gap-4 sm:gap-8">
+        ${(props && store.nickname !== props.uName) ? `
             <div class="flex gap-2 flex-1 justify-end" id="friend-buttons-container">
               <!-- Loading state -->
               <div id="friendship-loading" class="text-gray-500">
@@ -193,7 +185,7 @@ export const Profile = createComponent((props: ProfileProps) => {
               </div>
               
               <!-- Buttons (initially hidden) -->
-              <div id="friendship-buttons" class="flex gap-2 w-full hidden">
+              <div id="friendship-buttons" class="flex gap-2 w-full">
                 <button id="message-user" class="max-sm:flex-1 bg-pongblue text-white text-nowrap max-sm:text-sm px-2 sm:px-4 py-1 rounded hover:bg-blue-700 transition-colors">
                   <i class="fas fa-envelope min-[401px]:mr-1"></i>
                   <span class="max-[402px]:hidden">${t("profile.message")}</span>
@@ -212,7 +204,7 @@ export const Profile = createComponent((props: ProfileProps) => {
         
         <div class="flex">
           <div>
-              <p id="name" class="font-bold text-lg">${store.nickname}</p>
+              <p id="name" class="font-bold text-lg">${props.uName}</p>
               <div class="flex items-center gap-1">
                   <p>${t('profile.rank')}</p>
                   <img src="${goldRank}" class="w-6">
@@ -220,16 +212,19 @@ export const Profile = createComponent((props: ProfileProps) => {
           </div>
           <div class="relative">
             <img 
-                src="${logoUrl}" 
                 alt="profile picture" 
+                id="profile-picture"
+                referrerpolicy="no-referrer"
                 class="size-14 sm:size-20 object-cover rounded-full border-2 border-pongblue"
             >
             <span class="absolute bottom-0 left-0 size-4 rounded-full
               bg-green-500 border border-white"></span>
-            <button id="upload-photo" class="absolute top-0 right-0 size-5 rounded-full hover:opacity-90 cursor-pointer bg-pongblue grid place-content-center">
-              <i class="fa-solid fa-pen text-white text-xs"></i>
-            </button>
-          </div>
+            ${props.uName === store.nickname ? `
+              <button id="upload-photo" class="absolute top-0 right-0 size-5 rounded-full hover:opacity-90 cursor-pointer bg-pongblue grid place-content-center">
+                <i class="fa-solid fa-pen text-white text-xs"></i>
+              </button>
+            ` : ''}
+            </div>
         </div>
       </div>
       <!-- Tabs (Statistics, History, Info) -->
@@ -275,6 +270,8 @@ export const Profile = createComponent((props: ProfileProps) => {
       nicknameElement.textContent = userData.nickname || store.nickname;
     }
 
+    const avatarElement = container.querySelector("#profile-picture") as HTMLImageElement;
+    avatarElement.src = userData.avatar_url || store.avatarUrl || logoUrl;
     // Update other elements as needed
     // For example, rank, avatar image, etc.
 
@@ -289,17 +286,55 @@ export const Profile = createComponent((props: ProfileProps) => {
   const infoTab = container.querySelector("#info-tab")!;
   const contentContainer = container.querySelector("#content-container")!;
   const overlay = container.querySelector(".overlay")!;
-  const addFriendButton = container.querySelector(
-    "#add-friend"
-  )! as HTMLButtonElement;
-  const blockUserButton = container.querySelector(
-    "#block-user"
-  )! as HTMLButtonElement;
-  const messageUserButton = container.querySelector(
-    "#message-user"
-  ) as HTMLButtonElement;
+  const addFriendButton = container.querySelector("#add-friend")! as HTMLButtonElement;
+  const blockUserButton = container.querySelector("#block-user")! as HTMLButtonElement;
+  const messageUserButton = container.querySelector("#message-user") as HTMLButtonElement;
   const profileTabs = container.querySelector("#profile-tabs")!
   const friendsTab = container.querySelector("#friends-tab")!
+  const uploadImage = container.querySelector('#upload-photo')
+
+  uploadImage?.addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.className = 'hidden';
+    input.type = 'file';
+    input.accept = 'image/png, image/jpeg';
+  
+    input.addEventListener('change', async () => {
+      const file = input.files && input.files[0];
+      if (!file) return;
+  
+      const fileName = file.name.toLowerCase();
+      if (!(fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.jpeg'))) {
+        alert('Please upload a PNG or JPG image.');
+        return;
+      }
+  
+      // console.log('Selected file:', file);
+      // here we will send the file to the server then update the profile picture
+      // console.log(store.accessToken);
+      const formData = new FormData();
+      formData.append('avatar', file);
+      console.log(`Bearer ${store.accessToken}`);
+      
+      await axios.post(`http://localhost:8001/auth/uploads/${store.userId}`, formData, {
+        headers: {
+          authorization: `Bearer ${store.accessToken}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then((response) => {
+        console.log(response.data);
+        const imageUrl = `${response.data.url}`;
+        const profileImage = container.querySelector('#profile-picture') as HTMLImageElement;
+        if (profileImage) {
+          profileImage.src = imageUrl;
+        }
+        store.update('avatarUrl', imageUrl)
+      }).catch((error) => {
+        console.error("gggg uploading image:", error);
+      })
+    });
+    input.click();
+  })
 
   overlay.addEventListener("click", () => {
     container.remove();
@@ -472,7 +507,7 @@ export const Profile = createComponent((props: ProfileProps) => {
     // Get loading and buttons containers
     const loadingElement = container.querySelector("#friendship-loading");
     const buttonsContainer = container.querySelector("#friendship-buttons");
-    const addFriendButton = container.querySelector("#add-friend") as HTMLButtonElement;
+    const addFriendButton: HTMLButtonElement | null = container.querySelector("#add-friend") ;
 
     console.log("Received Status:", status);
 
@@ -480,20 +515,22 @@ export const Profile = createComponent((props: ProfileProps) => {
     switch (status) {
       case 'friends':
         console.log("✅ User is a friend");
-        addFriendButton.textContent = t("✖️Remove friend");
-        addFriendButton.disabled = false; // Enable button for removing friend
-        addFriendButton.classList.remove("bg-green-500", "hover:bg-green-600", "bg-gray-400", "bg-yellow-500", "hover:bg-yellow-600");
-        addFriendButton.classList.add("bg-red-500", "hover:bg-red-600");
+        if (addFriendButton) {
+          addFriendButton.textContent = t("✖️Remove friend");
+          addFriendButton.disabled = false; // Enable button for removing friend
+          addFriendButton.classList.remove("bg-green-500", "hover:bg-green-600", "bg-gray-400", "bg-yellow-500", "hover:bg-yellow-600");
+          addFriendButton.classList.add("bg-red-500", "hover:bg-red-600");
+        }
         break;
 
       case 'pending':
         console.log("⏳ Friend request pending");
-        if (initiator === 'current_user' && direction === 'outgoing') {
+        if (initiator === 'current_user' && direction === 'outgoing' && addFriendButton) {
           addFriendButton.textContent = t("profile.requestSent");
           addFriendButton.disabled = true; // Can't cancel request yet (add this feature later if needed)
           addFriendButton.classList.remove("bg-green-500", "hover:bg-green-600", "bg-red-500", "hover:bg-red-600", "bg-yellow-500", "hover:bg-yellow-600");
           addFriendButton.classList.add("bg-gray-400");
-        } else if (initiator === 'other_user' && direction === 'incoming') {
+        } else if (initiator === 'other_user' && direction === 'incoming' && addFriendButton) {
           addFriendButton.textContent = t("profile.acceptRequest");
           addFriendButton.disabled = false; // Enable to accept request
           addFriendButton.classList.remove("bg-green-500", "hover:bg-green-600", "bg-red-500", "hover:bg-red-600", "bg-gray-400");
@@ -504,10 +541,12 @@ export const Profile = createComponent((props: ProfileProps) => {
       case 'none':
         console.log("➕ User can send a friend request");
         // Default state - allow sending friend request
-        addFriendButton.textContent = t("profile.add");
-        addFriendButton.disabled = false;
-        addFriendButton.classList.remove("bg-gray-400", "bg-red-500", "hover:bg-red-600", "bg-yellow-500", "hover:bg-yellow-600");
-        addFriendButton.classList.add("bg-green-500", "hover:bg-green-600");
+        if (addFriendButton) {
+          addFriendButton.textContent = t("profile.add");
+          addFriendButton.disabled = false;
+          addFriendButton.classList.remove("bg-gray-400", "bg-red-500", "hover:bg-red-600", "bg-yellow-500", "hover:bg-yellow-600");
+          addFriendButton.classList.add("bg-green-500", "hover:bg-green-600");  
+        }
         break;
 
       default:
@@ -518,16 +557,6 @@ export const Profile = createComponent((props: ProfileProps) => {
     if (loadingElement) loadingElement.classList.add('hidden');
     if (buttonsContainer) buttonsContainer.classList.remove('hidden');
   });
-
-
-  ////////////////////////////////////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-  
-  
 
   return container;
 });

@@ -4,7 +4,7 @@ import { PongAnimation } from '../components/partials/PingPongAnimation.js';
 import { SendEmail } from '../components/register/SendEmail.js';
 import { ResetPass } from '../components/register/ResetPass.js';
 import { TwoFactorSend } from '../components/register/TwoFactor.js';
-import { UserInfoForm } from '../components/register/UserInfoForm.js';
+// import { UserInfoForm } from '../components/register/UserInfoForm.js';
 
 export default {
 	render: (container: HTMLElement, params?: { [key: string]: string }) => {
@@ -66,26 +66,31 @@ export default {
 			)
 		}
 
-		const renderUserInfo = () => {
-			animateTransition(() =>
-				UserInfoForm()
-			)
-		}
+		// const renderUserInfo = () => {
+		// 	animateTransition(() =>
+		// 		UserInfoForm()
+		// 	)
+		// }
 
 		const renderTwoFactor = () => {
 			animateTransition(() =>
-				TwoFactorSend(
-					{ onSwitchToSignIn: renderSignIn }
-				)
+				TwoFactorSend()
 			)
 		}
 
-		if (params?.uuid)
+		// if (params?.uuid)
+		// 	renderResetPass(params);
+		// else if (window.location.pathname === "/register/twofactor")
+		// 	renderTwoFactor();
+		// else
+		// 	renderSignIn();
+		if (params?.uuid && window.location.pathname.startsWith("/reset_password")) {
 			renderResetPass(params);
-		else if (window.location.pathname === "/register/twofactor")
+		} else if (window.location.pathname === "/register/twofactor") {
 			renderTwoFactor();
-		else
+		} else {
 			renderSignIn();
+		}
 
 		const canvas = document.getElementById('pongCanvas') as HTMLCanvasElement;
 		if (canvas)
