@@ -134,6 +134,66 @@ export async function createChatRoom(roomId, participants) {
   }
 }
 
+/**
+ * Get all message requests from non-friends
+ * @param {number} userId - The ID of the user to check for
+ * @returns {Promise<Array>} - Array of users who have sent messages but aren't friends
+ */
+export async function getMessageRequests(userId) {
+  try {
+    const db = await getDatabase();
+    
+    // Get all rooms where the user is a participant
+    const rooms = await db.all(
+      `SELECT rp.room_id
+       FROM room_participants rp
+       WHERE rp.user_id = ?`,
+      [userId]
+    );
+    
+    const messageRequests = [];
+    
+    // For each room, check if it's with a non-friend
+    for (const room of rooms) {
+      const roomId = room.room_id;
+      
+      // Get the other user in this chat room
+      const otherUser = await db.get(
+        `SELECT user_id FROM room_participants
+         WHERE room_id = ? AND user_id != ?`,
+        [roomId, userId]
+      );
+      
+      if (!otherUser) continue;
+      
+      // Check if they are friends
+      const isFriend = await db.get(
+        `SELECT 1 FROM friends
+         WHERE user_id = ? AND friend_id = ?`,
+        [userId, otherUser.user_id]
+      );
+      
+      // If not friends, add to requests
+      if (!isFriend) {
+        // Get user details
+        const userDetails = await getUserFromAuth(otherUser.user_id);
+        
+        if (userDetails) {
+          messageRequests.push({
+            user: userDetails,
+          });
+        }
+      }
+    }
+    
+    return messageRequests;
+    
+  } catch (error) {
+    console.error("Error getting message requests:", error);
+    throw new Error(`Failed to get message requests: ${error.message}`);
+  }
+}
+
 export async function createOrUpdateUser(userData) {
   // This is a placeholder since user creation is handled by auth service
   // We might add local caching or other functionality here if needed

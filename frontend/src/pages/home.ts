@@ -3,7 +3,7 @@ import { t } from "../languages/LanguageController.js";
 import { PongAnimation } from "../components/partials/PingPongAnimation.js";
 import { Header } from "../components/header_footer/header.js";
 import { Footer } from "../components/header_footer/footer.js";
-import chatService from "../utils/chatWebSocketService.js";
+import chatService from "../utils/chatUtils/chatWebSocketService.js";
 import store from "../../store/store.js";
 import { account } from '../appwriteConfig.js';
 import axios from "axios";

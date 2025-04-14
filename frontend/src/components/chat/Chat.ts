@@ -1,8 +1,8 @@
 import store from "../../../store/store.js";
 import { createComponent } from "../../utils/StateManager.js";
-import chatService from "../../utils/chatWebSocketService.js";
+import chatService from "../../utils/chatUtils/chatWebSocketService.js";
 import bgImage from "../../assets/bg1.png";
-import bgImage2 from "../../assets/chatBg5.gif"
+import bgImage2 from "../../assets/background1.gif"
 import { emoticons, emoticonsMap } from "./emoticons.js";
 import { Profile } from "../profile/UserProfile.js";
 import { t } from "../../languages/LanguageController.js";
@@ -49,16 +49,7 @@ export const Chat = createComponent(
                             </div>
                         </div>
                     </div>
-                    ${
-                      activeUser
-                        ? `
-                    <div class="flex items-center gap-2 justify-center">
-                        <button type="button" class="block-btn text-base sm:text-lg text-white bg-pongdark rounded-full px-3 py-1 hover:opacity-80">Block</button>
-                        <button type="button" class="invite-btn text-base sm:text-lg text-white bg-pongblue rounded-full px-3 py-1 hover:opacity-80">Invite</button>
-                    </div>
-                    `
-                        : ""
-                    }
+
                 </header>
                 <section id="message-container" class="chat_core overflow-y-auto [scrollbar-width:thin] [scrollbar-color:white_pongdark]
                 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2
@@ -104,6 +95,9 @@ export const Chat = createComponent(
                 }
             </div>
         `;
+
+
+        
 
       // Add event listeners after the HTML is rendered
       if (activeUser) {
@@ -388,7 +382,7 @@ export const Chat = createComponent(
       full_name: string;
     }) => {
       activeUser = user;
-
+    
       // Create room ID (combination of both usernames sorted alphabetically)
       const currentUserId = store.userId;
       if (currentUserId) {
@@ -396,14 +390,21 @@ export const Chat = createComponent(
         roomId = [currentUserId, user.id]
           .sort((a: any, b: any) => a - b)
           .join("-");
-
+    
         // Get message history for this room
         if (chatService.isConnected()) {
           chatService.getMessageHistory(roomId);
+          
+          // Mark messages as read when opening the chat
           chatService.markMessagesAsRead(roomId);
+          
+          // Request updated unread counts after marking messages as read
+          chatService.send("messages:unread:get", {
+            userId: store.userId
+          });
         }
       }
-
+    
       renderChat();
     };
 
@@ -500,6 +501,7 @@ export const Chat = createComponent(
     // Return the component with its public methods
     return Object.assign(container, {
       setActiveUser,
+      getCurrentActiveChatId: () => activeUser ? activeUser.id : null
     });
   }
 );

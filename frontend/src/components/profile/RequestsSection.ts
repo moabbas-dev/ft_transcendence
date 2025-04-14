@@ -62,7 +62,7 @@
 
 
 import { createComponent } from "../../utils/StateManager.js";
-import chatService from "../../utils/chatWebSocketService.js";
+import chatService from "../../utils/chatUtils/chatWebSocketService.js";
 import store from "../../../store/store.js";
 
 // We'll replace the hardcoded requests with an empty array initially
