@@ -82,6 +82,7 @@ export const SignIn = createComponent((props: SignInProps) => {
 			if (signIn.data.require2FA == false) {
 				if (signIn.data.accessToken) {
 					const decodedToken: any = jwtDecode(signIn.data.accessToken);
+					console.log(`User id: ${decodedToken.userId}`);
 					store.update("accessToken", signIn.data.accessToken);
 					store.update("refreshToken", signIn.data.refreshToken);
 					store.update("sessionUUID", signIn.data.sessUUID);
@@ -93,8 +94,9 @@ export const SignIn = createComponent((props: SignInProps) => {
 					store.update("country", decodedToken.country);
 					store.update("createdAt", decodedToken.createdAt);
 					store.update("avatarUrl", decodedToken.avatarUrl);
+					store.update("is2faEnabled", decodedToken.is2fa);
 					store.update("isLoggedIn", true);
-					navigate("/play");
+					navigate("/");
 					Toast.show(`Login successful, Welcome ${decodedToken.fullName}!`, "success");
 				}
 			}
@@ -116,8 +118,7 @@ export const SignIn = createComponent((props: SignInProps) => {
 				Toast.show(`No response from server: ${error.request}`, "error");
 			else
 				Toast.show(`Error setting up the request: ${error.message}`, "error");
-			console.log(error);
-			
+			console.log(error);	
 		}
 	};
 

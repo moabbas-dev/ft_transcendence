@@ -12,6 +12,7 @@ class Store {
 	country: string | null = localStorage.getItem("country");
 	avatarUrl: string | null = localStorage.getItem("avatarUrl");
 	isLoggedIn: boolean = localStorage.getItem("isLoggedIn") === "true";
+	is2faEnabled: boolean = localStorage.getItem("is2faEnabled") === "1";
 	accessToken: string | null = localStorage.getItem("accessToken");
 	refreshToken: string | null = localStorage.getItem("refreshToken");
 	sessionUUID: string | null = localStorage.getItem("sessionUUID");
@@ -37,6 +38,7 @@ class Store {
 			await axios.post(`http://localhost:8001/auth/logout/${this.sessionUUID}`);
 
 			this.update("isLoggedIn", false);
+			this.update("is2faEnabled", null);
 			this.update("userId", null);
 			this.update("nickname", null);
 			this.update("email", null);

@@ -2,13 +2,12 @@ const { db } = require('../db/initDb');
 const bcrypt = require('bcrypt');
 const Session = require('../models/Session');
 const User = require('../models/User');
-const SECRET_KEY = process.env.JWT_SECRET_KEY;
 const { generateTokens } = require('../utils/jwtUtils');
 const UserToken = require('../models/UserToken');
 const axios = require('axios');
 const { validatePassword, validateNickname, capitalizeFullName } = require('../utils/validationUtils');
-const { OAuth2Client } = require('google-auth-library');
-const client = new OAuth2Client(process.env.CLIENT_ID);
+// const { OAuth2Client } = require('google-auth-library');
+// const client = new OAuth2Client(process.env.CLIENT_ID);
 
 const authenticateUser = async (email, password) => {
 	const query = `SELECT * FROM Users WHERE email = ?`;
@@ -42,13 +41,13 @@ const authenticateUser = async (email, password) => {
 	});
 };
 
-async function verifyGoogleToken(idToken) {
-	const ticket = await client.verifyIdToken({
-		idToken: idToken,
-		audience: process.env.CLIENT_ID, // Must match your Google OAuth2 client ID
-	});
-	return ticket.getPayload();
-}
+// async function verifyGoogleToken(idToken) {
+// 	const ticket = await client.verifyIdToken({
+// 		idToken: idToken,
+// 		audience: process.env.CLIENT_ID, // Must match your Google OAuth2 client ID
+// 	});
+// 	return ticket.getPayload();
+// }
 
 const generateNickname = async (userId) => {
 	const randomString = Math.random().toString(36).substring(2, 7); // Generates a 5-letter string

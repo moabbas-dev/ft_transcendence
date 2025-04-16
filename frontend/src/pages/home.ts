@@ -9,6 +9,7 @@ import { account } from '../appwriteConfig.js';
 import axios from "axios";
 import Toast from "../toast/Toast.js";
 import { jwtDecode } from "jwt-decode";
+import { PongLoading } from "../components/partials/PongLoading.js";
 
 export default {
   render: async (container: HTMLElement) => {
@@ -88,27 +89,15 @@ export default {
     </div> 
     `;
 
-    await initializeWebSocket();
-
-    // Initialize WebSocket connection
-    async function initializeWebSocket() {
-      try {
-        const username = store.nickname;
-        const userId = store.userId;
-
-        if (!username || !userId) {
-          // console.error("User information not found in sessionStorage");
-          return;
-        }
-
-        // Connect to WebSocket server
-        await chatService.connect();
-
-        console.log("Connected to chat service");
-      } catch (error) {
-        console.error("Failed to connect to chat service:", error);
-      } finally {
-      }
+    if(window.location.href.endsWith(':5173/#') && localStorage.getItem("googleAuthClicked")) {
+      const overlay = document.createElement('div');
+      overlay.className = 'fixed inset-0 bg-black opacity-40 z-50';
+      container.appendChild(overlay);
+      container.classList.add('overflow-hidden', 'pointer-events-none', 'items-center', 'justify-center');  
+      const loadingContainer = document.createElement('div');
+      loadingContainer.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[60] bg-white rounded-lg shadow-pongblue shadow-lg p-4 z-60';
+      loadingContainer.appendChild(PongLoading({text: "Signing you in..."}));
+      container.appendChild(loadingContainer);
     }
 
     //header
@@ -185,11 +174,9 @@ export default {
         console.log(appwiteUser.$id);
         const photoUrl = await getGoogleProfilePhoto();
         console.log(photoUrl); // this works 100%
-
         const session = await account.getSession('current');
         try {
           const data = await axios.post("http://localhost:8001/auth/google/signIn", { email: appwiteUser.email, name: appwiteUser.name, country: session.countryName});
-
           if (!data.data.require2FA) {
             if (data.data.accessToken) {
               const decodedToken: any = jwtDecode(data.data.accessToken);
@@ -204,6 +191,7 @@ export default {
               store.update("country", decodedToken.country);
               store.update("createdAt", decodedToken.createdAt);
               store.update("avatarUrl", decodedToken.avatarUrl);
+              store.update("is2faEnabled", decodedToken.is2fa);
               store.update("isLoggedIn", true);
               navigate("/");
               Toast.show(`Login successful, Welcome ${decodedToken.fullName}!`, "success");
@@ -212,6 +200,16 @@ export default {
             store.update("sessionUUID", data.data.sessUUID);
             navigate("/register/twofactor");
             Toast.show("First step is complete! Now moving to the 2fa code validation", "success");
+          }
+          try {
+            await axios.post(`http://localhost:8001/auth/google_upload/${store.sessionUUID}?photo=${photoUrl as string}`, undefined, {
+              headers:{
+                Authorization: `Bearer ${store.accessToken}`,
+              }
+            })
+            store.update("avatarUrl", photoUrl as string);
+          } catch(err) {
+            console.log(err);
           }
           localStorage.removeItem("googleAuthClicked");
         } catch (err: any) {
@@ -239,3 +237,28 @@ export default {
       await checkUserAfterAuth();
   },
 };
+
+window.addEventListener("DOMContentLoaded", async () => {
+  await initializeWebSocket();
+});
+
+// Initialize WebSocket connection
+async function initializeWebSocket() {
+  try {
+    const username = store.nickname;
+    const userId = store.userId;
+
+    if (!username || !userId) {
+      // console.error("User information not found in sessionStorage");
+      return;
+    }
+
+    // Connect to WebSocket server
+    await chatService.connect();
+
+    console.log("Connected to chat service");
+  } catch (error) {
+    console.error("Failed to connect to chat service:", error);
+  } finally {
+  }
+}

@@ -20,7 +20,7 @@ export const SignUp = createComponent((props: SignUpProps) => {
       
       <!-- Form area - scrollable only on mobile -->
       <form class="flex flex-col gap-2 pb-2">
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-1 w-full overflow-y-auto max-h-[300px] md:max-h-none">
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-1 w-full overflow-y-auto max-h-[300px] md:max-h-none pb-1">
 			<div class="flex flex-col gap-1 px-1">
 				<label for="email" class="text-base font-medium text-gray-700">Email</label>
 				<div class="relative">

@@ -1,5 +1,5 @@
 require('dotenv').config();
-const fastify = require('fastify')({ logger: true });
+const fastify = require('fastify')({ logger: true, maxParamLength: 6000 });
 const cors = require('@fastify/cors');
 const { createTables, closeDatabase } = require('./src/db/initDb');
 const fastifyOauth2 = require('@fastify/oauth2');

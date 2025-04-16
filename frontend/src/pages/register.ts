@@ -4,7 +4,7 @@ import { PongAnimation } from '../components/partials/PingPongAnimation.js';
 import { SendEmail } from '../components/register/SendEmail.js';
 import { ResetPass } from '../components/register/ResetPass.js';
 import { TwoFactorSend } from '../components/register/TwoFactor.js';
-import { UserInfoForm } from '../components/register/UserInfoForm.js';
+// import { UserInfoForm } from '../components/register/UserInfoForm.js';
 
 export default {
 	render: (container: HTMLElement, params?: { [key: string]: string }) => {
@@ -66,17 +66,15 @@ export default {
 			)
 		}
 
-		const renderUserInfo = () => {
-			animateTransition(() =>
-				UserInfoForm()
-			)
-		}
+		// const renderUserInfo = () => {
+		// 	animateTransition(() =>
+		// 		UserInfoForm()
+		// 	)
+		// }
 
-		const renderTwoFactor = (params?: { [key: string]: string | number }) => {
+		const renderTwoFactor = () => {
 			animateTransition(() =>
-				TwoFactorSend(
-					params
-				)
+				TwoFactorSend()
 			)
 		}
 
@@ -88,8 +86,6 @@ export default {
 		// 	renderSignIn();
 		if (params?.uuid && window.location.pathname.startsWith("/reset_password")) {
 			renderResetPass(params);
-		} else if (params?.uuid && window.location.pathname.startsWith("/register/twofactor")) {
-			renderTwoFactor(params); // pass uuid if needed
 		} else if (window.location.pathname === "/register/twofactor") {
 			renderTwoFactor();
 		} else {

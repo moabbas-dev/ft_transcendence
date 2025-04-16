@@ -84,7 +84,9 @@ export default {
     chat.appendChild(chatComponent);
 
     // Initialize WebSocket connection
-    await initializeWebSocket();
+    window.addEventListener("DOMContentLoaded", async () => {
+      await initializeWebSocket();
+    })
 
     // Get unread count function
     const getUnreadCount = (userId: number): number => {

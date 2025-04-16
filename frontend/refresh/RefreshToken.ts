@@ -20,7 +20,7 @@ const getValidAccessToken = async (): Promise<string | null> => {
             } catch (err: any) {
                 if (err.response && err.response.status === 401) {
                     await store.logout();
-                    Toast.show("Session terminated, please sign up again!", "warn");
+                    Toast.show("Session terminated, please sign in again!", "warn");
                     return null;
                 }
                 return store.accessToken;
