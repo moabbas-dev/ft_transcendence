@@ -2,6 +2,10 @@ import { navigate } from "../router.js";
 
 export default {
 	render: (container: HTMLElement) => {
+	  const params = new URLSearchParams(window.location.search);
+	  const nickname = params.get("u");
+	  const email = params.get("e");
+
 	  container.className = 'flex items-center justify-center text-white flex-col h-dvh bg-pongdark';
 	  container.innerHTML = `
   
@@ -16,7 +20,7 @@ export default {
 			<i class="fa-solid fa-user text-xl text-white drop-shadow-[0_0_3px_#00ffff]"></i>
 			<div class="flex flex-col gap-1">
 			  <span class="text-sm text-slate-300">Username</span>
-			  <span class="font-medium">@username</span>
+			  <span class="font-medium">@${nickname || "Loading..."}</span>
 			</div>
 		  </div>
   
@@ -24,7 +28,7 @@ export default {
 			<i class="fa-solid fa-envelope text-xl text-white drop-shadow-[0_0_3px_#00ffff]"></i>
 			<div class="flex flex-col gap-1">
 			  <span class="text-sm text-slate-300">Email</span>
-			  <span class="font-medium">user@example.com</span>
+			  <span class="font-medium">${email || "Loading..."}</span>
 			</div>
 		  </div>
   
@@ -39,14 +43,14 @@ export default {
   
 		<div class="flex flex-col gap-2 items-center">
 		  <p class="text-center text-slate-300">Your account has been successfully verified. You now have access to all platform features.</p>
-		  <button class="continue-to-dashboard mt-4 px-6 py-3 rounded-lg bg-pongblue text-slate-300 hover:opacity-80 transition-all duration-200 shadow-[0_0_10px_#00ffff]">
-			<i class="fa-solid fa-arrow-right-to-bracket mr-2"></i> Continue to Dashboard
+		  <button class="continue-to-login mt-4 px-6 py-3 rounded-lg bg-pongblue text-slate-300 hover:opacity-80 transition-all duration-200 shadow-[0_0_10px_#00ffff]">
+			<i class="fa-solid fa-arrow-right-to-bracket mr-2"></i> Continue to Login
 		  </button>
 		</div>
 	  </div>
 	  `;
-	  const continueButton = container.querySelector('.continue-to-dashboard') as HTMLButtonElement;
-	  continueButton.addEventListener('click', () => {navigate('/')})
+	  const continueButton = container.querySelector('.continue-to-login') as HTMLButtonElement;
+	  continueButton.addEventListener('click', () => {navigate('/register')})
 	}
 };
   

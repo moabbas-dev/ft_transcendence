@@ -18,7 +18,6 @@ const routes: { [key: string]: Page } = {
   "/": HomePage,
   "/register": RegisterPage,
   "/register/twofactor": RegisterPage,
-//   "/register/twofactor/:uuid": RegisterPage,
   "/reset_password/:uuid": RegisterPage,
   "/play": PlayPage,
   "/play/local-ai": PlayVsAI,
@@ -32,21 +31,6 @@ const routes: { [key: string]: Page } = {
   "/about-us": AboutPage,
   "/account-verified": AccountVerifiedPage,
 };
-
-// export function refreshRouter() {
-//   const path = window.location.pathname;
-//   const page = routes[path] || NotFound;
-//   const appContainer = document.getElementById("app")!;
-//   appContainer.className = "";
-//   appContainer.innerHTML = "";
-
-//   const savedLanguage = localStorage.getItem("selectedLanguage");
-//   if (savedLanguage) {
-//     setLanguage(savedLanguage as Lang);
-//   }
-
-//   page.render(appContainer);
-// }
 
 export function refreshRouter() {
 	const path = window.location.pathname;

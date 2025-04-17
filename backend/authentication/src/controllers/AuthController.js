@@ -215,7 +215,7 @@ class AuthController {
 			await User.activateUser(userId);
 			await UserToken.deleteByToken(token); // Delete expired token
 			// return reply.code(200).send({ message: "Account activation complete!" });
-			return reply.redirect(`${process.env.FRONTEND_DOMAIN}/`);
+			return reply.redirect(`${process.env.FRONTEND_DOMAIN}/account-verified?u=${user.nickname}&e=${user.email}`);
 		} catch (err) {
 			return reply.code(500).send({ message: "Error activating the account!", error: err.message });
 		}

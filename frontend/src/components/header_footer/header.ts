@@ -221,6 +221,12 @@ export const Header = createComponent(() => {
     function renderNotifications(notifications: NotificationData[]) {
         if (notificationContainer) {
             notificationContainer.innerHTML = '';
+            if (notifications.length === 0) {
+                const msg = document.createElement('p')
+                msg.innerHTML = '<p class="text-slate-500 text-center">No notifications yet!</p>'
+                notificationContainer.appendChild(msg)
+                return 
+            }
             let unreadCount = 0;
             notifications.forEach(notification => {
                 const body = {
