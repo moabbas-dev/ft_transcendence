@@ -27,7 +27,7 @@ export const Chat = createComponent(
     // Create the chat UI
     const renderChat = () => {
       container.innerHTML = `
-            <div class="flex flex-col bg-pongblue bg-custom-gradient justify-between h-screen z-20 gap-2 bg-cover bg-center" style="background-image: ${activeUser ? `url(${bgImage})` : `url(${bgImage2})` }">
+            <div class="flex flex-col bg-pongcyan bg-custom-gradient justify-between h-screen z-20 gap-2 bg-cover bg-center" style="background-image: ${activeUser ? `url(${bgImage})` : `url(${bgImage2})` }">
                 <header class="flex h-fit items-center justify-between py-3 px-2 bg-white">
                     <div class="flex">
                         <div class="back_arrow sm:hidden text-black text-3xl flex items-center justify-center hover:cursor-pointer hover:opacity-80">

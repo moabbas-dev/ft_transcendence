@@ -22,7 +22,7 @@
 // 			<span class="text-sm text-gray-500">${props.timeSent}</span>
 // 		</div>
 // 		<div class="flex flex-1 justify-end gap-2">
-// 			<button id="accept" class="px-3 py-1 bg-pongblue text-white text-sm rounded hover:opacity-80">
+// 			<button id="accept" class="px-3 py-1 bg-pongcyan text-white text-sm rounded hover:opacity-80">
 // 				Accept
 // 			</button>
 // 			<button id="decline" class="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300">
@@ -88,7 +88,7 @@ const Request = createComponent((props: RequestProps) => {
 			<span class="text-sm text-gray-500">${props.timeSent}</span>
 		</div>
 		<div class="flex flex-1 justify-end gap-2">
-			<button id="accept" class="px-3 py-1 bg-pongblue text-white text-sm rounded hover:opacity-80">
+			<button id="accept" class="px-3 py-1 bg-pongcyan text-white text-sm rounded hover:opacity-80">
 				Accept
 			</button>
 			<button id="decline" class="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300">

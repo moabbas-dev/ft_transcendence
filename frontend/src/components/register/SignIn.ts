@@ -19,7 +19,7 @@ export const SignIn = createComponent((props: SignInProps) => {
 	form.className = `flex flex-col justify-center gap-3 w-[93vw] sm:w-96 xl:w-[30vw] bg-white rounded-lg p-4 sm:p-8 ${props.styles || ''}`;
 	form.innerHTML = `
   	<div class="flex flex-col gap-3">
-    	<h1 class="text-2xl sm:text-3xl font-bold text-center text-pongblue">${t('register.signin.title')}</h1>
+    	<h1 class="text-2xl sm:text-3xl font-bold text-center text-pongcyan">${t('register.signin.title')}</h1>
 		<form class="flex flex-col gap-2">
 			<div class="flex flex-col gap-1 px-1">
 				<label for="email" class="text-base font-medium text-gray-700">Email</label>
@@ -28,7 +28,7 @@ export const SignIn = createComponent((props: SignInProps) => {
 					<i class="bx bx-envelope text-lg"></i>
 					</span>
 					<input type="email" id="email" placeholder="${t('register.signup.emailPlaceholder')}" autocomplete="email" name="email" 
-					class="w-full pl-8 pr-2 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue">
+					class="w-full pl-8 pr-2 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongcyan focus:outline-none focus:ring-1 focus:ring-pongcyan focus:border-pongcyan">
 				</div>
 			</div>
 
@@ -39,7 +39,7 @@ export const SignIn = createComponent((props: SignInProps) => {
 						<i class="bx bx-lock-alt text-lg"></i>
 					</span>
 					<input type="password" id="password" placeholder="${t('register.signup.passwordPlaceholder')}" autocomplete="current-password" name="password"
-					class="w-full pl-8 pr-8 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue">
+					class="w-full pl-8 pr-8 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongcyan focus:outline-none focus:ring-1 focus:ring-pongcyan focus:border-pongcyan">
 					<span class="absolute inset-y-0 right-0 flex items-center pr-2 cursor-pointer toggle-password">
 						<i class='bx bx-hide hide-show text-lg text-gray-500'></i>
 					</span>
@@ -59,12 +59,12 @@ export const SignIn = createComponent((props: SignInProps) => {
       	</div>
     </div>
 	<div class="flex flex-col gap-3" id="google-btn">
-		<button id="google-sign" class="w-full flex items-center gap-2 justify-center py-2 text-white bg-pongblue hover:cursor-pointer hover:opacity-80 rounded-md transition-all duration-300">
+		<button id="google-sign" class="w-full flex items-center gap-2 justify-center py-2 text-white bg-pongcyan hover:cursor-pointer hover:opacity-80 rounded-md transition-all duration-300">
 			<i class='bx bxl-google text-2xl'></i>
 			<span class="text-center">${t('register.continueGoogle')}</span>
 		</button>
 		<div class="w-full text-center">
-			${t('register.signin.acc_question')} <span class="signup-link hover:cursor-pointer hover:underline text-pongblue">${t('register.signin.signup_btn')}</span>
+			${t('register.signin.acc_question')} <span class="signup-link hover:cursor-pointer hover:underline text-pongcyan">${t('register.signin.signup_btn')}</span>
 		</div>
 	</div>
   `;
@@ -137,7 +137,7 @@ export const SignIn = createComponent((props: SignInProps) => {
 	const forgotBtn = Button({
 		type: 'button',
 		text: t('register.signin.forgotpass'),
-		styles: 'bg-white text-pongblue p-0 rounded-none hover:opacity-100 hover:underline',
+		styles: 'bg-white text-pongcyan p-0 rounded-none hover:opacity-100 hover:underline',
 		eventType: 'click',
 		onClick: (e: Event) => {
 			e.preventDefault()

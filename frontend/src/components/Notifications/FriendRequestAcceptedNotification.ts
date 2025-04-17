@@ -26,7 +26,7 @@ export const FriendRequestAcceptedNotification = createComponent((props: Notific
         </div>
         <div>
             <p class="text-gray-700">
-                <span id="sender-name" class="text-pongblue font-semibold cursor-pointer hover:underline hover:opacity-90">Loading...</span>
+                <span id="sender-name" class="text-pongcyan font-semibold cursor-pointer hover:underline hover:opacity-90">Loading...</span>
                 accepted your friend invitation
             </p>
         </div>

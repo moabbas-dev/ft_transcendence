@@ -9,7 +9,7 @@ export const GameResultsPopUp = createComponent(() => {
 
   // Create popup content
   const popupContent = document.createElement("div");
-  popupContent.className = "bg-black border-2 border-pongblue p-6 rounded-lg shadow-lg text-center";
+  popupContent.className = "bg-black border-2 border-pongcyan p-6 rounded-lg shadow-lg text-center";
   popup.appendChild(popupContent);
   
   // Winner text
@@ -28,7 +28,7 @@ export const GameResultsPopUp = createComponent(() => {
   // Restart button
   const restartButton = document.createElement("button");
   restartButton.className = 
-    "px-4 py-2 bg-pongblue text-white border border-white rounded-lg transition-all hover:opacity-80 hover:shadow-neon";
+    "px-4 py-2 bg-pongcyan text-white border border-white rounded-lg transition-all hover:opacity-80 hover:shadow-neon";
   restartButton.textContent = t('play.resultsPopup.playAgain');
   restartButton.style.boxShadow = "0 0 10px #0ff, 0 0 20px #0ff"; // Add neon glow to button
   restartButton.id = "restart-btn"

@@ -57,7 +57,7 @@ export function renderWaitingRoomSlots(container: HTMLElement, playerCount: numb
 				waitingPlayersContainer.innerHTML += `
 					<div class="bg-[rgba(100,100,255,0.2)] p-4 rounded-lg flex items-center justify-between">
 						<div class="flex items-center gap-3">
-							<div class="size-10 rounded-full bg-pongblue">
+							<div class="size-10 rounded-full bg-pongcyan">
 								<img src="${playerData.avatar}" alt="avatar" class="size-full rounded-full object-cover" />
 							</div>
 							<div>

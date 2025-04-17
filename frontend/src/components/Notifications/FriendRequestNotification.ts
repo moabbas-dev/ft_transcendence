@@ -27,7 +27,7 @@ export const FriendRequestNotification = createComponent((props: NotificationPro
         </div>
         <div class="flex flex-col">
             <p class="text-gray-700">
-                <span id="sender-name" class="text-pongblue font-semibold hover:cursor-pointer hover:underline hover:opacity-90">Loading...</span>
+                <span id="sender-name" class="text-pongcyan font-semibold hover:cursor-pointer hover:underline hover:opacity-90">Loading...</span>
                 Sent you a friend request
             </p>
             <div class="flex justify-between gap-2">

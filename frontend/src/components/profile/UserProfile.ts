@@ -186,7 +186,7 @@ export const Profile = createComponent((props: ProfileProps) => {
               
               <!-- Buttons (initially hidden) -->
               <div id="friendship-buttons" class="flex gap-2 w-full">
-                <button id="message-user" class="max-sm:flex-1 bg-pongblue text-white text-nowrap max-sm:text-sm px-2 sm:px-4 py-1 rounded hover:bg-blue-700 transition-colors">
+                <button id="message-user" class="max-sm:flex-1 bg-pongcyan text-white text-nowrap max-sm:text-sm px-2 sm:px-4 py-1 rounded hover:bg-blue-700 transition-colors">
                   <i class="fas fa-envelope min-[401px]:mr-1"></i>
                   <span class="max-[402px]:hidden">${t("profile.message")}</span>
                 </button>
@@ -215,12 +215,12 @@ export const Profile = createComponent((props: ProfileProps) => {
                 alt="profile picture" 
                 id="profile-picture"
                 referrerpolicy="no-referrer"
-                class="size-14 sm:size-20 object-cover rounded-full border-2 border-pongblue"
+                class="size-14 sm:size-20 object-cover rounded-full border-2 border-pongcyan"
             >
             <span class="absolute bottom-0 left-0 size-4 rounded-full
               bg-green-500 border border-white"></span>
             ${props.uName === store.nickname ? `
-              <button id="upload-photo" class="absolute top-0 right-0 size-5 rounded-full hover:opacity-90 cursor-pointer bg-pongblue grid place-content-center">
+              <button id="upload-photo" class="absolute top-0 right-0 size-5 rounded-full hover:opacity-90 cursor-pointer bg-pongcyan grid place-content-center">
                 <i class="fa-solid fa-pen text-white text-xs"></i>
               </button>
             ` : ''}
@@ -231,7 +231,7 @@ export const Profile = createComponent((props: ProfileProps) => {
         <div id="profile-tabs" class="flex space-x-4 border-b border-gray-300">
           <button 
               id="info-tab" 
-              class="flex-1 py-2 text-white text-center transition-all  focus:outline-none bg-pongblue"
+              class="flex-1 py-2 text-white text-center transition-all  focus:outline-none bg-pongcyan"
             >
             ${t("profile.infoTab.title")}
           </button>
@@ -349,7 +349,7 @@ export const Profile = createComponent((props: ProfileProps) => {
   function clearActiveTabs() {
     profileTabs?.childNodes.forEach((tab) => {
       if (tab instanceof HTMLElement) {
-        tab.classList.remove("bg-pongblue");
+        tab.classList.remove("bg-pongcyan");
         tab.classList.remove("text-white");
       }
     })
@@ -365,7 +365,7 @@ export const Profile = createComponent((props: ProfileProps) => {
   statisticsTab?.addEventListener("click", () => {
     if (!contentContainer) return;
     clearActiveTabs();
-    statisticsTab.classList.add("bg-pongblue", "text-white");
+    statisticsTab.classList.add("bg-pongcyan", "text-white");
 
     // Set up the content with three canvases
     contentContainer.innerHTML = "";
@@ -455,7 +455,7 @@ export const Profile = createComponent((props: ProfileProps) => {
   historyTab?.addEventListener("click", () => {
     if (!contentContainer) return;
     clearActiveTabs();
-    historyTab.classList.add("bg-pongblue", "text-white");
+    historyTab.classList.add("bg-pongcyan", "text-white");
     contentContainer.innerHTML = "";
     contentContainer?.appendChild(GamesHistory());
   });
@@ -463,7 +463,7 @@ export const Profile = createComponent((props: ProfileProps) => {
   infoTab?.addEventListener("click", () => {
     if (!contentContainer) return;
     clearActiveTabs();
-    infoTab.classList.add("bg-pongblue", "text-white");
+    infoTab.classList.add("bg-pongcyan", "text-white");
     contentContainer.innerHTML = "";
     console.log(props.uName);
     contentContainer?.appendChild(
@@ -487,7 +487,7 @@ export const Profile = createComponent((props: ProfileProps) => {
   friendsTab?.addEventListener("click", () => {
     if (!contentContainer) return;
     clearActiveTabs();
-    friendsTab.classList.add("bg-pongblue", "text-white");
+    friendsTab.classList.add("bg-pongcyan", "text-white");
     contentContainer.innerHTML = "";
     contentContainer?.appendChild(UserFriends());
   });
