@@ -4,7 +4,6 @@ module.exports = {
     extend: {
       colors: {
         pongcyan: "#00f7ff",
-        pongcyan: "#00f7ff",
         pongpink: "#ff00e4",
         pongdark: "black",
         ponghover: "rgb(26, 36, 58)",
