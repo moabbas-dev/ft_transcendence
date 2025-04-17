@@ -6,7 +6,7 @@ import { t } from '../languages/LanguageController';
 export default {
 	render: (container: HTMLElement) => {
 	  container.innerHTML = `
-		<section class="min-h-screen flex items-center justify-center bg-pongdark py-12 px-4 sm:px-6 lg:px-8">
+		<section class="max-md:min-h-screen md:h-screen flex items-center justify-center bg-pongdark py-12 px-4 sm:px-6 lg:px-8">
 		  <div class="max-w-4xl mx-auto text-center flex flex-col gap-12">
 			<h2 class="text-3xl font-extrabold text-white sm:text-4xl">
 			  ${t('about.title')}
@@ -60,7 +60,7 @@ export default {
 			  <p class="text-lg">
 			  	${t('about.conclusion')}
 			  </p>
-			  <p class="text-pongdark">Mr. Walid please 125 :)</p>
+			  <p class="text-pongdark font-semibold hover:text-pongblue">Mr. Walid please at least 125 <i class="fa-solid fa-face-grin-beam-sweat"></i></p>
 			</div>
 		  </div>
 		</section>

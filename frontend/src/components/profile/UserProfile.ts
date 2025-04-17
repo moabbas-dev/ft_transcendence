@@ -531,7 +531,7 @@ export const Profile = createComponent((props: ProfileProps) => {
           addFriendButton.classList.remove("bg-green-500", "hover:bg-green-600", "bg-red-500", "hover:bg-red-600", "bg-yellow-500", "hover:bg-yellow-600");
           addFriendButton.classList.add("bg-gray-400");
         } else if (initiator === 'other_user' && direction === 'incoming' && addFriendButton) {
-          addFriendButton.textContent = t("profile.acceptRequest");
+          addFriendButton.innerHTML = `<i class="fa-solid fa-circle-check min-[401px]:mr-1"></i> <span class="max-[402px]:hidden">accept</span>`;
           addFriendButton.disabled = false; // Enable to accept request
           addFriendButton.classList.remove("bg-green-500", "hover:bg-green-600", "bg-red-500", "hover:bg-red-600", "bg-gray-400");
           addFriendButton.classList.add("bg-yellow-500", "hover:bg-yellow-600");

@@ -5,17 +5,17 @@ import axios from 'axios';
 import store from '../store/store.js';
 import Toast from './toast/Toast.js';
 
-// window.addEventListener("contextmenu", (e) => e.preventDefault());
-// window.addEventListener("keydown", (e) => {
-// 	if (
-// 	  e.key === "F12" ||
-// 	  (e.ctrlKey && e.shiftKey && e.key === "I") ||
-// 	  (e.ctrlKey && e.shiftKey && e.key === "J") ||
-// 	  (e.ctrlKey && e.key === "U")
-// 	) {
-// 	  e.preventDefault();
-// 	}
-// });
+window.addEventListener("contextmenu", (e) => e.preventDefault());
+window.addEventListener("keydown", (e) => {
+	if (
+	  e.key === "F12" ||
+	  (e.ctrlKey && e.shiftKey && e.key === "I") ||
+	  (e.ctrlKey && e.shiftKey && e.key === "J") ||
+	  (e.ctrlKey && e.key === "U")
+	) {
+	  e.preventDefault();
+	}
+});
 
 export const handleLoginWithGoogle = (container: HTMLElement) => {
 	const signBtn: HTMLButtonElement = container.querySelector('#google-sign')!
