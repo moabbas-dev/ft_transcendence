@@ -23,7 +23,7 @@ export default {
     container.className = 'flex flex-col h-dvh';
     container.innerHTML = `
       <div class="profile"></div>
-      <div class="header z-50"></div>
+      <div class="header z-50 w-full bg-black"></div>
       
       <div class="content flex-1 overflow-x-hidden bg-black relative z-10">
         <!-- Neon glow effects -->

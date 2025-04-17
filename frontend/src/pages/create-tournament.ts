@@ -9,7 +9,7 @@ export default {
         container.className = "flex flex-col h-dvh bg-pongdark"
         container.innerHTML = `
             <div class="profile"></div>
-            <div class="header bg-pongcyan w-full h-fit"></div>
+            <div class="header bg-bal w-full h-fit"></div>
             <div class="w-full overflow-x-hidden overflow-y-auto">
             <div id="content" class="flex flex-col flex-1 container mx-auto px-4 gap-6 w-full text-white py-6">
                 <!-- Tournament Status Bar -->

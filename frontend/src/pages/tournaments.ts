@@ -9,7 +9,7 @@ export default {
 	render: (container: HTMLElement) => {
 		container.className = "flex flex-col h-dvh";
 		container.innerHTML = `
-			<div class="header z-50"></div>
+			<div class="header z-50 w-full bg-black"></div>
 			
 			<div class="content flex-1 relative overflow-hidden bg-black">
 				<!-- Neon glow effects -->
