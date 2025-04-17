@@ -499,6 +499,7 @@ wsAdapter.on("friend:decline", async ({ clientId, payload }) => {
     const status = await getFriendshipStatus(currentUserId, targetUserId);
 
     console.log(status);
+
     wsAdapter.sendTo(clientId, "friendship:status", {
       status: status
     });

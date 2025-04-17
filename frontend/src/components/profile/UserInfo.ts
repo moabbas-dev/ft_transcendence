@@ -196,7 +196,8 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
   const twoFactorToggle = container.querySelector(
     "#twoFactorToggle"
   ) as HTMLInputElement;
-  twoFactorToggle.checked = store.is2faEnabled;
+  if (twoFactorToggle)
+    twoFactorToggle.checked = store.is2faEnabled;
   const qrCodeContainer = container.querySelector("#qrCodeContainer");
   const qrCodeImage = container.querySelector("#qrCodeImage") as HTMLDivElement;
 

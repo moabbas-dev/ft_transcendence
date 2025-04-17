@@ -3,8 +3,9 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        pongblue: "#0F6292",
-        pongdark: "rgb(17, 24, 39)",
+        pongcyan: "#00f7ff",
+        pongpink: "#ff00e4",
+        pongdark: "black",
         ponghover: "rgb(26, 36, 58)",
         // Podium colors
         gold: '#FFD700',

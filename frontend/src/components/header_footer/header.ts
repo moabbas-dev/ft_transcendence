@@ -13,78 +13,76 @@ import defaultImage from "../../assets/guests.png";
 
 export const Header = createComponent(() => {
     const container = document.createElement("header");
-    container.className = "container mx-auto relative p-2 flex items-center bg-gradient-to-r from-pongblue via-[#0a1150] to-pongblue justify-between text-white max-sm:gap-2";
+    container.className = "container mx-auto relative p-2 flex items-center bg-black justify-between text-white max-sm:gap-2 border-b-2 border-pongcyan shadow-[0_5px_15px_rgba(0,247,255,0.5)]";
     container.innerHTML = `
-        <!-- <div id="menu-bar" class="fas fa-bars"></div> -->
         <div class="flex items-center justify-start w-1/2 gap-2 sm:gap-8">
-            <div class="logo hidden sm:flex flex-col items-center text-center font-bold text-white text-xl transition-all duration-300 hover:drop-shadow-[0_0_25px_#a855f7]">
-                <span class="text-purple-500 drop-shadow-[0_0_10px_#a855f7] transition-all duration-300 hover:drop-shadow-[0_0_20px_#a855f7]">
-                    Pong
+            <div class="logo hidden sm:flex flex-col items-center text-center font-bold text-white text-xl transition-all duration-300 hover:animate-pulse">
+                <span class="text-pongcyan drop-shadow-[0_0_10px_#00f7ff] transition-all duration-300 hover:drop-shadow-[0_0_20px_#00f7ff] hover:text-white">
+                    ft_transcendence
                 </span>
-                <span class="text-gray-300 text-xs transition-all duration-300 hover:text-white">
+                <span class="text-pongpink text-xs transition-all duration-300 hover:text-white drop-shadow-[0_0_5px_#ff00e4]">
                     Neon Pong
                 </span>
             </div>
             <nav class="navbar items-center gap-4 hidden text-nowrap sm:flex">
                 ${store.userId ? `
-                <div class="nav-child playPage group flex flex-col justify-center items-center transition-all hover:cursor-pointer hover:text-ponghover" onClick="${() => navigate('/play')}">
-                    <i class="fa-solid fa-play text-lg sm:text-xl group-hover:rotate-12"></i>
-                    <span>${t('home.header.play')}</span>
+                <div class="nav-child playPage group flex flex-col justify-center items-center transition-all hover:cursor-pointer" onClick="${() => navigate('/play')}">
+                    <i class="fa-solid fa-play text-lg sm:text-xl text-pongcyan drop-shadow-[0_0_5px_#00f7ff] group-hover:rotate-12 group-hover:text-white group-hover:drop-shadow-[0_0_10px_#00f7ff]"></i>
+                    <span class="text-pongcyan group-hover:text-pongpink transition-all duration-300">${t('home.header.play')}</span>
                 </div>
-                <div class="nav-child flex flex-col group leaderBoard-page justify-center items-center transition-all hover:cursor-pointer hover:text-ponghover">
-                    <i class="fa-solid fa-ranking-star text-lg sm:text-xl group-hover:rotate-12"></i>
-                    <span>${t('home.header.leaderBoard')}</span>
+                <div class="nav-child flex flex-col group leaderBoard-page justify-center items-center transition-all hover:cursor-pointer">
+                    <i class="fa-solid fa-ranking-star text-lg sm:text-xl text-pongcyan drop-shadow-[0_0_5px_#00f7ff] group-hover:rotate-12 group-hover:text-white group-hover:drop-shadow-[0_0_10px_#00f7ff]"></i>
+                    <span class="text-pongcyan group-hover:text-pongpink transition-all duration-300">${t('home.header.leaderBoard')}</span>
                 </div>
-                <div class="nav-child nav-chat flex flex-col group justify-center items-center transition-all hover:cursor-pointer hover:text-ponghover" onClick="${() => navigate('/chat')}">
-                    <i class="fa-solid fa-comments text-lg sm:text-xl group-hover:rotate-12"></i>
-                    <span>${t('home.header.chat')}</span>
+                <div class="nav-child nav-chat flex flex-col group justify-center items-center transition-all hover:cursor-pointer" onClick="${() => navigate('/chat')}">
+                    <i class="fa-solid fa-comments text-lg sm:text-xl text-pongcyan drop-shadow-[0_0_5px_#00f7ff] group-hover:rotate-12 group-hover:text-white group-hover:drop-shadow-[0_0_10px_#00f7ff]"></i>
+                    <span class="text-pongcyan group-hover:text-pongpink transition-all duration-300">${t('home.header.chat')}</span>
                 </div>
             ` : ``}
             </nav>
             <nav class="nav-btn sm:hidden hover:cursor-pointer hover:opacity-80">
-                <i class="fa-solid fa-bars text-2xl"></i>
+                <i class="fa-solid fa-bars text-2xl text-pongcyan drop-shadow-[0_0_5px_#00f7ff]"></i>
             </nav>
         </div>
         <div class="flex items-center justify-end gap-3 sm:gap-4 w-1/2">
             <div class="md:flex-1">
                 ${store.userId? `
-                <form action="" id="search-bar-container" class="search-bar-container flex justify-center items-center gap-2 rounded-md md:p-2 md:bg-white z-50">
-                    <input type="text" name="search-bar" id="search-bar" autocomplete="off" placeholder="${t('home.header.search')}" class="w-full hidden md:block text-lg text-ponghover rounded-md">
-                    <label for="search-bar" class="fas fa-search text-ponghover text-xl max-md:text-white"></label>
+                <form action="" id="search-bar-container" class="search-bar-container flex justify-center items-center gap-2 rounded-md md:p-2 md:bg-black md:border-2 md:border-pongcyan z-50">
+                    <input type="text" name="search-bar" id="search-bar" autocomplete="off" placeholder="${t('home.header.search')}" class="w-full hidden md:block text-lg text-white bg-transparent rounded-md placeholder-pongcyan/50 focus:outline-none">
+                    <label for="search-bar" class="fas fa-search text-pongcyan text-xl drop-shadow-[0_0_5px_#00f7ff] max-md:text-white hover:text-white hover:drop-shadow-[0_0_10px_#00f7ff] transition-all duration-300"></label>
                 </form>                
                 ` : ``}
-
             </div>
             ${store.userId ? `
             <div class="notification-bell relative group">
-                <i class="fa-solid fa-bell text-white text-2xl group-hover:scale-120 group-hover:rotate-12 transition-all hover:cursor-pointer hover:text-ponghover"></i>
-                <span class="notification-count absolute -top-2 -right-2 rounded-full group-hover:animate-jump-in text-white bg-gray-500 hover:cursor-pointer w-5 h-5 flex items-center justify-center text-sm">0</span>
+                <i class="fa-solid fa-bell text-pongpink text-2xl drop-shadow-[0_0_5px_#ff00e4] group-hover:scale-110 group-hover:rotate-12 transition-all hover:cursor-pointer hover:text-white hover:drop-shadow-[0_0_10px_#ff00e4]"></i>
+                <span class="notification-count absolute -top-2 -right-2 rounded-full group-hover:animate-jump-in text-white bg-gray-500 hover:cursor-pointer w-5 h-5 flex items-center justify-center text-sm shadow-[0_0_5px_rgba(255,0,228,0.5)]">0</span>
             </div>
-            <div class="notification hidden absolute scrollbar-thin shadow-pongblue overflow-y-auto top-full ${localStorage.getItem('selectedLanguage') === 'ar' ? 'left-0' : 'right-0'} z-50 bg-white w-[300px] py-2 pl-2 max-sm:pr-2 max-h-[300px] animate-fade-down animate-once animate-duration-300">
+            <div class="notification hidden absolute scrollbar-thin shadow-[0_0_15px_rgba(0,247,255,0.5)] overflow-y-auto top-full ${localStorage.getItem('selectedLanguage') === 'ar' ? 'left-0' : 'right-0'} z-50 bg-black border-2 border-pongcyan w-[300px] py-2 pl-2 max-sm:pr-2 max-h-[300px] animate-fade-down animate-once animate-duration-300">
 
             </div>
             ` : ``}
-            <select id="languages" name="languages_options" title="Select your language" class="text-xl bg-pongdark/30 rounded-full px-1 text-white text-[2.5rem] focus:outline-none hover:opacity-80 cursor-pointer">
+            <select id="languages" name="languages_options" title="Select your language" class="text-xl bg-black border-2 border-pongpink rounded-full px-1 text-white text-[2.5rem] focus:outline-none hover:shadow-[0_0_10px_rgba(255,0,228,0.7)] cursor-pointer transition-all duration-300">
                 <option value="en" class="text-center">en</option>
                 <option value="fr" class="text-center">fr</option>
                 <option value="ar" class="text-center">ع</option>
             </select>
             <div class="account relative flex gap-3 text-white">
-                <div id="profile-head" class="flex gap-3 hover:cursor-pointer hover:underline hover:text-ponghover">
+                <div id="profile-head" class="flex gap-3 hover:cursor-pointer hover:text-pongcyan hover:drop-shadow-[0_0_5px_#00f7ff] transition-all duration-300">
                     <div class="profile-section group flex items-center justify-center gap-2">
                         <div class="flex items-center justify-center text-lg font-bold">
                         <p>${store.nickname || 'Guest'}</p>
 
                         </div>
-                        <div class="w-10 h-10 group-hover:rotate-12 group-hover:scale-110 transition-all bg-slate-400 rounded-full bg-cover">
-                            <img src="${store.avatarUrl || defaultImage}" class="size-full rounded-full" referrerpolicy="no-referrer"/>
+                        <div class="w-10 h-10 group-hover:rotate-12 group-hover:scale-110 transition-all bg-slate-400 rounded-full bg-cover border-2 border-pongcyan shadow-[0_0_10px_rgba(0,247,255,0.5)]">
+                            <img src="${store.avatarUrl || defaultImage}" class="size-full rounded-full"/>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         ${store.userId ? `
-        <div id="search-result-container" class="hidden absolute left-0 ${localStorage.getItem('selectedLanguage') === 'ar' ? 'md:left-48' : 'md:left-1/2'} top-[calc(100%+44px)] md:top-full z-[9999] w-fit h-fit max-md:w-full bg-white border-t rounded-md shadow-[0_0_15px] shadow-white"></div>
+        <div id="search-result-container" class="hidden absolute left-0 ${localStorage.getItem('selectedLanguage') === 'ar' ? 'md:left-48' : 'md:left-1/2'} top-[calc(100%+44px)] md:top-full z-[9999] w-fit h-fit max-md:w-full bg-black border-2 border-pongcyan rounded-md shadow-[0_0_15px_rgba(0,247,255,0.5)]"></div>
         ` : ``}
     `;
 
@@ -134,6 +132,7 @@ export const Header = createComponent(() => {
             .then((response) => {
                 // Store or use the user data
                 const allUsers = response.data;
+                // console.log(allUsers);
                 // Filter users based on search query
                 const filteredUsers = allUsers.filter((user: { nickname: string; }) =>
                     user.nickname.toLowerCase().includes(searchQuery)
@@ -256,7 +255,7 @@ export const Header = createComponent(() => {
 
         if (!isClickInside) {
             navbar.classList.add('hidden');
-            navBtn.innerHTML = '<i class="fa-solid fa-bars text-xl"></i>';
+            navBtn.innerHTML = '<i class="fa-solid fa-bars text-xl text-pongcyan drop-shadow-[0_0_5px_#00f7ff]"></i>';
         }
     });
 
@@ -265,19 +264,19 @@ export const Header = createComponent(() => {
         const navStyles = `max-sm:animate-fade-down max-sm:animate-once max-sm:animate-duration-[600ms] max-sm:flex max-sm:z-50 max-sm:flex-col max-sm:absolute max-sm:top-full ${localStorage.getItem('selectedLanguage') === 'ar' ? 'max-sm:right-0' : 'max-sm:left-0'} max-sm:w-fit max-sm:gap-0`
         navStyles.split(' ').forEach(style => navbar.classList.toggle(style))
         if (!navBtn.innerHTML.includes('fa-bars-staggered')) {
-            navBtn.innerHTML = '<i class="fa-solid fa-bars-staggered text-xl"></i>';
+            navBtn.innerHTML = '<i class="fa-solid fa-bars-staggered text-xl text-pongpink drop-shadow-[0_0_5px_#ff00e4]"></i>';
         } else {
-            navBtn.innerHTML = '<i class="fa-solid fa-bars text-xl"></i>';
+            navBtn.innerHTML = '<i class="fa-solid fa-bars text-xl text-pongcyan drop-shadow-[0_0_5px_#00f7ff]"></i>';
         }
         navbar.classList.toggle('hidden')
-        const childrenStyles = 'max-sm:flex-row max-sm:w-full max-sm:max-w-full max-sm:justify-start max-sm:gap-2 max-sm:bg-pongblue max-sm:py-3 max-sm:px-5 max-sm:transition-all max-sm:hover:pl-7 max-sm:hover:pr-3'
+        const childrenStyles = 'max-sm:flex-row max-sm:w-full max-sm:max-w-full max-sm:justify-start max-sm:gap-2 max-sm:bg-black max-sm:border-y max-sm:border-pongcyan max-sm:py-3 max-sm:px-5 max-sm:transition-all max-sm:hover:pl-7 max-sm:hover:pr-3'
         navChildren.forEach(nav =>
             childrenStyles.split(' ').forEach(style => nav.classList.toggle(style))
         );
     })
 
     searchIcon?.addEventListener('click', () => {
-        const styles = 'max-md:block max-md:absolute max-md:top-full max-md:left-0 max-md:p-2 max-md:h-fit'
+        const styles = 'max-md:block max-md:absolute max-md:top-full max-md:left-0 max-md:p-2 max-md:h-fit max-md:bg-black max-md:border-2 max-md:border-pongcyan max-md:shadow-[0_0_10px_rgba(0,247,255,0.5)]'
         styles.split(' ').forEach(style => searchBar.classList.toggle(style))
         if (searchBar.classList.contains('hidden'))
             searchBar.value = "";
@@ -310,7 +309,7 @@ export const Header = createComponent(() => {
             navbar.classList.add('hidden')
             const navStyles = 'max-sm:animate-fade-down max-sm:animate-once max-sm:animate-duration-[600ms] max-sm:flex max-sm:flex-col max-sm:absolute max-sm:top-full max-sm:left-0 max-sm:w-fit max-sm:gap-0'
             navStyles.split(' ').forEach(style => navbar.classList.remove(style))
-            const childrenStyles = 'max-sm:flex-row max-sm:w-full max-sm:max-w-full max-sm:justify-start max-sm:gap-2 max-sm:bg-pongblue max-sm:py-3 max-sm:px-5 max-sm:transition-all max-sm:hover:pl-7 max-sm:hover:pr-3'
+            const childrenStyles = 'max-sm:flex-row max-sm:w-full max-sm:max-w-full max-sm:justify-start max-sm:gap-2 max-sm:bg-black max-sm:border-y max-sm:border-pongcyan max-sm:py-3 max-sm:px-5 max-sm:transition-all max-sm:hover:pl-7 max-sm:hover:pr-3'
             navChildren.forEach(nav =>
                 childrenStyles.split(' ').forEach(style => nav.classList.remove(style))
             )
@@ -319,7 +318,7 @@ export const Header = createComponent(() => {
         if (searchBar
             && !path.includes(searchBar)
             && searchIcon && !path.includes(searchIcon)) {
-            const styles = 'max-md:block max-md:absolute max-md:top-full max-md:left-0 max-md:p-2 max-md:h-fit'
+            const styles = 'max-md:block max-md:absolute max-md:top-full max-md:left-0 max-md:p-2 max-md:h-fit max-md:bg-black max-md:border-2 max-md:border-pongcyan max-md:shadow-[0_0_10px_rgba(0,247,255,0.5)]'
             styles.split(' ').forEach(style => searchBar.classList.remove(style))
             searchBar.classList.add('hidden')
         }
@@ -332,11 +331,5 @@ export const Header = createComponent(() => {
         }
     });
 
-    // const logoContainer = container.querySelector('.logo')!;
-    // logoContainer.addEventListener('click', () => {
-    //     navigate('/')
-    // });
-
     return container;
 });
-// <div class="notification hidden absolute scrollbar-thin shadow-pongblue overflow-y-auto top-full ${localStorage.getItem('selectedLanguage') === 'ar'? 'left-0' : 'right-0'} z-50 bg-white w-[300px] py-2 pl-2 max-sm:pr-2 max-h-[300px] animate-fade-down animate-once animate-duration-300">

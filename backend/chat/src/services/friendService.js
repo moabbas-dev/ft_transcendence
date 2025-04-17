@@ -137,6 +137,9 @@ export async function removeFriend(userId, friendId) {
  */
 export async function getFriendshipStatus(userId, friendId) {
   const db = await getDatabase();
+
+  userId   = Number(userId);
+  friendId = Number(friendId);
   
   // First check if they are friends
   const isFriend = await db.get(
@@ -160,7 +163,7 @@ export async function getFriendshipStatus(userId, friendId) {
         OR (from_user = ? AND to_user = ?)`,
     [userId, friendId, friendId, userId]
   );
-
+  console.log(request, "userId:", userId, "friendId:", friendId);
   if (request) {
     return {
       status: 'pending',

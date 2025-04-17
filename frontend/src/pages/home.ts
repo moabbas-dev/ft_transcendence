@@ -16,72 +16,71 @@ export default {
     container.className = 'flex flex-col h-dvh'
     container.innerHTML = `
     <div class="profile"></div>
-    <div class="header bg-pongblue w-full h-fit"></div>
-    <div class="w-full overflow-x-none bg-gradient-to-br from-pongdark via-[#0a1128] to-pongdark flex-1 flex items-center justify-center">
+    <div class="header bg-black w-full h-fit"></div>
+    <div class="w-full overflow-x-none bg-black flex-1 flex items-center justify-center">
       <div class="container mx-auto grid place-content-center px-4">
         <div class="flex items-center justify-center gap-5">
           <div class="xl:w-1/2 h-full hidden sm:flex items-center">
             <div class="relative">
-              <canvas id="pongCanvas" class="w-full h-[50vh] border-4 border-pongblue rounded-2xl shadow-[0_0_50px_rgba(59,130,246,0.3)] transform transition-transform animate-flip-up animate-duration-[3s]"></canvas>
-              <div class="absolute inset-0 bg-pongblue opacity-20 rounded-2xl animate-flip-down animate-duration-[3s]"></div>
+              <canvas id="pongCanvas" class="w-full h-[50vh] border-4 border-pongcyan rounded-2xl shadow-[0_0_50px_rgba(0,247,255,0.5)] transform transition-transform animate-flip-up animate-duration-[3s]"></canvas>
+              <div class="absolute inset-0 bg-pongcyan -z-50 opacity-10 rounded-2xl animate-flip-down animate-duration-[3s]"></div>
             </div>
           </div>
           <div class="flex flex-col gap-3 justify-center max-sm:w-full max-sm:px-3">
-            <div class="bg-[rgba(59,130,246,0.1)] border border-pongblue/20 rounded-xl p-6 transform transition-transform hover:scale-[1.02]">
-              <h1 class="text-nowrap text-5xl max-sm:text-center max-sm:font-bold sm:text-6xl lg:text-8xl xl:text-9xl text-white text-start drop-shadow-[0_0_10px_#0F6292] animate-fade-right animate-once animate-duration-700 animate-ease-linear">
+            <div class="bg-[rgba(0,0,0,0.7)] border-2 border-pongpink rounded-xl p-6 transform transition-transform hover:scale-[1.02] shadow-[0_0_20px_rgba(255,0,228,0.4)]">
+              <h1 class="text-nowrap text-5xl max-sm:text-center max-sm:font-bold sm:text-6xl lg:text-8xl xl:text-9xl text-pongpink text-start drop-shadow-[0_0_10px_#ff00e4] animate-fade-right animate-once animate-duration-700 animate-ease-linear">
                 ${t("home.title")}
               </h1>
-              <p class="text-white text-2xl max-sm:text-center lg:text-4xl mt-4 opacity-80 animate-fade-left sm:animate-fade-right animate-once animate-duration-700 animate-delay-700 animate-ease-linear">
+              <p class="text-pongcyan text-2xl max-sm:text-center lg:text-4xl mt-4 drop-shadow-[0_0_5px_#00f7ff] animate-fade-left sm:animate-fade-right animate-once animate-duration-700 animate-delay-700 animate-ease-linear">
                 ${t("home.tagline")}
               </p>
             </div>
             <div class="flex flex-wrap justify-center sm:justify-start items-center gap-4">
               ${store.userId ? `
-              <button id="chat-friends-btn" class="group relative text-lg rounded-lg text-white flex justify-center items-center bg-pongblue px-6 py-3 
+              <button id="chat-friends-btn" class="group relative text-lg rounded-lg text-white flex justify-center items-center bg-black border-2 border-pongcyan px-6 py-3 
                 transition-all duration-300 ease-in-out
-                hover:bg-pongblue/90 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]
-                focus:outline-none focus:ring-2 focus:ring-pongblue focus:ring-offset-2
+                hover:text-pongcyan hover:shadow-[0_0_15px_rgba(0,247,255,0.7)]
+                focus:outline-none
                 animate-fade-up animate-duration-700 animate-delay-1000 animate-ease-linear">
-                <span class="relative z-10">Chat with Friends</span>
+                <span class="relative z-10 drop-shadow-[0_0_5px_#00f7ff]">Chat with Friends</span>
               </button>
-              <button id="play-online-btn" class="group relative text-lg rounded-lg text-white flex justify-center items-center bg-pongblue px-6 py-3 
+              <button id="play-online-btn" class="group relative text-lg rounded-lg text-white flex justify-center items-center bg-black border-2 border-pongpink px-6 py-3 
                 transition-all duration-300 ease-in-out
-                hover:bg-pongblue/90 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]
-                focus:outline-none focus:ring-2 focus:ring-pongblue focus:ring-offset-2
+                hover:text-pongpink hover:shadow-[0_0_15px_rgba(255,0,228,0.7)]
+                focus:outline-none
                 animate-fade-up animate-duration-700 animate-delay-[1200ms] animate-ease-linear">
-                <span class="relative z-10">Play Online</span>
+                <span class="relative z-10 drop-shadow-[0_0_5px_#ff00e4]">Play Online</span>
               </button>
-              <button id="start-tournament-btn" class="group relative text-lg rounded-lg text-white flex justify-center items-center bg-pongblue px-6 py-3 
+              <button id="start-tournament-btn" class="group relative text-lg rounded-lg text-white flex justify-center items-center bg-black border-2 border-pongcyan px-6 py-3 
                 transition-all duration-300 ease-in-out
-                hover:bg-pongblue/90 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]
-                focus:outline-none focus:ring-2 focus:ring-pongblue focus:ring-offset-2
+                hover:text-pongcyan hover:shadow-[0_0_15px_rgba(0,247,255,0.7)]
+                focus:outline-none
                 animate-fade-up animate-duration-700 animate-delay-[1400ms] animate-ease-linear">
-                <span class="relative z-10">Start a Tournament</span>
+                <span class="relative z-10 drop-shadow-[0_0_5px_#00f7ff]">Start a Tournament</span>
               </button>
               ` : `
-              <button id="register-btn" class="group relative text-lg rounded-lg text-white flex justify-center items-center bg-pongblue px-6 py-3 
+              <button id="register-btn" class="group relative text-lg rounded-lg text-white flex justify-center items-center bg-black border-2 border-pongcyan px-6 py-3 
                 transition-all duration-300 ease-in-out
-                hover:bg-pongblue/90 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]
-                focus:outline-none focus:ring-2 focus:ring-pongblue focus:ring-offset-2
+                hover:text-pongcyan hover:shadow-[0_0_15px_rgba(0,247,255,0.7)]
+                focus:outline-none
                 animate-fade-up animate-duration-700 animate-delay-1000 animate-ease-linear">
-                <span class="relative z-10">${t("home.register")}</span>
+                <span class="relative z-10 drop-shadow-[0_0_5px_#00f7ff]">${t("home.register")}</span>
               </button>
-              <button id="ai-btn" class="group relative text-lg rounded-lg text-white flex justify-center items-center bg-pongblue px-6 py-3 
+              <button id="ai-btn" class="group relative text-lg rounded-lg text-white flex justify-center items-center bg-black border-2 border-pongpink px-6 py-3 
                 transition-all duration-300 ease-in-out
-                hover:bg-pongblue/90 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]
-                focus:outline-none focus:ring-2 focus:ring-pongblue focus:ring-offset-2
+                hover:text-pongpink hover:shadow-[0_0_15px_rgba(255,0,228,0.7)]
+                focus:outline-none
                 animate-fade-up animate-duration-700 animate-delay-[1200ms] animate-ease-linear">
-                <span class="relative z-10">${t("home.playAI")}</span>
+                <span class="relative z-10 drop-shadow-[0_0_5px_#ff00e4]">${t("home.playAI")}</span>
               </button>
-              <button id="local-btn" class="group relative text-lg rounded-lg text-white flex justify-center items-center bg-pongblue px-6 py-3 
+              <button id="local-btn" class="group relative text-lg rounded-lg text-white flex justify-center items-center bg-black border-2 border-pongcyan px-6 py-3 
                 transition-all duration-300 ease-in-out
-                hover:bg-pongblue/90 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]
-                focus:outline-none focus:ring-2 focus:ring-pongblue focus:ring-offset-2
+                hover:text-pongcyan hover:shadow-[0_0_15px_rgba(0,247,255,0.7)]
+                focus:outline-none
                 animate-fade-up animate-duration-700 animate-delay-[1400ms] animate-ease-linear">
-                <span class="relative z-10">${t("home.playLocaly")}</span>
+                <span class="relative z-10 drop-shadow-[0_0_5px_#00f7ff]">${t("home.playLocaly")}</span>
               </button>
               `}
-
             </div>
           </div>
         </div>
@@ -95,7 +94,7 @@ export default {
       container.appendChild(overlay);
       container.classList.add('overflow-hidden', 'pointer-events-none', 'items-center', 'justify-center');  
       const loadingContainer = document.createElement('div');
-      loadingContainer.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[60] bg-white rounded-lg shadow-pongblue shadow-lg p-4 z-60';
+      loadingContainer.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[60] bg-black border-2 border-pongcyan rounded-lg shadow-[0_0_15px_rgba(0,247,255,0.6)] p-4 z-60';
       loadingContainer.appendChild(PongLoading({text: "Signing you in..."}));
       container.appendChild(loadingContainer);
     }

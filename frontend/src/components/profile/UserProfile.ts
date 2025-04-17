@@ -186,7 +186,7 @@ export const Profile = createComponent((props: ProfileProps) => {
               
               <!-- Buttons (initially hidden) -->
               <div id="friendship-buttons" class="flex gap-2 w-full">
-                <button id="message-user" class="max-sm:flex-1 bg-pongblue text-white text-nowrap max-sm:text-sm px-2 sm:px-4 py-1 rounded hover:bg-blue-700 transition-colors">
+                <button id="message-user" class="max-sm:flex-1 bg-pongcyan text-white text-nowrap max-sm:text-sm px-2 sm:px-4 py-1 rounded hover:bg-blue-700 transition-colors">
                   <i class="fas fa-envelope min-[401px]:mr-1"></i>
                   <span class="max-[402px]:hidden">${t("profile.message")}</span>
                 </button>
