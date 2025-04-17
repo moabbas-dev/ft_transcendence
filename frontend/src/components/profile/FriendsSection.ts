@@ -21,10 +21,10 @@ const Friend = createComponent((props: FriendProps) => {
       <span class="text-sm text-gray-500">${props.status}</span>
     </div>
     <div class="flex flex-1 justify-end gap-2">
-      <button class="size-[32px] p-1.5 grid place-content-center bg-pongblue text-white rounded-full hover:opacity-80 chat-button">
+      <button class="size-[32px] p-1.5 grid place-content-center bg-pongcyan text-white rounded-full hover:opacity-80 chat-button">
         <i class="fa-regular fa-comment-dots"></i>
       </button>
-      <button class="size-[32px] p-1.5 grid place-content-center bg-pongblue rounded-full hover:bg-gray-200 remove-friend-button">
+      <button class="size-[32px] p-1.5 grid place-content-center bg-pongcyan rounded-full hover:bg-gray-200 remove-friend-button">
         <i class="fas fa-times text-2xl cursor-pointer text-red-600"></i>
       </button>
     </div>
@@ -49,7 +49,7 @@ export const FriendsSection = createComponent(() => {
   const section = document.createElement('div');
   section.className = "flex flex-col gap-4";
   section.innerHTML = `
-    <div id="search-container" class="flex items-center gap-4 px-4 rounded-lg bg-gray-200 focus-within:bg-gray-100 focus-within:shadow-sm focus-within:shadow-pongblue focus-within:border focus-within:border-pongblue">
+    <div id="search-container" class="flex items-center gap-4 px-4 rounded-lg bg-gray-200 focus-within:bg-gray-100 focus-within:shadow-sm focus-within:shadow-pongcyan focus-within:border focus-within:border-pongcyan">
       <i class="fa-solid fa-magnifying-glass"></i>
       <input 
         id="friends-search"

@@ -6,146 +6,82 @@ import { Footer } from "../components/header_footer/footer.js";
 
 export default {
   render: async (container: HTMLElement) => {
+    container.className = 'flex flex-col h-dvh';
     container.innerHTML = `
     <div class="profile"></div>
-    <div class="header bg-pongblue w-full h-fit"></div>
-    <div class="content relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 h-[calc(100vh-56px-68px)] sm:h-[calc(100vh-136px)]">
-        <canvas id="pongCanvas" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 sm:translate-x-0 sm:translate-y-0 sm:top-0 sm:left-0 z-0 w-full h-[inherit] opacity-30 inset-0 rotate-90 origin-center sm:rotate-0"></canvas>
+    <div class="header z-50 w-full bg-black"></div>
+    
+    <div class="content flex-1 relative overflow-hidden bg-black">
+        <canvas id="pongCanvas" class="absolute left-0 top-0 w-full h-full opacity-30 z-0"></canvas>
         
-        <!-- Particle effects overlay -->
-        <div class="absolute inset-0 z-5 pointer-events-none"></div>
+        <!-- Neon glow effects -->
+        <div class="absolute inset-0 bg-gradient-to-br from-transparent via-pongcyan/5 to-transparent opacity-20 z-5 pointer-events-none"></div>
         
-        <div class="game-options relative z-10 container mx-auto max-sm:px-4 flex flex-col gap-5 sm:gap-8 md:gap-10 h-full w-full items-center justify-center">
-            <h1 class="text-4xl md:text-6xl font-bold text-center text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] animate-fade-down animate-once">
+        <div class="game-options relative z-10 container mx-auto px-4 flex flex-col gap-8 h-full w-full items-center justify-center">
+            <h1 class="text-4xl md:text-6xl font-bold text-center text-pongcyan drop-shadow-[0_0_15px_#00f7ff] animate-fade-down animate-once animate-duration-700">
                 ${t("play.title")}
             </h1>
             
-            <div class="grid grid-cols-2 gap-4 md:gap-8 max-w-4xl mx-auto">
-                <button class="game-mode-btn max-[350px]:size-[120px] max-sm:size-[150px] max-sm:justify-center p-3 sm:p-8 border-none rounded-2xl group bg-gradient-to-br from-pongblue to-[rgba(100,100,255,0.8)] hover:from-[rgba(100,100,255,0.9)] hover:to-pongblue text-white flex max-sm:flex-col items-center gap-3 sm:gap-6 cursor-pointer transition-all duration-300 ease-in-out transform hover:-translate-y-1 shadow-lg hover:shadow-[0_8px_24px_rgba(66,153,225,0.4)] active:translate-y-0 active:shadow-inner animate-fade-up animate-once backdrop-blur-sm" data-route="/play/local-ai">
-                    <span class="group-hover:scale-[1.2] max-[350px]:text-[2rem] text-[2.5rem] transition-transform duration-300 ease-in-out">
-                      <i class="fa-solid fa-robot drop-shadow-[0_5px_rgba(0,0,0,0.5)] group-hover:drop-shadow-[0_8px_10px_rgba(66,153,225,0.6)]"></i>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto w-full">
+                <!-- VS AI Button -->
+                <button class="game-mode-btn p-6 border-2 border-pongcyan rounded-xl group bg-black hover:bg-black/80 text-white flex items-center gap-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-[1.02] shadow-[0_0_15px_rgba(0,247,255,0.4)] hover:shadow-[0_0_25px_rgba(0,247,255,0.6)] animate-fade-right animate-once animate-duration-700" data-route="/play/local-ai">
+                    <span class="group-hover:scale-110 text-3xl transition-transform duration-300 ease-in-out text-pongcyan drop-shadow-[0_0_10px_#00f7ff]">
+                      <i class="fa-solid fa-robot"></i>
                     </span>
-                    <div class="flex flex-col gap-1 text-center sm:text-left">
-                        <h2 class="max-[350px]:text-lg text-2xl font-bold sm:text-start">${t('play.vsAI')}</h2>
-                        <p class="hidden sm:block text-[0.9rem] opacity-90 sm:text-start">${t('play.vsAIInfo')}</p>
+                    <div class="flex flex-col gap-1">
+                        <h2 class="text-xl font-bold text-pongcyan drop-shadow-[0_0_5px_#00f7ff] group-hover:text-white group-hover:drop-shadow-[0_0_10px_#00f7ff]">${t('play.vsAI')}</h2>
+                        <p class="text-sm opacity-90">${t('play.vsAIInfo')}</p>
                     </div>
                 </button>
                 
-                <button class="game-mode-btn max-[350px]:size-[120px] max-sm:size-[150px] max-sm:justify-center p-3 sm:p-8 border-none rounded-2xl group bg-gradient-to-br from-pongblue to-[rgba(100,100,255,0.8)] hover:from-[rgba(100,100,255,0.9)] hover:to-pongblue text-white flex max-sm:flex-col items-center gap-3 sm:gap-6 cursor-pointer transition-all duration-300 ease-in-out transform hover:-translate-y-1 shadow-lg hover:shadow-[0_8px_24px_rgba(66,153,225,0.4)] active:translate-y-0 active:shadow-inner animate-fade-up animate-once animate-delay-100 backdrop-blur-sm" data-route="/play/local-multi">
-                    <span class="group-hover:scale-[1.2] max-[350px]:text-[2rem] text-[2.5rem] transition-transform duration-300 ease-in-out">
-                      <i class="fa-solid fa-user-group drop-shadow-[0_5px_rgba(0,0,0,0.5)] group-hover:drop-shadow-[0_8px_10px_rgba(66,153,225,0.6)]"></i>
+                <!-- Local Multiplayer Button -->
+                <button class="game-mode-btn p-6 border-2 border-pongcyan rounded-xl group bg-black hover:bg-black/80 text-white flex items-center gap-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-[1.02] shadow-[0_0_15px_rgba(0,247,255,0.4)] hover:shadow-[0_0_25px_rgba(0,247,255,0.6)] animate-fade-left animate-once animate-duration-700 animate-delay-100" data-route="/play/local-multi">
+                    <span class="group-hover:scale-110 text-3xl transition-transform duration-300 ease-in-out text-pongcyan drop-shadow-[0_0_10px_#00f7ff]">
+                      <i class="fa-solid fa-user-group"></i>
                     </span>
-                    <div class="flex flex-col gap-1 text-center sm:text-left">
-                        <h2 class="max-[350px]:text-lg text-2xl font-bold sm:text-start">${t('play.localPlayer')}</h2>
-                        <p class="hidden sm:block text-[0.9rem] opacity-90 sm:text-start">${t('play.localPlayerInfo')}</p>
+                    <div class="flex flex-col gap-1">
+                        <h2 class="text-xl font-bold text-pongcyan drop-shadow-[0_0_5px_#00f7ff] group-hover:text-white group-hover:drop-shadow-[0_0_10px_#00f7ff]">${t('play.localPlayer')}</h2>
+                        <p class="text-sm opacity-90">${t('play.localPlayerInfo')}</p>
                     </div>
                 </button>
                 
-                <button class="game-mode-btn max-[350px]:size-[120px] max-sm:size-[150px] max-sm:justify-center p-3 sm:p-8 border-none rounded-2xl group bg-gradient-to-br from-pongblue to-[rgba(100,100,255,0.8)] hover:from-[rgba(100,100,255,0.9)] hover:to-pongblue text-white flex max-sm:flex-col items-center gap-3 sm:gap-6 cursor-pointer transition-all duration-300 ease-in-out transform hover:-translate-y-1 shadow-lg hover:shadow-[0_8px_24px_rgba(66,153,225,0.4)] active:translate-y-0 active:shadow-inner animate-fade-up animate-once animate-delay-200 backdrop-blur-sm" data-route="/play/tournaments">
-                    <span class="group-hover:scale-[1.2] max-[350px]:text-[2rem] text-[2.5rem] transition-transform duration-300 ease-in-out">
-                      <i class="fa-solid fa-trophy drop-shadow-[0_5px_rgba(0,0,0,0.5)] group-hover:drop-shadow-[0_8px_10px_rgba(66,153,225,0.6)]"></i>
+                <!-- Tournament Button -->
+                <button class="game-mode-btn p-6 border-2 border-pongpink rounded-xl group bg-black hover:bg-black/80 text-white flex items-center gap-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-[1.02] shadow-[0_0_15px_rgba(255,0,228,0.4)] hover:shadow-[0_0_25px_rgba(255,0,228,0.6)] animate-fade-right animate-once animate-duration-700 animate-delay-200" data-route="/play/tournaments">
+                    <span class="group-hover:scale-110 text-3xl transition-transform duration-300 ease-in-out text-pongpink drop-shadow-[0_0_10px_#ff00e4]">
+                      <i class="fa-solid fa-trophy"></i>
                     </span>
-                    <div class="flex flex-col gap-1 text-center sm:text-left">
-                        <h2 class="max-[350px]:text-lg text-2xl font-bold sm:text-start">${t('play.tournament')}</h2>
-                        <p class="hidden sm:block text-[0.9rem] opacity-90 sm:text-start">${t('play.tournamentInfo')}</p>
+                    <div class="flex flex-col gap-1">
+                        <h2 class="text-xl font-bold text-pongpink drop-shadow-[0_0_5px_#ff00e4] group-hover:text-white group-hover:drop-shadow-[0_0_10px_#ff00e4]">${t('play.tournament')}</h2>
+                        <p class="text-sm opacity-90">${t('play.tournamentInfo')}</p>
                     </div>
                 </button>
                 
-                <button id="online-multiplayer" class="game-mode-btn max-[350px]:size-[120px] max-sm:size-[150px] max-sm:justify-center p-3 sm:p-8 border-none rounded-2xl group bg-gradient-to-br from-pongblue to-[rgba(100,100,255,0.8)] hover:from-[rgba(100,100,255,0.9)] hover:to-pongblue text-white flex max-sm:flex-col items-center gap-3 sm:gap-6 cursor-pointer transition-all duration-300 ease-in-out transform hover:-translate-y-1 shadow-lg hover:shadow-[0_8px_24px_rgba(66,153,225,0.4)] active:translate-y-0 active:shadow-inner animate-fade-up animate-once animate-delay-300 backdrop-blur-sm">
-                    <span class="group-hover:scale-[1.2] max-[350px]:text-[2rem] text-[2.5rem] transition-transform duration-300 ease-in-out">
-                      <i class="fa-solid fa-globe drop-shadow-[0_5px_rgba(0,0,0,0.5)] group-hover:drop-shadow-[0_8px_10px_rgba(66,153,225,0.6)]"></i>
+                <!-- Online Multiplayer Button -->
+                <button id="online-multiplayer" class="game-mode-btn p-6 border-2 border-pongpink rounded-xl group bg-black hover:bg-black/80 text-white flex items-center gap-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-[1.02] shadow-[0_0_15px_rgba(255,0,228,0.4)] hover:shadow-[0_0_25px_rgba(255,0,228,0.6)] animate-fade-left animate-once animate-duration-700 animate-delay-300">
+                    <span class="group-hover:scale-110 text-3xl transition-transform duration-300 ease-in-out text-pongpink drop-shadow-[0_0_10px_#ff00e4]">
+                      <i class="fa-solid fa-globe"></i>
                     </span>
-                    <div class="flex flex-col gap-1 text-center sm:text-left">
-                        <h2 class="max-[350px]:text-lg text-2xl font-bold sm:text-start">${t('play.online')}</h2>
-                        <p class="hidden sm:block text-[0.9rem] opacity-90 sm:text-start">${t('play.onlineInfo')}</p>
+                    <div class="flex flex-col gap-1">
+                        <h2 class="text-xl font-bold text-pongpink drop-shadow-[0_0_5px_#ff00e4] group-hover:text-white group-hover:drop-shadow-[0_0_10px_#ff00e4]">${t('play.online')}</h2>
+                        <p class="text-sm opacity-90">${t('play.onlineInfo')}</p>
                     </div>
                 </button>
             </div>
         </div>
     </div>
+    
     <div class="footer"></div>
-`;
+    `;
 
-    // if (localStorage.getItem("googleAuth") && localStorage.getItem("googleAuth") === "true") {
-    //   try {
-    //     const googleData = await axios.get("http://localhost:8001/auth/google/signIn", {
-    //       withCredentials: true,
-    //     });
-    //     const decodedToken: any = jwtDecode(googleData.data.accessToken);
-    //     store.update("accessToken", googleData.data.accessToken);
-    //     store.update("refreshToken", googleData.data.refreshToken);
-    //     store.update("sessionId", googleData.data.sessionId);
-    //     store.update("userId", decodedToken.userId);
-    //     store.update("email", decodedToken.email);
-    //     store.update("nickname", decodedToken.nickname);
-    //     store.update("fullName", decodedToken.fullName);
-    //     store.update("age", decodedToken.age);
-    //     store.update("country", decodedToken.country);
-    //     store.update("createdAt", decodedToken.createdAt);
-    //     store.update("avatarUrl", decodedToken.avatarUrl);
-    //     store.update("isLoggedIn", true);
-    //     Toast.show(`Login successful, Welcome ${store.fullName}!`, "success");
-    //     localStorage.removeItem("googleAuth");
-    //   } catch (error: any) {
-    //     localStorage.removeItem("googleAuth");
-    //     if (error.response) {
-    //       if (error.response.status === 401) {
-    //         if (error.response.data.key !== "cookie")
-    //           Toast.show(`Error: ${error.response.data.message}`, "error");
-    //       }
-    //       else if (error.response.status === 500)
-    //         Toast.show(`Server error: ${error.response.data.error}`, "error");
-    //       else
-    //         Toast.show(`Unexpected error: ${error.response}`, "error");
-    //     } else if (error.request)
-    //       Toast.show(`No response from server: ${error.request}`, "error");
-    //     else
-    //       Toast.show(`Error setting up the request: ${error.message}`, "error");
-    //   }
-    // }
-    // if (params?.uuid) {
-    //   try {
-    //     const data = await axios.get(`http://localhost:8001/auth/google/signIn/${params.uuid}`);
-    //     const decodedToken: any = jwtDecode(data.data.accessToken);
-    //     store.update("accessToken", data.data.accessToken);
-    //     store.update("refreshToken", data.data.refreshToken);
-    //     store.update("sessionUUID", data.data.sessUUID);
-    //     store.update("userId", decodedToken.userId);
-    //     store.update("email", decodedToken.email);
-    //     store.update("nickname", decodedToken.nickname);
-    //     store.update("fullName", decodedToken.fullName);
-    //     store.update("age", decodedToken.age);
-    //     store.update("country", decodedToken.country);
-    //     store.update("createdAt", decodedToken.createdAt);
-    //     store.update("avatarUrl", decodedToken.avatarUrl);
-    //     store.update("isLoggedIn", true);
-    //     Toast.show(`Login successful, Welcome ${decodedToken.fullName}!`, "success");
-    //     return navigate("/play");
-    //   } catch (error: any) {
-    //     if (error.response) {
-    //       if (error.response.status === 401) {
-    //         if (error.response.data.key !== "cookie")
-    //           Toast.show(`Error: ${error.response.data.message}`, "error");
-    //       }
-    //       else if (error.response.status === 500)
-    //         Toast.show(`Server error: ${error.response.data.error}`, "error");
-    //       else
-    //         Toast.show(`Unexpected error: ${error.response}`, "error");
-    //     } else if (error.request)
-    //       Toast.show(`No response from server: ${error.request}`, "error");
-    //     else
-    //       Toast.show(`Error setting up the request: ${error.message}`, "error");
-    //   }
-    // }
-    //header
-    const headerNav = container.querySelector(".header");
+    // Add header component
+    const headerContainer = container.querySelector(".header");
     const header = Header();
-    headerNav?.appendChild(header);
+    headerContainer?.appendChild(header);
 
-    //footer
-    const footer = container.querySelector(".footer")!;
+    // Add footer component
+    const footerContainer = container.querySelector(".footer");
     const footerComp = Footer();
-    footer.appendChild(footerComp);
+    footerContainer?.appendChild(footerComp);
 
     // Add button interactions
     document.querySelectorAll(".game-mode-btn").forEach((button) => {
@@ -156,10 +92,13 @@ export default {
       });
     });
 
+    // Online multiplayer button handler
     const onlineMuliplayerBtn = container.querySelector('#online-multiplayer')!
     onlineMuliplayerBtn.addEventListener('click', () => {
       navigate('/play/online-game')
-    })
+    });
+
+    // Initialize Pong animation
     const canvas = document.getElementById("pongCanvas") as HTMLCanvasElement;
     if (canvas) {
       new PongAnimation(canvas);

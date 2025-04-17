@@ -52,7 +52,7 @@ const createTables = () => {
 					token_type TEXT NOT NULL CHECK (token_type IN ('account_activation', 'reset_password')),
 					expires_at TIMESTAMP NOT NULL DEFAULT (DATETIME('now', '+24 hours')),
 					created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-					FOREIGN KEY (user_id) REFERENCES Users(id),
+					FOREIGN KEY (user_id) REFERENCES Users(id)
 				);`
 	];
 	queries.forEach((query) => {

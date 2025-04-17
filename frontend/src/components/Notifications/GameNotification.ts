@@ -19,7 +19,7 @@ export const GameChallengeNotification = createComponent((props: NotificationPro
         
     notification.innerHTML = `
         <div class="flex justify-between items-center">
-            <span id="sender-name" class="text-lg font-bold text-pongblue cursor-pointer hover:opacity-90 hover:underline">Loading...</span>
+            <span id="sender-name" class="text-lg font-bold text-pongcyan cursor-pointer hover:opacity-90 hover:underline">Loading...</span>
             <div class="flex items-center gap-2">
                 ${!props.is_read? '<div class="size-1.5 bg-red-600 rounded-full"></div>' : ''}
                 <span class="text-sm text-gray-600">${formatDistanceToNow(props.created_at, { addSuffix: false })}</span>

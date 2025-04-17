@@ -39,29 +39,29 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
               <div class="flex-1 min-w-[250px]">
                 <label class="block font-semibold">${t('profile.infoTab.fullname')}</label>
                 <input id="fullName" type="text" class="border border-gray-300 p-1 w-full
-                 rounded-md focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue" placeholder="Full name" id="fullName" value="Loading...">
+                 rounded-md focus:shadow-[0_0_5px] focus:shadow-pongcyan focus:outline-none focus:ring-1 focus:ring-pongcyan focus:border-pongcyan" placeholder="Full name" id="fullName" value="Loading...">
               </div>
               <div class="flex-1 min-w-[250px]">
                 <label class="block font-semibold">Nickname</label>
                 <input id="nickname-value" type="text" class="border border-gray-300 p-1 w-full
-                rounded-md focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue" value="Loading...">
+                rounded-md focus:shadow-[0_0_5px] focus:shadow-pongcyan focus:outline-none focus:ring-1 focus:ring-pongcyan focus:border-pongcyan" value="Loading...">
               </div>
               <div class="flex-1 min-w-[250px]">
                 <label class="block font-semibold">${t('profile.infoTab.age')}</label>
                 <input type="text" class="border border-gray-300 p-1 w-full
-                rounded-md focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue" placeholder="Age" value="Loading...">
+                rounded-md focus:shadow-[0_0_5px] focus:shadow-pongcyan focus:outline-none focus:ring-1 focus:ring-pongcyan focus:border-pongcyan" placeholder="Age" value="Loading...">
               </div>
               <div class="flex-1 min-w-[250px]">
                 <label class="block font-semibold">${t('profile.infoTab.country')}</label>
                 <select id="country-select" name="country" 
-                class="w-full p-1 border cursor-pointer border-gray-300 rounded-md focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue appearance-none bg-white">
+                class="w-full p-1 border cursor-pointer border-gray-300 rounded-md focus:shadow-[0_0_5px] focus:shadow-pongcyan focus:outline-none focus:ring-1 focus:ring-pongcyan focus:border-pongcyan appearance-none bg-white">
                   <option value="" disabled selected>Loding...</option>
                 </select>
               </div>
               <div class="flex-1 min-w-[250px]">
                 <label class="block font-semibold">Email:</label>
                 <input type="text" class="border border-gray-300 p-1 w-full
-                rounded-md focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue" placeholder="Email" value="Loading...">
+                rounded-md focus:shadow-[0_0_5px] focus:shadow-pongcyan focus:outline-none focus:ring-1 focus:ring-pongcyan focus:border-pongcyan" placeholder="Email" value="Loading...">
               </div>
             </div>
             <div class="flex-1 min-w-[250px] border-b-2">
@@ -83,7 +83,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
                         after:content-[''] after:absolute after:top-0.5 after:left-[2px] 
                       after:bg-white after:border-gray-300 after:border 
                         after:rounded-full after:h-5 after:w-5 after:transition-all
-                      peer-checked:bg-pongblue">
+                      peer-checked:bg-pongcyan">
                       </div>
                     </label>
               </div>
@@ -113,7 +113,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
 					                  <input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
 				                  </div>
                           <!--
-                          <button id="validateCodeBtn" class="bg-pongblue text-white px-4 py-1 rounded hover:bg-blue-700 transition-colors">
+                          <button id="validateCodeBtn" class="bg-pongcyan text-white px-4 py-1 rounded hover:bg-blue-700 transition-colors">
                                ${t('profile.infoTab.generateNewQrcode')}
                           </button>
                           -->
@@ -124,7 +124,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
         </div>
         <!-- Save Button on the right side -->
         <div id="saveButtonContainer" class="flex justify-end">
-            <button type="submit" id="save-btn" class="bg-pongblue p-1 w-40 text-white hover:opacity-80 transition-all">${t('profile.infoTab.saveBtn')}</button>
+            <button type="submit" id="save-btn" class="bg-pongcyan p-1 w-40 text-white hover:opacity-80 transition-all">${t('profile.infoTab.saveBtn')}</button>
         </div>
         </div>            
     </div>`
@@ -196,7 +196,8 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
   const twoFactorToggle = container.querySelector(
     "#twoFactorToggle"
   ) as HTMLInputElement;
-  twoFactorToggle.checked = store.is2faEnabled;
+  if (twoFactorToggle)
+    twoFactorToggle.checked = store.is2faEnabled;
   const qrCodeContainer = container.querySelector("#qrCodeContainer");
   const qrCodeImage = container.querySelector("#qrCodeImage") as HTMLDivElement;
 

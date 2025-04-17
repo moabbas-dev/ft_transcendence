@@ -12,7 +12,7 @@ export const TwoFactorSend = createComponent(() => {
 	form.innerHTML = `
 		<div class="flex flex-col gap-3">
 			<div class="flex flex-col gap-2">
-				<h1 class="text-2xl sm:text-3xl font-bold text-center text-pongblue">${t("register.twoFactor.title")}</h1>
+				<h1 class="text-2xl sm:text-3xl font-bold text-center text-pongcyan">${t("register.twoFactor.title")}</h1>
 				<p class="text-center">${t("register.twoFactor.info")}</p>
 			</div>
 			<form class="flex flex-col gap-4">
@@ -24,7 +24,7 @@ export const TwoFactorSend = createComponent(() => {
 					<input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
 					<input type="text" class="size-8 sm:size-10 border-2 border-ponghover text-center rounded-lg text-pongdark text-2xl" maxlength="1" autocomplete="off" inputmode="numeric"/>
 				</div>
-				<a id="back-signIn" class="text-center text-pongblue hover:underline cursor-pointer text-sm sm:text-base">
+				<a id="back-signIn" class="text-center text-pongcyan hover:underline cursor-pointer text-sm sm:text-base">
 					${t("register.twoFactor.back")}
 				</a>
 			</form>

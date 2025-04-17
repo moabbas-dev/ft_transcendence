@@ -32,7 +32,7 @@ const BlockedUser = createComponent((props: BlockedUserProps) => {
       <span class="text-sm text-gray-500">Blocked on ${props.blockedOn}</span>
     </div>
     <div class="flex flex-1 justify-end gap-2">
-      <button id="unblock-${props.id}" class="px-3 py-1 bg-pongblue text-white text-sm rounded hover:bg-opacity-80">
+      <button id="unblock-${props.id}" class="px-3 py-1 bg-pongcyan text-white text-sm rounded hover:bg-opacity-80">
         Unblock
       </button>
     </div>

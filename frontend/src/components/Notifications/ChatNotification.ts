@@ -20,7 +20,7 @@ export const ChatNotification = createComponent((props: NotificationProps) => {
 	notification.innerHTML = `
 		<div class="flex justify-between items-center">
 			<span>
-				<span id="sender-name" class="text-lg font-bold text-pongblue hover:underline cursor-pointer">Loading...</span>
+				<span id="sender-name" class="text-lg font-bold text-pongcyan hover:underline cursor-pointer">Loading...</span>
 				<span>Messages you!</span>
 			</span>
 			<div class="flex items-center gap-2">

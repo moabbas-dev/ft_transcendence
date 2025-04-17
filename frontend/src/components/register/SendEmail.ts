@@ -14,7 +14,7 @@ export const SendEmail = createComponent((props: SendEmailProps) => {
 	form.innerHTML = `
 		<div class="flex flex-col gap-3">
 			<div class="flex flex-col gap-2">
-				<h1 class="text-2xl sm:text-3xl font-bold text-center text-pongblue">${t('register.sendEmail.resetPass')}</h1>
+				<h1 class="text-2xl sm:text-3xl font-bold text-center text-pongcyan">${t('register.sendEmail.resetPass')}</h1>
 				<p class="text-center">${t('register.sendEmail.info')}</p>
 			</div>
 			<form class="flex flex-col gap-2">
@@ -24,12 +24,12 @@ export const SendEmail = createComponent((props: SendEmailProps) => {
 					<i class="bx bx-envelope text-lg"></i>
 					</span>
 					<input type="email" id="email" placeholder="${t('register.signup.emailPlaceholder')}" autocomplete="email" name="email" 
-					class="w-full pl-8 pr-2 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue">
+					class="w-full pl-8 pr-2 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongcyan focus:outline-none focus:ring-1 focus:ring-pongcyan focus:border-pongcyan">
 				</div>
 			</form>
 			<div class="w-full text-center">
-				<span class="signin-link hover:cursor-pointer hover:underline text-pongblue">${t('register.sendEmail.backToSignin')} </span>|
-				<span class="resend-email hover:cursor-pointer hover:underline text-pongblue"> ${t('register.sendEmail.resendEmail')}</span>
+				<span class="signin-link hover:cursor-pointer hover:underline text-pongcyan">${t('register.sendEmail.backToSignin')} </span>|
+				<span class="resend-email hover:cursor-pointer hover:underline text-pongcyan"> ${t('register.sendEmail.resendEmail')}</span>
 			</div>
 		</div>
 	`;
