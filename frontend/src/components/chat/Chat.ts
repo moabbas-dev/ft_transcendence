@@ -1,7 +1,7 @@
 import store from "../../../store/store.js";
 import { createComponent } from "../../utils/StateManager.js";
 import chatService from "../../utils/chatUtils/chatWebSocketService.js";
-import bgImage from "../../assets/bg1.png";
+import bgImage from "../../assets/bg3.jpg";
 import bgImage2 from "../../assets/background1.gif"
 import { emoticons, emoticonsMap } from "./emoticons.js";
 import { Profile } from "../profile/UserProfile.js";
@@ -28,7 +28,7 @@ export const Chat = createComponent(
     const renderChat = () => {
       container.innerHTML = `
             <div class="flex flex-col bg-black bg-custom-gradient justify-between h-screen z-20 gap-2 bg-cover bg-center" style="background-image: ${activeUser ? `url(${bgImage})` : `url(${bgImage2})` }">
-                <header class="flex h-fit items-center justify-between py-3 px-2 bg-pongdark border-b-2 border-pongcyan shadow-[0_0_15px_rgba(0,247,255,0.3)]">
+                <header class="flex h-fit items-center justify-between py-3 px-2 bg-[#202c33] shadow-[0_0_15px_rgba(0,247,255,0.3)]">
                     <div class="flex">
                         <div class="back_arrow sm:hidden text-pongcyan text-3xl flex items-center justify-center hover:cursor-pointer hover:opacity-80">
                             <i class='bx bx-left-arrow-alt'></i>
@@ -62,7 +62,7 @@ export const Chat = createComponent(
                 </section>
                 ${
                   activeUser
-                    ? `<div class="message-input-container flex items-center h-fit bg-black border-t-2 border-pongcyan shadow-[0_0_15px_rgba(0,247,255,0.3)] gap-2 w-full px-3">
+                    ? `<div class="message-input-container flex items-center h-fit bg-[#202c33] border-t-2 border-pongcyan shadow-[0_0_15px_rgba(0,247,255,0.3)] gap-2 w-full px-3">
                     <div class="flex items-center w-full px-2 py-2">
                         <div 
                             id="message-input" 
@@ -201,11 +201,11 @@ export const Chat = createComponent(
                           text-white [direction:ltr] min-w-0 text-[17px] text-left
                           ${
                             isCurrentUser
-                              ? "bg-black border border-pongcyan mr-1 shadow-[0_0_8px_rgba(0,247,255,0.3)]"
-                              : "bg-black border border-pongpink ml-1 shadow-[0_0_8px_rgba(255,0,228,0.3)]"
+                              ? "bg-[#202c33] mr-1 shadow-[0_0_8px_rgba(0,247,255,0.3)]"
+                              : "bg-[#005c4b] ml-1 shadow-[0_0_8px_rgba(255,0,228,0.3)]"
                           }
                       ">
-                          <div class="message-content break-words ${isCurrentUser ? "text-pongcyan" : "text-pongpink"}">
+                          <div class="message-content break-words text-white">
                               ${formatMessageContent(message.content)}
                           </div>
                           <span class="text-xs text-gray-400">${messageTime}</span>

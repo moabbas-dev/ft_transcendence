@@ -10,7 +10,7 @@ export default {
   render: async (container: HTMLElement) => {
     container.innerHTML = `
       <div class="flex">
-        <div class="flex flex-col gap-4 w-screen sm:w-[30vw] sm:min-w-[300px] h-[100dvh] bg-pongdark relative">
+        <div class="flex flex-col gap-4 w-screen sm:w-[30vw] sm:min-w-[300px] h-[100dvh] bg-pongdark relative border-r-[2px] border-pongpink">
           <div class="flex gap-2 text-white px-4 pt-2 text-3xl 2xl:text-4xl items-center w-full relative">
             <div class="flex gap-2 text-white w-full text-3xl 2xl:text-4xl items-center justify-center">
             <div class="logo flex flex-col items-center text-center font-bold text-white text-3xl transition-all duration-300 hover:drop-shadow-[0_0_25px_#00f7ff]">
