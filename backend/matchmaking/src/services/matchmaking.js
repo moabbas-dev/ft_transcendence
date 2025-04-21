@@ -23,8 +23,8 @@ class MatchmakingService {
     //add a player looking for a match
     async addToQueue(playerId) {
         try {
-            const user = await this.getUserWithElo(playerId);
-            if (!user) throw new Error('[MATCHMAKING] User not found');
+            let user = await this.getUserWithElo(playerId);
+            if (!user) user = this.createNewUserRecord(playerId);
 
             this.removeFromQueue(playerId);
 
@@ -82,8 +82,8 @@ class MatchmakingService {
             this.removeFromQueue(opponent.playerId);
             // Create a match
             return this.createMatch(playerId, opponent.playerId, Match.ONLINE_MATCH);
-        } catch (err) { 
-            console.log("[MATCHMAKING] Error finding match:", err); 
+        } catch (err) {
+            console.log("[MATCHMAKING] Error finding match:", err);
             return null;
         }
     }
@@ -418,6 +418,22 @@ class MatchmakingService {
             console.error('Error fetching user:', error);
             throw error;
         }
+    }
+
+    // Create a user record when a new player registers
+    async createNewUserRecord(playerId) {
+        const sql = `
+          INSERT INTO players (id)
+          VALUES (?)
+          RETURNING *
+        `;
+        return await new Promise((resolve, reject) => {
+            db.run(sql, [playerId], (err, row) => {
+                if (err) return reject(err);
+                console.log(`[MATCHMAKING] Created new user record for player ${playerId}`);
+                resolve(row);
+            });
+        });
     }
 
     async getMatchById(matchId) {

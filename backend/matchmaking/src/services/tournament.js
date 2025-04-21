@@ -1,9 +1,9 @@
-const db = require('../config/db');
-const EloService = require('./elo');
+import db from '../config/db.js';
+import EloService from './elo.js';
 
 class TournamentService {
   constructor() {
-    this.eloService = new EloService();
+    this.eloService = EloService;
   }
 
   // Create a new tournament
@@ -459,4 +459,4 @@ class TournamentService {
   }
 }
 
-module.exports = new TournamentService();
+export default new TournamentService();
