@@ -1,7 +1,7 @@
 import store from "../../../store/store.js";
 import { createComponent } from "../../utils/StateManager.js";
 import chatService from "../../utils/chatUtils/chatWebSocketService.js";
-import bgImage from "../../assets/bg1.png";
+import bgImage from "../../assets/bg3.jpg";
 import bgImage2 from "../../assets/background1.gif"
 import { emoticons, emoticonsMap } from "./emoticons.js";
 import { Profile } from "../profile/UserProfile.js";
@@ -17,7 +17,7 @@ interface Message {
 
 export const Chat = createComponent(
   (props: {
-    activeUser?: { nickname: string; id: number; full_name: string };
+    activeUser?: { nickname: string; id: number; full_name: string, avatar_url: string };
   }) => {
     const container = document.createElement("div");
     let activeUser = props.activeUser;
@@ -27,21 +27,23 @@ export const Chat = createComponent(
     // Create the chat UI
     const renderChat = () => {
       container.innerHTML = `
-            <div class="flex flex-col bg-pongcyan bg-custom-gradient justify-between h-screen z-20 gap-2 bg-cover bg-center" style="background-image: ${activeUser ? `url(${bgImage})` : `url(${bgImage2})` }">
-                <header class="flex h-fit items-center justify-between py-3 px-2 bg-white">
+            <div class="flex flex-col bg-black bg-custom-gradient justify-between h-screen z-20 gap-2 bg-cover bg-center" style="background-image: ${activeUser ? `url(${bgImage})` : `url(${bgImage2})` }">
+                <header class="flex h-fit items-center justify-between py-3 px-2 bg-[#202c33] shadow-[0_0_15px_rgba(0,247,255,0.3)]">
                     <div class="flex">
-                        <div class="back_arrow sm:hidden text-black text-3xl flex items-center justify-center hover:cursor-pointer hover:opacity-80">
+                        <div class="back_arrow sm:hidden text-pongcyan text-3xl flex items-center justify-center hover:cursor-pointer hover:opacity-80">
                             <i class='bx bx-left-arrow-alt'></i>
                         </div>
-                        <div class="flex items-center justify-center gap-1 sm:gap-2"  id="friend_name">
-                            <div class="avatar h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-xl font-semibold text-gray-700">
-                              ${
-                                activeUser?.full_name?.charAt(0)?.toUpperCase() ||
-                                ""
+                        <div class="flex items-center z-10 justify-center gap-1 sm:gap-2"  id="friend_name">
+                                    
+                            <div class="avatar h-12 w-12 rounded-full bg-black border-2 ${activeUser ? 'border-pongcyan' : 'border-pongpink'} flex items-center justify-center text-xl font-semibold ${activeUser ? 'text-pongcyan' : 'text-pongpink'} ${activeUser ? 'shadow-[0_0_10px_rgba(0,247,255,0.4)]' : 'shadow-[0_0_10px_rgba(255,0,228,0.4)]'}">
+                              ${activeUser?.avatar_url ? 
+                              `<img src="${activeUser?.avatar_url}" class="h-11 w-11 rounded-full" alt="lol"/>` : 
+                              activeUser?.full_name?.charAt(0)?.toUpperCase() || "👀"
                               }
                             </div>
+
                             <div>
-                                <p  class="text-base sm:text-xl ${activeUser? "cursor-pointer hover:underline" : ""} ">${
+                                <p class="text-base sm:text-xl ${activeUser ? "cursor-pointer hover:underline text-pongcyan" : "text-pongpink"} ">${
                                   activeUser
                                     ? `${activeUser.full_name} - ${activeUser.nickname}`
                                     : t('chat.nochat')
@@ -60,13 +62,13 @@ export const Chat = createComponent(
                 </section>
                 ${
                   activeUser
-                    ? `<div class="message-input-container flex items-center h-fit bg-gray-800 gap-2 w-full  px-3">
-                    <div class="flex items-center w-full  px-2 py-2">
+                    ? `<div class="message-input-container flex items-center h-fit bg-[#202c33] border-t-2 border-pongcyan shadow-[0_0_15px_rgba(0,247,255,0.3)] gap-2 w-full px-3">
+                    <div class="flex items-center w-full px-2 py-2">
                         <div 
                             id="message-input" 
                             contenteditable="true"
                             role="textbox"
-                            class="border rounded-full lg:py-2 py-1 pl-4 [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-[#a0aec0] [&:empty]:before:pointer-events-none focus:outline-none bg-gray-800 text-lg text-white flex-1 max-h-[4.75rem] overflow-y-auto whitespace-pre-wrap [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-pongdark [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:my-2 "
+                            class="border border-pongcyan rounded-full lg:py-2 py-1 pl-4 [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-[#a0aec0] [&:empty]:before:pointer-events-none focus:outline-none bg-black text-lg text-pongcyan flex-1 max-h-[4.75rem] overflow-y-auto whitespace-pre-wrap [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-pongdark [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:my-2 shadow-[0_0_5px_rgba(0,247,255,0.2)]"
                             autocorrect="off"
                             autocapitalize="off"
                             spellcheck="false"
@@ -74,13 +76,13 @@ export const Chat = createComponent(
                         ></div>
                         <div 
                             id="emoticon-button" 
-                            class="flex items-center justify-center hover:cursor-pointer hover:opacity-80 max-sm:bg-slate-400 hover:bg-slate-400 rounded-full w-10 h-10 text-2xl text-white bg-gray-800 transition-all duration-300 mx-1"
+                            class="flex items-center justify-center hover:cursor-pointer hover:opacity-80 max-sm:bg-pongdark hover:bg-ponghover rounded-full w-10 h-10 text-2xl text-pongpink bg-black transition-all duration-300 mx-1 border border-pongpink shadow-[0_0_5px_rgba(255,0,228,0.3)]"
                         >
                             <i class='bx bx-smile'></i>
                         </div>
                         <div 
                             id="send-button" 
-                            class="flex items-center justify-center hover:cursor-pointer hover:opacity-80 max-sm:bg-slate-400 hover:bg-slate-400 rounded-full w-10 h-10 text-2xl text-white bg-gray-800 transition-all duration-300 -mr-2"
+                            class="flex items-center justify-center hover:cursor-pointer hover:opacity-80 max-sm:bg-pongdark hover:bg-ponghover rounded-full w-10 h-10 text-2xl text-pongcyan bg-black transition-all duration-300 -mr-2 border border-pongcyan shadow-[0_0_5px_rgba(0,247,255,0.3)]"
                         >
                             <i class='bx bx-send'></i>
                         </div>
@@ -88,7 +90,7 @@ export const Chat = createComponent(
                 </div>
                 
                 <!-- Add emoticon container popup that will be hidden by default -->
-                <div id="emoticon-container" class="fixed bottom-20 sm:bottom-20 left-4 right-8 sm:left-auto  sm:w-72 max-h-60 overflow-y-auto max-w-80 bg-black bg-opacity-55 rounded-lg shadow-lg p-2 z-30 grid grid-cols-5 gap-2 hidden">
+                <div id="emoticon-container" class="fixed bottom-20 sm:bottom-20 left-4 right-8 sm:left-auto sm:w-72 max-h-60 overflow-y-auto max-w-80 bg-black bg-opacity-95 rounded-lg shadow-[0_0_15px_rgba(255,0,228,0.5)] border border-pongpink p-2 z-30 grid grid-cols-5 gap-2 hidden">
                     <!-- Emoticons will be inserted here dynamically -->
                 </div>`
                     : ""
@@ -150,7 +152,7 @@ export const Chat = createComponent(
     // Render messages in the chat
     const renderMessages = () => {
       if (!messages.length && activeUser) {
-        return `<div class="text-black text-center py-4 opacity-50">No messages yet</div>`;
+        return `<div class="text-pongcyan text-center py-4 opacity-50">No messages yet</div>`;
       }
 
       const currentUserId = store.userId;
@@ -172,8 +174,8 @@ export const Chat = createComponent(
       return Object.entries(messagesByDate)
         .map(([date, dateMessages]) => {
           return `
-          <div class="flex justify-center items-center w-full bg-slate-500 bg-opacity-30 my-2 py-1 rounded-md">
-              <div class="date-header text-center bg-ponghover text-white rounded-md px-2 py-1">
+          <div class="flex justify-center items-center w-full bg-black bg-opacity-70 my-2 py-1 rounded-md border-t border-b border-pongcyan">
+              <div class="date-header text-center bg-ponghover text-pongcyan rounded-md px-2 py-1 shadow-[0_0_10px_rgba(0,247,255,0.3)]">
                   ${date}
               </div>
           </div>
@@ -199,11 +201,11 @@ export const Chat = createComponent(
                           text-white [direction:ltr] min-w-0 text-[17px] text-left
                           ${
                             isCurrentUser
-                              ? "bg-blue-900 mr-1"
-                              : "bg-pongdark ml-1"
+                              ? "bg-[#202c33] mr-1 shadow-[0_0_8px_rgba(0,247,255,0.3)]"
+                              : "bg-[#005c4b] ml-1 shadow-[0_0_8px_rgba(255,0,228,0.3)]"
                           }
                       ">
-                          <div class="message-content break-words">
+                          <div class="message-content break-words text-white">
                               ${formatMessageContent(message.content)}
                           </div>
                           <span class="text-xs text-gray-400">${messageTime}</span>
@@ -278,7 +280,7 @@ export const Chat = createComponent(
         emoticons.forEach((emo) => {
           const emoticonDiv = document.createElement("div");
           emoticonDiv.className =
-            "emoticon p-2 rounded cursor-pointer w-12 h-12";
+            "emoticon p-2 rounded cursor-pointer w-12 h-12 hover:bg-ponghover transition-all duration-200";
           emoticonDiv.title = emo.title;
           emoticonDiv.innerHTML = `<img src="${emo.src}" alt="${emo.title}" class="w-full h-auto">`;
 
@@ -380,8 +382,10 @@ export const Chat = createComponent(
       nickname: string;
       id: number;
       full_name: string;
+      avatar_url: string;
     }) => {
       activeUser = user;
+      console.log(activeUser);
     
       // Create room ID (combination of both usernames sorted alphabetically)
       const currentUserId = store.userId;

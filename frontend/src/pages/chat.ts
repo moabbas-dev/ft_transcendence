@@ -10,52 +10,55 @@ export default {
   render: async (container: HTMLElement) => {
     container.innerHTML = `
       <div class="flex">
-        <div class="flex flex-col gap-4 w-screen sm:w-[30vw] sm:min-w-[300px] h-[100dvh] bg-pongdark relative">
+        <div class="flex flex-col gap-4 w-screen sm:w-[30vw] sm:min-w-[300px] h-[100dvh] bg-pongdark relative border-r-[2px] border-pongpink">
           <div class="flex gap-2 text-white px-4 pt-2 text-3xl 2xl:text-4xl items-center w-full relative">
             <div class="flex gap-2 text-white w-full text-3xl 2xl:text-4xl items-center justify-center">
-              <div class="logo flex flex-col items-center text-center font-bold text-white text-3xl transition-all duration-300 hover:drop-shadow-[0_0_25px_#a855f7]">
-                <span class="text-purple-500 drop-shadow-[0_0_10px_#a855f7] transition-all duration-300 hover:drop-shadow-[0_0_20px_#a855f7]">
-                  ft_transcendence
-                </span>
-                <h1 class="text-gray-300 text-xl transition-all duration-300 hover:text-white">
-                  Neon Chat
-                </h1>
-              </div>
+            <div class="logo flex flex-col items-center text-center font-bold text-white text-3xl transition-all duration-300 hover:drop-shadow-[0_0_25px_#00f7ff]">
+              <span class="text-pongcyan drop-shadow-[0_0_10px_#00f7ff] transition-all duration-300 hover:drop-shadow-[0_0_20px_#ff00e4]">
+                ft_transcendence
+              </span>
+              <h1 class="text-pongpink text-xl transition-all duration-300 hover:text-white">
+                Neon Chat
+              </h1>
             </div>
+          </div>
             
-            <div class="absolute bottom-0 left-0 w-full h-[2px] bg-purple-500 shadow-[0_0_10px_#a855f7] transition-all duration-300 hover:shadow-[0_0_20px_#a855f7]"></div>
+            <div class="absolute bottom-0 left-0 w-full h-[2px] bg-pongpink shadow-[0_0_10px_#ff00e4] transition-all duration-300 hover:shadow-[0_0_20px_#ff00e4]"></div>
           </div>
 
           <!-- Toggle buttons for Friends and Message Requests -->
-          <div class="flex justify-center px-4 pb-2">
-            <div class="flex bg-ponghover rounded-lg p-1 w-full">
-              <button id="friends-tab" class="flex-1 text-white py-2 px-4 rounded-md bg-purple-500 text-center transition-all">
-                ${t('Friends')}
-              </button>
-              <button id="requests-tab" class="flex-1 text-white py-2 px-4 rounded-md text-center transition-all">
-                ${t('Message Requests')}
-              </button>
-            </div>
+        <div class="flex justify-center px-4 pb-2">
+          <div class="flex bg-black rounded-lg p-1 w-full border border-pongcyan shadow-[0_0_10px_rgba(0,247,255,0.3)]">
+            <button id="friends-tab" class="flex-1 text-white py-2 px-4 rounded-md bg-pongcyan text-center transition-all hover:bg-pongcyan">
+              ${t('Friends')}
+            </button>
+            <button id="requests-tab" class="flex-1 text-white py-2 px-4 rounded-md text-center transition-all hover:bg-pongpink">
+              ${t('Message Requests')}
+            </button>
           </div>
+        </div>
 
-          <!-- Friends List Container -->
-          <div id="friends-container" class="friends-list-container flex flex-col">
-            <div class="text-white px-4 pb-2 flex justify-between items-center">
-              <div class="loading-indicator hidden">
-                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              </div>
+        <!-- Friends List Container -->
+        <div id="friends-container" class="friends-list-container flex flex-col">
+          <div class="text-white px-4 pb-2 flex justify-between items-center">
+            <div class="loading-indicator hidden">
+              <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-pongcyan shadow-[0_0_10px_rgba(0,247,255,0.5)]"></div>
             </div>
-            <div id="friends-list-content"></div>
           </div>
+          <div id="friends-list-content" class="px-2 pb-2"></div>
+        </div>
 
           <!-- Message Requests Container (Hidden by default) -->
           <div id="requests-container" class="message-requests-container flex-col hidden">
             <div class="text-white px-4 pb-2 flex justify-between items-center">
               <div class="requests-loading-indicator hidden">
-                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                <div class="animate-spin rounded-full h-5 w-5 border-b-2  border-pongpink shadow-[0_0_10px_rgba(255,0,228,0.5)]"></div>
               </div>
             </div>
-            <div id="requests-list-content"></div>
+            <div id="requests-list-content" class="px-2 pb-2"></div>
+          </div>
+          <div class="mt-auto py-3 text-center text-xs text-gray-400 border-t border-ponghover/30">
+            <span class="transition-all duration-300 hover:text-pongpink">Neon Chat &copy; 2025</span>
           </div>
         </div>
 
@@ -86,6 +89,12 @@ export default {
     // Initialize WebSocket connection
     window.addEventListener("DOMContentLoaded", async () => {
       await initializeWebSocket();
+      // Load initial data after connection is established
+      await loadFriendsList();
+      // Only load message requests if that tab is active
+      if (!requestsContainer.classList.contains('hidden')) {
+        await loadMessageRequests();
+      }
     })
 
     // Get unread count function
@@ -133,22 +142,23 @@ export default {
     // Setup event handlers
     setupEventHandlers();
 
-    // Get friends list
+    // // Get friends list
     await loadFriendsList();
 
     // Set up tab switching
-    friendsTab.addEventListener("click", () => {
-      friendsTab.classList.add("bg-purple-500");
-      requestsTab.classList.remove("bg-purple-500");
+    friendsTab.addEventListener("click", async () => {
+      friendsTab.classList.add("bg-pongcyan");
+      requestsTab.classList.remove("bg-pongpink");
       friendsContainer.classList.remove("hidden");
       friendsContainer.classList.add("flex");
       requestsContainer.classList.add("hidden");
       requestsContainer.classList.remove("flex");
+      await loadFriendsList();
     });
 
-    requestsTab.addEventListener("click", () => {
-      requestsTab.classList.add("bg-purple-500");
-      friendsTab.classList.remove("bg-purple-500");
+    requestsTab.addEventListener("click", async () => {
+      requestsTab.classList.add("bg-pongpink");
+      friendsTab.classList.remove("bg-pongcyan");
       requestsContainer.classList.remove("hidden");
       requestsContainer.classList.add("flex");
       friendsContainer.classList.add("hidden");
@@ -274,22 +284,31 @@ export default {
         loadMessageRequests(); // Reload message requests
       });
     }
+
     // Load friends list
     async function loadFriendsList() {
       try {
         // Show loading indicator
         loadingIndicator.classList.remove("hidden");
-
-        // Request friends list from server
+    
+        // Make sure we're connected before attempting to send
+        if (!chatService.isConnected()) {
+          console.log("WebSocket not connected, attempting to reconnect...");
+          await initializeWebSocket();
+        }
+    
+        // Now we should be connected
         if (chatService.isConnected()) {
           chatService.send("friends:get", {
             userId: store.userId,
           });
-
+    
           // Request unread message counts
           chatService.send("messages:unread:get", {
             userId: store.userId
           });
+        } else {
+          throw new Error("Could not establish WebSocket connection");
         }
       } catch (error) {
         console.error("Error loading friends list:", error);
@@ -297,7 +316,6 @@ export default {
       } finally {
         loadingIndicator.classList.add("hidden");
       }
-
     }
 
     // Load message requests

@@ -6,6 +6,7 @@ interface User {
   id: number;
   full_name: string;
   status: string;
+  avatar_url: string;
 }
 
 interface RequestItem {
@@ -40,9 +41,9 @@ export const RequestsList = (props: RequestsListProps) => {
     searchBox.className = "search-box mb-4 px-4";
     searchBox.innerHTML = `
       <div class="relative">
-        <input type="text" class="w-full bg-ponghover text-white rounded-full py-2 px-4 pl-10 focus:outline-none drop-shadow-[1px_1px_1px_purple]" placeholder="Search requests...">
+        <input type="text" class="w-full bg-black text-pongcyan border border-pongcyan rounded-full py-2 px-4 pl-10 focus:outline-none drop-shadow-[2px_2px_2px_#00f7ff]" placeholder="Search requests...">
         <div class="absolute left-3 top-2.5 text-white">
-          <i class="fa-solid fa-search"></i>
+          <i class="fa-solid fa-search text-pongpink"></i>
         </div>
       </div>
     `;
@@ -59,6 +60,7 @@ export const RequestsList = (props: RequestsListProps) => {
       // Render online users
       onlineUsers.forEach((item) => {
         const user = item.user;
+        console.log(user);
         if (!user) return;
         
         const chatItemElement = ChatItem({
@@ -66,6 +68,7 @@ export const RequestsList = (props: RequestsListProps) => {
           userId: user.id,
           fullname: user.full_name,
           status: true,
+          avatar_url: user.avatar_url,
           unreadCount: props.getUnreadCount(user.id),
           onChatSelect: (user: any) => {
             props.onChatSelect(user);
@@ -96,6 +99,7 @@ export const RequestsList = (props: RequestsListProps) => {
           userId: user.id,
           fullname: user.full_name,
           status: false,
+          avatar_url: user.avatar_url,
           unreadCount: props.getUnreadCount(user.id),
           onChatSelect: (user: any) => {
             props.onChatSelect(user);
