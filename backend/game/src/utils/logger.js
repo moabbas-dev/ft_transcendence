@@ -1,4 +1,4 @@
-const logger = {
+export  default {
     info: (message) => {
       console.log(`[INFO] ${new Date().toISOString()} - ${message}`);
     },
@@ -18,4 +18,3 @@ const logger = {
     }
   };
   
-  module.exports = logger;

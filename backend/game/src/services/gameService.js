@@ -1,5 +1,5 @@
-const GameRoom = require('../models/GameRoom');
-const logger = require('../utils/logger');
+import GameRoom from '../models/GameRoom.js';
+import logger from '../utils/logger.js';
 
 // Store game rooms and socket mappings
 const gameRooms = {};
@@ -114,7 +114,7 @@ const startGame = (roomId) => {
   return false;
 };
 
-module.exports = {
+export default {
   getOrCreateRoom,
   addPlayerToRoom,
   removePlayerFromRoom,

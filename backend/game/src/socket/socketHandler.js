@@ -1,11 +1,11 @@
-const gameService = require('../services/gameService');
-const logger = require('../utils/logger');
+import gameService from '../services/gameService.js'
+import logger from '../utils/logger.js';
 
 /**
  * Set up Socket.IO event handlers
  * @param {Object} io - Socket.IO server instance
  */
-const setupSocketHandlers = (io) => {
+export const setupSocketHandlers = (io) => {
   io.on('connection', (socket) => {
     logger.info(`User connected: ${socket.id}`);
     
@@ -56,5 +56,3 @@ const setupSocketHandlers = (io) => {
     });
   });
 };
-
-module.exports = { setupSocketHandlers };

@@ -1,5 +1,5 @@
-const gameService = require('../services/gameService');
-const logger = require('../utils/logger');
+import gameService from '../services/gameService.js';
+import logger from '../utils/logger.js'
 
 /**
  * Health check endpoint
@@ -43,7 +43,7 @@ const getActiveRooms = (request, reply) => {
   reply.send(rooms);
 };
 
-module.exports = {
+export default {
   healthCheck,
   getGameStatus,
   getActiveRooms

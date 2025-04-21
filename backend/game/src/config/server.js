@@ -1,9 +1,11 @@
-const fastify = require('fastify');
-const path = require('path');
-const { Server } = require('socket.io');
-const routes = require('../routes');
-const { setupSocketHandlers } = require('../socket/socketHandler');
-const logger = require('../utils/logger');
+import fastify from 'fastify'
+import { Server } from 'socket.io'
+import routes from '../routes/index.js'
+import { setupSocketHandlers } from '../socket/socketHandler.js'
+import logger from '../utils/logger.js'
+import fastifyStatic from '@fastify/static'
+import { fileURLToPath } from 'url';
+import path, { dirname, join } from 'path';
 
 // Create Fastify server
 const createServer = () => {
@@ -11,8 +13,11 @@ const createServer = () => {
     logger: true
   });
 
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = dirname(__filename);
+
   // Register static file serving
-  app.register(require('@fastify/static'), {
+  app.register(fastifyStatic, {
     root: path.join(__dirname, '../../../client/dist'),
     prefix: '/',
     setHeaders: (res, filepath) => {
@@ -34,7 +39,7 @@ const startServer = async () => {
   const PORT = process.env.PORT || 3004;
 
   try {
-    await app.listen({ port: PORT, host: '0.0.0.0' });
+    await app.listen({ port: PORT, host: '::' });
     logger.info(`Server running on port ${PORT}`);
 
     // Setup Socket.IO after server is started
@@ -53,5 +58,5 @@ const startServer = async () => {
   }
 };
 
-module.exports = { createServer, startServer };
+export { createServer, startServer };
 

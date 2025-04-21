@@ -1,5 +1,4 @@
-const path = require('path');
-const gameController = require('../controllers/gameController');
+import gameController from '../controllers/gameController.js'
 
 async function routes(fastify, options) {
   // Health check endpoint
@@ -15,4 +14,4 @@ async function routes(fastify, options) {
 //   });
 }
 
-module.exports = routes;
+export default routes;

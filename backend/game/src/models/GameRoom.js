@@ -1,4 +1,5 @@
-const logger = require('../utils/logger');
+import logger from '../utils/logger.js'
+
 
 class GameRoom {
   constructor(roomId, io) {
@@ -195,4 +196,4 @@ class GameRoom {
   }
 }
 
-module.exports = GameRoom;
+export default GameRoom;
