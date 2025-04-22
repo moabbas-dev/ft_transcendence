@@ -462,6 +462,12 @@ class MatchmakingService {
             });
         });
     }
+
+    getQueuePosition(playerId) {
+        const playerIndex = this.waitingPlayers.findIndex(p => p.playerId === playerId);
+        if (playerIndex === -1) return null;
+        return playerIndex + 1;
+    }
 }
 
 /**

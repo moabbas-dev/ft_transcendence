@@ -30,14 +30,14 @@ export interface gameState {
 }
 
 export class GameBoard {
-	private gameType: "AI" | "Local";
-	private canvas: HTMLCanvasElement;
-	private ctx: CanvasRenderingContext2D;
-	private state:gameState;
-	private player1Controller!: Controller;
-	private player2Controller!: Controller;
-	private ballController: Controller;
-	private gameHeader: HTMLElement;
+	protected gameType: "AI" | "Local";
+	protected canvas: HTMLCanvasElement;
+	protected ctx: CanvasRenderingContext2D;
+	protected state:gameState;
+	protected player1Controller!: Controller;
+	protected player2Controller!: Controller;
+	protected ballController: Controller;
+	protected gameHeader: HTMLElement;
 	private AIDifficulty: AIDifficulty | undefined;
 
 	/** Overload signatures 
@@ -72,11 +72,11 @@ export class GameBoard {
 		window.addEventListener("popstate", this.handleNavigation.bind(this));
 	}
 
-	private handleNavigation() {
+	protected handleNavigation() {
 		this.state.gameEnded = true;
 	}
 
-	private createInitialState(): gameState {
+	protected createInitialState(): gameState {
 		return {
 			paddleHeight: 120,
 			paddleWidth: 20,
