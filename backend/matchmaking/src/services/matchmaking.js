@@ -26,8 +26,6 @@ class MatchmakingService {
             let user = await this.getUserWithElo(playerId);
             if (!user) user = this.createNewUserRecord(playerId);
 
-            this.removeFromQueue(playerId);
-
             this.waitingPlayers.push({
                 playerId: user.id,
                 elo: user.elo_score,
@@ -35,7 +33,13 @@ class MatchmakingService {
             });
             console.log(`user ${user.id} added to queue`);
 
-            return this.findMatch(user.id, user.elo_score);
+            if (this.waitingPlayers.length >= 2) {
+                this.removeFromQueue(playerId);
+                return this.findMatch(user.id, user.elo_score);
+            } else {
+                console.log(`Not enough players in queue. Current size: ${this.waitingPlayers.length}`);
+                return null;
+            }
         } catch (error) {
             console.error('Error adding to queue:', error);
         }

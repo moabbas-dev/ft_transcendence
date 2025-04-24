@@ -29,7 +29,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
         switch (data.type) {
           case 'find_match':
             const match = await matchmakingService.addToQueue(clientId);
-            
+            console.log(`FIND_MATCH: ${match}`);
             if (match) {
               wsAdapter.sendToClient(match.player1.id, 'match_found', {
                 matchId: match.matchId,
@@ -51,6 +51,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
                 wsAdapter.sendToClient(match.player1.id, 'game_start', { matchId: match.matchId });
                 wsAdapter.sendToClient(match.player2.id, 'game_start', { matchId: match.matchId });
               }, 3000);
+              console.log(`The game will start in 3 seconds between ${match.player1.id} and ${match.player2.id}`);
             } else {
               socket.send(JSON.stringify({
                 type: 'waiting_for_match',

@@ -7,6 +7,7 @@ import { Footer } from "../components/header_footer/footer.js";
 import { PongGameClient } from "../components/Online-Game/components/Game.js";
 import { OnlineGameBoard } from "../components/Online-Game/components/OnlineGameBoard.js";
 import { refreshRouter } from "../router.js";
+import store from "../../store/store.js";
 
 export default {
 	render: (container: HTMLElement) => {
@@ -99,8 +100,7 @@ export default {
 		
 		// Create matchmaking client
 		// In a real app, you would get the userId from your auth system
-		const userId = localStorage.getItem('userId') || "user_" + Math.floor(Math.random() * 10000);
-		localStorage.setItem('userId', userId); // Save for consistency between page loads
+		const userId = store.userId?? '0';
 		
 		// Connect to your matchmaking backend
 		const client = new PongGameClient("ws://localhost:3001", userId);
@@ -190,7 +190,7 @@ export default {
 		onlineShowdownBtn?.addEventListener("click", () => {
 			clearInterval(toggleInterval);
 
-			const gameModeDetails = document.getElementById("game-mode-details");
+			const gameModeDetails = document.getElementById("game-mode-details");			
 			if (gameModeDetails) {
 				heading.textContent = t('play.onlineGame.findingOponent');
 				heading.className = "text-4xl md:text-5xl font-bold text-center text-pongpink drop-shadow-[0_0_15px_#ff00e4]";
