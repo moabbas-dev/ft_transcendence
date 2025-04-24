@@ -3,19 +3,19 @@ import { t } from "../../languages/LanguageController.js";
 import chatService from "../../utils/chatUtils/chatWebSocketService.js";
 import { createComponent } from "../../utils/StateManager.js";
 
-interface FriendProps {
+export interface FriendProps {
   nickname: string;
   status: string;
-  avatar: string;
+  avatar_url: string;
   id: number;
 }
 
-const Friend = createComponent((props: FriendProps) => {
+export const Friend = createComponent((props: FriendProps) => {
   const friendItem = document.createElement('div');
   friendItem.className = "flex items-center gap-3 p-2 bg-white rounded-lg shadow-sm hover:bg-gray-50";
   friendItem.dataset.friendId = props.id.toString(); // Store the friend ID in a data attribute
   friendItem.innerHTML = `
-    <img alt="" src="${props.avatar}" class="size-10 rounded-full"/>
+    <img alt="" src="${props.avatar_url}" class="size-10 rounded-full"/>
     <div>
       <p class="font-medium">${props.nickname}</p>
       <span class="text-sm text-gray-500">${props.status}</span>
@@ -95,7 +95,7 @@ export const FriendsSection = createComponent(() => {
         friendsList.appendChild(Friend({
           nickname: friend.nickname,
           status: friend.status,
-          avatar: friend.avatar,
+          avatar_url: friend.avatar_url,
           id: friend.id
         }));
       });

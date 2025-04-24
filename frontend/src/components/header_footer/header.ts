@@ -246,6 +246,8 @@ export const Header = createComponent(() => {
 
     fetchUserNotifications(userId).then(data => {
         if (data) {
+            console.log('Fetched notifications:', data);
+            
             renderNotifications(data);
         }
     });

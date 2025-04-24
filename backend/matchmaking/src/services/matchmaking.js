@@ -400,11 +400,11 @@ class MatchmakingService {
             throw error;
         }
     }
-
-    // Helper to get user with ELO from database
+    
     async getUserWithElo(playerId) {
         try {
-            return await new Promise((resolve, reject) => {
+            // First try to get existing user
+            const existingUser = await new Promise((resolve, reject) => {
                 db.get(
                     `SELECT id, elo_score FROM players WHERE id = ?`,
                     [playerId],
@@ -414,26 +414,47 @@ class MatchmakingService {
                     }
                 );
             });
+
+            // If user exists, return it
+            if (existingUser) {
+                return existingUser;
+            }
+
+            // User doesn't exist, create a new record
+            console.log(`[MATCHMAKING] Creating new player record for user ID: ${playerId}`);
+
+            const newUser = await this.createNewUserRecord(playerId);
+            return newUser;
         } catch (error) {
-            console.error('Error fetching user:', error);
+            console.error('Error fetching or creating user:', error);
             throw error;
         }
     }
 
-    // Create a user record when a new player registers
+    // Create a new player record when a user first connects
     async createNewUserRecord(playerId) {
-        const sql = `
-          INSERT INTO players (id)
-          VALUES (?)
-          RETURNING *
-        `;
-        return await new Promise((resolve, reject) => {
-            db.run(sql, [playerId], (err, row) => {
-                if (err) return reject(err);
-                console.log(`[MATCHMAKING] Created new user record for player ${playerId}`);
-                resolve(row);
-            });
-        });
+        // Default values for a new player
+        const defaultElo = 1000;
+
+        try {
+            // Insert new player record
+            const result = await db.run(
+                `INSERT INTO players (id, elo_score, wins, losses, draws, total_matches, total_goals) 
+         VALUES (?, ?, 0, 0, 0, 0, 0)`,
+                [playerId, defaultElo]
+            );
+
+            console.log(`[MATCHMAKING] Created new player record for ID ${playerId}`);
+
+            // Return the newly created player data
+            return {
+                id: playerId,
+                elo_score: defaultElo
+            };
+        } catch (error) {
+            console.error('Error creating player record:', error);
+            throw error;
+        }
     }
 
     async getMatchById(matchId) {
@@ -467,6 +488,46 @@ class MatchmakingService {
         const playerIndex = this.waitingPlayers.findIndex(p => p.playerId === playerId);
         if (playerIndex === -1) return null;
         return playerIndex + 1;
+    }
+
+    async getUserActiveMatches(userId) {
+        try {
+            return await db.all(
+                `SELECT m.id, m.match_type, m.status, m.created_at,
+             mp1.player_id as player1_id, mp2.player_id as player2_id
+             FROM matches m
+             JOIN match_players mp1 ON m.id = mp1.match_id
+             JOIN match_players mp2 ON m.id = mp2.match_id
+             WHERE mp1.player_id = ? AND mp2.player_id != ?
+             AND m.status = 'pending'
+             ORDER BY m.created_at DESC`,
+                [userId, userId]
+            );
+        } catch (error) {
+            console.error('Error fetching active matches:', error);
+            throw error;
+        }
+    }
+
+    // Get match details with player info
+    async getMatchWithPlayers(matchId) {
+        try {
+            const match = await this.getMatchById(matchId);
+            if (!match) return null;
+
+            const players = await db.all(
+                `SELECT mp.*, p.elo_score 
+             FROM match_players mp
+             JOIN players p ON mp.player_id = p.id
+             WHERE mp.match_id = ?`,
+                [matchId]
+            );
+
+            return { match, players };
+        } catch (error) {
+            console.error('Error fetching match with players:', error);
+            throw error;
+        }
     }
 }
 

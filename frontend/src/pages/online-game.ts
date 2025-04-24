@@ -4,6 +4,9 @@ import { FetchFriendsList } from "../components/Online-Game/components/FriendsLi
 import { FindOpponent } from "../components/Online-Game/components/FindOpponent.js";
 import { t } from "../languages/LanguageController.js";
 import { Footer } from "../components/header_footer/footer.js";
+import { PongGameClient } from "../components/Online-Game/components/Game.js";
+import { OnlineGameBoard } from "../components/Online-Game/components/OnlineGameBoard.js";
+import { refreshRouter } from "../router.js";
 
 export default {
 	render: (container: HTMLElement) => {
@@ -62,20 +65,6 @@ export default {
 			<div class="footer"></div>
 		`;
 
-		// Header
-		const headerNav = container.querySelector(".header");
-		const header = Header();
-		headerNav?.appendChild(header);
-
-		// Footer component
-		const footerContainer = container.querySelector(".footer");
-		const footerComp = Footer();
-		footerContainer?.appendChild(footerComp);
-
-		// Loading pong animation
-		const loadingPong = container.querySelector('#loading-pong');
-		loadingPong?.appendChild(PongLoading({text: t('play.onlineGame.or')}));
-
 		let isIconVisible = true;
 		let toggleInterval = setInterval(() => {
 			isIconVisible = !isIconVisible;
@@ -92,6 +81,84 @@ export default {
 		}, 3000);
 
 		const heading = container.querySelector("h1")!;
+
+
+		// Header
+		const headerNav = container.querySelector(".header");
+		const header = Header();
+		headerNav?.appendChild(header);
+
+		// Footer component
+		const footerContainer = container.querySelector(".footer");
+		const footerComp = Footer();
+		footerContainer?.appendChild(footerComp);
+
+		// Loading pong animation
+		const loadingPong = container.querySelector('#loading-pong');
+		loadingPong?.appendChild(PongLoading({text: t('play.onlineGame.or')}));
+		
+		// Create matchmaking client
+		// In a real app, you would get the userId from your auth system
+		const userId = localStorage.getItem('userId') || "user_" + Math.floor(Math.random() * 10000);
+		localStorage.setItem('userId', userId); // Save for consistency between page loads
+		
+		// Connect to your matchmaking backend
+		const client = new PongGameClient("ws://localhost:3001", userId);
+		
+		// State for tracking current match
+		let currentMatchId: string | null = null;
+		let currentOpponentId: string | null = null;
+		let isPlayer1 = false;
+		let gameBoard:any | null = null;
+		
+		// Set up event handlers for matchmaking events
+		client.on('waiting_for_match', (data) => {
+			// Update queue position display if we have one
+			const queuePositionElement = document.getElementById('queue-position');
+			if (queuePositionElement) {
+				queuePositionElement.textContent = `Position: ${data.position}`;
+			}
+		});
+		
+		client.on('match_found', (data) => {
+			currentMatchId = data.matchId;
+			currentOpponentId = data.opponent.id;
+			isPlayer1 = true; // We're player 1 if we initiated
+			
+			// Show match found UI
+			showMatchFound(data.opponent);
+		});
+		
+		client.on('game_start', (data) => {
+			if (currentMatchId && currentOpponentId && currentMatchId === data.matchId) {
+				startGame(currentMatchId, currentOpponentId, isPlayer1);
+			}
+		});
+		
+		client.on('friend_match_invite', (data:any) => {
+			// Show friend invite notification
+			const accept = confirm(`${data.fromId} has invited you to a match. Accept?`);
+			if (accept) {
+				client.acceptFriendMatch(data.fromId);
+			}
+		});
+		
+		client.on('friend_match_created', (data:any) => {
+			currentMatchId = data.matchId;
+			currentOpponentId = data.opponent.id;
+			isPlayer1 = false; // We're player 2 if we accepted
+			
+			// Show match found UI
+			showMatchFound(data.opponent);
+		});
+		
+		client.on('match_results', (data:any) => {
+			if (gameBoard) {
+				// Game ended, show results
+				showGameResults(data);
+			}
+		});
+		
 		// Play with Friend functionality
 		const playWithFriendBtn = document.getElementById("play-with-friend");
 		playWithFriendBtn?.addEventListener("click", () => {
@@ -102,8 +169,19 @@ export default {
 				heading.textContent = t('play.onlineGame.findFriend');
 				heading.className = "text-4xl md:text-5xl font-bold text-center text-pongcyan drop-shadow-[0_0_15px_#00f7ff]";
 
+				// Replace the existing FetchFriendsList with one that uses our client
 				gameModeDetails.innerHTML = '';
-				gameModeDetails.appendChild(FetchFriendsList());
+				const friendsList = FetchFriendsList();
+				gameModeDetails.appendChild(friendsList);
+				
+				// Add event handler for friend invitation
+				friendsList.addEventListener('friend-selected', (e:any) => {
+					const friendId = e.detail;
+					client.inviteFriend(friendId);
+					
+					// Show waiting for response UI
+					showWaitingForFriend(friendId);
+				});
 			}
 		});
 
@@ -118,9 +196,205 @@ export default {
 				heading.className = "text-4xl md:text-5xl font-bold text-center text-pongpink drop-shadow-[0_0_15px_#ff00e4]";
 
 				gameModeDetails.innerHTML = '';
-				gameModeDetails.appendChild(FindOpponent({heading, isIconVisible, toggleInterval}));
+				const findOpponent = FindOpponent({heading, isIconVisible, toggleInterval});
+				gameModeDetails.appendChild(findOpponent);
 				isIconVisible = !isIconVisible;
+				
+				// Start matchmaking
+				client.findMatch();
+				
+				// Add cancel button event handler
+				findOpponent.querySelector('#cancel-matchmaking')?.addEventListener('click', () => {
+					client.cancelMatchmaking();
+					showMainMenu();
+				});
 			}
 		});
+		
+		// Helper functions for UI transitions
+		
+		function showMainMenu() {
+			heading.textContent = t('play.title');
+			heading.className = "text-4xl md:text-6xl font-bold text-center text-pongcyan drop-shadow-[0_0_15px_#00f7ff] animate-fade-down animate-once animate-duration-700";
+			
+			const gameModeDetails = document.getElementById("game-mode-details");
+			if (gameModeDetails) {
+				gameModeDetails.innerHTML = `
+					<div class="relative w-full flex items-center justify-center">
+						<div class="animation-container relative w-full max-w-md aspect-square">
+							<i id="icon-friends" class="fa-solid fa-users text-7xl md:text-8xl absolute top-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-100 bg-gradient-to-r from-pongcyan via-[rgba(100,100,255,0.8)] to-pongcyan text-transparent bg-clip-text"></i>
+							<span id="text-friends" class="text-3xl md:text-4xl text-center font-bold absolute top-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-0">${t('play.onlineGame.vsFriend')}</span>
+							
+							<div id="loading-pong" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-125"></div>
+							
+							<i id="icon-online" class="fa-solid fa-globe text-7xl md:text-8xl absolute bottom-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-100 bg-gradient-to-b from-pongpink via-[rgba(255,0,228,0.8)] to-pongpink text-transparent bg-clip-text"></i>
+							<span id="text-online" class="text-3xl md:text-4xl text-center font-bold absolute bottom-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-0">${t('play.onlineGame.vsRivals')}</span>
+						</div>
+					</div>
+				`;
+				
+				// Restart animation
+				toggleInterval = setInterval(() => {
+					isIconVisible = !isIconVisible;
+					document.getElementById("icon-friends")?.classList.toggle("opacity-0", !isIconVisible);
+					document.getElementById("icon-friends")?.classList.toggle("opacity-100");
+					document.getElementById("text-friends")?.classList.toggle("opacity-0", isIconVisible);
+					document.getElementById("icon-online")?.classList.toggle("opacity-0", !isIconVisible);
+					document.getElementById("icon-online")?.classList.toggle("opacity-100");
+					document.getElementById("text-online")?.classList.toggle("opacity-0", isIconVisible);
+				}, 3000);
+				
+				// Add loading animation
+				const loadingPong = document.getElementById('loading-pong');
+				loadingPong?.appendChild(PongLoading({text: t('play.onlineGame.or')}));
+			}
+		}
+		
+		function showWaitingForFriend(friendId:string) {
+			const gameModeDetails = document.getElementById("game-mode-details");
+			if (gameModeDetails) {
+				gameModeDetails.innerHTML = `
+					<div class="flex flex-col items-center justify-center gap-6">
+						<h2 class="text-2xl text-pongcyan">${t('play.onlineGame.waitingForFriend')}</h2>
+						<p>${t('play.onlineGame.inviteSentTo')} ${friendId}</p>
+						<div class="spinner"></div>
+						<button id="cancel-invite" class="px-6 py-3 bg-red-600 text-white rounded-md">
+							${t('play.onlineGame.cancel')}
+						</button>
+					</div>
+				`;
+				
+				// Add cancel button handler
+				document.getElementById('cancel-invite')?.addEventListener('click', () => {
+					showMainMenu();
+				});
+			}
+		}
+		
+		function showMatchFound(opponent:any) {
+			const gameModeDetails = document.getElementById("game-mode-details");
+			if (gameModeDetails) {
+				gameModeDetails.innerHTML = `
+					<div class="flex flex-col items-center justify-center gap-6">
+						<h2 class="text-2xl text-pongpink">${t('play.onlineGame.matchFound')}</h2>
+						<p>${t('play.onlineGame.opponent')}: ${opponent.id}</p>
+						<p>${t('play.onlineGame.opponentElo')}: ${opponent.elo}</p>
+						<div class="countdown-container">
+							<p>${t('play.onlineGame.startingIn')}</p>
+							<div class="text-5xl font-bold countdown">3</div>
+						</div>
+					</div>
+				`;
+				
+				// Start countdown
+				let count = 3;
+				const countdownElement = document.querySelector('.countdown');
+				const interval = setInterval(() => {
+					count--;
+					if (countdownElement) {
+						countdownElement.textContent = count.toString();
+					}
+					
+					if (count <= 0) {
+						clearInterval(interval);
+					}
+				}, 1000);
+			}
+		}
+		
+		function startGame(matchId:string, opponentId:string, isPlayer1:boolean) {
+			// Create game container
+			container.innerHTML = `
+				<div class="header z-50 w-full bg-black"></div>
+				<div class="game-container flex-1 relative">
+					<div id="game-header" class="flex justify-between items-center p-4 bg-black text-white">
+						<div class="player-info">
+							<span class="player-name">You</span>
+							<span id="player-score1" class="player-score">0</span>
+						</div>
+						<div class="timer">00:00</div>
+						<div class="player-info">
+							<span id="player-score2" class="player-score">0</span>
+							<span class="player-name">Opponent</span>
+						</div>
+					</div>
+					<canvas id="game-canvas" class="w-full h-full"></canvas>
+				</div>
+			`;
+			
+			// Get canvas and header
+			const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
+			const gameHeader = document.getElementById('game-header') as HTMLElement;
+
+			// Create game board
+			if (canvas && gameHeader) {
+				gameBoard = new OnlineGameBoard(
+					canvas,
+					gameHeader,
+					client,
+					matchId,
+					userId,
+					opponentId,
+					isPlayer1
+				);
+				
+				// Start the game
+				gameBoard.startGame();
+			}
+		}
+		
+		function showGameResults(results: any) {
+			// Create results overlay
+			const resultsOverlay = document.createElement('div');
+			resultsOverlay.className = 'game-results fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50';
+			
+			// Determine if player won
+			const isWinner = results.winner === userId;
+			
+			// Calculate ELO change
+			const eloChange = results.eloChange[userId] || 0;
+			const eloChangeDisplay = eloChange >= 0 ? `+${eloChange}` : eloChange;
+			
+			resultsOverlay.innerHTML = `
+				<div class="results-container bg-black p-8 rounded-xl border-2 ${isWinner ? 'border-pongcyan' : 'border-pongpink'} max-w-md w-full">
+					<h2 class="text-3xl font-bold mb-4 ${isWinner ? 'text-pongcyan' : 'text-pongpink'}">
+						${isWinner ? t('play.onlineGame.youWon') : t('play.onlineGame.youLost')}
+					</h2>
+					<p class="text-white mb-2">${t('play.onlineGame.finalScore')}: ${results.finalScore.player1} - ${results.finalScore.player2}</p>
+					<p class="text-white mb-6">${t('play.onlineGame.eloChange')}: <span class="${eloChange >= 0 ? 'text-green-500' : 'text-red-500'}">${eloChangeDisplay}</span></p>
+					
+					<div class="flex gap-4">
+						<button id="play-again-btn" class="flex-1 py-3 px-4 bg-pongcyan text-white rounded-md">
+							${t('play.onlineGame.playAgain')}
+						</button>
+						<button id="main-menu-btn" class="flex-1 py-3 px-4 bg-gray-700 text-white rounded-md">
+							${t('play.onlineGame.mainMenu')}
+						</button>
+					</div>
+				</div>
+			`;
+			
+			// Add to DOM
+			document.body.appendChild(resultsOverlay);
+			
+			// Add button event handlers
+			document.getElementById('play-again-btn')?.addEventListener('click', () => {
+				document.body.removeChild(resultsOverlay);
+				gameBoard = null;
+				refreshRouter()
+			});
+			
+			document.getElementById('main-menu-btn')?.addEventListener('click', () => {
+				document.body.removeChild(resultsOverlay);
+				gameBoard = null;
+				refreshRouter()
+				showMainMenu();
+			});
+		}
+
+		return () => {
+			client.disconnect();
+			clearInterval(toggleInterval);
+		};
 	}
-}
+};

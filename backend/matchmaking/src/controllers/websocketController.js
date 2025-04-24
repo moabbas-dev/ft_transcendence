@@ -1,16 +1,25 @@
-import { matchmakingService } from '../services/matchmaking.js';
-import { v4 as uuidv4 } from 'uuid';
+import matchmakingService from '../services/matchmaking.js'
 
 export function setupWebSocketHandlers(wsAdapter, fastify) {
-  wsAdapter.server.on('connection', (socket, request) => {
-    // Generate a temporary ID for the socket if not authenticated yet
-    let clientId = uuidv4();
-    let authenticated = false;
-
-    // Register the new client
-    wsAdapter.registerClient(clientId, socket);
+  wsAdapter.wss.on('connection', async (socket, request) => {
+    const url = new URL(request.url, `http://${request.headers.host}`);
+    console.log(`WebSocket connection URL: ${url}`);
     
-    fastify.log.info(`New WebSocket connection: ${clientId}`);
+    const userId = url.searchParams.get('userId');
+        
+    if (!userId) {
+      fastify.log.error('WebSocket connection attempt without userId');
+      socket.close(1008, "Missing user identification");
+      return;
+    }
+    
+    // Use the actual user ID directly instead of a temporary one
+    const clientId = userId;
+    await matchmakingService.getUserWithElo(clientId);
+    // Register the new client with user data
+    wsAdapter.registerClient(clientId, socket, { userId });
+    
+    fastify.log.info(`New WebSocket connection from user: ${clientId}`);
     
     socket.on('message', async (message) => {
       try {
@@ -18,46 +27,10 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
         fastify.log.info(`Received message from ${clientId}: ${data.type}`);
         
         switch (data.type) {
-          case 'auth':
-            // Authenticate the user and update the clientId to the real userId
-            if (data.token) {
-              try {
-                // Verify the token (implement your auth logic here)
-                const userId = verifyToken(data.token); // You'll need to implement this
-                
-                // Update the client ID to the real user ID
-                wsAdapter.removeClient(clientId);
-                clientId = userId;
-                wsAdapter.registerClient(clientId, socket, { authenticated: true });
-                authenticated = true;
-                
-                socket.send(JSON.stringify({
-                  type: 'auth_success',
-                  payload: { userId: clientId }
-                }));
-              } catch (err) {
-                socket.send(JSON.stringify({
-                  type: 'auth_error',
-                  payload: { message: 'Authentication failed' }
-                }));
-              }
-            }
-            break;
-            
           case 'find_match':
-            if (!authenticated) {
-              socket.send(JSON.stringify({
-                type: 'error',
-                payload: { message: 'You must be authenticated' }
-              }));
-              break;
-            }
-            
-            // Add player to matchmaking queue
             const match = await matchmakingService.addToQueue(clientId);
             
             if (match) {
-              // Match found! Notify both players
               wsAdapter.sendToClient(match.player1.id, 'match_found', {
                 matchId: match.matchId,
                 opponent: {
@@ -74,13 +47,11 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
                 }
               });
               
-              // Start the game countdown
               setTimeout(() => {
                 wsAdapter.sendToClient(match.player1.id, 'game_start', { matchId: match.matchId });
                 wsAdapter.sendToClient(match.player2.id, 'game_start', { matchId: match.matchId });
               }, 3000);
             } else {
-              // No match found yet, client will wait
               socket.send(JSON.stringify({
                 type: 'waiting_for_match',
                 payload: { position: matchmakingService.getQueuePosition(clientId) }
@@ -89,27 +60,16 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
             break;
             
           case 'cancel_matchmaking':
-            if (authenticated) {
-              matchmakingService.removeFromQueue(clientId);
-              socket.send(JSON.stringify({
-                type: 'matchmaking_cancelled',
-                payload: {}
-              }));
-            }
+            matchmakingService.removeFromQueue(clientId);
+            socket.send(JSON.stringify({
+              type: 'matchmaking_cancelled',
+              payload: {}
+            }));
             break;
             
           case 'friend_match_request':
-            if (!authenticated) {
-              socket.send(JSON.stringify({
-                type: 'error',
-                payload: { message: 'You must be authenticated' }
-              }));
-              break;
-            }
-            
             const { friendId } = data.payload;
             
-            // Send match invite to friend if they're online
             const inviteSent = wsAdapter.sendToClient(friendId, 'friend_match_invite', {
               fromId: clientId
             });
@@ -128,15 +88,12 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
             break;
             
           case 'friend_match_accept':
-            if (!authenticated) break;
-            
             const { fromId } = data.payload;
             
-            // Create a direct match between friends
             const friendMatch = await matchmakingService.createMatch(
               fromId, 
               clientId, 
-              'FRIEND_MATCH'
+              'friendly'
             );
             
             if (friendMatch) {
@@ -159,7 +116,6 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
                 }
               }));
               
-              // Start the game countdown
               setTimeout(() => {
                 wsAdapter.sendToClient(fromId, 'game_start', { matchId: friendMatch.matchId });
                 wsAdapter.sendToClient(clientId, 'game_start', { matchId: friendMatch.matchId });
@@ -168,12 +124,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
             break;
             
           case 'paddle_move':
-            if (!authenticated) break;
-            
             const { matchId, position } = data.payload;
-            
-            // Find the opponent in this match and send them the paddle position
-            // You'll need to implement a way to track matches and opponents
             const opponentId = await getOpponentId(clientId, matchId);
             
             if (opponentId) {
@@ -184,8 +135,6 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
             break;
             
           case 'ball_update':
-            if (!authenticated) break;
-            
             const { matchId: ballMatchId, ballData } = data.payload;
             const ballOpponentId = await getOpponentId(clientId, ballMatchId);
             
@@ -197,11 +146,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
             break;
             
           case 'goal_scored':
-            if (!authenticated) break;
-            
             const { matchId: goalMatchId, scoringPlayer, newScore } = data.payload;
-            // Update match score in database
-            // Broadcast to both players
             const goalOpponentId = await getOpponentId(clientId, goalMatchId);
             
             if (goalOpponentId) {
@@ -210,7 +155,6 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
                 newScore
               });
               
-              // Also send to the scoring player for confirmation
               wsAdapter.sendToClient(clientId, 'goal_update', {
                 scoringPlayer,
                 newScore
@@ -219,26 +163,39 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
             break;
             
           case 'match_complete':
-            if (!authenticated) break;
-            
             const { matchId: completedMatchId, winner, finalScore } = data.payload;
+            const matchResult = await matchmakingService.updateMatchResult(
+              completedMatchId, 
+              { goals: finalScore }, 
+              winner
+            );
             
-            // Update match in database as completed
-            // Calculate ELO changes
-            // Send results to both players
             const completeOpponentId = await getOpponentId(clientId, completedMatchId);
-            
-            // Send match results to both players
+
             if (completeOpponentId) {
-              const matchResults = {
+              const formattedResults = {
                 matchId: completedMatchId,
                 winner,
                 finalScore,
-                eloChange: {} // You'll need to calculate this
+                eloChange: {}
               };
               
-              wsAdapter.sendToClient(clientId, 'match_results', matchResults);
-              wsAdapter.sendToClient(completeOpponentId, 'match_results', matchResults);
+              if (matchResult.winner) {
+                formattedResults.eloChange[matchResult.winner.playerId] = 
+                  matchResult.winner.eloAfter - matchResult.winner.eloBefore;
+                formattedResults.eloChange[matchResult.loser.playerId] = 
+                  matchResult.loser.eloAfter - matchResult.loser.eloBefore;
+              } else if (matchResult.draw) {
+                matchResult.draw.forEach(player => {
+                  formattedResults.eloChange[player.playerId] = 
+                    player.eloAfter - player.eloBefore;
+                });
+              }
+              
+              wsAdapter.sendToClient(clientId, 'match_results', formattedResults);
+              wsAdapter.sendToClient(completeOpponentId, 'match_results', formattedResults);
+              
+              completeMatch(completedMatchId);
             }
             break;
         }
@@ -255,34 +212,40 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
     socket.on('close', () => {
       fastify.log.info(`WebSocket connection closed: ${clientId}`);
       
-      // Clean up: remove from matchmaking queue if they were in it
-      if (authenticated) {
-        matchmakingService.removeFromQueue(clientId);
-      }
+      matchmakingService.removeFromQueue(clientId);
       
-      // Remove client from adapter
       wsAdapter.removeClient(clientId);
     });
   });
   
-  // Helper function to get opponent ID from a match
+  const activeMatches = new Map();
+  const userMatches = new Map();
+  
   async function getOpponentId(playerId, matchId) {
-    // Implement logic to find the opponent in a match
-    // This will depend on your database schema
-    // Example implementation:
-    const match = await getMatchDetails(matchId);
-    if (!match) return null;
+    const matchData = activeMatches.get(matchId);
+    if (!matchData) {
+      const matchWithPlayers = await matchmakingService.getMatchWithPlayers(matchId);
+      if (!matchWithPlayers) return null;
+      
+      const players = matchWithPlayers.players.map(p => p.player_id);
+      return players.find(id => id != playerId);
+    }
     
-    return match.player1Id === playerId ? match.player2Id : match.player1Id;
+    return matchData.player1Id === playerId ? matchData.player2Id : matchData.player1Id;
   }
   
-  async function getMatchDetails(matchId) {
-    // Implement this to fetch match details from your database
-    // Return { player1Id, player2Id } or null if not found
+  async function trackMatch(matchId, player1Id, player2Id) {
+    activeMatches.set(matchId, { player1Id, player2Id });
+    userMatches.set(player1Id, matchId);
+    userMatches.set(player2Id, matchId);
   }
   
-  function verifyToken(token) {
-    // Implement your token verification logic
-    // Return the userId if valid, throw error if invalid
+  function completeMatch(matchId) {
+    const matchData = activeMatches.get(matchId);
+    if (matchData) {
+      userMatches.delete(matchData.player1Id);
+      userMatches.delete(matchData.player2Id);
+      activeMatches.delete(matchId);
+    }
   }
 }

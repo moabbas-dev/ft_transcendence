@@ -1,23 +1,22 @@
-import { OnlineGameBoard } from "./OnlineGameBoard";
-
 export class PongGameClient {
 	private ws: WebSocket | null = null;
 	private callbacks: { [key: string]: ((data: any) => void)[] } = {};
 	private reconnectTimer: number | null = null;
-	private authToken: string;
-	private gameBoard: OnlineGameBoard | null = null;
+	private userId: string;
 	
-	constructor(private serverUrl: string, authToken: string) {
-	  this.authToken = authToken;
+	constructor(private serverUrl: string, userId: string) {
+	  this.userId = userId;
 	  this.connect();
 	}
 	
 	private connect(): void {
-	  this.ws = new WebSocket(this.serverUrl);
+	  const wsUrl = `${this.serverUrl}/?userId=${encodeURIComponent(this.userId)}`;
+	  
+	  this.ws = new WebSocket(wsUrl);
 	  
 	  this.ws.onopen = () => {
-		console.log('Connected to game server');
-		this.send('auth', { token: this.authToken });
+		console.log('Connected to matchmaking server');
+		this.triggerCallbacks('connection', { status: 'connected' });
 	  };
 	  
 	  this.ws.onmessage = (event) => {
@@ -45,8 +44,14 @@ export class PongGameClient {
 	  };
 	  
 	  this.ws.onerror = (error) => {
-		console.error('WebSocket error:', error);
+		console.error('WebSocket errorrrr:', error);
 	  };
+	}
+	
+	private triggerCallbacks(type: string, payload: any): void {
+	  if (this.callbacks[type]) {
+		this.callbacks[type].forEach(callback => callback(payload));
+	  }
 	}
 	
 	// Send message to the server
@@ -96,90 +101,11 @@ export class PongGameClient {
 	// Start finding a match
 	findMatch(): void {
 	  this.send('find_match');
-	  
-	  // Show "Finding match" UI
-	  this.showFindingMatchUI();
 	}
 	
 	// Cancel matchmaking
 	cancelMatchmaking(): void {
 	  this.send('cancel_matchmaking');
-	  this.hideFindingMatchUI();
-	}
-	
-	// Show UI for finding a match
-	private showFindingMatchUI(): void {
-	  const findingMatch = document.createElement('div');
-	  findingMatch.id = 'finding-match-overlay';
-	  findingMatch.innerHTML = `
-		<div class="finding-match-content">
-		  <h2>Finding Match...</h2>
-		  <div class="spinner"></div>
-		  <button id="cancel-matchmaking">Cancel</button>
-		</div>
-	  `;
-	  
-	  document.body.appendChild(findingMatch);
-	  
-	  document.getElementById('cancel-matchmaking')?.addEventListener('click', () => {
-		this.cancelMatchmaking();
-	  });
-	}
-	
-	// Hide the finding match UI
-	private hideFindingMatchUI(): void {
-	  const findingMatch = document.getElementById('finding-match-overlay');
-	  if (findingMatch) {
-		document.body.removeChild(findingMatch);
-	  }
-	}
-	
-	// Start a game when match is found
-	startGame(matchId: string, playerId: string, opponentId: string, isPlayer1: boolean): void {
-	  // Hide the finding match UI if it's visible
-	  this.hideFindingMatchUI();
-	  
-	  // Get the game canvas and header elements
-	  const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
-	  const gameHeader = document.getElementById('game-header') as HTMLElement;
-	  
-	  if (!canvas || !gameHeader) {
-		console.error('Game elements not found in the DOM');
-		return;
-	  }
-	  
-	  // Create a new online game board
-	  this.gameBoard = new OnlineGameBoard(
-		canvas,
-		gameHeader,
-		this,
-		matchId,
-		playerId,
-		opponentId,
-		isPlayer1
-	  );
-	  
-	  // Start the game loop
-	  this.startGameLoop();
-	}
-	
-	// Start the game loop
-	private startGameLoop(): void {
-	  const gameLoop = () => {
-		if (this.gameBoard) {
-		  // Update and draw the game
-		  this.gameBoard.update();
-		  this.gameBoard.draw();
-		  
-		  // Continue the loop if game hasn't ended
-		  if (!this.gameBoard.getState.gameEnded) {
-			requestAnimationFrame(gameLoop);
-		  }
-		}
-	  };
-	  
-	  // Start the loop
-	  requestAnimationFrame(gameLoop);
 	}
 	
 	// Game-specific methods
