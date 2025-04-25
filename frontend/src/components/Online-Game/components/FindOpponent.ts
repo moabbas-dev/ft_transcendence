@@ -66,6 +66,7 @@ export const FindOpponent = createComponent((props: FindOpponentProps) => {
 	// Set up WebSocket event handlers if client is provided
 	if (props.client) {
 		props.client.on('match_found', (data: any) => {
+			console.log('Match found:', data);
 			showOpponentFound(data.opponent);
 		});
 		

@@ -130,6 +130,7 @@ export default {
 		});
 		
 		client.on('game_start', (data) => {
+			console.log(`Game started with match ID: ${data.matchId}`);
 			if (currentMatchId && currentOpponentId && currentMatchId === data.matchId) {
 				startGame(currentMatchId, currentOpponentId, isPlayer1);
 			}
