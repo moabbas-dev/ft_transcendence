@@ -1,252 +1,283 @@
-import matchmakingService from '../services/matchmaking.js'
+import matchmakingService from '../services/matchmaking.js';
+import { createWebSocketAdapter } from '../services/websocketAdapter.js'; 
 
+
+/**
+ * Sets up WebSocket handlers for the matchmaking service
+ * @param {WebSocketAdapter} wsAdapter - The WebSocket adapter instance
+ * @param {FastifyInstance} fastify - The Fastify instance
+ */
 export function setupWebSocketHandlers(wsAdapter, fastify) {
-  wsAdapter.wss.on('connection', async (socket, request) => {
-    const url = new URL(request.url, `http://${request.headers.host}`);
-    console.log(`WebSocket connection URL: ${url}`);
-    
-    const userId = url.searchParams.get('userId');
-        
-    if (!userId) {
-      fastify.log.error('WebSocket connection attempt without userId');
-      socket.close(1008, "Missing user identification");
-      return;
-    }
-    
-    // Use the actual user ID directly instead of a temporary one
-    const clientId = userId;
-    await matchmakingService.getUserWithElo(clientId);
-    // Register the new client with user data
-    wsAdapter.registerClient(clientId, socket, { userId });
-    
-    fastify.log.info(`New WebSocket connection from user: ${clientId}`);
-    
-    socket.on('message', async (message) => {
-      try {
-        const data = JSON.parse(message);
-        fastify.log.info(`Received message from ${clientId}: ${data.type}`);
-        
-        switch (data.type) {
-          case 'find_match':
-            const match = await matchmakingService.addToQueue(clientId);
-            console.log(`FIND_MATCH: ${match}`);
-            if (match) {
-              wsAdapter.sendToClient(match.player1.id, 'match_found', {
-                matchId: match.matchId,
-                opponent: {
-                  id: match.player2.id,
-                  elo: match.player2.elo_score
-                }
-              });
-              
-              wsAdapter.sendToClient(match.player2.id, 'match_found', {
-                matchId: match.matchId,
-                opponent: {
-                  id: match.player1.id,
-                  elo: match.player1.elo_score
-                }
-              });
-              
-              setTimeout(() => {
-                wsAdapter.sendToClient(match.player1.id, 'game_start', { matchId: match.matchId });
-                wsAdapter.sendToClient(match.player2.id, 'game_start', { matchId: match.matchId });
-              }, 3000);
-              console.log(`The game will start in 3 seconds between ${match.player1.id} and ${match.player2.id}`);
-            } else {
-              socket.send(JSON.stringify({
-                type: 'waiting_for_match',
-                payload: { position: matchmakingService.getQueuePosition(clientId) }
-              }));
-            }
-            break;
-            
-          case 'cancel_matchmaking':
-            matchmakingService.removeFromQueue(clientId);
-            socket.send(JSON.stringify({
-              type: 'matchmaking_cancelled',
-              payload: {}
-            }));
-            break;
-            
-          case 'friend_match_request':
-            const { friendId } = data.payload;
-            
-            const inviteSent = wsAdapter.sendToClient(friendId, 'friend_match_invite', {
-              fromId: clientId
-            });
-            
-            if (inviteSent) {
-              socket.send(JSON.stringify({
-                type: 'friend_invite_sent',
-                payload: { friendId }
-              }));
-            } else {
-              socket.send(JSON.stringify({
-                type: 'friend_invite_failed',
-                payload: { friendId, reason: 'Friend is offline' }
-              }));
-            }
-            break;
-            
-          case 'friend_match_accept':
-            const { fromId } = data.payload;
-            
-            const friendMatch = await matchmakingService.createMatch(
-              fromId, 
-              clientId, 
-              'friendly'
-            );
-            
-            if (friendMatch) {
-              wsAdapter.sendToClient(fromId, 'friend_match_created', {
-                matchId: friendMatch.matchId,
-                opponent: {
-                  id: clientId,
-                  elo: friendMatch.player2.elo_score
-                }
-              });
-              
-              socket.send(JSON.stringify({
-                type: 'friend_match_created',
-                payload: {
-                  matchId: friendMatch.matchId,
-                  opponent: {
-                    id: fromId,
-                    elo: friendMatch.player1.elo_score
-                  }
-                }
-              }));
-              
-              setTimeout(() => {
-                wsAdapter.sendToClient(fromId, 'game_start', { matchId: friendMatch.matchId });
-                wsAdapter.sendToClient(clientId, 'game_start', { matchId: friendMatch.matchId });
-              }, 3000);
-            }
-            break;
-            
-          case 'paddle_move':
-            const { matchId, position } = data.payload;
-            const opponentId = await getOpponentId(clientId, matchId);
-            
-            if (opponentId) {
-              wsAdapter.sendToClient(opponentId, 'opponent_paddle_move', {
-                position
-              });
-            }
-            break;
-            
-          case 'ball_update':
-            const { matchId: ballMatchId, ballData } = data.payload;
-            const ballOpponentId = await getOpponentId(clientId, ballMatchId);
-            
-            if (ballOpponentId) {
-              wsAdapter.sendToClient(ballOpponentId, 'ball_sync', {
-                ballData
-              });
-            }
-            break;
-            
-          case 'goal_scored':
-            const { matchId: goalMatchId, scoringPlayer, newScore } = data.payload;
-            const goalOpponentId = await getOpponentId(clientId, goalMatchId);
-            
-            if (goalOpponentId) {
-              wsAdapter.sendToClient(goalOpponentId, 'goal_update', {
-                scoringPlayer,
-                newScore
-              });
-              
-              wsAdapter.sendToClient(clientId, 'goal_update', {
-                scoringPlayer,
-                newScore
-              });
-            }
-            break;
-            
-          case 'match_complete':
-            const { matchId: completedMatchId, winner, finalScore } = data.payload;
-            const matchResult = await matchmakingService.updateMatchResult(
-              completedMatchId, 
-              { goals: finalScore }, 
-              winner
-            );
-            
-            const completeOpponentId = await getOpponentId(clientId, completedMatchId);
-
-            if (completeOpponentId) {
-              const formattedResults = {
-                matchId: completedMatchId,
-                winner,
-                finalScore,
-                eloChange: {}
-              };
-              
-              if (matchResult.winner) {
-                formattedResults.eloChange[matchResult.winner.playerId] = 
-                  matchResult.winner.eloAfter - matchResult.winner.eloBefore;
-                formattedResults.eloChange[matchResult.loser.playerId] = 
-                  matchResult.loser.eloAfter - matchResult.loser.eloBefore;
-              } else if (matchResult.draw) {
-                matchResult.draw.forEach(player => {
-                  formattedResults.eloChange[player.playerId] = 
-                    player.eloAfter - player.eloBefore;
-                });
-              }
-              
-              wsAdapter.sendToClient(clientId, 'match_results', formattedResults);
-              wsAdapter.sendToClient(completeOpponentId, 'match_results', formattedResults);
-              
-              completeMatch(completedMatchId);
-            }
-            break;
-        }
-        
-      } catch (err) {
-        fastify.log.error(`Error processing WebSocket message: ${err.message}`);
-        socket.send(JSON.stringify({
-          type: 'error',
-          payload: { message: 'Invalid message format' }
-        }));
+  // Initialize the WebSocket adapter with our connection handler
+  wsAdapter.initialize(async (socket, request) => {
+    try {
+      const url = new URL(request.url, `http://${request.headers.host}`);
+      console.log(`WebSocket connection URL: ${url}`);
+      
+      const userId = url.searchParams.get('userId');
+          
+      if (!userId) {
+        fastify.log.error('WebSocket connection attempt without userId');
+        socket.close(1008, "Missing user identification");
+        return;
       }
-    });
-    
-    socket.on('close', () => {
-      fastify.log.info(`WebSocket connection closed: ${clientId}`);
       
-      matchmakingService.removeFromQueue(clientId);
+      // Use the actual user ID directly
+      const clientId = userId;
       
-      wsAdapter.removeClient(clientId);
-    });
+      // Make sure user exists in the database
+      try {
+        await matchmakingService.getUserWithElo(clientId);
+      } catch (error) {
+        fastify.log.error(`Error getting user data: ${error.message}`);
+        socket.close(1011, "Error retrieving user data");
+        return;
+      }
+      
+      // Register the new client with user data
+      wsAdapter.registerClient(clientId, socket, { userId });
+      
+      fastify.log.info(`New WebSocket connection from user: ${clientId}`);
+      
+      // Set up message handler for this socket
+      socket.on('message', async (rawMessage) => {
+        console.log(`Received message from ${clientId}: ${rawMessage}`);
+        
+        try {
+          // Parse the message
+          let data;
+          if (typeof rawMessage === 'string') {
+            data = JSON.parse(rawMessage);
+          } else {
+            // If it's a Buffer, convert to string first
+            data = JSON.parse(rawMessage.toString());
+          }
+          
+          // Check if data has the expected format
+          if (!data || !data.type) {
+            console.error(`Invalid message format from ${clientId}: ${rawMessage}`);
+            wsAdapter.sendToClient(clientId, 'error', { 
+              message: 'Invalid message format: missing type' 
+            });
+            return;
+          }
+          
+          console.log(`Processing message type: ${data.type}`);
+          
+          // Let the adapter try to process the message with registered handlers
+          const handled = await wsAdapter.processMessage(clientId, data);
+          
+          // If not handled by a registered handler, process it here
+          if (!handled) {
+            console.log(`No handler for message type: ${data.type}`);
+            wsAdapter.sendToClient(clientId, 'error', { 
+              message: `Unsupported message type: ${data.type}` 
+            });
+          }
+        } catch (error) {
+          console.error(`Error processing message: ${error.message}`);
+          wsAdapter.sendToClient(clientId, 'error', { 
+            message: `Error processing message: ${error.message}` 
+          });
+        }
+      });
+      
+      // Handle disconnection
+      socket.on('close', () => {
+        console.log(`Client disconnected: ${clientId}`);
+        
+        // Remove from matchmaking queue if present
+        matchmakingService.removeFromQueue(clientId);
+        
+        // Remove client from adapter
+        wsAdapter.removeClient(clientId);
+      });
+      
+      // Handle socket errors
+      socket.on('error', (error) => {
+        console.error(`WebSocket error for client ${clientId}:`, error);
+      });
+      
+      // Send welcome message
+      wsAdapter.sendToClient(clientId, 'welcome', {
+        message: 'Connected to matchmaking service',
+        userId: clientId
+      });
+    } catch (error) {
+      fastify.log.error(`Error in WebSocket connection handler: ${error.message}`);
+      socket.close(1011, "Internal server error");
+    }
   });
   
-  const activeMatches = new Map();
-  const userMatches = new Map();
-  
-  async function getOpponentId(playerId, matchId) {
-    const matchData = activeMatches.get(matchId);
-    if (!matchData) {
-      const matchWithPlayers = await matchmakingService.getMatchWithPlayers(matchId);
-      if (!matchWithPlayers) return null;
-      
-      const players = matchWithPlayers.players.map(p => p.player_id);
-      return players.find(id => id != playerId);
-    }
+  // Register message handlers
+  registerMessageHandlers(wsAdapter);
+}
+
+/**
+ * Register all message type handlers with the WebSocket adapter
+ * @param {WebSocketAdapter} wsAdapter - The WebSocket adapter instance
+ */
+function registerMessageHandlers(wsAdapter) {
+  // Find match handler
+  wsAdapter.registerMessageHandler('find_match', async (clientId, payload) => {
+    console.log(`Processing find_match request from ${clientId}`);
+    const match = await matchmakingService.addToQueue(clientId);
+    console.log(`FIND_MATCH result:`, match);
     
-    return matchData.player1Id === playerId ? matchData.player2Id : matchData.player1Id;
-  }
-  
-  async function trackMatch(matchId, player1Id, player2Id) {
-    activeMatches.set(matchId, { player1Id, player2Id });
-    userMatches.set(player1Id, matchId);
-    userMatches.set(player2Id, matchId);
-  }
-  
-  function completeMatch(matchId) {
-    const matchData = activeMatches.get(matchId);
-    if (matchData) {
-      userMatches.delete(matchData.player1Id);
-      userMatches.delete(matchData.player2Id);
-      activeMatches.delete(matchId);
+    if (match) {
+      wsAdapter.sendToClient(match.player1.id, 'match_found', {
+        matchId: match.matchId,
+        opponent: {
+          id: match.player2.id,
+          elo: match.player2.elo_score
+        }
+      });
+      
+      wsAdapter.sendToClient(match.player2.id, 'match_found', {
+        matchId: match.matchId,
+        opponent: {
+          id: match.player1.id,
+          elo: match.player1.elo_score
+        }
+      });
+      
+      setTimeout(() => {
+        wsAdapter.sendToClient(match.player1.id, 'game_start', { matchId: match.matchId });
+        wsAdapter.sendToClient(match.player2.id, 'game_start', { matchId: match.matchId });
+      }, 3000);
+      console.log(`The game will start in 3 seconds between ${match.player1.id} and ${match.player2.id}`);
+    } else {
+      wsAdapter.sendToClient(clientId, 'waiting_for_match', { 
+        position: matchmakingService.getQueuePosition(clientId) 
+      });
     }
-  }
+  });
+  
+  // Cancel matchmaking handler
+  wsAdapter.registerMessageHandler('cancel_matchmaking', async (clientId, payload) => {
+    matchmakingService.removeFromQueue(clientId);
+    wsAdapter.sendToClient(clientId, 'matchmaking_cancelled', {});
+  });
+  
+  // Friend match request handler
+  wsAdapter.registerMessageHandler('friend_match_request', async (clientId, payload) => {
+    const { friendId } = payload;
+    
+    const inviteSent = wsAdapter.sendToClient(friendId, 'friend_match_invite', {
+      fromId: clientId
+    });
+    
+    if (inviteSent) {
+      wsAdapter.sendToClient(clientId, 'friend_invite_sent', { friendId });
+    } else {
+      wsAdapter.sendToClient(clientId, 'friend_invite_failed', { 
+        friendId, 
+        reason: 'Friend is offline' 
+      });
+    }
+  });
+  
+  // Friend match accept handler
+  wsAdapter.registerMessageHandler('friend_match_accept', async (clientId, payload) => {
+    const { fromId } = payload;
+    
+    const friendMatch = await matchmakingService.createMatch(
+      fromId, 
+      clientId, 
+      'friendly'
+    );
+    
+    if (friendMatch) {
+      wsAdapter.sendToClient(fromId, 'friend_match_created', {
+        matchId: friendMatch.matchId,
+        opponent: {
+          id: clientId,
+          elo: friendMatch.player2.elo_score
+        }
+      });
+      
+      wsAdapter.sendToClient(clientId, 'friend_match_created', {
+        matchId: friendMatch.matchId,
+        opponent: {
+          id: fromId,
+          elo: friendMatch.player1.elo_score
+        }
+      });
+      
+      setTimeout(() => {
+        wsAdapter.sendToClient(fromId, 'game_start', { matchId: friendMatch.matchId });
+        wsAdapter.sendToClient(clientId, 'game_start', { matchId: friendMatch.matchId });
+      }, 3000);
+    }
+  });
+  
+  // Paddle move handler
+  wsAdapter.registerMessageHandler('paddle_move', async (clientId, payload) => {
+    const { matchId, position } = payload;
+    const opponentId = await matchmakingService.getOpponentId(clientId, matchId);
+    
+    if (opponentId) {
+      wsAdapter.sendToClient(opponentId, 'opponent_paddle_move', {
+        position
+      });
+    }
+  });
+  
+  // Ball update handler
+  wsAdapter.registerMessageHandler('ball_update', async (clientId, payload) => {
+    const { matchId, position, velocity } = payload;
+    const opponentId = await matchmakingService.getOpponentId(clientId, matchId);
+    
+    if (opponentId) {
+      wsAdapter.sendToClient(opponentId, 'ball_update', {
+        position,
+        velocity
+      });
+    }
+  });
+  
+  // Game score update handler
+  wsAdapter.registerMessageHandler('score_update', async (clientId, payload) => {
+    const { matchId, player1Score, player2Score } = payload;
+    const opponentId = await matchmakingService.getOpponentId(clientId, matchId);
+    
+    if (opponentId) {
+      wsAdapter.sendToClient(opponentId, 'score_update', {
+        player1Score,
+        player2Score
+      });
+    }
+  });
+  
+  // Game end handler
+  wsAdapter.registerMessageHandler('game_end', async (clientId, payload) => {
+    const { matchId, winner, player1Goals, player2Goals } = payload;
+    
+    // Update match result in database
+    const result = await matchmakingService.updateMatchResult(
+      matchId,
+      winner,
+      player1Goals,
+      player2Goals
+    );
+    
+    // Notify both players about the result
+    if (result) {
+      const match = await matchmakingService.getMatchById(matchId);
+      if (match) {
+        const player1Id = match.player1_id;
+        const player2Id = match.player2_id;
+        
+        wsAdapter.sendToClient(player1Id, 'game_result', result);
+        wsAdapter.sendToClient(player2Id, 'game_result', result);
+      }
+    }
+  });
+}
+
+// Export a function to initialize the WebSocket controller
+export function initializeWebSocketController(server, fastify) {
+  const wsAdapter = createWebSocketAdapter(server);
+  setupWebSocketHandlers(wsAdapter, fastify);
+  return wsAdapter;
 }

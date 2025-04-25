@@ -14,123 +14,55 @@ class WebSocketAdapter {
     this.wss = new WebSocketServer({ server });
     this.clients = new Map(); // Map of client connections: clientId -> { socket, userData }
     this.rooms = new Map();   // Map of room connections: roomId -> Set of clients
-    this.setupConnectionHandler();
+    this.messageHandlers = new Map(); // Map of message type handlers
   }
 
   /**
-   * Set up handler for new connections
+   * Initialize the WebSocket server with message handlers
+   * @param {Function} onConnection - Function to call when a new connection is established
    */
-  setupConnectionHandler() {
+  initialize(onConnection) {
     this.wss.on('connection', (socket, request) => {
-      // Generate a temporary ID for the socket if not authenticated yet
-      const clientId = uuidv4();
-      
-      // Register the new client
-      this.registerClient(clientId, socket);
-      
-      console.log(`New WebSocket connection: ${clientId}`);
-      
-      // Send welcome message
-      this.sendToClient(clientId, 'welcome', { 
-        message: 'Connected to matchmaking service',
-        clientId
-      });
-      
-      // Set up message handler
-      socket.on('message', (rawMessage) => {
-        try {
-          const message = JSON.parse(rawMessage);
-          this.handleMessage(clientId, socket, message);
-        } catch (error) {
-          console.error('Failed to parse message:', error);
-          this.sendToClient(clientId, 'error', { 
-            message: 'Invalid message format'
-          });
-        }
-      });
-      
-      // Handle disconnection
-      socket.on('close', () => {
-        console.log(`Client disconnected: ${clientId}`);
-        this.handleDisconnect(clientId);
-      });
-      
-      // Handle errors
-      socket.on('error', (error) => {
-        console.error(`WebSocket error for client ${clientId}:`, error);
-      });
-    });
-  }
-  
-  /**
-   * Handle incoming messages from clients
-   * @param {string} clientId - ID of the client sending the message
-   * @param {WebSocket} socket - WebSocket connection of the client
-   * @param {Object} message - Parsed message from the client
-   */
-  handleMessage(clientId, socket, message) {
-    const { type, payload } = message;
-    
-    console.log(`Received message from ${clientId}: ${type}`);
-    
-    // Handle different message types
-    switch (type) {
-      case 'join_room':
-        this.joinRoom(clientId, payload.roomId);
-        break;
-        
-      case 'leave_room':
-        this.leaveRoom(clientId, payload.roomId);
-        break;
-        
-      case 'room_message':
-        this.sendToRoom(payload.roomId, payload.type || 'message', payload.data, clientId);
-        break;
-        
-      // Additional message types will be handled by external controllers
-      default:
-        // Emit an event for custom message handlers
-        if (this.messageHandler) {
-          this.messageHandler(clientId, socket, message);
-        }
-    }
-  }
-  
-  /**
-   * Register an external message handler
-   * @param {Function} handler - Function to handle messages: (clientId, socket, message) => void
-   */
-  setMessageHandler(handler) {
-    this.messageHandler = handler;
-  }
-  
-  /**
-   * Handle client disconnection
-   * @param {string} clientId - ID of the disconnected client
-   */
-  handleDisconnect(clientId) {
-    // Clean up: Remove client from all rooms
-    this.rooms.forEach((clients, roomId) => {
-      if (clients.has(clientId)) {
-        this.leaveRoom(clientId, roomId);
+      // Let the controller handle the connection
+      if (onConnection) {
+        onConnection(socket, request);
       }
     });
-    
-    // Remove client from clients map
-    this.removeClient(clientId);
-    
-    // Notify disconnect handler if registered
-    if (this.disconnectHandler) {
-      this.disconnectHandler(clientId);
-    }
   }
   
   /**
-   * Register a disconnect handler
-   * @param {Function} handler - Function to handle disconnections: (clientId) => void
+   * Register a message type handler
+   * @param {string} messageType - Type of message to handle
+   * @param {Function} handler - Handler function (clientId, payload) => Promise<void>
    */
-  setDisconnectHandler(handler) {
-    this.disconnectHandler = handler;
+  registerMessageHandler(messageType, handler) {
+    this.messageHandlers.set(messageType, handler);
+  }
+  
+  /**
+   * Process an incoming message
+   * @param {string} clientId - ID of the client sending the message
+   * @param {Object} message - Parsed message object
+   * @returns {Promise<boolean>} Whether the message was handled
+   */
+  async processMessage(clientId, message) {
+    const { type, payload } = message;
+    
+    const handler = this.messageHandlers.get(type);
+    if (handler) {
+      try {
+        await handler(clientId, payload);
+        return true;
+      } catch (error) {
+        console.error(`Error handling message type ${type}:`, error);
+        this.sendToClient(clientId, 'error', { 
+          message: `Error processing ${type}: ${error.message}`
+        });
+        return false;
+      }
+    }
+    
+    return false; // Message type not handled
   }
   
   /**
@@ -211,7 +143,7 @@ class WebSocketAdapter {
    */
   sendToClient(clientId, messageType, payload) {
     const client = this.clients.get(clientId);
-    if (!client || client.socket.readyState !== 1) { // 1 = WebSocket.OPEN
+    if (!client || client.socket.readyState !== WebSocket.OPEN) {
       return false;
     }
     
@@ -276,7 +208,7 @@ class WebSocketAdapter {
    */
   isClientConnected(clientId) {
     const client = this.clients.get(clientId);
-    return client !== undefined && client.socket.readyState === 1;
+    return client !== undefined && client.socket.readyState === WebSocket.OPEN;
   }
   
   /**
@@ -308,100 +240,7 @@ class WebSocketAdapter {
   }
 }
 
-function registerWebSocketAdapter(fastify) {
-  const adapter = new WebSocketAdapter(fastify.server);
-  return adapter;
+// Export a factory function to create the adapter
+export function createWebSocketAdapter(server) {
+  return new WebSocketAdapter(server);
 }
-
-export { WebSocketAdapter, registerWebSocketAdapter };
-// export function registerWebSocketAdapter(fastify) {
-//   // Create WebSocketServer with appropriate options
-//   const wss = new WebSocketServer({ 
-//     server: fastify.server,
-//   });
-  
-//   // Handle connection directly here for initial debugging
-//   wss.on('connection', (socket, request) => {
-//     fastify.log.info('Raw WebSocket connection received');
-    
-//     socket.on('error', (error) => {
-//       fastify.log.error('WebSocket error event:', error);
-//     });
-//   });
-  
-//   wss.on('error', (error) => {
-//     fastify.log.error('WebSocketServer error:', error);
-//   });
-  
-//   const adapter = {
-//     server: wss,
-//     clients: new Map(), // Store connected clients: userId -> {socket, userData}
-    
-//     // Send message to specific client by ID
-//     sendToClient: function(clientId, messageType, payload) {
-//       const client = this.clients.get(clientId);
-//       if (client && client.socket.readyState === WebSocket.OPEN) {
-//         try {
-//           const message = JSON.stringify({
-//             type: messageType,
-//             payload: payload
-//           });
-//           client.socket.send(message);
-//           return true;
-//         } catch (error) {
-//           fastify.log.error(`Error sending message to client ${clientId}:`, error);
-//           return false;
-//         }
-//       }
-//       return false;
-//     },
-    
-//     // Broadcast to all clients
-//     broadcast: function(messageType, payload, excludeId = null) {
-//       this.clients.forEach((client, id) => {
-//         if (id !== excludeId && client.socket.readyState === WebSocket.OPEN) {
-//           try {
-//             const message = JSON.stringify({
-//               type: messageType,
-//               payload: payload
-//             });
-//             client.socket.send(message);
-//           } catch (error) {
-//             fastify.log.error(`Error broadcasting to client ${id}:`, error);
-//           }
-//         }
-//       });
-//     },
-    
-//     // Register a new client connection
-//     registerClient: function(clientId, socket, userData = {}) {
-//       fastify.log.info(`Registering client: ${clientId}`);
-      
-//       // Set up error handler for this specific client
-//       socket.on('error', (error) => {
-//         fastify.log.error(`WebSocket error for client ${clientId}:`, error);
-//       });
-      
-//       this.clients.set(clientId, { 
-//         socket: socket,
-//         userData: userData
-//       });
-      
-//       fastify.log.info(`Client registered: ${clientId}, total clients: ${this.clients.size}`);
-//     },
-    
-//     // Remove a client
-//     removeClient: function(clientId) {
-//       fastify.log.info(`Removing client: ${clientId}`);
-//       const removed = this.clients.delete(clientId);
-//       fastify.log.info(`Client removed: ${clientId}, success: ${removed}, remaining clients: ${this.clients.size}`);
-//     },
-    
-//     // Get all online user IDs
-//     getOnlineUserIds: function() {
-//       return Array.from(this.clients.keys());
-//     }
-//   };
-  
-//   return adapter;
-// }

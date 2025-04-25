@@ -119,6 +119,7 @@ const { Database } = sqlite3;
 class DatabaseConnection {
   constructor() {
     const dbPath = path.resolve(__dirname, '../../data/elo_matchmaking.sqlite');
+    console.log(`database connection to ${dbPath} has Initialized!`);
     this.db = new Database(dbPath, (err) => {
       if (err) {
         console.error('Database connection error:', err.message);

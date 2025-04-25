@@ -23,25 +23,55 @@ class MatchmakingService {
     //add a player looking for a match
     async addToQueue(playerId) {
         try {
-            let user = await this.getUserWithElo(playerId);
-            if (!user) user = this.createNewUserRecord(playerId);
+            // Convert playerId to string to ensure consistent handling
+            const playerIdStr = String(playerId);
+            console.log("////////////////////////////////////////");
+            console.log(`player ${playerIdStr} added to queue`);
+            console.log("////////////////////////////////////////");
 
+            // Get or create user with consistent ID format
+            let user = await this.getUserWithElo(playerIdStr);
+            
+            if (!user) {
+                user = await this.createNewUserRecord(playerIdStr);
+            }
+            
+            console.log(`user ${user.id} has elo ${user.elo_score}`);
+            
+            // Check if player is already in queue
+            const existingPlayer = this.waitingPlayers.find(p => p.playerId === user.id);
+            if (existingPlayer) {
+                console.log(`Player ${user.id} is already in queue`);
+                return null;
+            }
+            
+            // Add to waiting queue with consistent ID format
             this.waitingPlayers.push({
                 playerId: user.id,
                 elo: user.elo_score,
                 joinedAt: Date.now()
             });
-            console.log(`user ${user.id} added to queue`);
+            console.log("////////////////////////////////////////")
+            console.log(this.waitingPlayers);
+            console.log("////////////////////////////////////////")
 
             if (this.waitingPlayers.length >= 2) {
-                this.removeFromQueue(playerId);
-                return this.findMatch(user.id, user.elo_score);
+                // Find a match with another player
+                const match = await this.findMatch(user.id, user.elo_score);
+                
+                // Only remove from queue if match is found
+                if (match) {
+                    this.removeFromQueue(user.id);
+                    return match;
+                }
+                return null;
             } else {
                 console.log(`Not enough players in queue. Current size: ${this.waitingPlayers.length}`);
                 return null;
             }
         } catch (error) {
             console.error('Error adding to queue:', error);
+            return null;
         }
     }
 
@@ -53,9 +83,10 @@ class MatchmakingService {
     // Find a suitable opponent
     async findMatch(playerId, userElo) {
         try {
+            const playerIdStr = String(playerId);
             // Don't match against self
-            const possibleOpponents = this.waitingPlayers.filter(p => p.playerId !== playerId);
-
+            const possibleOpponents = this.waitingPlayers.filter(p => p.playerId !== playerIdStr);
+            
             if (possibleOpponents.length === 0) {
                 return null;
             }
@@ -418,6 +449,9 @@ class MatchmakingService {
                     }
                 );
             });
+            console.log("////////////////////////////////////////")
+            console.log("lol",existingUser);
+            console.log("////////////////////////////////////////")
 
             // If user exists, return it
             if (existingUser) {
@@ -439,20 +473,25 @@ class MatchmakingService {
     async createNewUserRecord(playerId) {
         // Default values for a new player
         const defaultElo = 1000;
+        const playerIdStr = String(playerId);
+        console.log("////////////////////////////////////////")
+
+        console.log(playerIdStr);
+        console.log("////////////////////////////////////////")
 
         try {
             // Insert new player record
             const result = await db.run(
                 `INSERT INTO players (id, elo_score, wins, losses, draws, total_matches, total_goals) 
          VALUES (?, ?, 0, 0, 0, 0, 0)`,
-                [playerId, defaultElo]
+                [playerIdStr, defaultElo]
             );
 
             console.log(`[MATCHMAKING] Created new player record for ID ${playerId}`);
 
             // Return the newly created player data
             return {
-                id: playerId,
+                id: playerIdStr,
                 elo_score: defaultElo
             };
         } catch (error) {
