@@ -69,12 +69,7 @@ export const FindOpponent = createComponent((props: FindOpponentProps) => {
 			console.log('Match found:', data);
 			showOpponentFound(data.opponent);
 		});
-		
-		props.client.on('game_start', (data: any) => {
-			// Redirect to the game page or start the game
-			navigate(`/play/online-match/${data.matchId}`);
-		});
-		
+				
 		props.client.on('waiting_for_match', (data: any) => {
 			console.log(data);
 			

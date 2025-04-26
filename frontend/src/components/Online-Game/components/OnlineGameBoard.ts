@@ -22,7 +22,7 @@ export class OnlineGameBoard extends GameBoard {
 		isPlayer1: boolean
 	) {
 		// Call parent constructor with no game type to use the overloaded empty constructor
-		super();
+		super("Local", canvas, gameHeader);
 
 		// Reassign the properties that would normally be set in the parent constructor
 		this.canvas = canvas;

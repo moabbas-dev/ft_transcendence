@@ -24,10 +24,16 @@ export class PongGameClient {
 		  const message = JSON.parse(event.data);
 		  console.log('Received:', message);
 		  
-		  // Trigger all callbacks for this message type
-		  if (this.callbacks[message.type]) {
-			this.callbacks[message.type].forEach(callback => callback(message.payload));
-		  }
+		// Trigger all callbacks for this message type
+		if (this.callbacks[message.type]) {
+			this.callbacks[message.type].forEach(callback => {
+				try {
+					callback(message.payload);
+				} catch (err) {
+					console.error(`Error in callback for message type ${message.type}:`, err);
+				}
+			});
+		}
 		} catch (err) {
 		  console.error('Error processing message:', err);
 		}

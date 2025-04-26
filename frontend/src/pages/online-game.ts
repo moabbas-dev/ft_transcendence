@@ -131,6 +131,7 @@ export default {
 		
 		client.on('game_start', (data) => {
 			console.log(`Game started with match ID: ${data.matchId}`);
+			
 			if (currentMatchId && currentOpponentId && currentMatchId === data.matchId) {
 				startGame(currentMatchId, currentOpponentId, isPlayer1);
 			}
@@ -327,7 +328,7 @@ export default {
 			// Get canvas and header
 			const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
 			const gameHeader = document.getElementById('game-header') as HTMLElement;
-
+			
 			// Create game board
 			if (canvas && gameHeader) {
 				gameBoard = new OnlineGameBoard(
