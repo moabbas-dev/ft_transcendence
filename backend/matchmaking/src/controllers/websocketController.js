@@ -125,21 +125,28 @@ function registerMessageHandlers(wsAdapter) {
     console.log(`FIND_MATCH result:`, match);
     
     if (match) {
-      wsAdapter.sendToClient(match.player1.id, 'match_found', {
+      const p1 = wsAdapter.sendToClient(match.player1.id, 'match_found', {
         matchId: match.matchId,
         opponent: {
           id: match.player2.id,
           elo: match.player2.elo_score
         }
       });
-      
-      wsAdapter.sendToClient(match.player2.id, 'match_found', {
+
+      const p2 = wsAdapter.sendToClient(match.player2.id, 'match_found', {
         matchId: match.matchId,
         opponent: {
           id: match.player1.id,
           elo: match.player1.elo_score
         }
       });
+      if (!p1 || !p2) {
+        console.error(`Failed to send match_found message to one of the players`);
+        wsAdapter.sendToClient(clientId, 'error', { 
+          message: 'Failed to notify opponent about the match' 
+        });
+        return;
+      }
       
       setTimeout(() => {
         wsAdapter.sendToClient(match.player1.id, 'game_start', { matchId: match.matchId });

@@ -35,7 +35,6 @@ class MatchmakingService {
             if (!user) {
                 user = await this.createNewUserRecord(playerIdStr);
             }
-            
             console.log(`user ${user.id} has elo ${user.elo_score}`);
             
             // Check if player is already in queue
@@ -529,7 +528,7 @@ class MatchmakingService {
 
     getQueuePosition(playerId) {
         const playerIndex = this.waitingPlayers.findIndex(p => p.playerId === playerId);
-        if (playerIndex === -1) return null;
+        if (playerIndex === -1) return 0;
         return playerIndex + 1;
     }
 

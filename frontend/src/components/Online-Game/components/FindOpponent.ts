@@ -76,6 +76,8 @@ export const FindOpponent = createComponent((props: FindOpponentProps) => {
 		});
 		
 		props.client.on('waiting_for_match', (data: any) => {
+			console.log(data);
+			
 			const queuePosition = data.position;
 			const positionText = container.querySelector("p.text-xl");
 			if (positionText) {

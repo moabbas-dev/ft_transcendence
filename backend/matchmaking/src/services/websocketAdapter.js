@@ -111,7 +111,7 @@ class WebSocketAdapter {
    * @param {Object} userData - Optional user data to associate with the client
    */
   registerClient(clientId, socket, userData = {}) {
-    this.clients.set(clientId, { socket, userData });
+    this.clients.set(clientId, { socket, userData });    
   }
   
   /**
@@ -142,11 +142,13 @@ class WebSocketAdapter {
    * @returns {boolean} Whether the message was sent successfully
    */
   sendToClient(clientId, messageType, payload) {
-    const client = this.clients.get(clientId);
+    const client = this.clients.get(String(clientId)); 
+    // console.log(`Sending message to client ${client}:`, { type: messageType, payload });    
+    
     if (!client || client.socket.readyState !== WebSocket.OPEN) {
       return false;
     }
-    
+
     try {
       client.socket.send(JSON.stringify({
         type: messageType,

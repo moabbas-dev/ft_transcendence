@@ -119,7 +119,7 @@ export default {
 				queuePositionElement.textContent = `Position: ${data.position}`;
 			}
 		});
-		
+
 		client.on('match_found', (data) => {
 			currentMatchId = data.matchId;
 			currentOpponentId = data.opponent.id;
@@ -197,12 +197,13 @@ export default {
 				heading.className = "text-4xl md:text-5xl font-bold text-center text-pongpink drop-shadow-[0_0_15px_#ff00e4]";
 
 				gameModeDetails.innerHTML = '';
-				const findOpponent = FindOpponent({heading, isIconVisible, toggleInterval});
+				const findOpponent = FindOpponent({heading, isIconVisible, toggleInterval, client});
 				gameModeDetails.appendChild(findOpponent);
 				isIconVisible = !isIconVisible;
 				
 				// Start matchmaking
-				client.findMatch();
+				// client.findMatch();
+				console.log("find_match request sent");
 				
 				// Add cancel button event handler
 				findOpponent.querySelector('#cancel-matchmaking')?.addEventListener('click', () => {
