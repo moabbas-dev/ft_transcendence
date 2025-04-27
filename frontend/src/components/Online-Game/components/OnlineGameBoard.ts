@@ -13,7 +13,7 @@ export class OnlineGameBoard extends GameBoard {
 	protected canvas: HTMLCanvasElement;
 	private lastReceivedState: any = null;
 	private lastInputTime: number = 0;
-	private inputDelay: number = 20; // Delay in ms to prevent sending too many updates
+	private inputDelay: number = 0; // Delay in ms to prevent sending too many updates
 
 	constructor(
 		canvas: HTMLCanvasElement,
@@ -60,10 +60,10 @@ export class OnlineGameBoard extends GameBoard {
 		// In online mode, each player only controls their own paddle
 		if (this.isPlayer1) {
 			this.player1Controller = new HumanPlayerController({ up: 'w', down: 's' }, 'player1Y');
-			this.player2Controller = new NetworkController(); // This receives updates from opponent
+			this.player2Controller = new NetworkController();
 		} else {
-			this.player1Controller = new NetworkController(); // This receives updates from opponent
-			this.player2Controller = new HumanPlayerController({ up: 'w', down: 's' }, 'player1Y');
+			this.player1Controller = new NetworkController();
+			this.player2Controller = new HumanPlayerController({ up: 'w', down: 's' }, 'player2Y');
 		}
 	}
 
@@ -228,11 +228,25 @@ export class OnlineGameBoard extends GameBoard {
 				this.sendPaddlePosition();
 			}
 
-			// Ball and score are controlled by server
-			// Local prediction can be added for smoother gameplay
+			// Apply server state if available
 			if (this.lastReceivedState) {
 				this.applyServerState(this.lastReceivedState);
 			}
+
+			// Important: Apply boundary constraints to keep paddles inside canvas
+			this.clampPaddlePosition('player1Y');
+			this.clampPaddlePosition('player2Y');
+
+			// Update ball physics if we're the authority for the ball
+			const isAuthority = (this.state.servingPlayer === 1 && this.isPlayer1) ||
+				(this.state.servingPlayer === 2 && !this.isPlayer1);
+			if (isAuthority) {
+				this.ballController.update(this.canvas, this.state);
+				this.sendBallUpdate();
+			}
+
+			// Update scores display
+			this.updateScoreDisplay();
 		}
 	}
 
