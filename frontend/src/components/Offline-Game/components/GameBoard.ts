@@ -383,7 +383,7 @@ export class GameBoard {
 		);
 	}
 
-	startGame() {
+	protected startGame() {
 		this.init();
 		this.gameLoop();
 	}
@@ -397,7 +397,7 @@ export class GameBoard {
 		this.startGame()
 	}
 
-	private gameLoop = () => {
+	protected gameLoop = () => {
 		this.draw();
 		if (!this.state.gamePaused)
 			this.update();

@@ -44,7 +44,7 @@ const Friend = createComponent((props: FriendProps) => {
         : 'bg-gray-700 text-gray-400 cursor-not-allowed'}"
       ${!isAvailable ? 'disabled' : ''}
     >
-      ${t('play.onlineGame.invite')}
+      ${'invite'}
     </button>
   `;
   

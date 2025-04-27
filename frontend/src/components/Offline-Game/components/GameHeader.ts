@@ -11,9 +11,12 @@ import {
 	createParticles,
 	initBackgrounds,
   } from "./HeaderAnimations_utils.js";
+import { GameType } from "../../../types/types.js";
 
 interface OfflineGameHeader {
-	gameMode: "AI" | "Local";
+	gameMode: GameType;
+	player1_id?: string;
+	player2_id?: string;
 }
 
 const aiImages = [aiPic1, aiPic2, aiPic3, aiPic4, aiPic5];
@@ -45,10 +48,10 @@ export const OfflineGameHeader = createComponent((props: OfflineGameHeader) => {
 		<!-- Player 1 Info -->
 		<div class="flex items-center gap-1 sm:gap-2 md:gap-4 justify-self-start">
 		<div id="player-avatar-container">
-			<img src="${playerPic}" alt="Player 1" class="w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 rounded-full border border-blue-300 md:border-2">
+			<img src="${props.gameMode === 'online' ? playerPic : playerPic}" alt="Player 1" class="w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 rounded-full border border-blue-300 md:border-2">
 		</div>
 		<div>
-			<p class="font-bold text-sm sm:text-base md:text-xl text-blue-200">${props.gameMode === "AI" ? "Player" : "Player 1"}</p>
+			<p class="font-bold text-sm sm:text-base md:text-xl text-blue-200">${props.gameMode === "AI" ? "Player" : props.gameMode === "Local"? "Player 1" : ''}</p>
 			<div class="flex items-center">
 			<p id="player-score1" class="text-lg sm:text-xl md:text-2xl font-bold relative">
 				<span class="relative z-10 text-white">0</span>

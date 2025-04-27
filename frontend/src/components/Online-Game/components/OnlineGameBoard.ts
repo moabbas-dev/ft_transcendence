@@ -9,7 +9,7 @@ export class OnlineGameBoard extends GameBoard {
 	private opponentId: string;
 	private isPlayer1: boolean; // Determines which paddle this player controls
 	private lastSentBallUpdate: number = 0;
-	private ballUpdateInterval: number = 50; // Send ball updates every 50ms
+	private ballUpdateInterval: number = 0; // Send ball updates every 50ms
 	protected canvas: HTMLCanvasElement;
 	private lastReceivedState: any = null;
 	private lastInputTime: number = 0;
@@ -25,7 +25,7 @@ export class OnlineGameBoard extends GameBoard {
 		isPlayer1: boolean
 	) {
 		// Call parent constructor with no game type to use the overloaded empty constructor
-		super("Local", canvas, gameHeader);
+		super("online", canvas, gameHeader);
 
 		// Reassign the properties that would normally be set in the parent constructor
 		this.canvas = canvas;
@@ -88,6 +88,28 @@ export class OnlineGameBoard extends GameBoard {
 		this.canvas.addEventListener('touchstart', this.handleTouchStart.bind(this));
 		this.canvas.addEventListener('touchmove', this.handleTouchMove.bind(this));
 		this.canvas.addEventListener('touchend', this.handleTouchEnd.bind(this));
+	}
+
+	// Override the startGame method to properly initialize the ball
+	startGame() {
+		this.state.gameStarted = true;
+		this.state.gameEnded = false;
+
+		// Initialize ball position at center
+		this.state.ballX = this.canvas.width / 2;
+		this.state.ballY = this.canvas.height / 2;
+
+		// Initialize ball velocity - let's have player 1 always serve first
+		this.state.servingPlayer = 1;
+
+		// Set initial ball direction based on serving player
+		const angle = (Math.random() * Math.PI / 2) - Math.PI / 4; // Between -45 and 45 degrees
+		const speed = 8;
+		this.state.ballSpeedX = Math.cos(angle) * speed * (this.state.servingPlayer === 1 ? 1 : -1);
+		this.state.ballSpeedY = Math.sin(angle) * speed;
+
+		// Start the game loop
+		this.gameLoop();
 	}
 
 	private handleTouchStart(e: TouchEvent): void {
@@ -167,9 +189,6 @@ export class OnlineGameBoard extends GameBoard {
 	}
 
 	private sendPaddlePosition(): void {
-		// Only send paddle position if game is started and not too frequently
-		if (!this.state.gameStarted) return;
-
 		const now = Date.now();
 		if (now - this.lastInputTime < this.inputDelay) return;
 
@@ -178,9 +197,7 @@ export class OnlineGameBoard extends GameBoard {
 		this.lastInputTime = now;
 	}
 
-	// Setup WebSocket handlers for server state updates
 	private setupWebSocketHandlers(): void {
-		// Handle opponent paddle movement
 		this.client.on('opponent_paddle_move', (data: any) => {
 			if (this.isPlayer1) {
 				this.state.player2Y = data.position;
@@ -189,9 +206,7 @@ export class OnlineGameBoard extends GameBoard {
 			}
 		});
 
-		// Handle ball updates from the authoritative player
 		this.client.on('ball_update', (data: any) => {
-			// Only update ball if we're not the authoritative player
 			if ((this.state.servingPlayer === 1 && !this.isPlayer1) ||
 				(this.state.servingPlayer === 2 && this.isPlayer1)) {
 				this.state.ballX = data.position.x;
@@ -201,13 +216,11 @@ export class OnlineGameBoard extends GameBoard {
 			}
 		});
 
-		// Handle score updates
 		this.client.on('score_update', (data: any) => {
 			this.state.scores.player1 = data.player1Score;
 			this.state.scores.player2 = data.player2Score;
 		});
 
-		// Handle match results
 		this.client.on('match_results', (data: any) => {
 			this.state.gameEnded = true;
 			this.showGameOverScreen(data.winner === this.playerId ? 'You' : 'Opponent',
@@ -236,13 +249,47 @@ export class OnlineGameBoard extends GameBoard {
 
 		const isAuthority = (this.state.servingPlayer === 1 && this.isPlayer1) ||
 			(this.state.servingPlayer === 2 && !this.isPlayer1);
+
 		if (isAuthority) {
 			this.ballController.update(this.canvas, this.state);
 			this.sendBallUpdate();
 		}
 
+		// Keep paddles within canvas bounds
+		this.clampPaddlePosition('player1Y');
+		this.clampPaddlePosition('player2Y');
+
 		// Update scores display
 		this.updateScoreDisplay();
+	}
+
+	// Add method to send ball updates
+	private sendBallUpdate(): void {
+		const now = Date.now();
+		if (now - this.lastSentBallUpdate < this.ballUpdateInterval) return;
+
+		this.client.send('ball_update', {
+			matchId: this.matchId,
+			position: { x: this.state.ballX, y: this.state.ballY },
+			velocity: { x: this.state.ballSpeedX, y: this.state.ballSpeedY },
+			scores: this.state.scores
+		});
+
+		this.lastSentBallUpdate = now;
+	}
+
+	// Add method to update scores in the UI
+	private updateScoreDisplay(): void {
+		const score1Element = this.gameHeader.querySelector('#player-score1');
+		const score2Element = this.gameHeader.querySelector('#player-score2');
+
+		if (score1Element) {
+			score1Element.textContent = `${this.state.scores.player1}`;
+		}
+
+		if (score2Element) {
+			score2Element.textContent = `${this.state.scores.player2}`;
+		}
 	}
 
 	private applyServerState(serverState: any): void {

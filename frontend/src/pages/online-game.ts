@@ -8,6 +8,7 @@ import { PongGameClient } from "../components/Online-Game/components/Game.js";
 import { OnlineGameBoard } from "../components/Online-Game/components/OnlineGameBoard.js";
 import { refreshRouter } from "../router.js";
 import store from "../../store/store.js";
+import { OfflineGameHeader } from "../components/Offline-Game/components/GameHeader.js";
 
 export default {
 	render: (container: HTMLElement) => {
@@ -260,8 +261,8 @@ export default {
 			if (gameModeDetails) {
 				gameModeDetails.innerHTML = `
 					<div class="flex flex-col items-center justify-center gap-6">
-						<h2 class="text-2xl text-pongcyan">${t('play.onlineGame.waitingForFriend')}</h2>
-						<p>${t('play.onlineGame.inviteSentTo')} ${friendId}</p>
+						<h2 class="text-2xl text-pongcyan">${'waiting for Friend'}</h2>
+						<p>${'Invite sent to'} ${friendId}</p>
 						<div class="spinner"></div>
 						<button id="cancel-invite" class="px-6 py-3 bg-red-600 text-white rounded-md">
 							${t('play.onlineGame.cancel')}
@@ -310,27 +311,19 @@ export default {
 		function startGame(matchId:string, opponentId:string, isPlayer1:boolean) {
 			// Create game container
 			container.innerHTML = `
-				<div class="header z-50 w-full bg-black"></div>
-				<div class="game-container flex-1 relative flex flex-col">
-					<div id="game-header" class="flex justify-between items-center p-4 bg-black text-white">
-						<div class="player-info">
-							<span class="player-name">You</span>
-							<span id="player-score1" class="player-score">0</span>
-						</div>
-						<div class="timer">00:00</div>
-						<div class="player-info">
-							<span id="player-score2" class="player-score">0</span>
-							<span class="player-name">Opponent</span>
-						</div>
+				<div class="content relative flex flex-col items-center sm:justify-around h-screen max-sm:p-2 sm:border-8 bg-pongcyan border-pongdark border-solid">
+					<div class="player-header w-4/5 "></div>
+					<div class="game-container flex items-center justify-center max-sm:flex-1 max-w-0">
+						<canvas id="game-canvas" class="portrait:-rotate-90 portrait:origin-center max-sm:w-[85dvh] max-sm:h-[85dvw] portrait:w-[85dvh] portrait:h-[85dvw] sm:w-[80vw] sm:h-[80vh] rounded-lg -rotate-90 sm:rotate-0"></canvas>
 					</div>
-					<canvas id="game-canvas" class="w-full h-full flex-1 border-4 border-pongcyan rounded-2xl shadow-[0_0_50px_rgba(0,247,255,0.5)] transform transition-transform animate-flip-up animate-duration-[3s]"></canvas>
 				</div>
 			`;
 			
 			// Get canvas and header
 			const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
-			const gameHeader = document.getElementById('game-header') as HTMLElement;
-			
+			const gameHeader = OfflineGameHeader({gameMode: 'online', player1_id: userId, player2_id: opponentId });
+			const playerHeader = container.querySelector('.player-header')!;
+			playerHeader.appendChild(gameHeader);
 			// Create game board
 			if (canvas && gameHeader) {
 				gameBoard = new OnlineGameBoard(
