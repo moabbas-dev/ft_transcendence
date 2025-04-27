@@ -9,11 +9,11 @@ export class OnlineGameBoard extends GameBoard {
 	private opponentId: string;
 	private isPlayer1: boolean; // Determines which paddle this player controls
 	private lastSentBallUpdate: number = 0;
-	private ballUpdateInterval: number = 0; // Send ball updates every 50ms
+	private ballUpdateInterval: number = 30; // Send ball updates every 50ms
 	protected canvas: HTMLCanvasElement;
 	private lastReceivedState: any = null;
 	private lastInputTime: number = 0;
-	private inputDelay: number = 0; // Delay in ms to prevent sending too many updates
+	private inputDelay: number = 30; // Delay in ms to prevent sending too many updates
 
 	constructor(
 		canvas: HTMLCanvasElement,

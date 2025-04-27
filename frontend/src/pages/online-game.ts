@@ -321,7 +321,7 @@ export default {
 			
 			// Get canvas and header
 			const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
-			const gameHeader = OfflineGameHeader({gameMode: 'online', player1_id: userId, player2_id: opponentId });
+			const gameHeader = OfflineGameHeader({gameMode: 'online', player1_id: userId, player2_id: opponentId, client });
 			const playerHeader = container.querySelector('.player-header')!;
 			playerHeader.appendChild(gameHeader);
 			// Create game board

@@ -22,7 +22,7 @@ export class PongGameClient {
 	  this.ws.onmessage = (event) => {
 		try {
 		  const message = JSON.parse(event.data);
-		  console.log('Received:', message);
+		//   console.log('Received:', message);
 		  
 		// Trigger all callbacks for this message type
 		if (this.callbacks[message.type]) {
