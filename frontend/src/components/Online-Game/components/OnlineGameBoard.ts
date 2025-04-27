@@ -2,6 +2,7 @@ import { t } from "../../../languages/LanguageController.js";
 import { refreshRouter } from "../../../router.js";
 import { GameBoard, gameState } from "../../Offline-Game/components/GameBoard.js";
 import { BallController, Controller, HumanPlayerController } from "../../Offline-Game/components/GameControllers.js";
+import { updateBackgrounds } from "../../Offline-Game/components/HeaderAnimations_utils.js";
 import { PongGameClient } from "./Game.js";
 
 export class OnlineGameBoard extends GameBoard {
@@ -16,6 +17,7 @@ export class OnlineGameBoard extends GameBoard {
 	private lastReceivedState: any = null;
 	private lastInputTime: number = 0;
 	private inputDelay: number = 30; // Delay in ms to prevent sending too many updates
+	private lastSentPaddlePosition: number = 0;
 
 	constructor(
 		canvas: HTMLCanvasElement,
@@ -116,6 +118,7 @@ export class OnlineGameBoard extends GameBoard {
 
 	gameLoop = () => {
 		this.draw();
+		this.update();
 		if (!this.state.gameEnded) {
 			requestAnimationFrame(this.gameLoop);
 		} else {
@@ -223,9 +226,13 @@ export class OnlineGameBoard extends GameBoard {
 		const now = Date.now();
 		if (now - this.lastInputTime < this.inputDelay) return;
 
-		const position = this.isPlayer1 ? this.state.player1Y : this.state.player2Y;
-		this.client.updatePaddlePosition(this.matchId, position);
-		this.lastInputTime = now;
+		const currentPosition = this.isPlayer1 ? this.state.player1Y : this.state.player2Y;
+
+		if (currentPosition !== this.lastSentPaddlePosition) {
+			this.client.updatePaddlePosition(this.matchId, currentPosition);
+			this.lastSentPaddlePosition = currentPosition;
+			this.lastInputTime = now;
+		}
 	}
 
 	private setupWebSocketHandlers(): void {
@@ -289,6 +296,10 @@ export class OnlineGameBoard extends GameBoard {
 		this.clampPaddlePosition('player2Y');
 
 		this.updateScoreDisplay();
+
+		if (Math.max(this.state.scores.player1, this.state.scores.player2) >= 10) {
+			this.state.gameEnded = true;
+		}
 	}
 
 	// Add method to send ball updates
@@ -309,14 +320,15 @@ export class OnlineGameBoard extends GameBoard {
 	// Add method to update scores in the UI
 	private updateScoreDisplay(): void {
 		const score1Element = this.gameHeader.querySelector('#player-score1');
-		const score2Element = this.gameHeader.querySelector('#player-score2');
-
 		if (score1Element) {
-			score1Element.textContent = `${this.state.scores.player1}`;
+		  score1Element.textContent = `${this.state.scores.player1}`;
+		  updateBackgrounds(this.state.scores.player1, this.state.scores.player2);
 		}
-
+		
+		const score2Element = this.gameHeader.querySelector('#player-score2');
 		if (score2Element) {
-			score2Element.textContent = `${this.state.scores.player2}`;
+		  score2Element.textContent = `${this.state.scores.player2}`;
+		  updateBackgrounds(this.state.scores.player1, this.state.scores.player2);
 		}
 	}
 
