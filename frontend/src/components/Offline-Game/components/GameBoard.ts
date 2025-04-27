@@ -397,7 +397,7 @@ export class GameBoard {
 		this.startGame()
 	}
 
-	protected gameLoop = () => {
+	gameLoop = () => {
 		this.draw();
 		if (!this.state.gamePaused)
 			this.update();

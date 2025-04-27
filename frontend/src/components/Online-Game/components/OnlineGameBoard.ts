@@ -1,3 +1,5 @@
+import { t } from "../../../languages/LanguageController.js";
+import { refreshRouter } from "../../../router.js";
 import { GameBoard, gameState } from "../../Offline-Game/components/GameBoard.js";
 import { BallController, Controller, HumanPlayerController } from "../../Offline-Game/components/GameControllers.js";
 import { PongGameClient } from "./Game.js";
@@ -110,6 +112,35 @@ export class OnlineGameBoard extends GameBoard {
 
 		// Start the game loop
 		this.gameLoop();
+	}
+
+	gameLoop = () => {
+		this.draw();
+		if (!this.state.gameEnded) {
+			requestAnimationFrame(this.gameLoop);
+		} else {
+			const resultsPopup = document.querySelector("#result-popup")!;
+			resultsPopup.classList.toggle("hidden")
+			let text = ""
+			if (this.gameScore.player1 > this.gameScore.player2)
+				text = "Player 1"
+			else if (this.gameType == "AI") {
+				text = "AI"
+			} else {
+				text = "Player 2"
+			}
+			const winnerText = resultsPopup.querySelector('#winner-text')!
+			winnerText.textContent = `${text} ${t('play.resultsPopup.title')}`;
+
+			const scoreText = resultsPopup.querySelector('#score-text')!
+			scoreText.textContent = `${t('play.resultsPopup.finalScore')}: ${this.gameScore.player1} - ${this.gameScore.player2}`
+
+			const restartButton = resultsPopup.querySelector("#restart-btn")
+			restartButton?.addEventListener('click', () => {
+				// this.restartGame();
+				refreshRouter()
+			}, { once: true });
+		}
 	}
 
 	private handleTouchStart(e: TouchEvent): void {
@@ -229,7 +260,7 @@ export class OnlineGameBoard extends GameBoard {
 	}
 
 	// Override update method to rely on server state
-	update(): void {
+	update() {
 		// Handle local player's paddle
 		if (this.isPlayer1) {
 			this.player1Controller.update(this.canvas, this.state);
@@ -239,7 +270,6 @@ export class OnlineGameBoard extends GameBoard {
 			this.sendPaddlePosition();
 		}
 
-		// Apply server state if available
 		if (this.lastReceivedState) {
 			this.applyServerState(this.lastReceivedState);
 		}
@@ -255,11 +285,9 @@ export class OnlineGameBoard extends GameBoard {
 			this.sendBallUpdate();
 		}
 
-		// Keep paddles within canvas bounds
 		this.clampPaddlePosition('player1Y');
 		this.clampPaddlePosition('player2Y');
 
-		// Update scores display
 		this.updateScoreDisplay();
 	}
 
