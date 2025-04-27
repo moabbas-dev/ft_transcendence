@@ -18,6 +18,7 @@ class MatchmakingService {
         this.eloService = EloService;
         this.waitingPlayers = [];
         this.rangeIncrement = 50;
+        this.activeGames = new Map();
     }
 
     //add a player looking for a match
@@ -31,19 +32,19 @@ class MatchmakingService {
 
             // Get or create user with consistent ID format
             let user = await this.getUserWithElo(playerIdStr);
-            
+
             if (!user) {
                 user = await this.createNewUserRecord(playerIdStr);
             }
             console.log(`user ${user.id} has elo ${user.elo_score}`);
-            
+
             // Check if player is already in queue
             const existingPlayer = this.waitingPlayers.find(p => p.playerId === user.id);
             if (existingPlayer) {
                 console.log(`Player ${user.id} is already in queue`);
                 return null;
             }
-            
+
             // Add to waiting queue with consistent ID format
             this.waitingPlayers.push({
                 playerId: user.id,
@@ -57,7 +58,7 @@ class MatchmakingService {
             if (this.waitingPlayers.length >= 2) {
                 // Find a match with another player
                 const match = await this.findMatch(user.id, user.elo_score);
-                
+
                 // Only remove from queue if match is found
                 if (match) {
                     this.removeFromQueue(user.id);
@@ -85,7 +86,7 @@ class MatchmakingService {
             const playerIdStr = String(playerId);
             // Don't match against self
             const possibleOpponents = this.waitingPlayers.filter(p => p.playerId !== playerIdStr);
-            
+
             if (possibleOpponents.length === 0) {
                 return null;
             }
@@ -180,6 +181,115 @@ class MatchmakingService {
             throw error;
         }
     }
+
+    async createGameInstance(matchId, player1Id, player2Id) {
+        // Initialize game state
+        const gameState = {
+            ballX: 400, // Center X
+            ballY: 300, // Center Y
+            ballSpeedX: 5 * (Math.random() > 0.5 ? 1 : -1),
+            ballSpeedY: 5 * (Math.random() * 2 - 1),
+            player1Y: 250,
+            player2Y: 250,
+            scores: { player1: 0, player2: 0 },
+            paddleHeight: 120,
+            paddleWidth: 20,
+            ballSize: 12,
+            paddleOffset: 30,
+            canvasWidth: 800,
+            canvasHeight: 600
+        };
+
+        this.activeGames.set(String(matchId), {
+            gameState,
+            player1Id,
+            player2Id,
+            lastUpdateTime: Date.now()
+        });
+
+        // Start game loop for this match
+        this.runGameLoop(matchId);
+    }
+
+    // Game loop runs physics on server
+    runGameLoop(matchId) {
+        const game = this.activeGames.get(matchId);
+        if (!game) return;
+
+        const gameLoop = setInterval(() => {
+            if (!this.activeGames.has(matchId)) {
+                clearInterval(gameLoop);
+                return;
+            }
+
+            const currentGame = this.activeGames.get(matchId);
+            const state = currentGame.gameState;
+
+            // Update ball position
+            state.ballX += state.ballSpeedX;
+            state.ballY += state.ballSpeedY;
+
+            // Check for wall collisions
+            if (state.ballY <= state.ballSize || state.ballY >= state.canvasHeight - state.ballSize) {
+                state.ballSpeedY *= -1;
+            }
+
+            // Check for paddle collisions
+            this.checkPaddleCollisions(state);
+
+            // Check for scoring
+            if (state.ballX <= 0) {
+                // Player 2 scores
+                state.scores.player2++;
+                this.resetBall(state, 1);
+            } else if (state.ballX >= state.canvasWidth) {
+                // Player 1 scores
+                state.scores.player1++;
+                this.resetBall(state, 2);
+            }
+
+            // Send updated state to both players
+            wsAdapter.sendToClient(currentGame.player1Id, 'game_state', state);
+            wsAdapter.sendToClient(currentGame.player2Id, 'game_state', state);
+
+            // Check for game end
+            if (state.scores.player1 >= 10 || state.scores.player2 >= 10) {
+                this.endGame(matchId);
+            }
+        }, 16); // 60fps
+    }
+
+    /**
+ * Get the opponent ID for a player in a match
+ * @param {string} playerId - ID of the player
+ * @param {string} matchId - ID of the match
+ * @returns {Promise<string|null>} - The opponent ID or null if not found
+ */
+    async getOpponentId(playerId, matchId) {
+        try {
+            const players = await new Promise((resolve, reject) => {
+                db.all(
+                    `SELECT mp.player_id FROM match_players mp WHERE mp.match_id = ?`,
+                    [matchId],
+                    (err, rows) => {
+                        if (err) reject(err);
+                        else resolve(rows);
+                    }
+                );
+            });
+
+            if (!players || players.length !== 2) {
+                return null;
+            }
+
+            const opponent = players.find(p => p.player_id != playerId);
+            return opponent ? opponent.player_id : null;
+        } catch (error) {
+            console.error(`Error getting opponent ID: ${error.message}`);
+            return null;
+        }
+    }
+
 
     /**
      * Updates a user's statistics after a match is completed
@@ -434,7 +544,7 @@ class MatchmakingService {
             throw error;
         }
     }
-    
+
     async getUserWithElo(playerId) {
         try {
             // First try to get existing user
@@ -449,7 +559,7 @@ class MatchmakingService {
                 );
             });
             console.log("////////////////////////////////////////")
-            console.log("lol",existingUser);
+            console.log("lol", existingUser);
             console.log("////////////////////////////////////////")
 
             // If user exists, return it

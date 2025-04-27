@@ -130,7 +130,8 @@ function registerMessageHandlers(wsAdapter) {
         opponent: {
           id: match.player2.id,
           elo: match.player2.elo_score
-        }
+        },
+        isPlayer1: true
       });
 
       const p2 = wsAdapter.sendToClient(match.player2.id, 'match_found', {
@@ -138,7 +139,8 @@ function registerMessageHandlers(wsAdapter) {
         opponent: {
           id: match.player1.id,
           elo: match.player1.elo_score
-        }
+        },
+        isPlayer1: false
       });
       if (!p1 || !p2) {
         console.error(`Failed to send match_found message to one of the players`);

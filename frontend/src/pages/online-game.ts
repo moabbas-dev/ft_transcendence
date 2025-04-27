@@ -123,7 +123,8 @@ export default {
 		client.on('match_found', (data) => {
 			currentMatchId = data.matchId;
 			currentOpponentId = data.opponent.id;
-			isPlayer1 = true; // We're player 1 if we initiated
+			isPlayer1 = data.isPlayer1; // We're player 1 if we initiated
+			console.log(`This is player 1: ${isPlayer1}`);
 			
 			// Show match found UI
 			showMatchFound(data.opponent);
@@ -309,7 +310,7 @@ export default {
 			// Create game container
 			container.innerHTML = `
 				<div class="header z-50 w-full bg-black"></div>
-				<div class="game-container flex-1 relative">
+				<div class="game-container flex-1 relative flex flex-col">
 					<div id="game-header" class="flex justify-between items-center p-4 bg-black text-white">
 						<div class="player-info">
 							<span class="player-name">You</span>
@@ -321,7 +322,7 @@ export default {
 							<span class="player-name">Opponent</span>
 						</div>
 					</div>
-					<canvas id="game-canvas" class="w-full h-full"></canvas>
+					<canvas id="game-canvas" class="w-full h-full flex-1 border-4 border-pongcyan rounded-2xl shadow-[0_0_50px_rgba(0,247,255,0.5)] transform transition-transform animate-flip-up animate-duration-[3s]"></canvas>
 				</div>
 			`;
 			

@@ -11,6 +11,9 @@ export class OnlineGameBoard extends GameBoard {
 	private lastSentBallUpdate: number = 0;
 	private ballUpdateInterval: number = 50; // Send ball updates every 50ms
 	protected canvas: HTMLCanvasElement;
+	private lastReceivedState: any = null;
+	private lastInputTime: number = 0;
+	private inputDelay: number = 20; // Delay in ms to prevent sending too many updates
 
 	constructor(
 		canvas: HTMLCanvasElement,
@@ -164,13 +167,18 @@ export class OnlineGameBoard extends GameBoard {
 	}
 
 	private sendPaddlePosition(): void {
-		// Only send paddle position if game is started
+		// Only send paddle position if game is started and not too frequently
 		if (!this.state.gameStarted) return;
+
+		const now = Date.now();
+		if (now - this.lastInputTime < this.inputDelay) return;
 
 		const position = this.isPlayer1 ? this.state.player1Y : this.state.player2Y;
 		this.client.updatePaddlePosition(this.matchId, position);
+		this.lastInputTime = now;
 	}
 
+	// Setup WebSocket handlers for server state updates
 	private setupWebSocketHandlers(): void {
 		// Handle opponent paddle movement
 		this.client.on('opponent_paddle_move', (data: any) => {
@@ -181,146 +189,127 @@ export class OnlineGameBoard extends GameBoard {
 			}
 		});
 
-		// Handle ball sync (when we're not the authoritative player)
-		this.client.on('ball_sync', (data: any) => {
-			// Only update ball if we're not the current authority
+		// Handle ball updates from the authoritative player
+		this.client.on('ball_update', (data: any) => {
+			// Only update ball if we're not the authoritative player
 			if ((this.state.servingPlayer === 1 && !this.isPlayer1) ||
 				(this.state.servingPlayer === 2 && this.isPlayer1)) {
-				this.state.ballX = data.ballData.x;
-				this.state.ballY = data.ballData.y;
-				this.state.ballSpeedX = data.ballData.speedX;
-				this.state.ballSpeedY = data.ballData.speedY;
+				this.state.ballX = data.position.x;
+				this.state.ballY = data.position.y;
+				this.state.ballSpeedX = data.velocity.x;
+				this.state.ballSpeedY = data.velocity.y;
 			}
 		});
 
-		// Handle goal updates
-		this.client.on('goal_update', (data: any) => {
-			// Update scores
-			if (data.scoringPlayer === 1) {
-				this.state.scores.player1 = data.newScore.player1;
-			} else {
-				this.state.scores.player2 = data.newScore.player2;
-			}
-
-			// Reset ball to center
-			this.resetBall();
-
-			// Set serving player
-			this.state.servingPlayer = data.scoringPlayer === 1 ? 2 : 1;
+		// Handle score updates
+		this.client.on('score_update', (data: any) => {
+			this.state.scores.player1 = data.player1Score;
+			this.state.scores.player2 = data.player2Score;
 		});
 
 		// Handle match results
 		this.client.on('match_results', (data: any) => {
 			this.state.gameEnded = true;
-
-			// Show game over screen
-			const winner = data.winner === this.playerId ? 'You' : 'Opponent';
-			this.showGameOverScreen(winner, data.finalScore, data.eloChange);
+			this.showGameOverScreen(data.winner === this.playerId ? 'You' : 'Opponent',
+				data.finalScore, data.eloChange);
 		});
 	}
 
-	// Keep the existing code in OnlineGameBoard.ts, but update these key sections:
-
-	// In the update() method:
+	// Override update method to rely on server state
 	update(): void {
-		// Call parent update to handle local game state
+		// Still allow local input processing
 		if (!this.state.gamePaused) {
-			this.player1Controller.update(this.canvas, this.state);
-			this.player2Controller.update(this.canvas, this.state);
-
-			// Only update ball if we're the authority for it
-			const isAuthority = (this.state.servingPlayer === 1 && this.isPlayer1) ||
-				(this.state.servingPlayer === 2 && !this.isPlayer1);
-
-			if (isAuthority && this.state.gameStarted && !this.state.gameEnded) {
-				this.ballController.update(this.canvas, this.state);
-
-				// Periodically send ball updates
-				const now = Date.now();
-				if (now - this.lastSentBallUpdate > this.ballUpdateInterval) {
-					this.client.updateBall(this.matchId, {
-						x: this.state.ballX,
-						y: this.state.ballY,
-						speedX: this.state.ballSpeedX,
-						speedY: this.state.ballSpeedY
-					});
-					this.lastSentBallUpdate = now;
-				}
-
-				// Check for goals
-				this.checkForGoals();
+			// Handle local player's paddle
+			if (this.isPlayer1) {
+				this.player1Controller.update(this.canvas, this.state);
+				this.sendPaddlePosition();
+			} else {
+				this.player2Controller.update(this.canvas, this.state);
+				this.sendPaddlePosition();
 			}
 
-			// Update scores in UI
-			const score1Element = this.gameHeader.querySelector('#player-score1');
-			if (score1Element) {
-				score1Element.textContent = `${this.state.scores.player1}`;
-			}
-
-			const score2Element = this.gameHeader.querySelector('#player-score2');
-			if (score2Element) {
-				score2Element.textContent = `${this.state.scores.player2}`;
-			}
-
-			// Check for game end
-			if (Math.max(this.state.scores.player1, this.state.scores.player2) >= 10 && !this.state.gameEnded) {
-				this.endGame();
+			// Ball and score are controlled by server
+			// Local prediction can be added for smoother gameplay
+			if (this.lastReceivedState) {
+				this.applyServerState(this.lastReceivedState);
 			}
 		}
 	}
 
-	// Add this method to check for goals
-	private checkForGoals(): void {
-		// Check if ball went past left edge (player 2 scores)
-		if (this.state.ballX < 0) {
-			this.state.scores.player2++;
-			this.client.reportGoal(this.matchId, 2, {
-				player1: this.state.scores.player1,
-				player2: this.state.scores.player2
-			});
-			this.resetBall();
-			this.state.servingPlayer = 1;
+	private applyServerState(serverState: any): void {
+		// Update ball position from server
+		this.state.ballX = serverState.ballX;
+		this.state.ballY = serverState.ballY;
+		this.state.ballSpeedX = serverState.ballSpeedX;
+		this.state.ballSpeedY = serverState.ballSpeedY;
+
+		// Update scores from server
+		this.state.scores.player1 = serverState.scores.player1;
+		this.state.scores.player2 = serverState.scores.player2;
+
+		// Update opponent paddle position
+		if (this.isPlayer1) {
+			this.state.player2Y = serverState.player2Y;
+		} else {
+			this.state.player1Y = serverState.player1Y;
 		}
 
-		// Check if ball went past right edge (player 1 scores)
-		if (this.state.ballX > this.canvas.width) {
-			this.state.scores.player1++;
-			this.client.reportGoal(this.matchId, 1, {
-				player1: this.state.scores.player1,
-				player2: this.state.scores.player2
-			});
-			this.resetBall();
-			this.state.servingPlayer = 2;
-		}
+		// // Update UI elements
+		// this.updateScoreDisplay();
 	}
 
-	// Add this method to handle game ending
-	private endGame(): void {
-		this.state.gameEnded = true;
+	// // Add this method to check for goals
+	// private checkForGoals(): void {
+	// 	// Check if ball went past left edge (player 2 scores)
+	// 	if (this.state.ballX < 0) {
+	// 		this.state.scores.player2++;
+	// 		this.client.reportGoal(this.matchId, 2, {
+	// 			player1: this.state.scores.player1,
+	// 			player2: this.state.scores.player2
+	// 		});
+	// 		this.resetBall();
+	// 		this.state.servingPlayer = 1;
+	// 	}
 
-		// Determine winner ID (which is the player's user ID in your system)
-		const winnerId = this.state.scores.player1 > this.state.scores.player2 ?
-			(this.isPlayer1 ? this.playerId : this.opponentId) :
-			(this.isPlayer1 ? this.opponentId : this.playerId);
+	// 	// Check if ball went past right edge (player 1 scores)
+	// 	if (this.state.ballX > this.canvas.width) {
+	// 		this.state.scores.player1++;
+	// 		this.client.reportGoal(this.matchId, 1, {
+	// 			player1: this.state.scores.player1,
+	// 			player2: this.state.scores.player2
+	// 		});
+	// 		this.resetBall();
+	// 		this.state.servingPlayer = 2;
+	// 	}
+	// }
 
-		// Report match completion to server
-		this.client.completeMatch(
-			this.matchId,
-			winnerId,
-			{
-				player1: this.state.scores.player1,
-				player2: this.state.scores.player2
-			}
-		);
-	}
+	// // Add this method to handle game ending
+	// private endGame(): void {
+	// 	this.state.gameEnded = true;
 
-	// Method to reset ball to center for a new point
-	private resetBall(): void {
-		this.state.ballX = this.canvas.width / 2;
-		this.state.ballY = this.canvas.height / 2;
-		this.state.ballSpeedX = (Math.random() > 0.5 ? 1 : -1) * 5;
-		this.state.ballSpeedY = (Math.random() * 2 - 1) * 5;
-	}
+	// 	// Determine winner ID (which is the player's user ID in your system)
+	// 	const winnerId = this.state.scores.player1 > this.state.scores.player2 ?
+	// 		(this.isPlayer1 ? this.playerId : this.opponentId) :
+	// 		(this.isPlayer1 ? this.opponentId : this.playerId);
+
+	// 	// Report match completion to server
+	// 	this.client.completeMatch(
+	// 		this.matchId,
+	// 		winnerId,
+	// 		{
+	// 			player1: this.state.scores.player1,
+	// 			player2: this.state.scores.player2
+	// 		}
+	// 	);
+	// }
+
+	// // Method to reset ball to center for a new point
+	// private resetBall(): void {
+	// 	this.state.ballX = this.canvas.width / 2;
+	// 	this.state.ballY = this.canvas.height / 2;
+	// 	this.state.ballSpeedX = (Math.random() > 0.5 ? 1 : -1) * 5;
+	// 	this.state.ballSpeedY = (Math.random() * 2 - 1) * 5;
+	// }
 
 	// Show game over screen with player stats
 	private showGameOverScreen(winner: string, finalScore: { player1: number, player2: number }, eloChange: any): void {
