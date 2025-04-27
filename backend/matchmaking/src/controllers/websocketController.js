@@ -234,13 +234,14 @@ function registerMessageHandlers(wsAdapter) {
   
   // Ball update handler
   wsAdapter.registerMessageHandler('ball_update', async (clientId, payload) => {
-    const { matchId, position, velocity } = payload;
+    const { matchId, position, velocity, scores } = payload;
     const opponentId = await matchmakingService.getOpponentId(clientId, matchId);
     
     if (opponentId) {
       wsAdapter.sendToClient(opponentId, 'ball_update', {
         position,
-        velocity
+        velocity,
+        scores
       });
     }
   });

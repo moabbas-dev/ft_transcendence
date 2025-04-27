@@ -1,5 +1,5 @@
 import { t } from "../../../languages/LanguageController.js";
-import { refreshRouter } from "../../../router.js";
+import { navigate, refreshRouter } from "../../../router.js";
 import { GameBoard, gameState } from "../../Offline-Game/components/GameBoard.js";
 import { BallController, Controller, HumanPlayerController } from "../../Offline-Game/components/GameControllers.js";
 import { updateBackgrounds } from "../../Offline-Game/components/HeaderAnimations_utils.js";
@@ -61,14 +61,15 @@ export class OnlineGameBoard extends GameBoard {
 	}
 
 	private initializeOnlineControllers(): void {
-		// In online mode, each player only controls their own paddle
-		if (this.isPlayer1) {
-			this.player1Controller = new HumanPlayerController({ up: 'w', down: 's' }, 'player1Y');
-			this.player2Controller = new NetworkController();
-		} else {
-			this.player1Controller = new NetworkController();
-			this.player2Controller = new HumanPlayerController({ up: 'w', down: 's' }, 'player2Y');
-		}
+		// if (this.isPlayer1) {
+		// 	this.player1Controller = new NetworkController();
+		// 	this.player2Controller = new HumanPlayerController({ up: 'w', down: 's' }, 'player2Y');
+		// } else {
+		// 	this.player1Controller = new HumanPlayerController({ up: 'w', down: 's' }, 'player1Y');
+		// 	this.player2Controller = new NetworkController();
+		// }
+		this.player1Controller = new HumanPlayerController({ up: 'w', down: 's' }, 'player1Y');
+		this.player2Controller = new NetworkController();
 	}
 
 	private initOnlineEventListeners(): void {
@@ -104,13 +105,23 @@ export class OnlineGameBoard extends GameBoard {
 		this.state.ballY = this.canvas.height / 2;
 
 		// Initialize ball velocity - let's have player 1 always serve first
-		this.state.servingPlayer = 1;
+		this.state.servingPlayer = 2;
 
 		// Set initial ball direction based on serving player
-		const angle = (Math.random() * Math.PI / 2) - Math.PI / 4; // Between -45 and 45 degrees
-		const speed = 8;
-		this.state.ballSpeedX = Math.cos(angle) * speed * (this.state.servingPlayer === 1 ? 1 : -1);
-		this.state.ballSpeedY = Math.sin(angle) * speed;
+		// const angle = (Math.random() * Math.PI / 2) - Math.PI / 4; // Between -45 and 45 degrees
+		// const speed = 8;
+		// this.state.ballSpeedX = Math.cos(angle) * speed * (this.state.servingPlayer === 1 ? 1 : -1);
+		// this.state.ballSpeedY = Math.sin(angle) * speed;
+		if (this.isPlayer1) {
+			this.state.servingPlayer = 1;
+			const angle = (Math.random() * Math.PI / 2) - Math.PI / 4;
+			const speed = 8;
+			this.state.ballSpeedX = Math.cos(angle) * speed;
+			this.state.ballSpeedY = Math.sin(angle) * speed;
+			
+			// Send initial ball state to Player 2
+			this.sendBallUpdate();
+		}
 
 		// Start the game loop
 		this.gameLoop();
@@ -140,8 +151,7 @@ export class OnlineGameBoard extends GameBoard {
 
 			const restartButton = resultsPopup.querySelector("#restart-btn")
 			restartButton?.addEventListener('click', () => {
-				// this.restartGame();
-				refreshRouter()
+				navigate("/play")
 			}, { once: true });
 		}
 	}
@@ -215,18 +225,20 @@ export class OnlineGameBoard extends GameBoard {
 		const paddleTarget = (relativeY / this.canvas.height) * this.canvas.height;
 
 		// Move the player's paddle
-		if (this.isPlayer1) {
-			this.state.player1Y = paddleTarget - (this.state.paddleHeight / 2);
-		} else {
-			this.state.player2Y = paddleTarget - (this.state.paddleHeight / 2);
-		}
+		// if (this.isPlayer1) {
+		// 	this.state.player2Y = paddleTarget - (this.state.paddleHeight / 2);
+		// } else {
+		// 	this.state.player1Y = paddleTarget - (this.state.paddleHeight / 2);
+		// }
+		this.state.player1Y = paddleTarget - (this.state.paddleHeight / 2);
 	}
 
 	private sendPaddlePosition(): void {
 		const now = Date.now();
 		if (now - this.lastInputTime < this.inputDelay) return;
 
-		const currentPosition = this.isPlayer1 ? this.state.player1Y : this.state.player2Y;
+		// const currentPosition = this.isPlayer1 ? this.state.player2Y : this.state.player1Y;
+		const currentPosition = this.state.player1Y;
 
 		if (currentPosition !== this.lastSentPaddlePosition) {
 			this.client.updatePaddlePosition(this.matchId, currentPosition);
@@ -237,20 +249,29 @@ export class OnlineGameBoard extends GameBoard {
 
 	private setupWebSocketHandlers(): void {
 		this.client.on('opponent_paddle_move', (data: any) => {
-			if (this.isPlayer1) {
-				this.state.player2Y = data.position;
-			} else {
-				this.state.player1Y = data.position;
-			}
+			// if (this.isPlayer1) {
+			// 	this.state.player1Y = data.position;
+			// } else {
+			// 	this.state.player2Y = data.position;
+			// }
+			this.state.player2Y = data.position;
 		});
 
 		this.client.on('ball_update', (data: any) => {
-			if ((this.state.servingPlayer === 1 && !this.isPlayer1) ||
-				(this.state.servingPlayer === 2 && this.isPlayer1)) {
+			if (!this.isPlayer1) {
+				console.log("NICE!!!");
+				console.log(data);
+				
 				this.state.ballX = data.position.x;
 				this.state.ballY = data.position.y;
 				this.state.ballSpeedX = data.velocity.x;
 				this.state.ballSpeedY = data.velocity.y;
+				const player1Score = typeof data.scores.player1 === 'number' ? data.scores.player1 : -1;
+				const player2Score = typeof data.scores.player2 === 'number' ? data.scores.player2 : -1;	
+				this.state.scores = {
+					player1: player1Score,
+					player2: player2Score
+				};
 			}
 		});
 
@@ -269,13 +290,15 @@ export class OnlineGameBoard extends GameBoard {
 	// Override update method to rely on server state
 	update() {
 		// Handle local player's paddle
-		if (this.isPlayer1) {
-			this.player1Controller.update(this.canvas, this.state);
-			this.sendPaddlePosition();
-		} else {
-			this.player2Controller.update(this.canvas, this.state);
-			this.sendPaddlePosition();
-		}
+		// if (this.isPlayer1) {
+		// 	this.player1Controller.update(this.canvas, this.state);
+		// 	this.sendPaddlePosition();
+		// } else {
+		// 	this.player2Controller.update(this.canvas, this.state);
+		// 	this.sendPaddlePosition();
+		// }
+		this.player1Controller.update(this.canvas, this.state);
+		this.sendPaddlePosition();
 
 		if (this.lastReceivedState) {
 			this.applyServerState(this.lastReceivedState);
@@ -284,10 +307,8 @@ export class OnlineGameBoard extends GameBoard {
 		this.clampPaddlePosition('player1Y');
 		this.clampPaddlePosition('player2Y');
 
-		const isAuthority = (this.state.servingPlayer === 1 && this.isPlayer1) ||
-			(this.state.servingPlayer === 2 && !this.isPlayer1);
-
-		if (isAuthority) {
+		// only one player should update the ball position
+		if (this.isPlayer1) {
 			this.ballController.update(this.canvas, this.state);
 			this.sendBallUpdate();
 		}
@@ -311,24 +332,34 @@ export class OnlineGameBoard extends GameBoard {
 			matchId: this.matchId,
 			position: { x: this.state.ballX, y: this.state.ballY },
 			velocity: { x: this.state.ballSpeedX, y: this.state.ballSpeedY },
-			scores: this.state.scores
+			scores: {
+				player1: this.state.scores.player1,
+				player2: this.state.scores.player2
+			}
 		});
 
 		this.lastSentBallUpdate = now;
 	}
 
-	// Add method to update scores in the UI
 	private updateScoreDisplay(): void {
 		const score1Element = this.gameHeader.querySelector('#player-score1');
-		if (score1Element) {
-		  score1Element.textContent = `${this.state.scores.player1}`;
-		  updateBackgrounds(this.state.scores.player1, this.state.scores.player2);
-		}
-		
 		const score2Element = this.gameHeader.querySelector('#player-score2');
-		if (score2Element) {
-		  score2Element.textContent = `${this.state.scores.player2}`;
-		  updateBackgrounds(this.state.scores.player1, this.state.scores.player2);
+		
+		if (score1Element && score2Element) {
+			if (this.isPlayer1) {
+				score1Element.textContent = String(this.state.scores.player1);
+				score2Element.textContent = String(this.state.scores.player2);
+			}
+			else {
+				score1Element.textContent = String(this.state.scores.player2);
+				score2Element.textContent = String(this.state.scores.player1);
+			}
+			
+			if (this.isPlayer1) {
+				updateBackgrounds(this.state.scores.player1, this.state.scores.player2);
+			} else {
+				updateBackgrounds(this.state.scores.player2, this.state.scores.player1);
+			}
 		}
 	}
 

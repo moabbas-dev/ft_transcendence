@@ -316,6 +316,13 @@ export default {
 					<div class="game-container flex items-center justify-center max-sm:flex-1 max-w-0">
 						<canvas id="game-canvas" class="portrait:-rotate-90 portrait:origin-center max-sm:w-[85dvh] max-sm:h-[85dvw] portrait:w-[85dvh] portrait:h-[85dvw] sm:w-[80vw] sm:h-[80vh] rounded-lg -rotate-90 sm:rotate-0"></canvas>
 					</div>
+					<div class="fixed hidden inset-0 flex items-center justify-center bg-black bg-opacity-75" id="result-popup">
+						<div class="bg-black border-2 border-pongcyan p-6 rounded-lg shadow-lg text-center">
+							<p class="text-xl font-bold mb-4 text-white text-shadow-neon" id="winner-text"></p>
+							<p class="mb-4 text-lg text-white text-shadow-neon" id="score-text"></p>
+							<button class="px-4 py-2 bg-pongcyan text-white border border-white rounded-lg transition-all hover:opacity-80 hover:shadow-neon" id="restart-btn" style="box-shadow: rgb(0, 255, 255) 0px 0px 10px, rgb(0, 255, 255) 0px 0px 20px;">Return</button>
+						</div>
+					</div>
 				</div>
 			`;
 			

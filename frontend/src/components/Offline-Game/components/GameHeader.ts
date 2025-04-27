@@ -153,8 +153,6 @@ export const OfflineGameHeader = createComponent((props: OfflineGameHeader) => {
 			fetchUserData(props.player1_id),
 			fetchUserData(props.player2_id)
 		]).then(([player1Data, player2Data]) => {
-			console.log("Player 1 Data:", player1Data);
-			console.log("Player 2 Data:", player2Data);
 
 			updatePlayerDisplay(1, player1Data);
 			updatePlayerDisplay(2, player2Data);
