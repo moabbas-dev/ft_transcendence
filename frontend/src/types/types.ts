@@ -13,3 +13,5 @@ export interface NotificationData {
 	created_at: Date;
 	is_read: boolean;
 }
+
+export type GameType = "AI" | "Local" | "online";

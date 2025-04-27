@@ -128,7 +128,7 @@ export default {
 			// Show match found UI
 			showMatchFound(data.opponent);
 		});
-		
+
 		client.on('game_start', (data) => {
 			console.log(`Game started with match ID: ${data.matchId}`);
 			

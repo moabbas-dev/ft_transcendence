@@ -1,6 +1,6 @@
 import { t } from "../../../languages/LanguageController.js";
 import { refreshRouter } from "../../../router.js";
-import { AIDifficulty } from "../../../types/types.js";
+import { AIDifficulty, GameType } from "../../../types/types.js";
 import { AIController, BallController, Controller, HumanPlayerController } from "./GameControllers.js";
 import { updateBackgrounds } from "./HeaderAnimations_utils.js";
 
@@ -30,7 +30,7 @@ export interface gameState {
 }
 
 export class GameBoard {
-	protected gameType: "AI" | "Local";
+	protected gameType: GameType;
 	protected canvas: HTMLCanvasElement;
 	protected ctx: CanvasRenderingContext2D;
 	protected state:gameState;
@@ -47,9 +47,9 @@ export class GameBoard {
 	 * from this class some methods like draw(), initEventListerners() ...
 	*/
 	constructor();
-	constructor(gameType: "AI" | "Local", canvas:HTMLCanvasElement, gameHeader:HTMLElement, difficulty?:AIDifficulty);
+	constructor(gameType: GameType, canvas:HTMLCanvasElement, gameHeader:HTMLElement, difficulty?:AIDifficulty);
 
-	constructor(gameType?: "AI" | "Local", canvas?:HTMLCanvasElement, gameHeader?:HTMLElement, difficulty?:AIDifficulty) {
+	constructor(gameType?: GameType, canvas?:HTMLCanvasElement, gameHeader?:HTMLElement, difficulty?:AIDifficulty) {
 		this.gameType = gameType!;
 		this.canvas = canvas!;
 		this.gameHeader = gameHeader!
@@ -377,7 +377,7 @@ export class GameBoard {
 		}
 	}
 
-	private clampPaddlePosition(positionKey: 'player1Y' | 'player2Y') {
+	protected clampPaddlePosition(positionKey: 'player1Y' | 'player2Y') {
 		this.state[positionKey] = Math.max(0,
 		  Math.min(this.canvas.height - this.state.paddleHeight, this.state[positionKey])
 		);
