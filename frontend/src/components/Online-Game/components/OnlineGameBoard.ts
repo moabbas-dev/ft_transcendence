@@ -217,37 +217,32 @@ export class OnlineGameBoard extends GameBoard {
 
 	// Override update method to rely on server state
 	update(): void {
-		// Still allow local input processing
-		if (!this.state.gamePaused) {
-			// Handle local player's paddle
-			if (this.isPlayer1) {
-				this.player1Controller.update(this.canvas, this.state);
-				this.sendPaddlePosition();
-			} else {
-				this.player2Controller.update(this.canvas, this.state);
-				this.sendPaddlePosition();
-			}
-
-			// Apply server state if available
-			if (this.lastReceivedState) {
-				this.applyServerState(this.lastReceivedState);
-			}
-
-			// Important: Apply boundary constraints to keep paddles inside canvas
-			this.clampPaddlePosition('player1Y');
-			this.clampPaddlePosition('player2Y');
-
-			// Update ball physics if we're the authority for the ball
-			const isAuthority = (this.state.servingPlayer === 1 && this.isPlayer1) ||
-				(this.state.servingPlayer === 2 && !this.isPlayer1);
-			if (isAuthority) {
-				this.ballController.update(this.canvas, this.state);
-				this.sendBallUpdate();
-			}
-
-			// Update scores display
-			this.updateScoreDisplay();
+		// Handle local player's paddle
+		if (this.isPlayer1) {
+			this.player1Controller.update(this.canvas, this.state);
+			this.sendPaddlePosition();
+		} else {
+			this.player2Controller.update(this.canvas, this.state);
+			this.sendPaddlePosition();
 		}
+
+		// Apply server state if available
+		if (this.lastReceivedState) {
+			this.applyServerState(this.lastReceivedState);
+		}
+
+		this.clampPaddlePosition('player1Y');
+		this.clampPaddlePosition('player2Y');
+
+		const isAuthority = (this.state.servingPlayer === 1 && this.isPlayer1) ||
+			(this.state.servingPlayer === 2 && !this.isPlayer1);
+		if (isAuthority) {
+			this.ballController.update(this.canvas, this.state);
+			this.sendBallUpdate();
+		}
+
+		// Update scores display
+		this.updateScoreDisplay();
 	}
 
 	private applyServerState(serverState: any): void {
@@ -267,63 +262,7 @@ export class OnlineGameBoard extends GameBoard {
 		} else {
 			this.state.player1Y = serverState.player1Y;
 		}
-
-		// // Update UI elements
-		// this.updateScoreDisplay();
 	}
-
-	// // Add this method to check for goals
-	// private checkForGoals(): void {
-	// 	// Check if ball went past left edge (player 2 scores)
-	// 	if (this.state.ballX < 0) {
-	// 		this.state.scores.player2++;
-	// 		this.client.reportGoal(this.matchId, 2, {
-	// 			player1: this.state.scores.player1,
-	// 			player2: this.state.scores.player2
-	// 		});
-	// 		this.resetBall();
-	// 		this.state.servingPlayer = 1;
-	// 	}
-
-	// 	// Check if ball went past right edge (player 1 scores)
-	// 	if (this.state.ballX > this.canvas.width) {
-	// 		this.state.scores.player1++;
-	// 		this.client.reportGoal(this.matchId, 1, {
-	// 			player1: this.state.scores.player1,
-	// 			player2: this.state.scores.player2
-	// 		});
-	// 		this.resetBall();
-	// 		this.state.servingPlayer = 2;
-	// 	}
-	// }
-
-	// // Add this method to handle game ending
-	// private endGame(): void {
-	// 	this.state.gameEnded = true;
-
-	// 	// Determine winner ID (which is the player's user ID in your system)
-	// 	const winnerId = this.state.scores.player1 > this.state.scores.player2 ?
-	// 		(this.isPlayer1 ? this.playerId : this.opponentId) :
-	// 		(this.isPlayer1 ? this.opponentId : this.playerId);
-
-	// 	// Report match completion to server
-	// 	this.client.completeMatch(
-	// 		this.matchId,
-	// 		winnerId,
-	// 		{
-	// 			player1: this.state.scores.player1,
-	// 			player2: this.state.scores.player2
-	// 		}
-	// 	);
-	// }
-
-	// // Method to reset ball to center for a new point
-	// private resetBall(): void {
-	// 	this.state.ballX = this.canvas.width / 2;
-	// 	this.state.ballY = this.canvas.height / 2;
-	// 	this.state.ballSpeedX = (Math.random() > 0.5 ? 1 : -1) * 5;
-	// 	this.state.ballSpeedY = (Math.random() * 2 - 1) * 5;
-	// }
 
 	// Show game over screen with player stats
 	private showGameOverScreen(winner: string, finalScore: { player1: number, player2: number }, eloChange: any): void {

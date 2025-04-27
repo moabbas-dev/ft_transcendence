@@ -125,7 +125,7 @@ export class GameBoard {
 		window.addEventListener('keydown', (e) => {
 			const key = e.key.toLowerCase();
 
-			if (key === 'escape' && this.state.gameStarted && !this.state.gameEnded) {
+			if (key === 'escape' && this.state.gameStarted && !this.state.gameEnded && this.gameType !== "online") {
 			  if (!this.state.keys[key]) {
 				this.state.gamePaused = !this.state.gamePaused;
 			  }
