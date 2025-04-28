@@ -190,24 +190,24 @@ class ChatWebSocketService {
   /**
    * Send a private message to another user
    */
-  public sendPrivateMessage(toUserId: number, content: string): void {
-    if (!this.userId || !this.username) {
-      console.error("Not authenticated");
-      return;
-    }
+  // public sendPrivateMessage(toUserId: number, content: string): void {
+  //   if (!this.userId || !this.username) {
+  //     console.error("Not authenticated");
+  //     return;
+  //   }
 
-    this.send("message:private", {
-      from: this.userId,
-      to: toUserId,
-      content,
-      timestamp: Date.now(),
-    });
-  }
+  //   this.send("message:private", {
+  //     from: this.userId,
+  //     to: toUserId,
+  //     content,
+  //     timestamp: Date.now(),
+  //   });
+  // }
 
   /**
  * Mark all messages in a room as read
  */
-public markMessagesAsRead(roomId: string): void {
+public markMessagesAsRead(roomId: string | null): void {
   if (!this.isConnected()) {
     console.error("WebSocket not connected");
     return;

@@ -27,7 +27,7 @@ export const Chat = createComponent(
     // Create the chat UI
     const renderChat = () => {
       container.innerHTML = `
-            <div class="flex flex-col bg-black bg-custom-gradient justify-between h-screen z-20 gap-2 bg-cover bg-center" style="background-image: ${activeUser ? `url(${bgImage})` : `url(${bgImage2})` }">
+            <div class="flex flex-col bg-black bg-custom-gradient justify-between h-screen z-20 gap-2 bg-cover bg-center" style="background-image: ${activeUser ? `url(${bgImage})` : `url(${bgImage2})`}">
                 <header class="flex h-fit items-center justify-between py-3 px-2 bg-[#202c33] shadow-[0_0_15px_rgba(0,247,255,0.3)]">
                     <div class="flex">
                         <div class="back_arrow sm:hidden text-pongcyan text-3xl flex items-center justify-center hover:cursor-pointer hover:opacity-80">
@@ -36,18 +36,17 @@ export const Chat = createComponent(
                         <div class="flex items-center z-10 justify-center gap-1 sm:gap-2"  id="friend_name">
                                     
                             <div class="avatar h-12 w-12 rounded-full bg-black border-2 ${activeUser ? 'border-pongcyan' : 'border-pongpink'} flex items-center justify-center text-xl font-semibold ${activeUser ? 'text-pongcyan' : 'text-pongpink'} ${activeUser ? 'shadow-[0_0_10px_rgba(0,247,255,0.4)]' : 'shadow-[0_0_10px_rgba(255,0,228,0.4)]'}">
-                              ${activeUser?.avatar_url ? 
-                              `<img src="${activeUser?.avatar_url}" class="h-11 w-11 rounded-full" alt="lol"/>` : 
-                              activeUser?.full_name?.charAt(0)?.toUpperCase() || "👀"
-                              }
+                              ${activeUser?.avatar_url ?
+          `<img src="${activeUser?.avatar_url}" class="h-11 w-11 rounded-full" alt="lol"/>` :
+          activeUser?.full_name?.charAt(0)?.toUpperCase() || "👀"
+        }
                             </div>
 
                             <div>
-                                <p class="text-base sm:text-xl ${activeUser ? "cursor-pointer hover:underline text-pongcyan" : "text-pongpink"} ">${
-                                  activeUser
-                                    ? `${activeUser.full_name} - ${activeUser.nickname}`
-                                    : t('chat.nochat')
-                                }</p>
+                                <p class="text-base sm:text-xl ${activeUser ? "cursor-pointer hover:underline text-pongcyan" : "text-pongpink"} ">${activeUser
+          ? `${activeUser.full_name} - ${activeUser.nickname}`
+          : t('chat.nochat')
+        }</p>
                             </div>
                         </div>
                     </div>
@@ -60,9 +59,8 @@ export const Chat = createComponent(
                 [&::-webkit-scrollbar-thumb:hover]:bg-[#2d3748] h-fit flex-1 flex flex-col-reverse gap-0.5">
                     ${renderMessages()}
                 </section>
-                ${
-                  activeUser
-                    ? `<div class="message-input-container flex items-center h-fit bg-[#202c33] border-t-2 border-pongcyan shadow-[0_0_15px_rgba(0,247,255,0.3)] gap-2 w-full px-3">
+                ${activeUser
+          ? `<div class="message-input-container flex items-center h-fit bg-[#202c33] border-t-2 border-pongcyan shadow-[0_0_15px_rgba(0,247,255,0.3)] gap-2 w-full px-3">
                     <div class="flex items-center w-full px-2 py-2">
                         <div 
                             id="message-input" 
@@ -93,13 +91,13 @@ export const Chat = createComponent(
                 <div id="emoticon-container" class="fixed bottom-20 sm:bottom-20 left-4 right-8 sm:left-auto sm:w-72 max-h-60 overflow-y-auto max-w-80 bg-black bg-opacity-95 rounded-lg shadow-[0_0_15px_rgba(255,0,228,0.5)] border border-pongpink p-2 z-30 grid grid-cols-5 gap-2 hidden">
                     <!-- Emoticons will be inserted here dynamically -->
                 </div>`
-                    : ""
-                }
+          : ""
+        }
             </div>
         `;
 
 
-        
+
 
       // Add event listeners after the HTML is rendered
       if (activeUser) {
@@ -117,8 +115,8 @@ export const Chat = createComponent(
             // Append it to a parent container, e.g. the main container
             container.appendChild(profilePopUp);
           }
-          
-          const profile = Profile({ 
+
+          const profile = Profile({
             uName: activeUser?.nickname,
           });
           console.log(activeUser?.nickname);
@@ -174,36 +172,30 @@ export const Chat = createComponent(
       return Object.entries(messagesByDate)
         .map(([date, dateMessages]) => {
           return `
-          <div class="flex justify-center items-center w-full bg-black bg-opacity-70 my-2 py-1 rounded-md border-t border-b border-pongcyan">
-              <div class="date-header text-center bg-ponghover text-pongcyan rounded-md px-2 py-1 shadow-[0_0_10px_rgba(0,247,255,0.3)]">
-                  ${date}
-              </div>
-          </div>
+
           ${dateMessages
-            .map((message) => {
-              const isCurrentUser = message.senderId == currentUserId;
+              .map((message) => {
+                const isCurrentUser = message.senderId == currentUserId;
 
-              const messageTime = new Date(
-                message.timestamp
-              ).toLocaleTimeString([], {
-                hour: "numeric",
-                minute: "2-digit",
-                hour12: true,
-              });
+                const messageTime = new Date(
+                  message.timestamp
+                ).toLocaleTimeString([], {
+                  hour: "numeric",
+                  minute: "2-digit",
+                  hour12: true,
+                });
 
-              return `
-                  <div class="flex w-full ${
-                    isCurrentUser ? "justify-end" : "justify-start"
+                return `
+                  <div class="flex w-full ${isCurrentUser ? "justify-end" : "justify-start"
                   }">
                       <div class="
                           flex flex-col justify-center pt-1 px-2 rounded-lg
                           max-w-[250px] md:max-w-sm break-words 2xl:max-w-xl
                           text-white [direction:ltr] min-w-0 text-[17px] text-left
-                          ${
-                            isCurrentUser
-                              ? "bg-[#202c33] mr-1 shadow-[0_0_8px_rgba(0,247,255,0.3)]"
-                              : "bg-[#005c4b] ml-1 shadow-[0_0_8px_rgba(255,0,228,0.3)]"
-                          }
+                          ${isCurrentUser
+                    ? "bg-[#202c33] mr-1 shadow-[0_0_8px_rgba(0,247,255,0.3)]"
+                    : "bg-[#005c4b] ml-1 shadow-[0_0_8px_rgba(255,0,228,0.3)]"
+                  }
                       ">
                           <div class="message-content break-words text-white">
                               ${formatMessageContent(message.content)}
@@ -212,8 +204,13 @@ export const Chat = createComponent(
                       </div>
                   </div>
               `;
-            })
-            .join("")}
+              })
+              .join("")}
+              <div class="flex justify-center items-center w-full bg-black bg-opacity-70 my-2 py-1 rounded-md border-t border-b border-pongcyan">
+                <div class="date-header text-center bg-ponghover text-pongcyan rounded-md px-2 py-1 shadow-[0_0_10px_rgba(0,247,255,0.3)]">
+                  ${date}
+                </div>
+              </div>
       `;
         })
         .join("");
@@ -365,9 +362,11 @@ export const Chat = createComponent(
         content,
         timestamp: tempMessage.timestamp,
       };
+      console.log(newMessage);
 
-      // Send via WebSocket
+      // // Send via WebSocket
       chatService.send("message:private", newMessage);
+      // chatService.sendPrivateMessage(activeUser.id, content);
     };
 
     const scrollToBottom = () => {
@@ -385,8 +384,8 @@ export const Chat = createComponent(
       avatar_url: string;
     }) => {
       activeUser = user;
-      console.log(activeUser);
-    
+      // console.log(activeUser);
+
       // Create room ID (combination of both usernames sorted alphabetically)
       const currentUserId = store.userId;
       if (currentUserId) {
@@ -394,21 +393,21 @@ export const Chat = createComponent(
         roomId = [currentUserId, user.id]
           .sort((a: any, b: any) => a - b)
           .join("-");
-    
+
         // Get message history for this room
         if (chatService.isConnected()) {
           chatService.getMessageHistory(roomId);
-          
+
           // Mark messages as read when opening the chat
           chatService.markMessagesAsRead(roomId);
-          
+
           // Request updated unread counts after marking messages as read
           chatService.send("messages:unread:get", {
             userId: store.userId
           });
         }
       }
-    
+
       renderChat();
     };
 
@@ -417,41 +416,42 @@ export const Chat = createComponent(
       // Listen for received messages
       chatService.on("message:received", (data: any) => {
         console.log("Received message:", data);
-        
+
         if (!data || !data.message) {
           console.error("Invalid message data received");
           return;
         }
-        
+
         const { message, roomId: msgRoomId } = data;
-        
+
         // Only add message if it's for the current room
         if (msgRoomId === roomId) {
           // Add the new message to the messages array
           messages = [message, ...messages];
           renderChat();
           scrollToBottom();
+          chatService.markMessagesAsRead(roomId);
         }
       });
 
       // Listen for sent message confirmations
       chatService.on("message:sent", (data: any) => {
         console.log("Message sent confirmation:", data);
-        
+
         if (!data || !data.message) {
           console.error("Invalid message sent data received");
           return;
         }
-        
+
         const { message, roomId: msgRoomId } = data;
-        
+
         // Check if this message is already in our messages array
         // (to avoid duplicates from the optimistic update)
-        const messageExists = messages.some(m => 
-          m.content === message.content && 
+        const messageExists = messages.some(m =>
+          m.content === message.content &&
           m.timestamp === message.timestamp
         );
-        
+
         // Only add message if it's for the current room and doesn't already exist
         if (msgRoomId === roomId && !messageExists) {
           messages = [message, ...messages];
