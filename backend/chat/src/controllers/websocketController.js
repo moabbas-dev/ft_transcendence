@@ -220,6 +220,25 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
     try {
       const { from, to, content, timestamp } = payload;
 
+
+      // Check if either user has blocked the other
+      const blockedUsers = await getBlockedUsers(from);
+      const isBlocked = blockedUsers.some(user => user.id === parseInt(to));
+
+      // Also check if recipient has blocked the sender
+      const recipientBlockedUsers = await getBlockedUsers(to);
+      const isBlockedByRecipient = recipientBlockedUsers.some(user => user.id === parseInt(from));
+      
+      if (isBlocked || isBlockedByRecipient) {
+        console.log(`Message blocked: User ${from} and ${to} have a block relationship`);
+        wsAdapter.sendTo(clientId, "message:blocked", {
+          to,
+          timestamp,
+          reason: isBlocked ? "You have blocked this user" : "You have been blocked by this user"
+        });
+        return;
+      }
+      
       // Create a room ID (combination of both usernames sorted alphabetically)
       const roomId = [from, to].sort().join("-");
 
@@ -359,25 +378,32 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
   wsAdapter.on("user:block", async ({ clientId, payload }) => {
     try {
       const { from: blockerId, blocked: blockedId } = payload;
-      console.log(blockerId, "blocked", blockedId);
       // Ensure IDs are valid numbers
-      if (typeof blockerId !== "number" || typeof blockedId !== "number") {
-        throw new Error("Invalid user IDs");
+      if (!blockerId || !blockedId) {
+        throw new Error("Missing user IDs");
       }
 
-      // Block the user
-      await blockUser(blockerId, blockedId);
+      const blockerIdNum = parseInt(blockerId);
+      const blockedIdNum = parseInt(blockedId);
 
-      console.log("the user:", blockerId, ", blocked:", blockedId);
+      if (isNaN(blockerIdNum) || isNaN(blockedIdNum)) {
+        throw new Error("Invalid user IDs - not valid numbers");
+      }
+      // Block the user
+      await blockUser(blockerIdNum, blockedIdNum);
+
+      console.log("the user:", blockerId, ",has blocked:", blockedId);
 
       // Notify the blocker
       wsAdapter.sendTo(clientId, "user:blocked", {
         userId: blockedId, // Send the blocked user's ID
       });
     } catch (error) {
-      fastify.log.error("Block error:", error);
+      console.error("Block error details:", error.message, error.stack);
+      fastify.log.error(`Block error: ${error.message}`);
       wsAdapter.sendTo(clientId, "error", {
         message: "Failed to block user",
+        details: error.message
       });
     }
   });
@@ -386,16 +412,34 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
   wsAdapter.on("user:unblock", async ({ clientId, payload }) => {
     try {
       const { from, unblocked } = payload;
+      
+      if (!from || !unblocked) {
+        throw new Error("Missing user IDs");
+      }
+
+      const blockerIdNum = parseInt(from);
+      const blockedIdNum = parseInt(unblocked);
+
+      console.log(blockedIdNum, blockerIdNum);
+      if (isNaN(blockerIdNum) || isNaN(blockedIdNum)) {
+        throw new Error("Invalid user IDs - not valid numbers");
+      }
 
       // Remove from blocked users in database
-      await unblockUser(from, unblocked);
+      await unblockUser(blockerIdNum, blockedIdNum);
+
+      console.log(blockerIdNum, "unblocked user", blockedIdNum);
 
       // Confirm unblock to user
-      wsAdapter.sendTo(clientId, "user:unblocked", { username: unblocked });
+      wsAdapter.sendTo(clientId, "user:unblocked", { 
+        userId: blockedIdNum 
+      });
     } catch (error) {
-      fastify.log.error("Error in user:unblock handler", error);
+      console.error("Unblock error details:", error.message, error.stack);
+      fastify.log.error(`Error in user:unblock handler: ${error.message}`);
       wsAdapter.sendTo(clientId, "error", {
         message: "Failed to unblock user",
+        details: error.message
       });
     }
   });
@@ -526,6 +570,41 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       fastify.log.error("Error fetching blocked users:", error);
       wsAdapter.sendTo(clientId, "error", {
         message: "Failed to fetch blocked users",
+        details: error.message
+      });
+    }
+  });
+
+  wsAdapter.on("user:check_blocked", async ({ clientId, payload }) => {
+    try {
+      const { userId, targetId } = payload;
+      
+      if (!userId || !targetId) {
+        wsAdapter.sendTo(clientId, "error", {
+          message: "Both user ID and target ID are required"
+        });
+        return;
+      }
+      
+      // Get the list of users blocked by userId
+      const blockedUsers = await getBlockedUsers(userId);
+      
+      // Check if targetId is in the list of blocked users
+      const isBlocked = blockedUsers.some(user => user.id === parseInt(targetId));
+      
+      console.log(`Checking if user ${userId} has blocked user ${targetId}: ${isBlocked}`);
+      
+      // Send the result back to the client
+      wsAdapter.sendTo(clientId, "user:blocked_status", {
+        userId,
+        targetId,
+        isBlocked
+      });
+      
+    } catch (error) {
+      console.error("Error checking blocked status:", error);
+      wsAdapter.sendTo(clientId, "error", {
+        message: "Failed to check blocked status",
         details: error.message
       });
     }

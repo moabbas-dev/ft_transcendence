@@ -324,20 +324,25 @@ public markMessagesAsRead(roomId: string | null): void {
       from: this.userId,
       blocked: blockedUserId,
     });
+
+    this.send('friend:remove', {
+      userId: this.userId,
+      friendId: blockedUserId
+    });
   }
 
   /**
    * Unblock a user
    */
-  public unblockUser(unblockedUsername: string): void {
+  public unblockUser(unblockedUserId: string): void {
     if (!this.username) {
       console.error("Not authenticated");
       return;
     }
 
     this.send("user:unblock", {
-      from: this.username,
-      unblocked: unblockedUsername,
+      from: this.userId,
+      unblocked: unblockedUserId,
     });
   }
 }

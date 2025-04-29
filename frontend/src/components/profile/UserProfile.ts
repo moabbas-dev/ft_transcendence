@@ -11,6 +11,8 @@ import { t } from "../../languages/LanguageController.js";
 import { chatService } from "../../utils/chatUtils/chatWebSocketService.js";
 import { UserFriends } from "./UserFriends.js";
 import { navigate } from "../../router.js";
+import Toast from "../../../src/toast/Toast";
+
 
 interface ProfileProps {
   uName: string;
@@ -114,21 +116,152 @@ export const Profile = createComponent((props: ProfileProps) => {
           }
         });
 
-        blockUserButton?.addEventListener("click", () => {
-          const fromUserId = store.userId;
-          const toUsername = props.uName;
+        chatService.send("user:check_blocked", {
+          userId: store.userId,
+          targetId: userData.id
+        });
+        
+        // Add this event listener
+        chatService.on("user:blocked_status", (data) => {
+          console.log(data);
+          if (data.targetId === userData.id) {
+            const isBlocked = data.isBlocked;
+            const blockButton = container.querySelector("#block-user");
+            
+            if (isBlocked && blockButton) {
+              // User is blocked, show unblock button
+              blockButton.textContent = t("profile.unblock");
+              blockButton.classList.remove("bg-red-500", "hover:bg-red-600");
+              blockButton.classList.add("bg-gray-500", "hover:bg-gray-600");
+              blockButton.id = "unblock-user";
+              
+              // Update event listeners
+              blockButton.removeEventListener("click", blockUserHandler);
+              blockButton.addEventListener("click", unblockUserHandler);
+            }
+          }
+        });
 
-          if (!fromUserId || !toUsername) {
-            console.error("Missing user information for friend request");
+        // blockUserButton?.addEventListener("click", () => {
+        //   const fromUserId = store.userId;
+        //   const toUsername = props.uName;
+
+        //   if (!fromUserId || !toUsername) {
+        //     console.error("Missing user information for friend request");
+        //     return;
+        //   }
+
+        //   chatService.blockUser(userData.id);
+          
+        //   // Update UI immediately
+        //   blockUserButton.textContent = t("Unblock User");
+
+        //   Toast.show(`You have blocked ${userData.nickname}`, "success");
+        //   blockUserButton.removeAttribute('id');
+        //   blockUserButton.id = 'unblock-user';
+        // });
+        function blockUserHandler() {
+          const fromUserId = store.userId;
+          
+          if (!fromUserId || !userData) {
+            console.error("Missing user information for blocking user");
             return;
           }
-
+        
+          // Send block request to server
+          // chatService.send("user:block", {
+          //   from: fromUserId,
+          //   blocked: userData.id
+          // });
           chatService.blockUser(userData.id);
           
           // Update UI immediately
-          blockUserButton.textContent = t("😝 Unblock User?");
+          const blockButton = container.querySelector("#block-user");
+          if (blockButton) {
+            blockButton.textContent = t("profile.unblock");
+            blockButton.classList.remove("bg-red-500", "hover:bg-red-600");
+            blockButton.classList.add("bg-gray-500", "hover:bg-gray-600");
+            
+            // Change the button ID to indicate it's now an unblock button
+            blockButton.id = "unblock-user";
+            
+            // Remove the old event listener and add a new one for unblocking
+            blockButton.removeEventListener("click", blockUserHandler);
+            blockButton.addEventListener("click", unblockUserHandler);
+          }
+          
+          Toast.show(`You have blocked ${userData.nickname}`, "success");
+        }
+        
+        function unblockUserHandler() {
+          const fromUserId = store.userId;
+          
+          if (!fromUserId || !userData) {
+            console.error("Missing user information for unblocking user");
+            return;
+          }
+        
+          // Send unblock request to server
+          // chatService.send("user:unblock", {
+          //   from: fromUserId,
+          //   unblocked: userData.id
+          // });
 
-        });
+          chatService.unblockUser(userData.id);
+          
+          // Update UI immediately
+          const unblockButton = container.querySelector("#unblock-user");
+          if (unblockButton) {
+            unblockButton.textContent = t("profile.block");
+            unblockButton.classList.remove("bg-gray-500", "hover:bg-gray-600");
+            unblockButton.classList.add("bg-red-500", "hover:bg-red-600");
+            
+            // Change the button ID back to block-user
+            unblockButton.id = "block-user";
+            
+            // Remove the old event listener and add a new one for blocking
+            unblockButton.removeEventListener("click", unblockUserHandler);
+            unblockButton.addEventListener("click", blockUserHandler);
+          }
+          
+          Toast.show(`You have unblocked ${userData.nickname}`, "success");
+        }
+        
+        // Now, let's update the initial event listeners to use these handler functions
+        // Replace the existing block button event listener with:
+        blockUserButton?.addEventListener("click", blockUserHandler);
+
+        // blockUserButton?.addEventListener("click", () => {
+        //   const fromUserId = store.userId;
+        //   const toUsername = props.uName;
+        
+        //   if (!fromUserId || !toUsername) {
+        //     console.error("Missing user information for blocking user");
+        //     return;
+        //   }
+        
+        //   // Send block request to server
+        //   chatService.send("user:block", {
+        //     from: fromUserId,
+        //     blocked: userData.id
+        //   });
+          
+        //   // Update UI immediately
+        //   blockUserButton.textContent = t("profile.unblock");
+        //   blockUserButton.classList.remove("bg-red-500", "hover:bg-red-600");
+        //   blockUserButton.classList.add("bg-gray-500", "hover:bg-gray-600");
+          
+        //   // Change the button ID to indicate it's now an unblock button
+        //   blockUserButton.id = "unblock-user";
+          
+        //   // Remove the old event listener and add a new one for unblocking
+        //   blockUserButton.removeEventListener("click", blockUserHandler);
+        //   blockUserButton.addEventListener("click", unblockUserHandler);
+          
+        //   Toast.show(`You have blocked ${userData.nickname}`, "success");
+        // });
+
+        
 
         messageUserButton?.addEventListener("click", () => {
           const fromUserId = store.userId;

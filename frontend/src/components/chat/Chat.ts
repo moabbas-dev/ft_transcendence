@@ -60,7 +60,7 @@ export const Chat = createComponent(
                     ${renderMessages()}
                 </section>
                 ${activeUser
-          ? `<div class="message-input-container flex items-center h-fit bg-[#202c33] border-t-2 border-pongcyan shadow-[0_0_15px_rgba(0,247,255,0.3)] gap-2 w-full px-3">
+          ? `<div id="message-input-container" class="message-input-container flex items-center h-fit bg-[#202c33] border-t-2 border-pongcyan shadow-[0_0_15px_rgba(0,247,255,0.3)] gap-2 w-full px-3">
                     <div class="flex items-center w-full px-2 py-2">
                         <div 
                             id="message-input" 
@@ -413,6 +413,11 @@ export const Chat = createComponent(
 
     // Initialize WebSocket event listeners
     const initWebSocketEvents = () => {
+      // console.log(activeUser?.id);
+      // chatService.send("user:check_blocked", {
+      //   userId: store.userId,
+      //   targetId: activeUser?.id
+      // });
       // Listen for received messages
       chatService.on("message:received", (data: any) => {
         console.log("Received message:", data);
@@ -476,15 +481,62 @@ export const Chat = createComponent(
         }
       });
 
+      chatService.on("message:blocked", (data: any) => {
+        console.log("Message blocked:", data);
+        
+        // Show an error message to the user
+        const messageContainer = container.querySelector("#message-container");
+        if (messageContainer) {
+          const blockedMessage = document.createElement("div");
+          blockedMessage.className = "text-center text-red-500 my-2 px-4";
+          blockedMessage.textContent = data.reason || "Message could not be sent due to block settings";
+          messageContainer.prepend(blockedMessage);
+        }
+      });
+
+      chatService.on("user:blocked", (data: any) => {
+        console.log("User blocked:", data);
+        
+        // If we're currently chatting with the blocked user, show a message
+        if (activeUser && activeUser.id === data.userId) {
+          const messageContainer = container.querySelector("#message-container");
+          if (messageContainer) {
+            const blockedMessage = document.createElement("div");
+            blockedMessage.className = "text-center text-red-500 my-2 px-4";
+            blockedMessage.textContent = "You have blocked this user.";
+            messageContainer.prepend(blockedMessage);
+          }
+          
+          const inputContainer = container.querySelector("#message-input-container");
+          inputContainer?.classList.add("hidden");
+        }
+      });
+
+      // chatService.on("user:blocked_status", (data) => {
+      //   console.log(data);
+
+        
+      //       if (activeUser && activeUser.id === data.targetId) {
+      //         const messageContainer = container.querySelector("#message-container");
+      //         if (messageContainer) {
+      //           const blockedMessage = document.createElement("div");
+      //           blockedMessage.className = "text-center text-red-500 my-2 px-4";
+      //           blockedMessage.textContent = "You have blocked this user.";
+      //           messageContainer.prepend(blockedMessage);
+      //         }
+              
+      //         const inputContainer = container.querySelector("#message-input-container");
+      //         inputContainer?.classList.add("hidden");
+            
+
+      //     }
+      //   }
+      // );
+
       // Listen for errors
       chatService.on("error", (data) => {
         console.error("WebSocket error:", data.message);
         // You might want to show an error message to the user
-      });
-
-      // Listen for user blocked confirmation
-      chatService.on("user:blocked", (data) => {
-        // You might want to update the UI to reflect the blocked status
       });
     };
 
