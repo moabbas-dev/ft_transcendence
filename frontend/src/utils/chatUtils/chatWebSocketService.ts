@@ -347,6 +347,11 @@ public markMessagesAsRead(roomId: string | null): void {
       userId: this.userId,
       friendId: blockedUserId
     });
+
+    this.send('friendship:check', {
+      currentUserId: this.userId,
+      targetUserId: blockedUserId    
+    });
   }
 
   /**

@@ -128,6 +128,41 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
     }
   });
 
+  // Handle canceling a sent friend request
+  wsAdapter.on("friend:cancel_request", async ({ clientId, payload }) => {
+    try {
+      const { from, to } = payload;
+      
+      console.log("friend request canceled:");
+      console.log("from user:", from);
+      console.log("to user:", to);
+      
+      // Cancel the friend request in the database (using the same function as decline)
+      await cancelFriendRequest(from, to);
+      
+      // Send confirmation to the user who canceled their request
+      wsAdapter.sendTo(clientId, "friend:request_cancelled", {
+        success: true,
+        targetId: to
+      });
+      
+      // Optionally notify the recipient that the request was canceled
+      const recipientClientId = onlineUsers.get(to.toString());
+      if (recipientClientId) {
+        wsAdapter.sendTo(recipientClientId, "friend:request_cancelled", {
+          fromId: from
+        });
+      }
+      
+    } catch (error) {
+      console.error("Error in friend:cancel_request handler:", error);
+      wsAdapter.sendTo(clientId, "error", {
+        message: "Failed to cancel friend request",
+        details: error.message
+      });
+    }
+  });
+
 
   // Handle friend acceptance
   wsAdapter.on("friend:accept", async ({ clientId, payload }) => {
@@ -391,6 +426,9 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       }
       // Block the user
       await blockUser(blockerIdNum, blockedIdNum);
+
+      await cancelFriendRequest(blockerIdNum, blockedIdNum);
+      await cancelFriendRequest(blockedIdNum, blockerIdNum);
 
       console.log("the user:", blockerId, ",has blocked:", blockedId);
 

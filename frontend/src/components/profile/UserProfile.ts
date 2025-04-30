@@ -120,21 +120,21 @@ export const Profile = createComponent((props: ProfileProps) => {
           userId: store.userId,
           targetId: userData.id
         });
-        
+
         // Add this event listener
         chatService.on("user:blocked_status", (data) => {
           console.log(data);
           if (data.targetId === userData.id) {
             const isBlocked = data.isBlocked;
             const blockButton = container.querySelector("#block-user");
-            
+
             if (isBlocked && blockButton) {
               // User is blocked, show unblock button
               blockButton.textContent = t("profile.unblock");
               blockButton.classList.remove("bg-red-500", "hover:bg-red-600");
               blockButton.classList.add("bg-gray-500", "hover:bg-gray-600");
               blockButton.id = "unblock-user";
-              
+
               // Update event listeners
               blockButton.removeEventListener("click", blockUserHandler);
               blockButton.addEventListener("click", unblockUserHandler);
@@ -152,7 +152,7 @@ export const Profile = createComponent((props: ProfileProps) => {
         //   }
 
         //   chatService.blockUser(userData.id);
-          
+
         //   // Update UI immediately
         //   blockUserButton.textContent = t("Unblock User");
 
@@ -162,45 +162,45 @@ export const Profile = createComponent((props: ProfileProps) => {
         // });
         function blockUserHandler() {
           const fromUserId = store.userId;
-          
+
           if (!fromUserId || !userData) {
             console.error("Missing user information for blocking user");
             return;
           }
-        
+
           // Send block request to server
           // chatService.send("user:block", {
           //   from: fromUserId,
           //   blocked: userData.id
           // });
           chatService.blockUser(userData.id);
-          
+
           // Update UI immediately
           const blockButton = container.querySelector("#block-user");
           if (blockButton) {
             blockButton.textContent = t("profile.unblock");
             blockButton.classList.remove("bg-red-500", "hover:bg-red-600");
             blockButton.classList.add("bg-gray-500", "hover:bg-gray-600");
-            
+
             // Change the button ID to indicate it's now an unblock button
             blockButton.id = "unblock-user";
-            
+
             // Remove the old event listener and add a new one for unblocking
             blockButton.removeEventListener("click", blockUserHandler);
             blockButton.addEventListener("click", unblockUserHandler);
           }
-          
+
           Toast.show(`You have blocked ${userData.nickname}`, "success");
         }
-        
+
         function unblockUserHandler() {
           const fromUserId = store.userId;
-          
+
           if (!fromUserId || !userData) {
             console.error("Missing user information for unblocking user");
             return;
           }
-        
+
           // Send unblock request to server
           // chatService.send("user:unblock", {
           //   from: fromUserId,
@@ -208,25 +208,25 @@ export const Profile = createComponent((props: ProfileProps) => {
           // });
 
           chatService.unblockUser(userData.id);
-          
+
           // Update UI immediately
           const unblockButton = container.querySelector("#unblock-user");
           if (unblockButton) {
             unblockButton.textContent = t("profile.block");
             unblockButton.classList.remove("bg-gray-500", "hover:bg-gray-600");
             unblockButton.classList.add("bg-red-500", "hover:bg-red-600");
-            
+
             // Change the button ID back to block-user
             unblockButton.id = "block-user";
-            
+
             // Remove the old event listener and add a new one for blocking
             unblockButton.removeEventListener("click", unblockUserHandler);
             unblockButton.addEventListener("click", blockUserHandler);
           }
-          
+
           Toast.show(`You have unblocked ${userData.nickname}`, "success");
         }
-        
+
         // Now, let's update the initial event listeners to use these handler functions
         // Replace the existing block button event listener with:
         blockUserButton?.addEventListener("click", blockUserHandler);
@@ -234,43 +234,43 @@ export const Profile = createComponent((props: ProfileProps) => {
         // blockUserButton?.addEventListener("click", () => {
         //   const fromUserId = store.userId;
         //   const toUsername = props.uName;
-        
+
         //   if (!fromUserId || !toUsername) {
         //     console.error("Missing user information for blocking user");
         //     return;
         //   }
-        
+
         //   // Send block request to server
         //   chatService.send("user:block", {
         //     from: fromUserId,
         //     blocked: userData.id
         //   });
-          
+
         //   // Update UI immediately
         //   blockUserButton.textContent = t("profile.unblock");
         //   blockUserButton.classList.remove("bg-red-500", "hover:bg-red-600");
         //   blockUserButton.classList.add("bg-gray-500", "hover:bg-gray-600");
-          
+
         //   // Change the button ID to indicate it's now an unblock button
         //   blockUserButton.id = "unblock-user";
-          
+
         //   // Remove the old event listener and add a new one for unblocking
         //   blockUserButton.removeEventListener("click", blockUserHandler);
         //   blockUserButton.addEventListener("click", unblockUserHandler);
-          
+
         //   Toast.show(`You have blocked ${userData.nickname}`, "success");
         // });
 
-        
+
 
         messageUserButton?.addEventListener("click", () => {
           const fromUserId = store.userId;
-          
+
           if (!fromUserId || !userData) {
             console.error("Missing user information for messaging");
             return;
           }
-          
+
           // Store the user information in localStorage temporarily, so the chat page can access it
           localStorage.setItem('openChatWithUser', JSON.stringify({
             username: userData.nickname,
@@ -278,10 +278,10 @@ export const Profile = createComponent((props: ProfileProps) => {
             fullname: userData.full_name || userData.nickname,
             timestamp: Date.now() // Add timestamp to ensure this is a new request
           }));
-          
+
           // Close the profile modal
           container.remove();
-          
+
           // Navigate to the chat page
           navigate("/chat");
         });
@@ -290,7 +290,7 @@ export const Profile = createComponent((props: ProfileProps) => {
       .catch((error) => {
         console.error("Error fetching user data:", error.response.data.message);
       });
-      
+
   }
 
 
@@ -380,13 +380,14 @@ export const Profile = createComponent((props: ProfileProps) => {
           >
           ${t("profile.historyTab.title")}
           </button>
-
-          <button 
+          ${props.uName === store.nickname ? 
+          `<button 
             id="friends-tab" 
             class="flex-1 py-2 text-center transition-all focus:outline-none"
           >
             Friends
-          </button>
+          </button>` : ""}
+
         </div>
 
         <!-- Content Container -->
@@ -431,24 +432,24 @@ export const Profile = createComponent((props: ProfileProps) => {
     input.className = 'hidden';
     input.type = 'file';
     input.accept = 'image/png, image/jpeg';
-  
+
     input.addEventListener('change', async () => {
       const file = input.files && input.files[0];
       if (!file) return;
-  
+
       const fileName = file.name.toLowerCase();
       if (!(fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.jpeg'))) {
         alert('Please upload a PNG or JPG image.');
         return;
       }
-  
+
       // console.log('Selected file:', file);
       // here we will send the file to the server then update the profile picture
       // console.log(store.accessToken);
       const formData = new FormData();
       formData.append('avatar', file);
       console.log(`Bearer ${store.accessToken}`);
-      
+
       await axios.post(`http://localhost:8001/auth/uploads/${store.userId}`, formData, {
         headers: {
           authorization: `Bearer ${store.accessToken}`,
@@ -617,6 +618,7 @@ export const Profile = createComponent((props: ProfileProps) => {
     }
   });
 
+
   friendsTab?.addEventListener("click", () => {
     if (!contentContainer) return;
     clearActiveTabs();
@@ -640,7 +642,7 @@ export const Profile = createComponent((props: ProfileProps) => {
     // Get loading and buttons containers
     const loadingElement = container.querySelector("#friendship-loading");
     const buttonsContainer = container.querySelector("#friendship-buttons");
-    const addFriendButton: HTMLButtonElement | null = container.querySelector("#add-friend") ;
+    const addFriendButton: HTMLButtonElement | null = container.querySelector("#add-friend");
 
     console.log("Received Status:", status);
 
@@ -678,7 +680,7 @@ export const Profile = createComponent((props: ProfileProps) => {
           addFriendButton.textContent = t("profile.add");
           addFriendButton.disabled = false;
           addFriendButton.classList.remove("bg-gray-400", "bg-red-500", "hover:bg-red-600", "bg-yellow-500", "hover:bg-yellow-600");
-          addFriendButton.classList.add("bg-green-500", "hover:bg-green-600");  
+          addFriendButton.classList.add("bg-green-500", "hover:bg-green-600");
         }
         break;
 

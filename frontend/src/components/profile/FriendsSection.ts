@@ -21,9 +21,6 @@ export const Friend = createComponent((props: FriendProps) => {
       <span class="text-sm text-gray-500">${props.status}</span>
     </div>
     <div class="flex flex-1 justify-end gap-2">
-      <button class="size-[32px] p-1.5 grid place-content-center bg-pongcyan text-white rounded-full hover:opacity-80 chat-button">
-        <i class="fa-regular fa-comment-dots"></i>
-      </button>
       <button class="size-[32px] p-1.5 grid place-content-center bg-pongcyan rounded-full hover:bg-gray-200 remove-friend-button">
         <i class="fas fa-times text-2xl cursor-pointer text-red-600"></i>
       </button>
