@@ -101,15 +101,33 @@ class ChatWebSocketService {
   /**
    * Unsubscribe from an event
    */
-  public off(event: string, callback: (data: any) => void): void {
+  // public off(event: string, callback: (data: any) => void): void {
+  //   if (!this.eventListeners.has(event)) return;
+
+  //   const listeners = this.eventListeners.get(event) || [];
+  //   const index = listeners.indexOf(callback);
+
+  //   if (index !== -1) {
+  //     listeners.splice(index, 1);
+  //     this.eventListeners.set(event, listeners);
+  //   }
+  // }
+
+  public off(event: string, callback?: (data: any) => void): void {
     if (!this.eventListeners.has(event)) return;
-
-    const listeners = this.eventListeners.get(event) || [];
-    const index = listeners.indexOf(callback);
-
-    if (index !== -1) {
-      listeners.splice(index, 1);
-      this.eventListeners.set(event, listeners);
+  
+    if (callback) {
+      // Remove specific callback
+      const listeners = this.eventListeners.get(event) || [];
+      const index = listeners.indexOf(callback);
+  
+      if (index !== -1) {
+        listeners.splice(index, 1);
+        this.eventListeners.set(event, listeners);
+      }
+    } else {
+      // Remove all listeners for this event
+      this.eventListeners.delete(event);
     }
   }
 
@@ -335,7 +353,7 @@ public markMessagesAsRead(roomId: string | null): void {
    * Unblock a user
    */
   public unblockUser(unblockedUserId: string): void {
-    if (!this.username) {
+    if (!this.userId) {
       console.error("Not authenticated");
       return;
     }

@@ -406,18 +406,57 @@ export const Chat = createComponent(
             userId: store.userId
           });
         }
-      }
+        console.log(user.id);
 
+        chatService.off("user:blocked_status");
+
+        chatService.send("user:check_blocked", {
+          userId: store.userId,
+          targetId: user.id
+        });
+
+
+        chatService.on("user:blocked_status", (data) => {
+          console.log(data);
+          if (user.id && user.id === data.targetId) {
+            const messageContainer = container.querySelector("#message-container");
+
+            if (data.isBlocked && messageContainer) {
+              // Check if the blocked message already exists
+              const existingBlockedMessage = Array.from(messageContainer.querySelectorAll(".blocked-message"))
+                .find(msg => msg.textContent === "You have blocked this user.");
+
+              // Only add the message if it doesn't already exist
+              if (!existingBlockedMessage) {
+                const blockedMessage = document.createElement("div");
+                blockedMessage.className = "text-center text-red-500 my-2 px-4 blocked-message";
+                blockedMessage.textContent = "You have blocked this user.";
+                messageContainer.prepend(blockedMessage);
+              }
+
+              const inputContainer = container.querySelector("#message-input-container");
+              inputContainer?.classList.add("hidden");
+            }
+          }
+        });
+      }
       renderChat();
     };
 
     // Initialize WebSocket event listeners
     const initWebSocketEvents = () => {
-      // console.log(activeUser?.id);
+      chatService.off("message:received");
+      chatService.off("message:sent");
+      chatService.off("messages:history");
+      chatService.off("message:blocked");
+      chatService.off("user:blocked");
+      chatService.off("error");
+
       // chatService.send("user:check_blocked", {
       //   userId: store.userId,
-      //   targetId: activeUser?.id
+      //   targetId: props.activeUser?.id
       // });
+
       // Listen for received messages
       chatService.on("message:received", (data: any) => {
         console.log("Received message:", data);
@@ -483,7 +522,7 @@ export const Chat = createComponent(
 
       chatService.on("message:blocked", (data: any) => {
         console.log("Message blocked:", data);
-        
+
         // Show an error message to the user
         const messageContainer = container.querySelector("#message-container");
         if (messageContainer) {
@@ -496,42 +535,44 @@ export const Chat = createComponent(
 
       chatService.on("user:blocked", (data: any) => {
         console.log("User blocked:", data);
-        
+
+        const messageContainer = container.querySelector("#message-container");
         // If we're currently chatting with the blocked user, show a message
-        if (activeUser && activeUser.id === data.userId) {
-          const messageContainer = container.querySelector("#message-container");
-          if (messageContainer) {
+        if (activeUser && activeUser.id === data.userId && messageContainer) {
+          const existingBlockedMessage = Array.from(messageContainer.querySelectorAll(".blocked-message"))
+            .find(msg => msg.textContent === "You have blocked this user.");
+
+          // Only add the message if it doesn't already exist
+          if (!existingBlockedMessage) {
             const blockedMessage = document.createElement("div");
-            blockedMessage.className = "text-center text-red-500 my-2 px-4";
+            blockedMessage.className = "text-center text-red-500 my-2 px-4 blocked-message";
             blockedMessage.textContent = "You have blocked this user.";
             messageContainer.prepend(blockedMessage);
           }
-          
+
           const inputContainer = container.querySelector("#message-input-container");
           inputContainer?.classList.add("hidden");
         }
       });
 
-      // chatService.on("user:blocked_status", (data) => {
-      //   console.log(data);
+      chatService.on("user:unblocked", (data: any) => {
+        if (activeUser && activeUser.id === data.userId) {
+          const messageContainer = container.querySelector("#message-container");
+          if (messageContainer) {
+            // Find and remove the "You have blocked this user" message
+            const blockedMessages = messageContainer.querySelectorAll(".blocked-message");
+            blockedMessages.forEach(msg => {
+              if (msg.textContent === "You have blocked this user.") {
+                msg.remove();
+              }
+            });
+          }
 
-        
-      //       if (activeUser && activeUser.id === data.targetId) {
-      //         const messageContainer = container.querySelector("#message-container");
-      //         if (messageContainer) {
-      //           const blockedMessage = document.createElement("div");
-      //           blockedMessage.className = "text-center text-red-500 my-2 px-4";
-      //           blockedMessage.textContent = "You have blocked this user.";
-      //           messageContainer.prepend(blockedMessage);
-      //         }
-              
-      //         const inputContainer = container.querySelector("#message-input-container");
-      //         inputContainer?.classList.add("hidden");
-            
-
-      //     }
-      //   }
-      // );
+          // Show the input container again
+          const inputContainer = container.querySelector("#message-input-container");
+          inputContainer?.classList.remove("hidden");
+        }
+      });
 
       // Listen for errors
       chatService.on("error", (data) => {

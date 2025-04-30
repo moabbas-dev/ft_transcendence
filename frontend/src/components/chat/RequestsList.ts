@@ -60,7 +60,7 @@ export const RequestsList = (props: RequestsListProps) => {
       // Render online users
       onlineUsers.forEach((item) => {
         const user = item.user;
-        console.log(user);
+        // console.log(user);
         if (!user) return;
         
         const chatItemElement = ChatItem({
