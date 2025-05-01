@@ -123,9 +123,9 @@ export class PongGameClient {
 	  this.send('ball_update', { matchId, ballData });
 	}
 	
-	reportGoal(matchId: string, scoringPlayer: 1 | 2, newScore: { player1: number, player2: number }): void {
-	  this.send('goal_scored', { matchId, scoringPlayer, newScore });
-	}
+	// reportGoal(matchId: string, scoringPlayer: 1 | 2, newScore: { player1: number, player2: number }): void {
+	//   this.send('goal_scored', { matchId, scoringPlayer, newScore });
+	// }
 	
 	completeMatch(matchId: string, winner: string, finalScore: { player1: number, player2: number }): void {
 	  this.send('match_complete', { matchId, winner, finalScore });

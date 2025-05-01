@@ -1,5 +1,5 @@
 import { t } from "../../../languages/LanguageController.js";
-import { navigate, refreshRouter } from "../../../router.js";
+import { navigate } from "../../../router.js";
 import { GameBoard, gameState } from "../../Offline-Game/components/GameBoard.js";
 import { BallController, Controller, HumanPlayerController } from "../../Offline-Game/components/GameControllers.js";
 import { updateBackgrounds } from "../../Offline-Game/components/HeaderAnimations_utils.js";
@@ -118,7 +118,7 @@ export class OnlineGameBoard extends GameBoard {
 			const speed = 8;
 			this.state.ballSpeedX = Math.cos(angle) * speed;
 			this.state.ballSpeedY = Math.sin(angle) * speed;
-			
+
 			// Send initial ball state to Player 2
 			this.sendBallUpdate();
 		}
@@ -261,13 +261,13 @@ export class OnlineGameBoard extends GameBoard {
 			if (!this.isPlayer1) {
 				console.log("NICE!!!");
 				console.log(data);
-				
+
 				this.state.ballX = data.position.x;
 				this.state.ballY = data.position.y;
 				this.state.ballSpeedX = data.velocity.x;
 				this.state.ballSpeedY = data.velocity.y;
 				const player1Score = typeof data.scores.player1 === 'number' ? data.scores.player1 : -1;
-				const player2Score = typeof data.scores.player2 === 'number' ? data.scores.player2 : -1;	
+				const player2Score = typeof data.scores.player2 === 'number' ? data.scores.player2 : -1;
 				this.state.scores = {
 					player1: player1Score,
 					player2: player2Score
@@ -320,6 +320,18 @@ export class OnlineGameBoard extends GameBoard {
 
 		if (Math.max(this.state.scores.player1, this.state.scores.player2) >= 10) {
 			this.state.gameEnded = true;
+			const winnerId = this.state.scores.player1 > this.state.scores.player2
+				? (this.isPlayer1 ? this.playerId : this.opponentId)
+				: (this.isPlayer1 ? this.opponentId : this.playerId);
+
+			this.client.send('match_complete', {
+				matchId: this.matchId,
+				winnerId: winnerId,
+				goals: {
+					[this.playerId]: this.isPlayer1 ? this.state.scores.player1 : this.state.scores.player2,
+					[this.opponentId]: this.isPlayer1 ? this.state.scores.player2 : this.state.scores.player1
+				}
+			});
 		}
 	}
 
@@ -344,7 +356,7 @@ export class OnlineGameBoard extends GameBoard {
 	private updateScoreDisplay(): void {
 		const score1Element = this.gameHeader.querySelector('#player-score1');
 		const score2Element = this.gameHeader.querySelector('#player-score2');
-		
+
 		if (score1Element && score2Element) {
 			if (this.isPlayer1) {
 				score1Element.textContent = String(this.state.scores.player1);
@@ -354,7 +366,7 @@ export class OnlineGameBoard extends GameBoard {
 				score1Element.textContent = String(this.state.scores.player2);
 				score2Element.textContent = String(this.state.scores.player1);
 			}
-			
+
 			if (this.isPlayer1) {
 				updateBackgrounds(this.state.scores.player1, this.state.scores.player2);
 			} else {
