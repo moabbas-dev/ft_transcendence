@@ -13,7 +13,7 @@ import defaultImage from "../../assets/guests.png";
 
 export const Header = createComponent(() => {
     const container = document.createElement("header");
-    container.className = "container mx-auto relative p-2 flex items-center bg-black justify-between text-white max-sm:gap-2 border-b-2 border-pongcyan shadow-[0_5px_15px_rgba(0,247,255,0.5)]";
+    container.className = "w-full mx-auto relative p-2 flex items-center bg-black justify-between text-white max-sm:gap-2 border-b-2 border-pongcyan shadow-[0_5px_15px_rgba(0,247,255,0.5)]";
     container.innerHTML = `
         <div class="flex items-center justify-start w-1/2 gap-2 sm:gap-8">
             <div class="logo hidden sm:flex flex-col items-center text-center font-bold text-white text-xl transition-all duration-300 hover:animate-pulse">

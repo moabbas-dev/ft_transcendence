@@ -38,7 +38,7 @@ export const Chat = createComponent(
                             <div class="avatar h-12 w-12 rounded-full bg-black border-2 ${activeUser ? 'border-pongcyan' : 'border-pongpink'} flex items-center justify-center text-xl font-semibold ${activeUser ? 'text-pongcyan' : 'text-pongpink'} ${activeUser ? 'shadow-[0_0_10px_rgba(0,247,255,0.4)]' : 'shadow-[0_0_10px_rgba(255,0,228,0.4)]'}">
                               ${activeUser?.avatar_url ?
           `<img src="${activeUser?.avatar_url}" class="h-11 w-11 rounded-full" alt="lol"/>` :
-          activeUser?.full_name?.charAt(0)?.toUpperCase() || "👀"
+          activeUser?.full_name?.charAt(0)?.toUpperCase() || "💬"
         }
                             </div>
 
