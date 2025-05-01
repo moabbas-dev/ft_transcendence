@@ -101,15 +101,33 @@ class ChatWebSocketService {
   /**
    * Unsubscribe from an event
    */
-  public off(event: string, callback: (data: any) => void): void {
+  // public off(event: string, callback: (data: any) => void): void {
+  //   if (!this.eventListeners.has(event)) return;
+
+  //   const listeners = this.eventListeners.get(event) || [];
+  //   const index = listeners.indexOf(callback);
+
+  //   if (index !== -1) {
+  //     listeners.splice(index, 1);
+  //     this.eventListeners.set(event, listeners);
+  //   }
+  // }
+
+  public off(event: string, callback?: (data: any) => void): void {
     if (!this.eventListeners.has(event)) return;
-
-    const listeners = this.eventListeners.get(event) || [];
-    const index = listeners.indexOf(callback);
-
-    if (index !== -1) {
-      listeners.splice(index, 1);
-      this.eventListeners.set(event, listeners);
+  
+    if (callback) {
+      // Remove specific callback
+      const listeners = this.eventListeners.get(event) || [];
+      const index = listeners.indexOf(callback);
+  
+      if (index !== -1) {
+        listeners.splice(index, 1);
+        this.eventListeners.set(event, listeners);
+      }
+    } else {
+      // Remove all listeners for this event
+      this.eventListeners.delete(event);
     }
   }
 
@@ -190,24 +208,24 @@ class ChatWebSocketService {
   /**
    * Send a private message to another user
    */
-  public sendPrivateMessage(toUserId: number, content: string): void {
-    if (!this.userId || !this.username) {
-      console.error("Not authenticated");
-      return;
-    }
+  // public sendPrivateMessage(toUserId: number, content: string): void {
+  //   if (!this.userId || !this.username) {
+  //     console.error("Not authenticated");
+  //     return;
+  //   }
 
-    this.send("message:private", {
-      from: this.userId,
-      to: toUserId,
-      content,
-      timestamp: Date.now(),
-    });
-  }
+  //   this.send("message:private", {
+  //     from: this.userId,
+  //     to: toUserId,
+  //     content,
+  //     timestamp: Date.now(),
+  //   });
+  // }
 
   /**
  * Mark all messages in a room as read
  */
-public markMessagesAsRead(roomId: string): void {
+public markMessagesAsRead(roomId: string | null): void {
   if (!this.isConnected()) {
     console.error("WebSocket not connected");
     return;
@@ -324,20 +342,30 @@ public markMessagesAsRead(roomId: string): void {
       from: this.userId,
       blocked: blockedUserId,
     });
+
+    this.send('friend:remove', {
+      userId: this.userId,
+      friendId: blockedUserId
+    });
+
+    this.send('friendship:check', {
+      currentUserId: this.userId,
+      targetUserId: blockedUserId    
+    });
   }
 
   /**
    * Unblock a user
    */
-  public unblockUser(unblockedUsername: string): void {
-    if (!this.username) {
+  public unblockUser(unblockedUserId: string): void {
+    if (!this.userId) {
       console.error("Not authenticated");
       return;
     }
 
     this.send("user:unblock", {
-      from: this.username,
-      unblocked: unblockedUsername,
+      from: this.userId,
+      unblocked: unblockedUserId,
     });
   }
 }

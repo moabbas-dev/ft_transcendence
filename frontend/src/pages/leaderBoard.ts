@@ -43,7 +43,7 @@ export default {
                   <div class="crown absolute -top-6 left-1/2 transform -translate-x-1/2 text-2xl animate-bounce animate-infinite animate-duration-1000">🥈</div>
                   <div class="avatar-container relative size-16 sm:size-24 mb-2 overflow-hidden">
                     <img src="${pic2}" alt="2nd Place" class="second-avatar absolute rounded-full w-16 h-16 object-cover top-10 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
-                    <img src="${playerFrame1}" alt="Player Frame" class="absolute w-full -top-2 sm:-top-2 lg:-top-4 left-0 pointer-events-none z-10" />
+                    <img src="${playerFrame1}" alt="Player Frame" class="absolute w-full -top-4 left-0 pointer-events-none z-10" />
                   </div>
                   <div class="rank-badge bg-black text-pongcyan rounded-full w-8 h-8 mb-2 flex items-center justify-center absolute -bottom-2 -right-2 border-2 border-pongcyan shadow-[0_0_8px_rgba(0,247,255,0.6)] font-bold">2</div>
                 </div>

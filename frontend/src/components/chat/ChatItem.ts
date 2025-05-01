@@ -37,7 +37,7 @@ export const ChatItem = createComponent((props: ChatItemProps) => {
                         ${props.avatar_url ? `<img src="${props.avatar_url}" class="h-11 w-11 rounded-full"/>` : props.fullname.charAt(0).toUpperCase() }
                     </div>
                     ${props.unreadCount > 0 ? `
-                    <div class="absolute top-0 right-0 bg-pongpink text-white rounded-full 
+                    <div class="absolute top-0 right-0 bg-red-600 text-white rounded-full 
                         text-xs min-w-[20px] h-5 flex items-center justify-center px-1 shadow-[0_0_10px_rgba(255,0,228,0.6)] animate-pulse">
                         ${props.unreadCount > 9 ? '9+' : props.unreadCount}
                     </div>

@@ -57,7 +57,7 @@ export default {
             </div>
             <div id="requests-list-content" class="px-2 pb-2"></div>
           </div>
-          <div class="mt-auto py-3 text-center text-xs text-gray-400 border-t border-ponghover/30">
+          <div class="mt-auto py-3 text-center text-xs text-gray-400 border-t border-pongcyan">
             <span class="transition-all duration-300 hover:text-pongpink">Neon Chat &copy; 2025</span>
           </div>
         </div>

@@ -6,7 +6,7 @@ interface User {
   id: number;
   full_name: string;
   status: string;
-  
+  avatar_url: string;
 }
 
 interface FriendsListProps {
@@ -60,6 +60,7 @@ export const FriendsList = (props: FriendsListProps) => {
           userId: friend.id,
           fullname: friend.full_name,
           status: true,
+          avatar_url: friend.avatar_url,
           unreadCount: props.getUnreadCount(friend.id),
           onChatSelect: (user: any) => {
             props.onChatSelect(user);
@@ -87,6 +88,7 @@ export const FriendsList = (props: FriendsListProps) => {
           userId: friend.id,
           fullname: friend.full_name,
           status: false,
+          avatar_url: friend.avatar_url,
           unreadCount: props.getUnreadCount(friend.id),
           onChatSelect: (user: any) => {
             props.onChatSelect(user);
@@ -202,8 +204,8 @@ export const FriendsList = (props: FriendsListProps) => {
           if (count > 0) {
             const badge = document.createElement("div");
             badge.className =
-              "absolute top-0 right-0 bg-red-500 text-white rounded-full " +
-              "text-xs min-w-[20px] h-5 flex items-center justify-center px-1";
+              "absolute top-0 right-0 bg-red-600 text-white rounded-full " +
+              "text-xs min-w-[20px] h-5 flex items-center justify-center px-1 shadow-[0_0_10px_rgba(255,0,228,0.6)] animate-pulse";
             badge.textContent = count > 9 ? '9+' : count.toString();
             avatarContainer.appendChild(badge);
           }
