@@ -35,7 +35,7 @@ class Store {
 			return;
 		}
 		try {
-			await axios.post(`http://localhost:8001/auth/logout/${this.sessionUUID}`);
+			await axios.post(`/authentication/auth/logout/${this.sessionUUID}`);
 
 			this.update("isLoggedIn", false);
 			this.update("is2faEnabled", null);

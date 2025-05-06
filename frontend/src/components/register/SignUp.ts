@@ -172,11 +172,11 @@ export const SignUp = createComponent((props: SignUpProps) => {
 					country: countryInput.value,
 					google_id: null
 				};
-				await axios.post("http://localhost:8001/auth/users", body);
+				await axios.post("/authentication/auth/users", body);
 				Toast.show(`SignUp successful! Go to your email ${emailInput.value} to activate your account`, "success");
 				// navigate('/register'); // You can edit it
 			} catch (err: any) {
-				console.log(err)
+				console.log(err.response.data.message);
 				if (err.response) {
 					if (err.response.status === 400 || err.response.status === 409)
 						Toast.show(`Error: ${err.response.data.message}`, "error");

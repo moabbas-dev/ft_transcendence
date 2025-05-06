@@ -38,7 +38,7 @@ const setupDatabase = async () => {
 const start = async () => {
   try {
     await setupDatabase();
-    await fastify.listen({ port: 3002, host: "0.0.0.0" });
+    await fastify.listen({ port: 3002, host: "::" });
 
     const wsAdapter = registerWebSocketAdapter(fastify);
     setupWebSocketHandlers(wsAdapter, fastify);

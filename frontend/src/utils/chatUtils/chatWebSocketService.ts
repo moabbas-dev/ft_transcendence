@@ -11,8 +11,24 @@ class ChatWebSocketService {
   private username: string | null = null;
   private userId: any;
 
-  constructor(serverUrl: string = "ws://localhost:3002") {
-    this.serverUrl = serverUrl;
+  // constructor(serverUrl: string = "wss://192.168.1.13/social/") {
+  //   this.serverUrl = serverUrl;
+  // }
+
+  constructor(serverUrl: string | null = null) {
+    // Dynamically determine the WebSocket URL based on the current page's protocol and hostname
+    if (!serverUrl) {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const hostname = window.location.hostname; // This will be "localhost" or the IP address
+      const port = window.location.port ? `:${window.location.port}` : '';
+      this.serverUrl = `${protocol}//${hostname}${port}/social/`;
+      console.log("server url is null");
+    } else {
+      this.serverUrl = serverUrl;
+      console.log("server url is not null");
+    }
+
+    console.log("Using WebSocket URL:", this.serverUrl);
   }
 
   /**
@@ -75,6 +91,8 @@ class ChatWebSocketService {
    */
   public send(event: string, payload: any): void {
     if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
+      if (!this.socket)
+        console.error("hahahaah");
       console.error("WebSocket not connected");
       return;
     }
@@ -207,28 +225,28 @@ class ChatWebSocketService {
   /**
  * Mark all messages in a room as read
  */
-public markMessagesAsRead(roomId: string): void {
-  if (!this.isConnected()) {
-    console.error("WebSocket not connected");
-    return;
+  public markMessagesAsRead(roomId: string): void {
+    if (!this.isConnected()) {
+      console.error("WebSocket not connected");
+      return;
+    }
+
+    const userId = store.userId;
+    if (!userId) {
+      console.error("User ID not found");
+      return;
+    }
+
+    this.send("messages:mark_read", {
+      roomId,
+      userId
+    });
+
+    // Also trigger an unread count update
+    this.send("messages:unread:get", {
+      userId
+    });
   }
-  
-  const userId = store.userId;
-  if (!userId) {
-    console.error("User ID not found");
-    return;
-  }
-  
-  this.send("messages:mark_read", {
-    roomId,
-    userId
-  });
-  
-  // Also trigger an unread count update
-  this.send("messages:unread:get", {
-    userId
-  });
-}
 
   /**
    * Get list of pending friend requests
@@ -263,17 +281,17 @@ public markMessagesAsRead(roomId: string): void {
   /**
   * checkFriendshipStatus
   */
-    public checkFriendshipStatus(friendId: number): void {
-      if (!this.userId) {
-        console.error('Not authenticated');
-        return;
-      }
-  
-      this.send('friend:checkStatus', {
-        userId: this.userId,
-        friendId
-      });
+  public checkFriendshipStatus(friendId: number): void {
+    if (!this.userId) {
+      console.error('Not authenticated');
+      return;
     }
+
+    this.send('friend:checkStatus', {
+      userId: this.userId,
+      friendId
+    });
+  }
 
   /**
    * Get message history for a specific chat room

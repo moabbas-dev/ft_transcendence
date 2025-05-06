@@ -1,0 +1,1 @@
+2025/04/22 08:46:08 [error] 30#30: *222 connect() failed (111: Connection refused) while connecting to upstream, client: 172.18.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://172.18.0.5:5173/", host: "172.20.108.180"

@@ -17,7 +17,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
     const token = store.accessToken;
     // Make the API call with proper authorization headers
     axios
-      .get(`http://localhost:8001/auth/users/nickname/${props.uName}`, {
+      .get(`/authentication/auth/users/nickname/${props.uName}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -235,7 +235,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
         }
 
         try {
-          await axios.patch(`http://localhost:8001/auth/users/${store.userId}`, data, {
+          await axios.patch(`/authentication/auth/users/${store.userId}`, data, {
             headers: {
               authorization: `Bearer ${store.accessToken}`,
             }
@@ -288,11 +288,11 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
       if (this.checked) {
         // Show QR code when 2FA is enabled
         if (store.is2faEnabled)
-          return ;
+          return;
         qrCodeContainer.classList.remove("hidden");
         try {
           const accessToken = await getValidAccessToken();
-          const res = await axios.put(`http://localhost:8001/auth/twoFactor/enable/${store.userId}`, {}, {
+          const res = await axios.put(`/authentication/auth/twoFactor/enable/${store.userId}`, {}, {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },
@@ -316,12 +316,12 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
         // Hide QR code when 2FA is disabled
         try {
           const accessToken = await getValidAccessToken();
-          await axios.put(`http://localhost:8001/auth/twoFactor/disable/${store.userId}`, {}, {
+          await axios.put(`/authentication/auth/twoFactor/disable/${store.userId}`, {}, {
             headers: {
               authorization: `Bearer ${accessToken}`,
             }
           });
-          store.update("is2faEnabled", "0");
+          store.update("is2faEnabled", false);
           qrCodeContainer.classList.add("hidden");
           console.log("2FA disabled");
         } catch (error: any) {
@@ -376,12 +376,12 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
           try {
             const accessToken = await getValidAccessToken();
             const body = { code: code };
-            await axios.post(`http://localhost:8001/auth/twoFactor/enable/validate/${store.userId}`, body, {
+            await axios.post(`/authentication/auth/twoFactor/enable/validate/${store.userId}`, body, {
               headers: { Authorization: `Bearer ${accessToken}` }
             })
             Toast.show(`2FA Enabled Successfully!`, "success");
             qrCodeContainer?.classList.add("hidden");
-            store.update("is2faEnabled", "1");
+            store.update("is2faEnabled", true);
           } catch (error: any) {
             Toast.show(`Error: ${error.response.data.message}`, "error");
           }

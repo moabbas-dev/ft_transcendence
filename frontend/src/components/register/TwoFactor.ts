@@ -38,7 +38,7 @@ export const TwoFactorSend = createComponent(() => {
 		customAnchor.addEventListener("click", async(e) => {
 			e.preventDefault();
 			try {
-				await axios.delete(`http://localhost:8001/auth/sessions/${store.sessionUUID}`);
+				await axios.delete(`/authentication/auth/sessions/${store.sessionUUID}`);
 				store.update("sessionUUID", null);
 				if (localStorage.getItem("googleAuth") === "true")
 					localStorage.removeItem("googleAuth");
@@ -107,7 +107,7 @@ export const TwoFactorSend = createComponent(() => {
 			code: code,
 		};
 		try {
-			const userData = await axios.post(`http://localhost:8001/auth/twoFactor/login/${store.sessionUUID}`, body);
+			const userData = await axios.post(`/authentication/auth/twoFactor/login/${store.sessionUUID}`, body);
 			const decodedToken: any = jwtDecode(userData.data.accessToken);
 			store.update("accessToken", userData.data.accessToken);
 			store.update("refreshToken", userData.data.refreshToken);

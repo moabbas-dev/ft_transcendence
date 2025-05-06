@@ -30,8 +30,8 @@ export const handleLoginWithGoogle = (container: HTMLElement) => {
 			localStorage.setItem("googleAuthClicked", "true");
 			account.createOAuth2Session(
 				OAuthProvider.Google,
-				'http://localhost:5173', // if success redirect to this url
-				'http://localhost:5173/register' // if fail redirect to this url
+				'https://localhost', // if success redirect to this url
+				'https://localhost/register' // if fail redirect to this url
 			)
 		} catch(err) {
 			Toast.show("Error: Login failed", "error");
@@ -44,7 +44,7 @@ export const refreshUserData = async () => {
 	if (store.userId === null)
 		return 
 	try {
-		const response = await axios.get(`http://localhost:8001/auth/users/id/${store.userId}`)
+		const response = await axios.get(`/authentication/auth/users/id/${store.userId}`)
 		const data = response.data
 		
 		if (data) {
