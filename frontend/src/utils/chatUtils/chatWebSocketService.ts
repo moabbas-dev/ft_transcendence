@@ -10,6 +10,7 @@ class ChatWebSocketService {
   private connected = false;
   private username: string | null = null;
   private userId: any;
+  private messageQueue: Array<{ event: string, payload: any }> = [];
 
   // constructor(serverUrl: string = "wss://192.168.1.13/social/") {
   //   this.serverUrl = serverUrl;
@@ -46,6 +47,12 @@ class ChatWebSocketService {
           console.log("WebSocket connection established");
           this.reconnectAttempts = 0;
           this.connected = true;
+
+          // Process any queued messages
+          while (this.messageQueue.length > 0) {
+            const msg = this.messageQueue.shift(); // This removes the first item from the queue
+            if (msg) this.send(msg.event, msg.payload);
+          }
 
           // Send the initial connection message with user data
           if (!this.username || !this.userId) {
@@ -89,20 +96,35 @@ class ChatWebSocketService {
   /**
    * Send a message to the server
    */
+  // public send(event: string, payload: any): void {
+  //   if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
+  //     if (!this.socket)
+  //       console.error("hahahaah");
+  //     console.error("WebSocket not connected");
+  //     return;
+  //   }
+
+  //   this.socket.send(
+  //     JSON.stringify({
+  //       event,
+  //       payload,
+  //     })
+  //   );
+  // }
   public send(event: string, payload: any): void {
     if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
-      if (!this.socket)
-        console.error("hahahaah");
-      console.error("WebSocket not connected");
+      console.log("Queuing message for later delivery");
+      this.messageQueue.push({ event, payload });
+
+      // If not connecting yet, start connection
+      if (!this.socket) {
+        this.connect().catch(err => console.error("Error connecting:", err));
+      }
       return;
     }
 
-    this.socket.send(
-      JSON.stringify({
-        event,
-        payload,
-      })
-    );
+    // Send the message as normal
+    this.socket.send(JSON.stringify({ event, payload }));
   }
 
   /**
