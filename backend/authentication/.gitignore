@@ -1,6 +1,7 @@
 # dependencies
 /data
 /node_modules
+/uploads
 
 # debug
 npm-debug.log*
