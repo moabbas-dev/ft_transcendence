@@ -1,6 +1,6 @@
 import matchmakingService from '../services/matchmaking.js';
 import { createWebSocketAdapter } from '../services/websocketAdapter.js'; 
-
+import { registerTournamentMessageHandlers } from './tournamentWsController.js';
 
 /**
  * Sets up WebSocket handlers for the matchmaking service
@@ -111,6 +111,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
   
   // Register message handlers
   registerMessageHandlers(wsAdapter);
+  registerTournamentMessageHandlers(wsAdapter);
 }
 
 /**
@@ -259,8 +260,6 @@ function registerMessageHandlers(wsAdapter) {
     }
   });
   
-    // Game end handler
-    // Game end handler
     wsAdapter.registerMessageHandler('game_end', async (clientId, payload) => {
       const { matchId, winner, player1Goals, player2Goals } = payload;
       
@@ -271,6 +270,10 @@ function registerMessageHandlers(wsAdapter) {
           throw new Error(`Match with ID ${matchId} not found`);
         }
         console.log("Match found:", match);
+        if (match.match_type === 'tournament') {
+          await TournamentService.updateTournamentMatchResult(matchId, winner);
+          return;
+        }
         
         // Get players for this match from match_players table
         const matchPlayers = await matchmakingService.getMatchPlayers(matchId);
@@ -369,6 +372,41 @@ function registerMessageHandlers(wsAdapter) {
         });
       }
     });
+}
+
+async function notifyTournamentMatchPlayers(matchId, wsAdapter) {
+  try {
+    const matchWithPlayers = await TournamentService.getMatchWithPlayers(matchId);
+    
+    if (!matchWithPlayers) {
+      console.error(`Match ${matchId} not found`);
+      return;
+    }
+    
+    const { match, players } = matchWithPlayers;
+    
+    for (const player of players) {
+      // Find opponent
+      const opponent = players.find(p => p.player_id !== player.player_id);
+      
+      if (!opponent) continue;
+      
+      wsAdapter.sendToClient(player.player_id, 'tournament_match_notification', {
+        tournamentId: match.tournament_id,
+        matchId: match.id,
+        opponent: {
+          id: opponent.player_id,
+          username: opponent.nickname || `Player ${opponent.player_id}`,
+          elo: opponent.elo_score
+        },
+        round: match.round || 0
+      });
+    }
+    
+    console.log(`Tournament match notifications sent for match ${matchId}`);
+  } catch (error) {
+    console.error(`Error sending tournament match notifications: ${error.message}`);
+  }
 }
 
 // Export a function to initialize the WebSocket controller

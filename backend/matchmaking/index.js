@@ -58,7 +58,8 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import { createWebSocketAdapter } from './src/services/websocketAdapter.js';
 import { setupWebSocketHandlers } from './src/controllers/websocketController.js';
-import matchmakingRoutes from './src/routes/matches.js'; // Updated to match your actual file name
+import matchmakingRoutes from './src/routes/matches.js'; 
+import tournamentRoutes from './src/routes/tournament.js';
 import matchmakingService from './src/services/matchmaking.js';
 import database from './src/config/db.js';
 
@@ -83,6 +84,7 @@ fastify.decorate('wsAdapter', wsAdapter);
 
 // Register routes
 fastify.register(matchmakingRoutes);
+fastify.register(tournamentRoutes);
 
 // Basic health check route
 fastify.get('/', async (request, reply) => {

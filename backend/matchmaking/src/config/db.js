@@ -1,112 +1,3 @@
-// import { inspect } from 'node:util';
-// import sqlite3 from 'sqlite3';
-// import path from 'path';
-// import { fileURLToPath } from 'url';
-
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
-
-// const { Database } = sqlite3;
-
-// let dbInstance = null;
-
-// export async function initDatabase() {
-//   try {
-//     if (dbInstance) return dbInstance;
-
-//     const dbPath = path.resolve(__dirname, '../../data/elo_matchmaking.sqlite');
-//     dbInstance = new Database(dbPath, (err) => {
-//       console.dir(Object.getPrototypeOf(dbInstance), { depth: 1 });
-//       if (err) {
-//         console.error('Database connection error:', err.message);
-//       } else {
-//         console.log('Connected to the database.');
-//       }
-//     });
-
-//     console.log(`database connection to ${dbPath} has Initialized!`);
-
-//     // Enable foreign key constraints
-//     await dbInstance.run('PRAGMA foreign_keys = ON;');
-
-//     // Create tables if not exists (maintaining your existing structure)
-//     await dbInstance.exec(`
-//       CREATE TABLE IF NOT EXISTS matches (
-//         id INTEGER PRIMARY KEY AUTOINCREMENT,
-//         match_type TEXT NOT NULL CHECK(match_type IN ('1v1', 'friendly')),
-//         status TEXT NOT NULL CHECK(status IN ('pending', 'completed')),
-//         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-//         completed_at DATETIME
-//       );
-
-//       CREATE TABLE IF NOT EXISTS match_players (
-//         match_id INTEGER NOT NULL,
-//         user_id INTEGER NOT NULL,
-//         elo_before INTEGER NOT NULL,
-//         elo_after INTEGER,
-//         score INTEGER CHECK(score IN (0, 0.5, 1)),
-//         player1_goals INTEGER DEFAULT 0,
-//         player2_goals INTEGER DEFAULT 0,
-//         PRIMARY KEY (match_id, user_id),
-//         FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE,
-//         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-//       );
-//     `);
-
-//     console.log("Database initialized successfully");
-//     return dbInstance;
-
-//   } catch (error) {
-//     console.error('Database initialization failed:', error);
-//     throw error;
-//   }
-// };
-
-// export async function getDatabase() {
-//   try {
-//     if (!dbInstance) {
-//       dbInstance = await initDatabase();
-//     }
-//     return dbInstance;
-//   } catch (error) {
-//     console.error('Failed to get database connection:', error);
-//     throw error;
-//   }
-// }
-
-// export async function closeDatabase() {
-//   try {
-//     if (dbInstance) {
-//       await dbInstance.close();
-//       dbInstance = null;
-//       console.log("Database connection closed");
-//     }
-//   } catch (error) {
-//     console.error('Error closing database:', error);
-//     throw error;
-//   }
-// }
-
-// // Add graceful shutdown handling
-// ['SIGINT', 'SIGTERM'].forEach(signal => {
-//   process.on(signal, async () => {
-//     await closeDatabase();
-//     process.exit(0);
-//   });
-// });
-
-// // Add connection health check
-// export async function checkDatabaseHealth() {
-//   try {
-//     const db = await getDatabase();
-//     await db.get('SELECT 1 as ping');
-//     return true;
-//   } catch (error) {
-//     console.error('Database health check failed:', error);
-//     return false;
-//   }
-// }
-
 import sqlite3 from 'sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -169,26 +60,42 @@ class DatabaseConnection {
       );
     `;
 
-    // First, check if we need to add the winner_id column to existing matches table
+    const tournamentTables = `
+      CREATE TABLE IF NOT EXISTS tournaments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        status TEXT NOT NULL CHECK(status IN ('registering', 'in_progress', 'completed')),
+        player_count INTEGER NOT NULL CHECK(player_count IN (4, 8)),
+        creator_id INTEGER,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        started_at DATETIME,
+        completed_at DATETIME
+      );
+
+      CREATE TABLE IF NOT EXISTS tournament_players (
+        tournament_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        placement INTEGER,
+        joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (tournament_id, user_id),
+        FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES players(id) ON DELETE CASCADE
+      );
+    `;
+
+    this.db.run(tournamentTables, (err) => {
+      if (err) {
+        console.error('Error creating tournament tables', err);
+      } else {
+        console.log('Tournament tables created or already exist');
+      }
+    });
+
     this.db.get("PRAGMA table_info(matches)", (err, rows) => {
       if (err) {
         console.error('Error checking matches table schema:', err);
         return;
       }
-      
-      // Check if winner_id column exists
-      // const hasWinnerId = rows && rows.some(row => row.name === 'winner_id');
-      
-      // if (!hasWinnerId) {
-      //   // Add winner_id column to existing table
-      //   this.db.run("ALTER TABLE matches ADD COLUMN winner_id INTEGER", (err) => {
-      //     if (err) {
-      //       console.error('Error adding winner_id column:', err);
-      //     } else {
-      //       console.log('Added winner_id column to matches table');
-      //     }
-      //   });
-      // }
     });
 
     this.db.run(matchesTable, (err) => {

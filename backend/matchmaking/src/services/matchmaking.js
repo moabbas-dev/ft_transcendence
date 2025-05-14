@@ -80,32 +80,32 @@ class MatchmakingService {
         this.waitingPlayers = this.waitingPlayers.filter(player => player.playerId !== playerId);
     }
 
-   /**
-     * Get players for a specific match
-     * @param {number} matchId - The match ID
-     * @returns {Promise<Array>} - Array of player objects
-     */
-   async getMatchPlayers(matchId) {
-    try {
-        return new Promise((resolve, reject) => {
-            db.all(
-                `SELECT * FROM match_players WHERE match_id = ?`,
-                [matchId],
-                (err, rows) => {
-                    if (err) {
-                        console.error(`Error getting match players for match ${matchId}:`, err);
-                        reject(err);
-                    } else {
-                        resolve(rows);
+    /**
+      * Get players for a specific match
+      * @param {number} matchId - The match ID
+      * @returns {Promise<Array>} - Array of player objects
+      */
+    async getMatchPlayers(matchId) {
+        try {
+            return new Promise((resolve, reject) => {
+                db.all(
+                    `SELECT * FROM match_players WHERE match_id = ?`,
+                    [matchId],
+                    (err, rows) => {
+                        if (err) {
+                            console.error(`Error getting match players for match ${matchId}:`, err);
+                            reject(err);
+                        } else {
+                            resolve(rows);
+                        }
                     }
-                }
-            );
-        });
-    } catch (error) {
-        console.error(`Error getting match players for match ${matchId}:`, error);
-        throw error;
+                );
+            });
+        } catch (error) {
+            console.error(`Error getting match players for match ${matchId}:`, error);
+            throw error;
+        }
     }
-}
 
 
     // Find a suitable opponent
@@ -408,7 +408,7 @@ class MatchmakingService {
      */
     async updateMatchResult(matchId, winnerId, player1Id, player2Id, player1Goals, player2Goals, eloData = null) {
         try {
-            console.log("11111111winnerId:",winnerId);
+            console.log("11111111winnerId:", winnerId);
             // Update match status
             await new Promise((resolve, reject) => {
                 db.run(
@@ -434,10 +434,10 @@ class MatchmakingService {
                          elo_after = ? 
                      WHERE match_id = ? AND player_id = ?`,
                     [
-                        player1Goals, 
-                        eloData.player1OldElo, 
-                        eloData.player1NewElo, 
-                        matchId, 
+                        player1Goals,
+                        eloData.player1OldElo,
+                        eloData.player1NewElo,
+                        matchId,
                         player1Id
                     ],
                     (err) => {
@@ -456,10 +456,10 @@ class MatchmakingService {
                          elo_after = ? 
                      WHERE match_id = ? AND player_id = ?`,
                     [
-                        player2Goals, 
-                        eloData.player2OldElo, 
-                        eloData.player2NewElo, 
-                        matchId, 
+                        player2Goals,
+                        eloData.player2OldElo,
+                        eloData.player2NewElo,
+                        matchId,
                         player2Id
                     ],
                     (err) => {
@@ -533,41 +533,41 @@ class MatchmakingService {
         }
     }
 
-        /**
-     * Calculate new ELO rating
-     * @param {number} playerRating - Current player rating
-     * @param {number} opponentRating - Current opponent rating
-     * @param {number} result - 1 for win, 0 for loss
-     * @returns {number} - New ELO rating
+    /**
+ * Calculate new ELO rating
+ * @param {number} playerRating - Current player rating
+ * @param {number} opponentRating - Current opponent rating
+ * @param {number} result - 1 for win, 0 for loss
+ * @returns {number} - New ELO rating
+ */
+    async calculateNewElo(playerRating, opponentRating, result) {
+        // Use the EloService that's already imported
+        return this.eloService.calculateNewRatings(playerRating, opponentRating, result);
+    }
+
+    /**
+     * Update a user's ELO rating
+     * @param {string} userId - User ID
+     * @param {number} newElo - New ELO rating
      */
-        async calculateNewElo(playerRating, opponentRating, result) {
-            // Use the EloService that's already imported
-            return this.eloService.calculateNewRatings(playerRating, opponentRating, result);
+    async updateUserElo(userId, newElo) {
+        try {
+            await new Promise((resolve, reject) => {
+                db.run(
+                    'UPDATE players SET elo_score = ? WHERE id = ?',
+                    [newElo, userId],
+                    (err) => {
+                        if (err) reject(err);
+                        else resolve();
+                    }
+                );
+            });
+            console.log(`Updated ELO for user ${userId} to ${newElo}`);
+        } catch (error) {
+            console.error('Error updating user ELO:', error);
+            throw error;
         }
-        
-        /**
-         * Update a user's ELO rating
-         * @param {string} userId - User ID
-         * @param {number} newElo - New ELO rating
-         */
-        async updateUserElo(userId, newElo) {
-            try {
-                await new Promise((resolve, reject) => {
-                    db.run(
-                        'UPDATE players SET elo_score = ? WHERE id = ?',
-                        [newElo, userId],
-                        (err) => {
-                            if (err) reject(err);
-                            else resolve();
-                        }
-                    );
-                });
-                console.log(`Updated ELO for user ${userId} to ${newElo}`);
-            } catch (error) {
-                console.error('Error updating user ELO:', error);
-                throw error;
-            }
-        }
+    }
 
     async getUserWithElo(playerId) {
         try {
@@ -666,25 +666,6 @@ class MatchmakingService {
         return playerIndex + 1;
     }
 
-    async getUserActiveMatches(userId) {
-        try {
-            return await db.all(
-                `SELECT m.id, m.match_type, m.status, m.created_at,
-             mp1.player_id as player1_id, mp2.player_id as player2_id
-             FROM matches m
-             JOIN match_players mp1 ON m.id = mp1.match_id
-             JOIN match_players mp2 ON m.id = mp2.match_id
-             WHERE mp1.player_id = ? AND mp2.player_id != ?
-             AND m.status = 'pending'
-             ORDER BY m.created_at DESC`,
-                [userId, userId]
-            );
-        } catch (error) {
-            console.error('Error fetching active matches:', error);
-            throw error;
-        }
-    }
-
     // Get match details with player info
     async getMatchWithPlayers(matchId) {
         try {
@@ -705,107 +686,76 @@ class MatchmakingService {
             throw error;
         }
     }
-}
 
-/**
-     * Fetches match history for a specific user
-     * @param {number} playerId - The ID of the user to fetch history for
-     * @param {number} limit - Maximum number of matches to return (default: 10)
-     * @param {number} offset - Number of matches to skip (for pagination, default: 0)
-     * @returns {Promise<Array>} - Array of match history objects
+    /**
+     * TOURNAMENT HANDLING
      */
-export async function getUserMatchHistory(playerId) {
-    try {
-        // Query to get all matches with player data, scores, and match times
-        const matchHistory = await db.all(
-            `SELECT 
-                m.id AS match_id,
-                m.match_type,
-                m.created_at,
-                m.completed_at,
-                
-                -- Current player data
-                mp_user.player_id AS player_id,
-                mp_user.elo_before AS user_elo_before,
-                mp_user.elo_after AS user_elo_after,
-                mp_user.goals AS user_goals,
-                mp_user.score AS user_score,
-                
-                -- Opponent data
-                mp_opponent.player_id AS opponent_id,
-                mp_opponent.goals AS opponent_goals,
-                
-                -- Get opponent username from players table
-                u_opponent.username AS opponent_nickname
-            FROM 
-                matches m
-            JOIN 
-                match_players mp_user ON m.id = mp_user.match_id AND mp_user.player_id = ?
-            JOIN 
-                match_players mp_opponent ON m.id = mp_opponent.match_id AND mp_opponent.player_id != ?
-            LEFT JOIN
-                players u_opponent ON mp_opponent.player_id = u_opponent.id
-            WHERE 
-                m.status = ?
-            ORDER BY 
-                m.created_at DESC`,
-            [playerId, playerId, MatchStatus.COMPLETED]
-        );
+    async createTournamentMatch(player1Id, player2Id, tournamentId) {
+        try {
+            const player1 = await this.getUserWithElo(player1Id);
+            const player2 = await this.getUserWithElo(player2Id);
 
-        // Format the match history data for better readability
-        return matchHistory.map(match => {
-            // Calculate match duration in minutes
-            const createdAt = new Date(match.created_at);
-            const completedAt = match.completed_at ? new Date(match.completed_at) : null;
-            const durationMs = completedAt ? completedAt - createdAt : null;
-            const durationMinutes = durationMs ? Math.floor(durationMs / 60000) : null;
+            const matchId = await this.insertNewMatch(
+                `INSERT INTO matches (match_type, status, tournament_id) VALUES (?, ?, ?)`,
+                ['tournament', MatchStatus.PENDING, tournamentId]
+            );
+            console.log(`[TOURNAMENT] Created match with ID: ${matchId}`);
 
-            // Determine match result
-            let result;
-            if (match.user_score === 1) {
-                result = 'win';
-            } else if (match.user_score === 0) {
-                result = 'loss';
-            } else if (match.user_score === 0.5) {
-                result = 'draw';
-            } else {
-                result = 'unknown';
-            }
+            await db.run(
+                `INSERT INTO match_players (match_id, player_id, elo_before, elo_after, goals) VALUES (?, ?, ?, ?, ?)`,
+                [matchId, player1.id, player1.elo_score, player1.elo_score, 0]
+            );
 
-            // Format the score display
-            const scoreDisplay = `${match.user_goals}-${match.opponent_goals}`;
+            await db.run(
+                `INSERT INTO match_players (match_id, player_id, elo_before, elo_after, goals) VALUES (?, ?, ?, ?, ?)`,
+                [matchId, player2.id, player2.elo_score, player2.elo_score, 0]
+            );
 
-            // Format ELO change
-            const eloChange = match.user_elo_after - match.user_elo_before;
-            const eloChangeFormatted = eloChange >= 0 ? `+${eloChange}` : `${eloChange}`;
+            console.log(`[TOURNAMENT] Created match between ${player1Id} and ${player2Id}`);
 
             return {
-                matchId: match.match_id,
-                matchType: match.match_type,
-                createdAt: match.created_at,
-                completedAt: match.completed_at,
-                durationMinutes: durationMinutes,
-
-                // User data
-                playerId: match.player_id,
-                userScore: match.user_goals,
-
-                // Opponent data
-                opponentId: match.opponent_id,
-                opponentNickname: match.opponent_nickname || `Player ${match.opponent_id}`,
-                opponentScore: match.opponent_goals,
-
-                // Match result info
-                result: result,
-                score: scoreDisplay,
-                eloChange: eloChangeFormatted,
-                eloBefore: match.user_elo_before,
-                eloAfter: match.user_elo_after
+                matchId: matchId,
+                player1: {
+                    id: player1.id,
+                    elo_score: player1.elo_score
+                },
+                player2: {
+                    id: player2.id,
+                    elo_score: player2.elo_score
+                },
+                tournamentId: tournamentId
             };
-        });
-    } catch (error) {
-        console.error('Error fetching user match history:', error);
-        throw error;
+        } catch (error) {
+            console.error('Error creating tournament match:', error);
+            throw error;
+        }
+    }
+
+    async getTournamentMatchWithPlayers(matchId) {
+        try {
+            const match = await db.get(
+                `SELECT m.*, t.id as tournament_id 
+         FROM matches m
+         LEFT JOIN tournaments t ON m.tournament_id = t.id
+         WHERE m.id = ?`,
+                [matchId]
+            );
+
+            if (!match) return null;
+
+            const players = await db.all(
+                `SELECT mp.*, p.elo_score, p.username AS nickname 
+         FROM match_players mp
+         JOIN players p ON mp.player_id = p.id
+         WHERE mp.match_id = ?`,
+                [matchId]
+            );
+
+            return { match, players };
+        } catch (error) {
+            console.error('Error fetching match with players:', error);
+            throw error;
+        }
     }
 }
 

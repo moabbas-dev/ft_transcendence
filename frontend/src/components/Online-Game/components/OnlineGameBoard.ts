@@ -3,10 +3,11 @@ import { navigate } from "../../../router.js";
 import { GameBoard, gameState } from "../../Offline-Game/components/GameBoard.js";
 import { BallController, Controller, HumanPlayerController } from "../../Offline-Game/components/GameControllers.js";
 import { updateBackgrounds } from "../../Offline-Game/components/HeaderAnimations_utils.js";
+import { TournamentClient } from "../../Tournament-Game/TournamentClient.js";
 import { PongGameClient } from "./Game.js";
 
 export class OnlineGameBoard extends GameBoard {
-	private client: PongGameClient;
+	private client: PongGameClient | TournamentClient;
 	private matchId: string;
 	private playerId: string;
 	private opponentId: string;
@@ -22,7 +23,7 @@ export class OnlineGameBoard extends GameBoard {
 	constructor(
 		canvas: HTMLCanvasElement,
 		gameHeader: HTMLElement,
-		client: PongGameClient,
+		client: PongGameClient | TournamentClient,
 		matchId: string,
 		playerId: string,
 		opponentId: string,
@@ -415,7 +416,7 @@ export class OnlineGameBoard extends GameBoard {
 		// Add event listeners for buttons
 		gameOver.querySelector('.play-again')?.addEventListener('click', () => {
 			document.body.removeChild(gameOver);
-			this.client.findMatch(); // Find a new match
+			(this.client as PongGameClient).findMatch(); // Find a new match
 		});
 
 		gameOver.querySelector('.return-to-menu')?.addEventListener('click', () => {

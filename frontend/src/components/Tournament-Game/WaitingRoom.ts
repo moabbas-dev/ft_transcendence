@@ -1,81 +1,138 @@
 import { createComponent } from "../../utils/StateManager.js";
-import moabbas from '../../assets/moabbas.jpg';
-import afarachi from '../../assets/afarachi.jpg';
-import jfatfat from '../../assets/jfatfat.jpg';
-import odib from '../../assets/omar.webp';
 import { t } from "../../languages/LanguageController.js";
+import { TournamentClient } from "./TournamentClient.js";
 
-// Sample user data for search results [For testing purposes]
-const sampleUsers = [
-	{ username: "Ahmad Farachi - afarachi", status: "online", avatar: afarachi, rank: "Gold" },
-	{ username: "Jihad Fatfat - jfatfat", status: "offline", avatar: jfatfat, rank: "Silver" },
-	{ username: "Mohamad Abbass - moabbas", status: "in-game", avatar: moabbas, rank: "Bronze" },
-	{ username: "Omar Dib - odib", status: "online", avatar: odib, rank: "4" }
-];
+export interface Player {
+  userId: string;
+  username: string;
+  avatar?: string;
+  rank?: string;
+  joinedAt: string;
+}
 
-export const WaitingRoom = createComponent(() => {
-	const container = document.createElement('div')
-	container.className = "flex flex-col gap-6"
-	container.innerHTML = `
-	<div class="text-2xl font-semibold">${t('play.tournaments.createTournament.waitingRoom')}</div>
-		<div class="flex flex-col gap-4 bg-[rgba(100,100,255,0.1)] rounded-lg p-4">
-			<div class="flex justify-between items-center">
-				<div class="sm:text-lg font-medium">${t('play.tournaments.createTournament.currentParticipants')}</div>
-				<div class="text-sm text-gray-300">${t('play.tournaments.createTournament.tournamentStart')} <span class="player-max-display">4</span> ${t('play.tournaments.createTournament.tournamentStartContinue')}</div>
-			</div>
-			<div id="waiting-players" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-				<!-- Player slots will be dynamically generated -->
-			</div>
+export interface WaitingRoomProps {
+  tournamentId: string;
+  playerCount: number;
+  client: TournamentClient;
+  players: Player[];
+  isCreator: boolean;
+  onPlayerJoin?: (player: Player) => void;
+  onTournamentStart?: () => void;
+}
 
-			<div class="flex justify-between">
-				<button id="leave-tournament" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg">${t('play.tournaments.createTournament.leaveTournament')}</button>
-		</div>
-	</div>
-	`
-	return container;
-})
+export const WaitingRoom = createComponent((props: WaitingRoomProps ) => {
+  const {
+    tournamentId,
+    playerCount,
+    client,
+    players = [],
+    isCreator = false,
+    onPlayerJoin,
+    onTournamentStart
+  } = props;
 
-// Function to render waiting room slots based on player count
-export function renderWaitingRoomSlots(container: HTMLElement, playerCount: number) {
-	const waitingPlayersContainer = container.querySelector('#waiting-players');
-	const playerMaxDisplay = container.querySelectorAll('.player-max-display');
-	
-	if (waitingPlayersContainer) {
-		waitingPlayersContainer.innerHTML = '';
+  const container = document.createElement('div');
+  container.className = "flex flex-col gap-6";
+  container.innerHTML = `
+    <div class="text-2xl font-semibold">${t('play.tournaments.createTournament.waitingRoom')}</div>
+    <div class="flex flex-col gap-4 bg-[rgba(100,100,255,0.1)] rounded-lg p-4">
+      <div class="flex justify-between items-center">
+        <div class="sm:text-lg font-medium">${t('play.tournaments.createTournament.currentParticipants')}</div>
+        <div class="text-sm text-gray-300">${t('play.tournaments.createTournament.tournamentStart')} <span class="player-max-display">${playerCount}</span> ${t('play.tournaments.createTournament.tournamentStartContinue')}</div>
+      </div>
+      <div id="waiting-players" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+        <!-- Player slots will be dynamically generated -->
+      </div>
 
-		// Update player max display everywhere
-		playerMaxDisplay.forEach(el => {
-			el.textContent = playerCount.toString();
-		});
+      <div class="flex justify-between">
+        ${isCreator && players.length === playerCount ? 
+          `<button id="start-tournament" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg">${t('play.tournaments.createTournament.startTournament')}</button>` : ''}
+        <button id="leave-tournament" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg">${t('play.tournaments.createTournament.leaveTournament')}</button>
+      </div>
+    </div>
+  `;
 
-		// Generate slots for all players
-		for (let i = 0; i < playerCount; i++) {
-			const playerData = i < sampleUsers.length ? sampleUsers[i] : null;
+  renderWaitingRoomSlots(container, playerCount?? 0, players);
 
-			if (playerData) {
-				// Render occupied slot
-				waitingPlayersContainer.innerHTML += `
-					<div class="bg-[rgba(100,100,255,0.2)] p-4 rounded-lg flex items-center justify-between">
-						<div class="flex items-center gap-3">
-							<div class="size-10 rounded-full bg-pongcyan">
-								<img src="${playerData.avatar}" alt="avatar" class="size-full rounded-full object-cover" />
-							</div>
-							<div>
-								<div class="font-medium">${playerData.username}</div>
-								<div class="text-sm text-gray-300">${t('play.tournaments.createTournament.rank')} ${playerData.rank}</div>
-							</div>
-						</div>
-						<button class="bg-red-600 px-2 py-1 rounded text-sm hover:opacity-80 transition-all">${t('play.tournaments.createTournament.remove')}</button>
-					</div>
-				`;
-			} else {
-				// Render empty slot
-				waitingPlayersContainer.innerHTML += `
-					<div class="border-2 border-dashed border-[rgba(100,100,255,0.3)] p-4 rounded-lg flex items-center justify-center">
-						<div class="text-[rgba(255,255,255,0.5)]">${t('play.tournaments.createTournament.waitingForPlayers')}</div>
-					</div>
-				`;
-			}
-		}
-	}
+  const startButton = container.querySelector('#start-tournament');
+  if (startButton) {
+    startButton.addEventListener('click', () => {
+      client.startTournament(tournamentId);
+      if (onTournamentStart) onTournamentStart();
+    });
+  }
+
+  const leaveButton = container.querySelector('#leave-tournament');
+  if (leaveButton) {
+    leaveButton.addEventListener('click', () => {
+      // TODO: Implement tournament leave functionality
+      // For now, just navigate back to tournaments list
+      window.history.back();
+    });
+  }
+
+  client.on('tournament_player_joined', (data) => {
+    if (data.tournamentId === tournamentId) {
+      renderWaitingRoomSlots(container, playerCount?? 0, data.players);
+      if (onPlayerJoin) onPlayerJoin(data.newPlayer);
+      
+      if (isCreator && data.players.length === playerCount) {
+        const startButton = container.querySelector('#start-tournament');
+        if (startButton) {
+          startButton.classList.remove('opacity-50', 'cursor-not-allowed');
+          startButton.removeAttribute('disabled');
+        }
+      }
+    }
+  });
+
+  client.on('tournament_started', (data) => {
+    if (data.tournamentId === tournamentId && onTournamentStart) {
+      onTournamentStart();
+    }
+  });
+
+  return container;
+});
+
+export function renderWaitingRoomSlots(container: HTMLElement, playerCount: number, players: Player[] = []) {
+  const waitingPlayersContainer = container.querySelector('#waiting-players');
+  const playerMaxDisplay = container.querySelectorAll('.player-max-display');
+  
+  if (waitingPlayersContainer) {
+    waitingPlayersContainer.innerHTML = '';
+
+    playerMaxDisplay.forEach(el => {
+      el.textContent = playerCount.toString();
+    });
+
+    for (let i = 0; i < playerCount; i++) {
+      const playerData = i < players.length ? players[i] : null;
+
+      if (playerData) {
+        waitingPlayersContainer.innerHTML += `
+          <div class="bg-[rgba(100,100,255,0.2)] p-4 rounded-lg flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="size-10 rounded-full bg-pongcyan">
+                ${playerData.avatar ? 
+                  `<img src="${playerData.avatar}" alt="avatar" class="size-full rounded-full object-cover" />` :
+                  `<div class="size-full rounded-full flex items-center justify-center bg-pongcyan text-white text-xl font-bold">${playerData.username ? playerData.username.charAt(0).toUpperCase() : '?'}</div>`
+                }
+              </div>
+              <div>
+                <div class="font-medium">${playerData.username || 'Unknown Player'}</div>
+                <div class="text-sm text-gray-300">${t('play.tournaments.createTournament.rank')} ${playerData.rank || 'Unranked'}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        waitingPlayersContainer.innerHTML += `
+          <div class="border-2 border-dashed border-[rgba(100,100,255,0.3)] p-4 rounded-lg flex items-center justify-center">
+            <div class="text-[rgba(255,255,255,0.5)]">${t('play.tournaments.createTournament.waitingForPlayers')}</div>
+          </div>
+        `;
+      }
+    }
+  }
 }

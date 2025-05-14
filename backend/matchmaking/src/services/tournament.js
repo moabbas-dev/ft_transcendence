@@ -61,7 +61,7 @@ class TournamentService {
       // Check if tournament is full
       const currentCount = await db.get(
         `SELECT COUNT(*) as count FROM tournament_players 
-         WHERE tournament_id = ?`, 
+         WHERE tournament_id = ?`,
         [tournamentId]
       );
 
@@ -134,11 +134,11 @@ class TournamentService {
         const player2 = shuffledPlayers[i + 1];
 
         const matchResult = await this.createTournamentMatch(
-          tournamentId, 
-          player1.user_id, 
+          tournamentId,
+          player1.user_id,
           player2.user_id
         );
-        
+
         matches.push(matchResult);
       }
 
@@ -346,7 +346,7 @@ class TournamentService {
     try {
       // Winner is the last winner (of the final match)
       const champion = winners[winners.length - 1];
-      
+
       // Update tournament status
       await db.run(
         `UPDATE tournaments SET status = 'completed', completed_at = CURRENT_TIMESTAMP 
@@ -413,7 +413,7 @@ class TournamentService {
       const groupedMatches = {};
       matches.forEach(match => {
         if (!groupedMatches[match.id]) {
-          groupedMatches[match.id] = { 
+          groupedMatches[match.id] = {
             id: match.id,
             status: match.status,
             created_at: match.created_at,
@@ -456,6 +456,153 @@ class TournamentService {
   async updateUserStats(userId, newElo, isWin) {
     // Implementation depends on your microservice communication strategy
     // Similar to the method in matchmaking service
+  }
+
+  // Add to TournamentService in tournament.js
+  async getActiveTournaments() {
+    try {
+      const tournaments = await db.all(
+        `SELECT t.*, COUNT(tp.user_id) as registered_players_count
+       FROM tournaments t
+       LEFT JOIN tournament_players tp ON t.id = tp.tournament_id
+       WHERE t.status IN ('registering', 'in_progress')
+       GROUP BY t.id
+       ORDER BY t.created_at DESC`
+      );
+
+      return tournaments.map(tournament => ({
+        id: tournament.id,
+        name: tournament.name,
+        status: tournament.status,
+        player_count: tournament.player_count,
+        registered_players: tournament.registered_players_count,
+        created_at: tournament.created_at
+      }));
+    } catch (error) {
+      console.error('Error fetching active tournaments:', error);
+      throw error;
+    }
+  }
+
+  async getMatchWithPlayers(matchId) {
+    try {
+      const match = await db.get(
+        `SELECT m.*, tm.tournament_id 
+       FROM matches m
+       JOIN tournaments_matches tm ON m.id = tm.match_id
+       WHERE m.id = ?`,
+        [matchId]
+      );
+
+      if (!match) return null;
+
+      const players = await db.all(
+        `SELECT mp.*, p.elo_score, u.nickname 
+       FROM match_players mp
+       JOIN players p ON mp.player_id = p.id
+       LEFT JOIN users u ON mp.player_id = u.id
+       WHERE mp.match_id = ?`,
+        [matchId]
+      );
+
+      return { match, players };
+    } catch (error) {
+      console.error('Error fetching tournament match with players:', error);
+      throw error;
+    }
+  }
+
+  async getMatchWithPlayers(matchId) {
+    try {
+      const match = await db.get(
+        `SELECT m.*, tm.tournament_id 
+         FROM matches m
+         JOIN tournaments_matches tm ON m.id = tm.match_id
+         WHERE m.id = ?`,
+        [matchId]
+      );
+
+      if (!match) return null;
+
+      const players = await db.all(
+        `SELECT mp.*, p.elo_score, u.nickname 
+         FROM match_players mp
+         JOIN players p ON mp.player_id = p.id
+         LEFT JOIN users u ON mp.player_id = u.id
+         WHERE mp.match_id = ?`,
+        [matchId]
+      );
+
+      return { match, players };
+    } catch (error) {
+      console.error('Error fetching tournament match with players:', error);
+      throw error;
+    }
+  }
+
+  async notifyTournamentProgress(tournamentId, matchId, wsAdapter) {
+    try {
+      const tournamentDetails = await this.getTournamentDetails(tournamentId);
+
+      const matchDetails = tournamentDetails.matches.find(m => m.id === matchId);
+
+      if (!matchDetails) {
+        throw new Error(`Match ${matchId} not found in tournament ${tournamentId}`);
+      }
+
+      const playerIds = tournamentDetails.players.map(p => p.user_id);
+
+      playerIds.forEach(playerId => {
+        wsAdapter.sendToClient(playerId, 'tournament_match_completed', {
+          tournamentId,
+          matchId,
+          match: matchDetails,
+          tournament: tournamentDetails.tournament,
+          matches: tournamentDetails.matches
+        });
+      });
+
+      if (tournamentDetails.tournament.status === 'completed') {
+        const champion = tournamentDetails.players.find(p => p.placement === 1);
+
+        playerIds.forEach(playerId => {
+          wsAdapter.sendToClient(playerId, 'tournament_completed', {
+            tournamentId,
+            tournament: tournamentDetails.tournament,
+            champion: champion ? champion.user_id : null,
+            players: tournamentDetails.players
+          });
+        });
+      }
+      else {
+        const pendingMatches = tournamentDetails.matches.filter(m =>
+          m.status === 'pending' &&
+          m.players &&
+          m.players.length === 2
+        );
+
+        pendingMatches.forEach(match => {
+          match.players.forEach(player => {
+            const opponent = match.players.find(p => p.user_id !== player.user_id);
+
+            if (opponent) {
+              wsAdapter.sendToClient(player.user_id, 'tournament_match_notification', {
+                tournamentId,
+                matchId: match.id,
+                opponent: {
+                  id: opponent.user_id,
+                  username: opponent.nickname || `Player ${opponent.user_id}`,
+                  elo: opponent.elo_before
+                },
+                round: match.round || 0
+              });
+            }
+          });
+        });
+      }
+    } catch (error) {
+      console.error(`Error notifying tournament progress: ${error.message}`);
+    }
   }
 }
 
