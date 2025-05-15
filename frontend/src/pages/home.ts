@@ -255,7 +255,7 @@ async function initializeWebSocket() {
     // Connect to WebSocket server
     await chatService.connect();
 
-    console.log("Connected to chat service");
+    console.log("Connected to chat service from home");
   } catch (error) {
     console.error("Failed to connect to chat service:", error);
   } finally {

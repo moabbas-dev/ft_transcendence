@@ -164,8 +164,26 @@ function registerMessageHandlers(wsAdapter) {
   
   // Cancel matchmaking handler
   wsAdapter.registerMessageHandler('cancel_matchmaking', async (clientId, payload) => {
-    matchmakingService.removeFromQueue(clientId);
-    wsAdapter.sendToClient(clientId, 'matchmaking_cancelled', {});
+    try {
+      console.log(`Player ${clientId} is cancelling matchmaking`);
+      
+      // Remove the player from the matchmaking queue
+      matchmakingService.removeFromQueue(clientId);
+      
+      // Send confirmation to the client
+      wsAdapter.sendToClient(clientId, 'matchmaking_cancelled', {
+        success: true,
+        message: 'You have been removed from the matchmaking queue'
+      });
+      
+      console.log(`Player ${clientId} has been removed from the matchmaking queue`);
+    } catch (error) {
+      console.error(`Error cancelling matchmaking for player ${clientId}:`, error);
+      wsAdapter.sendToClient(clientId, 'error', {
+        message: 'Failed to cancel matchmaking',
+        details: error.message
+      });
+    }
   });
   
   // Friend match request handler
@@ -264,6 +282,8 @@ function registerMessageHandlers(wsAdapter) {
     wsAdapter.registerMessageHandler('game_end', async (clientId, payload) => {
       const { matchId, winner, player1Goals, player2Goals } = payload;
       
+      matchmakingService.removeFromQueue(winner);
+
       try {
         // Get match details
         const match = await matchmakingService.getMatchById(matchId);
@@ -282,6 +302,9 @@ function registerMessageHandlers(wsAdapter) {
         // Determine which player is which (we need to know player1 and player2)
         const player1Id = matchPlayers[0].player_id;
         const player2Id = matchPlayers[1].player_id;
+        matchmakingService.removeFromQueue(player1Id);
+        matchmakingService.removeFromQueue(player2Id);
+        console.log("Players removed from queue:", player1Id, player2Id);
         console.log(`Player 1: ${player1Id}, Player 2: ${player2Id}`);
         
         // Make sure winner is a number

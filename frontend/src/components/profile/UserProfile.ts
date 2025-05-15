@@ -38,8 +38,8 @@ export const Profile = createComponent((props: ProfileProps) => {
         updateUIWithUserData(userData, container);
 
         // Request friendship status via WebSocket
-        console.log(userData);
-        console.log(userData.id);
+        // console.log(userData);
+        // console.log(userData.id);
 
         chatService.send('friendship:check', {
           currentUserId: store.userId,
@@ -123,7 +123,7 @@ export const Profile = createComponent((props: ProfileProps) => {
 
         // Add this event listener
         chatService.on("user:blocked_status", (data) => {
-          console.log(data);
+          // console.log(data);
           if (data.targetId === userData.id) {
             const isBlocked = data.isBlocked;
             const blockButton = container.querySelector("#block-user");

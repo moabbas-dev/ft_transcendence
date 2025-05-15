@@ -24,7 +24,7 @@ export const RequestsList = (props: RequestsListProps) => {
   requestsListElement.className = "message-requests-list sm:flex flex-col scroll-pr-4 pl-4 flex-1 overflow-y-auto [scrollbar-width:thin] [scrollbar-color:white_pongdark] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-ponghover [&::-webkit-scrollbar-track]:rounded [&::-webkit-scrollbar-thumb]:bg-pongdark [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb:hover]:bg-[#2d3748]";
   
   // Initialize with loading state
-  requestsListElement.innerHTML = `<div class="loading text-center text-white py-4">${t('loadingRequests')}</div>`;
+  requestsListElement.innerHTML = `<div class="loading text-center text-white py-4">${t('chat.loadingRequests')}</div>`;
   
   // Render message requests list
   const renderRequestsList = (requests: RequestItem[]) => {
@@ -32,7 +32,7 @@ export const RequestsList = (props: RequestsListProps) => {
     requestsListElement.innerHTML = "";
     
     if (!requests || requests.length === 0) {
-      requestsListElement.innerHTML = '<div class="text-white text-center py-4 opacity-50">No message requests</div>';
+      requestsListElement.innerHTML = `<div class="text-white text-center py-4 opacity-50">${t('chat.noRequests')}</div>`;
       return;
     }
     
@@ -41,7 +41,7 @@ export const RequestsList = (props: RequestsListProps) => {
     searchBox.className = "search-box mb-4 px-4";
     searchBox.innerHTML = `
       <div class="relative">
-        <input type="text" class="w-full bg-black text-pongcyan border border-pongcyan rounded-full py-2 px-4 pl-10 focus:outline-none drop-shadow-[2px_2px_2px_#00f7ff]" placeholder="Search requests...">
+        <input type="text" class="w-full bg-black text-pongcyan border border-pongcyan rounded-full py-2 px-4 pl-10 focus:outline-none drop-shadow-[2px_2px_2px_#00f7ff]" placeholder='${t('chat.searchRequests')}'>
         <div class="absolute left-3 top-2.5 text-white">
           <i class="fa-solid fa-search text-pongpink"></i>
         </div>
@@ -54,7 +54,7 @@ export const RequestsList = (props: RequestsListProps) => {
     if (onlineUsers.length > 0) {
       const onlineTitle = document.createElement("div");
       onlineTitle.className = "text-white text-lg font-medium mt-2 mb-1 drop-shadow-[1px_1px_20px_white]";
-      onlineTitle.textContent = "Online";
+      onlineTitle.textContent = `${t('chat.on')}`;
       requestsListElement.appendChild(onlineTitle);
       
       // Render online users
@@ -86,7 +86,7 @@ export const RequestsList = (props: RequestsListProps) => {
     if (offlineUsers.length > 0) {
       const offlineTitle = document.createElement("div");
       offlineTitle.className = "text-white text-lg font-medium mt-4 mb-1 drop-shadow-[1px_1px_20px_white]";
-      offlineTitle.textContent = "Offline";
+      offlineTitle.textContent = `${t('chat.off')}`;
       requestsListElement.appendChild(offlineTitle);
       
       // Render offline users

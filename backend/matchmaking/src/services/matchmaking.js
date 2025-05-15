@@ -21,63 +21,72 @@ class MatchmakingService {
         this.activeGames = new Map();
     }
 
-    //add a player looking for a match
-    async addToQueue(playerId) {
-        try {
-            // Convert playerId to string to ensure consistent handling
-            const playerIdStr = String(playerId);
-            // console.log("////////////////////////////////////////");
-            // console.log(`player ${playerIdStr} added to queue`);
-            // console.log("////////////////////////////////////////");
+//add a player looking for a match
+async addToQueue(playerId) {
+    try {
+        // Convert playerId to string to ensure consistent handling
+        const playerIdStr = String(playerId);
 
-            // Get or create user with consistent ID format
-            let user = await this.getUserWithElo(playerIdStr);
+        // Get or create user with consistent ID format
+        let user = await this.getUserWithElo(playerIdStr);
 
-            if (!user) {
-                user = await this.createNewUserRecord(playerIdStr);
-            }
-            console.log(`user ${user.id} has elo ${user.elo_score}`);
+        if (!user) {
+            user = await this.createNewUserRecord(playerIdStr);
+        }
+        console.log(`user ${user.id} has elo ${user.elo_score}`);
 
-            // Check if player is already in queue
-            const existingPlayer = this.waitingPlayers.find(p => p.playerId === user.id);
-            if (existingPlayer) {
-                console.log(`Player ${user.id} is already in queue`);
-                return null;
-            }
-
-            // Add to waiting queue with consistent ID format
-            this.waitingPlayers.push({
-                playerId: user.id,
-                elo: user.elo_score,
-                joinedAt: Date.now()
-            });
-            // console.log("////////////////////////////////////////")
-            // console.log(this.waitingPlayers);
-            // console.log("////////////////////////////////////////")
-
-            if (this.waitingPlayers.length >= 2) {
-                // Find a match with another player
-                const match = await this.findMatch(user.id, user.elo_score);
-
-                // Only remove from queue if match is found
-                if (match) {
-                    this.removeFromQueue(user.id);
-                    return match;
-                }
-                return null;
-            } else {
-                console.log(`Not enough players in queue. Current size: ${this.waitingPlayers.length}`);
-                return null;
-            }
-        } catch (error) {
-            console.error('Error adding to queue:', error);
+        // Check if player is already in queue
+        const existingPlayer = this.waitingPlayers.find(p => p.playerId === user.id);
+        if (existingPlayer) {
+            console.log(`Player ${user.id} is already in queue`);
             return null;
         }
+
+        // Add to waiting queue with consistent ID format
+        this.waitingPlayers.push({
+            playerId: user.id,
+            elo: user.elo_score,
+            joinedAt: Date.now()
+        });
+
+        // Debug log to see queue state
+        console.log("Current queue:", this.waitingPlayers.map(p => p.playerId));
+
+        // Only try to find a match if there are at least 2 different players in queue
+        const uniquePlayerIds = new Set(this.waitingPlayers.map(p => p.playerId));
+        if (uniquePlayerIds.size >= 2) {
+            // Find a match with another player
+            const match = await this.findMatch(user.id, user.elo_score);
+
+            // Only remove from queue if match is found
+            if (match) {
+                return match;
+            }
+            return null;
+        } else {
+            console.log(`Not enough players in queue. Current size: ${this.waitingPlayers.length}`);
+            return null;
+        }
+    } catch (error) {
+        console.error('Error adding to queue:', error);
+        return null;
     }
+}
 
     // Remove a player from the waiting queue
     removeFromQueue(playerId) {
-        this.waitingPlayers = this.waitingPlayers.filter(player => player.playerId !== playerId);
+        const playerIdStr = String(playerId);
+        const beforeLength = this.waitingPlayers.length;
+        
+        // Filter out the player from the queue
+        this.waitingPlayers = this.waitingPlayers.filter(player => String(player.playerId) !== playerIdStr);
+        
+        const afterLength = this.waitingPlayers.length;
+        const wasRemoved = beforeLength > afterLength;
+        
+        console.log(`Player ${playerIdStr} removed from queue: ${wasRemoved ? 'Yes' : 'No'}`);
+        console.log(`Queue before: ${beforeLength}, Queue after: ${afterLength}`);
+        console.log("Current queue:", this.waitingPlayers.map(p => p.playerId));
     }
 
    /**
@@ -108,14 +117,19 @@ class MatchmakingService {
 }
 
 
-    // Find a suitable opponent
-    async findMatch(playerId, userElo) {
+       // Find a suitable opponent
+       async findMatch(playerId, userElo) {
         try {
             const playerIdStr = String(playerId);
-            // Don't match against self
-            const possibleOpponents = this.waitingPlayers.filter(p => p.playerId !== playerIdStr);
+            console.log(`Finding match for player ${playerIdStr} with ELO ${userElo}`);
+            
+            // Don't match against self - make sure we're filtering correctly
+            const possibleOpponents = this.waitingPlayers.filter(p => String(p.playerId) !== playerIdStr);
+            
+            console.log(`Possible opponents: ${JSON.stringify(possibleOpponents.map(p => p.playerId))}`);
 
             if (possibleOpponents.length === 0) {
+                console.log(`No possible opponents found for player ${playerIdStr}`);
                 return null;
             }
 
@@ -126,25 +140,36 @@ class MatchmakingService {
             // Gradually increase range if no match found
             while (!opponent && range <= 500) {
                 opponent = possibleOpponents.find(p => Math.abs(p.elo - userElo) <= range);
-
                 range += this.rangeIncrement;
             }
 
             // If still no match, take the closest available opponent
-            if (!opponent) {
+            if (!opponent && possibleOpponents.length > 0) {
                 opponent = possibleOpponents.reduce((closest, current) => {
-                    return (Math.abs(current.elo - userElo) <= Math.abs(closest.elo - userElo))
+                    return (Math.abs(current.elo - userElo) < Math.abs(closest.elo - userElo))
                         ? current : closest;
-                });
-                if (!opponent)
-                    return null
+                }, possibleOpponents[0]);
+            }
+            
+            if (!opponent) {
+                console.log(`No opponent found for player ${playerIdStr} after all attempts`);
+                return null;
+            }
+            
+            console.log(`Found opponent ${opponent.playerId} for player ${playerIdStr}`);
+
+            // Double-check that we're not matching against self
+            if (String(opponent.playerId) === playerIdStr) {
+                console.error(`ERROR: Attempted to match player ${playerIdStr} against themselves`);
+                return null;
             }
 
             // Remove both players from queue
-            this.removeFromQueue(playerId);
+            this.removeFromQueue(playerIdStr);
             this.removeFromQueue(opponent.playerId);
+            
             // Create a match
-            return this.createMatch(playerId, opponent.playerId, Match.ONLINE_MATCH);
+            return this.createMatch(playerIdStr, opponent.playerId, Match.ONLINE_MATCH);
         } catch (err) {
             console.log("[MATCHMAKING] Error finding match:", err);
             return null;
@@ -168,16 +193,22 @@ class MatchmakingService {
      */
     async createMatch(player1Id, player2Id, matchType) {
         try {
+            // Safety check to prevent matching a player against themselves
+            if (String(player1Id) === String(player2Id)) {
+                console.error(`[MATCHMAKING] Cannot create a match with the same player on both sides: ${player1Id}`);
+                throw new Error(`Cannot create a match with the same player on both sides: ${player1Id}`);
+            }
+    
             const player1 = await this.getUserWithElo(player1Id);
             const player2 = await this.getUserWithElo(player2Id);
-
+    
             // Insert new match
             const matchId = await this.insertNewMatch(
                 `INSERT INTO matches (match_type, status) VALUES (?, ?)`,
                 [matchType, MatchStatus.PENDING]
             );
             console.log("[MATCHMAKING] Created match with ID:", matchId);
-
+    
             // Add both players to the match_players table
             // Note: elo_after is initially set to the same as elo_before
             // It will be updated when the match is completed
@@ -185,14 +216,14 @@ class MatchmakingService {
                 `INSERT INTO match_players (match_id, player_id, elo_before, elo_after, goals) VALUES (?, ?, ?, ?, ?)`,
                 [matchId, player1.id, player1.elo_score, player1.elo_score, 0]
             );
-
+    
             await db.run(
                 `INSERT INTO match_players (match_id, player_id, elo_before, elo_after, goals) VALUES (?, ?, ?, ?, ?)`,
                 [matchId, player2.id, player2.elo_score, player2.elo_score, 0]
             );
-
+    
             console.log(`[MATCHMAKING] Found match for user ${player1Id} against opponent ${player2Id}`);
-
+    
             return {
                 matchId: matchId,
                 player1: {

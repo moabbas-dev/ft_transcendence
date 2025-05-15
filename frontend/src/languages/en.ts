@@ -151,7 +151,15 @@ export default {
 	chat: {
 		nochat: "Select a chat",
 		friends: "Friends",
+		messageRequests: "Message Requests",
 		loadingFriends: "Loading friends...",
+		loadingRequests: "Loading chats...",
+		noFriends: "No friends yet",
+		noRequests: "No message requests",
+		searchFriends: "Search friends...",
+		searchRequests: "Search requests...",
+		on: "Online",
+		off: "Offline",
 	},
 	profile: {
 		rank: "Rank: ",

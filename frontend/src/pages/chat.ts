@@ -30,10 +30,10 @@ export default {
         <div class="flex justify-center px-4 pb-2">
           <div class="flex bg-black rounded-lg p-1 w-full border border-pongcyan shadow-[0_0_10px_rgba(0,247,255,0.3)]">
             <button id="friends-tab" class="flex-1 text-white py-2 px-4 rounded-md bg-pongcyan text-center transition-all hover:bg-pongcyan">
-              ${t('Friends')}
+              ${t('chat.friends')}
             </button>
             <button id="requests-tab" class="flex-1 text-white py-2 px-4 rounded-md text-center transition-all hover:bg-pongpink">
-              ${t('Message Requests')}
+              ${t('chat.messageRequests')}
             </button>
           </div>
         </div>
@@ -183,7 +183,7 @@ export default {
         const userId = store.userId;
 
         if (!username || !userId) {
-          console.error("User information not found in localStorage");
+          // console.error("User information not found in localStorage");
           return;
         }
 
@@ -193,7 +193,7 @@ export default {
         // Connect to WebSocket server
         await chatService.connect();
 
-        console.log("Connected to chat service");
+        console.log("Connected to chat service from chat");
       } catch (error) {
         console.error("Failed to connect to chat service:", error);
       } finally {
@@ -206,7 +206,7 @@ export default {
     function setupEventHandlers() {
       // Handle friends list update
       chatService.on("friends:list", (data: any) => {
-        console.log(data);
+        // console.log(data);
         friendsList.render(data.friends);
       });
 
@@ -293,7 +293,7 @@ export default {
     
         // Make sure we're connected before attempting to send
         if (!chatService.isConnected()) {
-          console.log("WebSocket not connected, attempting to reconnect...");
+          // console.log("WebSocket not connected, attempting to reconnect...");
           await initializeWebSocket();
         }
     
