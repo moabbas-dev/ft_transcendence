@@ -100,14 +100,30 @@ class DatabaseConnection {
         console.log('Tournament tables created or already exist');
       }
     });
-
-    this.db.get("PRAGMA table_info(matches)", (err, rows) => {
-      if (err) {
-        console.error('Error checking matches table schema:', err);
-        return;
+  
+    this.db.all("PRAGMA table_info(matches)", (err, rows) => {
+        if (err) {
+          console.error('Error checking matches table schema:', err);
+          return;
+        }
+    
+        const hasTournamentId = rows.some(row => row.name === 'tournament_id');
+        
+        if (!hasTournamentId) {
+          this.db.run(
+            `ALTER TABLE matches ADD COLUMN tournament_id INTEGER NULL 
+              REFERENCES tournaments(id) 
+              ON DELETE SET NULL`, (err) => {
+                if (err)
+                  console.error('Error adding tournament_id column to matches table:', err);
+                else
+                  console.log('Added tournament_id column to matches table');
+            }
+          );
+        }
       }
-    });
-
+    );
+    
     this.db.run(matchesTable, (err) => {
       if (err) {
         console.error('Error creating matches table', err);

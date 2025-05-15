@@ -72,7 +72,7 @@ class TournamentService {
       }) 
 
       if (existing) {
-        throw new Error('Player already registered for this tournament');
+        return;
       }
 
       // Check if tournament is full
@@ -439,24 +439,22 @@ class TournamentService {
       // Get all players
       const players = await new Promise((resolve, reject) => {
         db.all(
-          `SELECT tp.*, u.nickname, u.elo
+          `SELECT tp.user_id, tp.placement, tp.joined_at
            FROM tournament_players tp
-           JOIN users u ON tp.user_id = u.id
            WHERE tp.tournament_id = ?`,
           [tournamentId],
-          (err, row) => err? reject(err): resolve(row)
+          (err, rows) => err? reject(err): resolve(rows)
         );
-      })
+      });
 
       // Get all matches
       const matches = await new Promise((resolve, reject) => {
         db.all(
-          `SELECT m.*, mp.user_id, mp.score, mp.elo_before, mp.elo_after
-           FROM matches m
-           JOIN match_players mp ON m.id = mp.match_id
-           JOIN tournament_players tp ON mp.user_id = tp.user_id
-           WHERE tp.tournament_id = ? AND m.match_type = 'tournament'
-           ORDER BY m.created_at`,
+          `SELECT m.*, mp.player_id, mp.elo_before, mp.elo_after, mp.goals
+            FROM matches m
+            JOIN match_players mp ON m.id = mp.match_id
+            WHERE m.tournament_id = ? AND m.match_type = 'tournament'
+            ORDER BY m.created_at`,
           [tournamentId],
           (err, row) => err? reject(err): resolve(row)
         );
@@ -469,16 +467,19 @@ class TournamentService {
           groupedMatches[match.id] = {
             id: match.id,
             status: match.status,
+            round: match.round || 0,
+            position: match.position || 0,
             created_at: match.created_at,
             completed_at: match.completed_at,
             players: []
           };
         }
         groupedMatches[match.id].players.push({
-          user_id: match.user_id,
+          player_id: match.user_id,
           score: match.score,
           elo_before: match.elo_before,
-          elo_after: match.elo_after
+          elo_after: match.elo_after,
+          goals: match.goals
         });
       });
 

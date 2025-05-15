@@ -4,6 +4,7 @@ import { account } from './appwriteConfig.js';
 import axios from 'axios';
 import store from '../store/store.js';
 import Toast from './toast/Toast.js';
+import { Result } from 'postcss';
 
 // window.addEventListener("contextmenu", (e) => e.preventDefault());
 // window.addEventListener("keydown", (e) => {
@@ -33,7 +34,7 @@ export const handleLoginWithGoogle = (container: HTMLElement) => {
 				'http://localhost:5173', // if success redirect to this url
 				'http://localhost:5173/register' // if fail redirect to this url
 			)
-		} catch(err) {
+		} catch (err) {
 			Toast.show("Error: Login failed", "error");
 		}
 	}
@@ -42,11 +43,11 @@ export const handleLoginWithGoogle = (container: HTMLElement) => {
 
 export const refreshUserData = async () => {
 	if (store.userId === null)
-		return 
+		return
 	try {
 		const response = await axios.get(`http://localhost:8001/auth/users/id/${store.userId}`)
 		const data = response.data
-		
+
 		if (data) {
 			store.update('age', data.age)
 			store.update('avatarUrl', data.avatar_url)
@@ -62,3 +63,18 @@ export const refreshUserData = async () => {
 refreshUserData()
 
 localStorage.setItem("isLoggedIn", localStorage.getItem("sessionUUID") ? "true" : "false");
+
+export async function fetchUserDetails(userIds: string[]) {
+	try {
+		const results = await Promise.all(
+			userIds.map(async (userId) => {
+				const response = await axios.get(`http://localhost:8001/auth/users/id/${userId}`);
+				return response.data;
+			})
+		);
+		return results;
+	} catch (error) {
+		console.error('Error fetching user details:', error);
+		return null;
+	}
+}
