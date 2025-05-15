@@ -3,24 +3,33 @@ export class TournamentClient {
 	private callbacks: { [key: string]: ((data: any) => void)[] } = {};
 	private reconnectTimer: number | null = null;
 	private userId: string;
-
+	private connectionPromise: Promise<boolean> | null = null;
+	private isConnecting: boolean = false;
+  
 	constructor(private serverUrl: string, userId: string) {
 		this.userId = userId;
-
 		this.serverUrl = "ws://localhost:3001";
 		console.log('Connecting to WebSocket at: ', this.serverUrl);
-		this.connect();
+	}
+
+	public initialize(): Promise<boolean> {
+		if (!this.connectionPromise && !this.isConnecting) {
+			this.isConnecting = true;
+			this.connectionPromise = this.connect();
+		}
+		return this.connectionPromise || Promise.resolve(false);
 	}
 
 	private connect(): Promise<boolean> {
 		return new Promise((resolve, reject) => {
 			const wsUrl = `${this.serverUrl}?userId=${encodeURIComponent(this.userId)}`;
-			console.log(wsUrl);
+			console.log(`Connecting to: ${wsUrl}`);
 			
 			this.ws = new WebSocket(wsUrl);
 	
 			this.ws.onopen = () => {
 				console.log('Connected to tournament server');
+				this.isConnecting = false;
 				this.triggerCallbacks('connection', { status: 'connected' });
 				resolve(true);
 			};
@@ -45,18 +54,24 @@ export class TournamentClient {
 	
 			this.ws.onclose = () => {
 				console.log('Disconnected from tournament server');
+				this.connectionPromise = null;
+				this.isConnecting = false;
 	
 				if (this.reconnectTimer !== null) {
 					clearTimeout(this.reconnectTimer);
 				}
-				this.reconnectTimer = window.setTimeout(() => this.connect(), 3000);
+				this.reconnectTimer = window.setTimeout(() => this.initialize(), 3000);
+				
+				reject(new Error('WebSocket connection closed'));
 			};
 	
 			this.ws.onerror = (error) => {
 				console.error('WebSocket error:', error);
+				this.isConnecting = false;
+				this.connectionPromise = null;
 				reject(error);
 			};
-		})
+		});
 	}
 
 	private triggerCallbacks(type: string, payload: any): void {
@@ -65,12 +80,21 @@ export class TournamentClient {
 		}
 	}
 
-	send(type: string, payload: any = {}): void {
-		if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-			console.log("TEvent: \n", JSON.stringify({ type, payload }));	
-			this.ws.send(JSON.stringify({ type, payload }));
-		} else {
-			console.error('Cannot send message, WebSocket is not connected');
+	async send(type: string, payload: any = {}): Promise<void> {
+		try {
+			if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+				await this.initialize();
+			}
+			
+			if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+				this.ws.send(JSON.stringify({ type, payload }));
+			} else {
+				console.error('Cannot send message, WebSocket is not connected');
+				throw new Error('WebSocket not connected');
+			}
+		} catch (error) {
+			console.error('Error sending message:', error);
+			throw error;
 		}
 	}
 
@@ -79,6 +103,10 @@ export class TournamentClient {
 			this.callbacks[messageType] = [];
 		}
 		this.callbacks[messageType].push(callback);
+		
+		if (messageType === 'connection' && this.ws && this.ws.readyState === WebSocket.OPEN) {
+			callback({ status: 'connected' });
+		}
 	}
 
 	off(messageType: string, callback?: (data: any) => void): void {
@@ -97,42 +125,50 @@ export class TournamentClient {
 	disconnect(): void {
 		if (this.ws) {
 			this.ws.close();
+			this.ws = null;
 		}
 
 		if (this.reconnectTimer !== null) {
 			clearTimeout(this.reconnectTimer);
 			this.reconnectTimer = null;
 		}
+		
+		this.connectionPromise = null;
+		this.isConnecting = false;
 	}
 
-	createTournament(name: string, playerCount: number): void {
-		this.send('create_tournament', { name, playerCount });
+	isConnected(): boolean {
+		return !!this.ws && this.ws.readyState === WebSocket.OPEN;
 	}
 
-	joinTournament(tournamentId: string): void {
-		this.send('join_tournament', { tournamentId });
+	async createTournament(name: string, playerCount: number): Promise<void> {
+		await this.send('create_tournament', { name, playerCount });
 	}
 
-	startTournament(tournamentId: string): void {
-		this.send('start_tournament', { tournamentId });
+	async joinTournament(tournamentId: string): Promise<void> {
+		await this.send('join_tournament', { tournamentId });
 	}
 
-	submitTournamentMatchResult(matchId: string, winnerId: string): void {
-		this.send('tournament_match_result', { matchId, winnerId });
+	async startTournament(tournamentId: string): Promise<void> {
+		await this.send('start_tournament', { tournamentId });
 	}
 
-	getTournamentDetails(tournamentId: string): void {
-		this.send('get_tournament_details', { tournamentId });
+	async submitTournamentMatchResult(matchId: string, winnerId: string): Promise<void> {
+		await this.send('tournament_match_result', { matchId, winnerId });
 	}
 
-	listTournaments(): void {
-		this.send('list_tournaments', {});
+	async getTournamentDetails(tournamentId: string): Promise<void> {
+		await this.send('get_tournament_details', { tournamentId });
 	}
 
-	// This method works with the existing PongGameClient methods
-	// for game state updates during tournament matches
+	async listTournaments(): Promise<void> {
+		await this.send('list_tournaments', {});
+	}
+
 	updatePaddlePosition(matchId: string, position: number): void {
-		this.send('paddle_move', { matchId, position });
+		this.send('paddle_move', { matchId, position }).catch(err => 
+			console.error('Failed to send paddle position:', err)
+		);
 	}
 
 	updateBall(matchId: string, position: any, velocity: any, scores: any): void {
@@ -141,7 +177,7 @@ export class TournamentClient {
 			position,
 			velocity,
 			scores
-		});
+		}).catch(err => console.error('Failed to send ball update:', err));
 	}
 
 	completeMatch(matchId: string, winner: string, finalScore: any): void {
@@ -150,6 +186,6 @@ export class TournamentClient {
 			winner,
 			player1Goals: finalScore.player1,
 			player2Goals: finalScore.player2
-		});
+		}).catch(err => console.error('Failed to complete match:', err));
 	}
 }

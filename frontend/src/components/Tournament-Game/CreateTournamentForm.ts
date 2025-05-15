@@ -5,10 +5,11 @@ import store from "../../../store/store.js";
 
 export interface CreateTournamentFormProps {
   onTournamentCreated?: (tournament: any) => void;
+  client?: TournamentClient;
 }
 
 export const CreateTournamentForm = createComponent((props: CreateTournamentFormProps) => {
-  const { onTournamentCreated } = props;
+  const { onTournamentCreated, client } = props;
   
   const container = document.createElement('div');
   container.className = "w-full max-w-md mx-auto";
@@ -77,7 +78,7 @@ export const CreateTournamentForm = createComponent((props: CreateTournamentForm
   playerCountOptions[0].classList.add('border-pongcyan');
   
   const form = container.querySelector('#create-tournament-form');
-  form?.addEventListener('submit', (e) => {
+  form?.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const nameInput = container.querySelector('#tournament-name') as HTMLInputElement;
@@ -93,15 +94,33 @@ export const CreateTournamentForm = createComponent((props: CreateTournamentForm
       return;
     }
     
-    const client = new TournamentClient(window.location.origin.replace('http', 'ws'), store.userId as string);
-        
-    client.on('tournament_created', (data) => {
+    const tournamentClient = client || new TournamentClient(window.location.origin.replace('http', 'ws'), store.userId as string);
+    if (!client) {
+      tournamentClient.on('tournament_created', (data) => {
+        if (onTournamentCreated) {
+          onTournamentCreated(data.tournament);
+        }
+        tournamentClient.disconnect();
+      })
+      await tournamentClient.initialize();
+    } else {
+      const onCreated = (data: any) => {
+        if (onTournamentCreated) {
+          onTournamentCreated(data.tournament);
+        }
+        tournamentClient.off('tournament_created', onCreated);
+      };
+      
+      tournamentClient.on('tournament_created', onCreated);
+    }
+
+    tournamentClient.on('tournament_created', (data) => {
       if (onTournamentCreated) {
         onTournamentCreated(data.tournament);
       }
     });
     
-    client.createTournament(name, playerCount);
+    tournamentClient.createTournament(name, playerCount);
     
     const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
     if (submitButton) {
@@ -112,6 +131,19 @@ export const CreateTournamentForm = createComponent((props: CreateTournamentForm
           ${t('play.tournaments.createTournament.creating')}
         </div>
       `;
+    }
+
+    try {
+      await tournamentClient.createTournament(name, playerCount);
+    } catch (error) {
+      console.error('Failed to create tournament:', error);
+      
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = t('play.tournaments.createTournament.createButton');
+      }
+      
+      alert('Failed to create tournament. Please try again.');
     }
   });
   

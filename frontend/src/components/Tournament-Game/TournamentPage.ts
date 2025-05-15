@@ -14,11 +14,16 @@ export default {
 	render: (container: HTMLElement) => {
 		const userId = store.userId;
 
-		// WebSocket connection URL - replace with your actual WebSocket URL
-		const wsUrl = `ws://${window.location.host}`;
-
-		// Create tournament client
+		// WebSocket connection URL
+		const wsUrl = `ws://${window.location.hostname}:3001`;
+	
+		// Create a single tournament client instance
 		const client = new TournamentClient(wsUrl, userId as string);
+		
+		// Initialize client connection
+		client.initialize().catch(err => {
+		  console.error("Failed to connect to tournament server:", err);
+		});
 
 		// Tournament state
 		let currentTournamentId: string | null = null;
@@ -105,7 +110,7 @@ export default {
 						isCreator: true,
 						client
 					});
-				}
+				}, client
 			}));
 		}
 
