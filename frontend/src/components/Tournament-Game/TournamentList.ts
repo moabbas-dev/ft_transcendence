@@ -27,7 +27,7 @@ export const TournamentList = createComponent((props: TournamentListProps) => {
   } = props;
   
   const container = document.createElement('div');
-  container.className = "w-full space-y-4";
+  container.className = "w-full flex flex-col gap-4";
   
 
   const searchContainer = document.createElement('div');
@@ -44,7 +44,7 @@ export const TournamentList = createComponent((props: TournamentListProps) => {
   
 
   const tournamentsContainer = document.createElement('div');
-  tournamentsContainer.className = "space-y-3";
+  tournamentsContainer.className = "flex flex-col gap-3 h-64 overflow-auto";
   container.appendChild(tournamentsContainer);
   
 

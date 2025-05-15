@@ -6,6 +6,9 @@ import { renderResultsTab } from "./TournamentResults.js";
 import { OnlineGameBoard } from "../Online-Game/components/OnlineGameBoard.js";
 import store from "../../../store/store.js";
 import { fetchUserDetails } from "../../main.js";
+import { CreateTournamentForm } from "./CreateTournamentForm.js";
+import { Tournament, TournamentList, fetchTournaments } from "./TournamentList.js";
+import { showTournamentMatchNotification } from "./TournamentMatchNotification.js";
 
 export default {
 	render: (container: HTMLElement) => {
@@ -20,6 +23,7 @@ export default {
 		// Tournament state
 		let currentTournamentId: string | null = null;
 		let currentView: 'list' | 'create' | 'waiting' | 'brackets' | 'results' = 'list';
+		let tournaments: Tournament[] = [];
 
 		container.className = "bg-ponghover w-full h-dvh flex flex-col items-center justify-center";
 		container.innerHTML = `
@@ -34,10 +38,12 @@ export default {
       
       <div id="main-content" class="p-4 bg-gray-900 rounded-lg">
         <!-- Main content will be rendered here -->
-        ${renderCreateTab()}
       </div>
     </div>
   `;
+
+		// Initialize the create tournament form first
+		showCreateTournamentForm();
 
 		// Tab switching logic
 		const tabButtons = container.querySelectorAll('.tab-btn');
@@ -59,30 +65,122 @@ export default {
 			});
 		});
 
-		// Initialize event listeners
-		initEventListeners();
-
 		// Initialize WebSocket event listeners
 		initWebSocketListeners();
 
-		// Helper functions
-		function initEventListeners() {
-			// Create tournament form submission
-			container.addEventListener('submit', (e) => {
-				const target = e.target as HTMLFormElement;
-				if (target && target.id === ' ') {
-					e.preventDefault();
-					const nameInput = target.querySelector('#tournament-name') as HTMLInputElement;
-					const countSelect = target.querySelector('#player-count') as HTMLSelectElement;
+		function showTabContent(tab: string) {
+			const mainContent = container.querySelector('#main-content');
+			if (!mainContent) return;
 
-					if (nameInput && countSelect) {
-						const name = nameInput.value;
-						const playerCount = parseInt(countSelect.value);
+			switch (tab) {
+				case 'create':
+					showCreateTournamentForm();
+					break;
+				case 'join':
+					showJoinTournamentTab();
+					break;
+				case 'active':
+					showActiveTournamentsTab();
+					break;
+			}
+		}
 
-						client.createTournament(name, playerCount);
+		function showCreateTournamentForm() {
+			currentView = 'create';
+			const mainContent = container.querySelector('#main-content');
+			if (!mainContent) return;
+
+			mainContent.innerHTML = '';
+			mainContent.appendChild(CreateTournamentForm({
+				onTournamentCreated: (tournament: { id: string; playerCount?: number; player_count?: number }) => {
+					currentTournamentId = tournament.id;
+					showWaitingRoom({
+						tournamentId: currentTournamentId,
+						playerCount: tournament.playerCount || tournament.player_count || 0,
+						players: [{
+							userId: userId as string,
+							username: store.nickname || `Player ${userId}`,
+							joinedAt: new Date().toISOString()
+						}],
+						isCreator: true,
+						client
+					});
+				}
+			}));
+		}
+
+		function showJoinTournamentTab() {
+			currentView = 'list';
+			const mainContent = container.querySelector('#main-content');
+			if (!mainContent) return;
+
+			// Show loading state
+			mainContent.innerHTML = `
+        <div class="text-center py-8">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-pongcyan"></div>
+          <p class="mt-2 text-gray-400">${t('play.tournaments.joinTournament.loading')}</p>
+        </div>
+      `;
+
+			// Fetch tournaments
+			fetchTournaments((fetchedTournaments) => {
+				tournaments = fetchedTournaments;
+				
+				if (mainContent) {
+					mainContent.innerHTML = '';
+					interface TournamentListProps {
+						tournaments: Tournament[];
+						onJoinTournament: (tournamentId: string) => void;
+						onTournamentSelected: (tournament: Tournament) => void;
 					}
+
+					mainContent.appendChild(TournamentList({
+						tournaments,
+						onJoinTournament: (tournamentId: string) => {
+							client.joinTournament(tournamentId);
+							// Show loading state
+							mainContent.innerHTML = `
+				<div class="text-center py-8">
+				  <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-pongcyan"></div>
+				  <p class="mt-2 text-gray-400">${t('play.tournaments.joinTournament.joining')}</p>
+				</div>
+			  `;
+						},
+						onTournamentSelected: (tournament: Tournament) => {
+							currentTournamentId = tournament.id;
+							client.getTournamentDetails(tournament.id);
+							// Show loading state
+							mainContent.innerHTML = `
+				<div class="text-center py-8">
+				  <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-pongcyan"></div>
+				  <p class="mt-2 text-gray-400">${t('play.tournaments.loading')}</p>
+				</div>
+			  `;
+						}
+					} as TournamentListProps));
 				}
 			});
+		}
+
+		function showActiveTournamentsTab() {
+			// This would show tournaments the user is participating in
+			// For simplicity, we'll just reuse the join tab but filter for tournaments
+			// that include this user
+			currentView = 'list';
+			const mainContent = container.querySelector('#main-content');
+			if (!mainContent) return;
+
+			// Show loading state
+			mainContent.innerHTML = `
+        <div class="text-center py-8">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-pongcyan"></div>
+          <p class="mt-2 text-gray-400">${t('play.tournaments.myTournaments.loading')}</p>
+        </div>
+      `;
+
+			// For real implementation, you would need a backend route to get user's tournaments
+			// For now, we'll just use the existing tournaments and filter client-side
+			client.listTournaments();
 		}
 
 		function initWebSocketListeners() {
@@ -92,7 +190,7 @@ export default {
 					tournamentId: currentTournamentId,
 					playerCount: data.tournament.player_count,
 					players: [{
-						userId: userId,
+						userId: userId as string,
 						username: store.nickname || `Player ${userId}`,
 						joinedAt: new Date().toISOString()
 					}],
@@ -189,6 +287,10 @@ export default {
 			// Tournament match completed
 			client.on('tournament_match_completed', (data) => {
 				// This will be handled by the TournamentBrackets component
+				if (currentTournamentId === data.tournamentId && currentView === 'brackets') {
+					// Refresh brackets with updated data
+					showTournamentBrackets(data);
+				}
 			});
 
 			// Tournament completed
@@ -200,160 +302,49 @@ export default {
 
 			// Tournament list
 			client.on('tournament_list', (data) => {
+				tournaments = data.tournaments || [];
+				
 				if (currentView === 'list') {
-					renderTournamentList(data.tournaments);
+					const mainContent = container.querySelector('#main-content');
+					if (!mainContent) return;
+					
+					mainContent.innerHTML = '';
+					interface TournamentListProps {
+						tournaments: Tournament[];
+						onJoinTournament: (tournamentId: string) => void;
+						onTournamentSelected: (tournament: Tournament) => void;
+					}
+
+					mainContent.appendChild(TournamentList({
+						tournaments,
+						onJoinTournament: (tournamentId: string) => {
+							client.joinTournament(tournamentId);
+						},
+						onTournamentSelected: (tournament: Tournament) => {
+							currentTournamentId = tournament.id;
+							client.getTournamentDetails(tournament.id);
+						}
+					} as TournamentListProps));
 				}
 			});
 
 			// Tournament match notification
 			client.on('tournament_match_notification', (data) => {
-				// This will be handled by the TournamentBrackets component or a separate function
-			});
-		}
-
-		function showTabContent(tab: string) {
-			const mainContent = container.querySelector('#main-content');
-			if (!mainContent) return;
-
-			switch (tab) {
-				case 'create':
-					mainContent.innerHTML = renderCreateTab();
-					currentView = 'create';
-					break;
-				case 'join':
-					mainContent.innerHTML = renderJoinTab();
-					currentView = 'list';
-					// Fetch tournaments list
-					client.listTournaments();
-					break;
-				case 'active':
-					mainContent.innerHTML = renderActiveTab();
-					// TODO: Fetch user's active tournaments
-					break;
-			}
-		}
-
-		function renderCreateTab() {
-			return `
-      <div id="create-tab" class="tab-content">
-        <h2 class="text-xl text-white mb-4">${t('play.tournaments.createTournament.title')}</h2>
-        <form id=" " class="space-y-4">
-          <div>
-            <label class="block text-gray-300 mb-2" for="tournament-name">${t('play.tournaments.createTournament.name')}</label>
-            <input type="text" id="tournament-name" class="w-full p-2 bg-gray-800 text-white rounded" required>
-          </div>
-          <div>
-            <label class="block text-gray-300 mb-2" for="player-count">${t('play.tournaments.createTournament.playerCount')}</label>
-            <select id="player-count" class="w-full p-2 bg-gray-800 text-white rounded">
-              <option value="4">4 ${t('play.tournaments.createTournament.players')}</option>
-              <option value="8">8 ${t('play.tournaments.createTournament.players')}</option>
-            </select>
-          </div>
-          <button type="submit" class="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-            ${t('play.tournaments.createTournament.createButton')}
-          </button>
-        </form>
-      </div>
-    `;
-		}
-
-		function renderJoinTab() {
-			return `
-      <div id="join-tab" class="tab-content">
-        <h2 class="text-xl text-white mb-4">${t('play.tournaments.joinTournament.title')}</h2>
-        <div class="mb-4">
-          <input type="text" id="tournament-search" placeholder="${t('play.tournaments.joinTournament.searchPlaceholder')}" class="w-full p-2 bg-gray-800 text-white rounded">
-        </div>
-        <div id="tournament-list" class="space-y-3">
-          <div class="text-gray-400 text-center py-8">${t('play.tournaments.joinTournament.loading')}</div>
-        </div>
-      </div>
-    `;
-		}
-
-		function renderActiveTab() {
-			return `
-      <div id="active-tab" class="tab-content">
-        <h2 class="text-xl text-white mb-4">${t('play.tournaments.myTournaments.title')}</h2>
-        <div id="my-tournaments" class="space-y-3">
-          <div class="text-gray-400 text-center py-8">${t('play.tournaments.myTournaments.loading')}</div>
-        </div>
-      </div>
-    `;
-		}
-
-		function renderTournamentList(tournaments: any[]) {
-			const tournamentList = container.querySelector('#tournament-list');
-			if (!tournamentList) return;
-
-			if (!tournaments || tournaments.length === 0) {
-				tournamentList.innerHTML = `
-        <div class="text-gray-400 text-center py-8">
-          ${t('play.tournaments.joinTournament.noTournaments')}
-        </div>
-      `;
-				return;
-			}
-
-			tournamentList.innerHTML = '';
-
-			tournaments.forEach(tournament => {
-				const tournamentItem = document.createElement('div');
-				tournamentItem.className = "tournament-item p-4 bg-gray-800 rounded-lg";
-
-				// Determine if tournament is full
-				const isFull = tournament.registered_players >= tournament.player_count;
-
-				tournamentItem.innerHTML = `
-        <div class="flex justify-between items-center mb-2">
-          <h3 class="tournament-name text-lg font-medium text-white">${tournament.name}</h3>
-          <span class="text-sm text-gray-400">${tournament.player_count} ${t('play.tournaments.createTournament.players')}</span>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="text-sm text-gray-300">${tournament.registered_players}/${tournament.player_count} ${t('play.tournaments.joinTournament.registered')}</span>
-          <button 
-            data-id="${tournament.id}" 
-            class="join-btn px-3 py-1 ${isFull ? 'bg-gray-600 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'} text-white rounded"
-            ${isFull ? 'disabled' : ''}
-          >
-            ${isFull ? t('play.tournaments.joinTournament.full') : t('play.tournaments.joinTournament.join')}
-          </button>
-        </div>
-      `;
-
-				tournamentList.appendChild(tournamentItem);
-
-				// Add join button event listener if not full
-				if (!isFull) {
-					const joinBtn = tournamentItem.querySelector('.join-btn');
-					if (joinBtn) {
-						joinBtn.addEventListener('click', () => {
-							const tournamentId = joinBtn.getAttribute('data-id');
-							if (tournamentId) {
-								client.joinTournament(tournamentId);
-							}
-						});
+				// Show match notification popup
+				showTournamentMatchNotification({
+					tournamentId: data.tournamentId,
+					matchId: data.matchId,
+					opponent: data.opponent,
+					onAccept: (matchId) => {
+						// Start the match
+						startTournamentMatch(matchId, {
+							players: data.matchPlayers,
+							tournamentName: "Tournament Match",
+							round: data.round || 1
+						}, userId as string);
 					}
-				}
-			});
-
-			// Add event listener for search input
-			const searchInput = container.querySelector('#tournament-search') as HTMLInputElement;
-			if (searchInput) {
-				searchInput.addEventListener('input', () => {
-					const searchValue = searchInput.value.toLowerCase();
-					const items = tournamentList.querySelectorAll('.tournament-item');
-
-					items.forEach(item => {
-						const name = item.querySelector('.tournament-name')?.textContent?.toLowerCase() || '';
-						if (name.includes(searchValue)) {
-							(item as HTMLElement).style.display = 'block';
-						} else {
-							(item as HTMLElement).style.display = 'none';
-						}
-					});
 				});
-			}
+			});
 		}
 
 		function showWaitingRoom(waitingRoomProps: any) {
@@ -398,10 +389,8 @@ export default {
 			const formattedMatches = formatMatchesForBrackets(data);
 
 			mainContent.appendChild(TournamentBrackets({
-				tournamentId: data.tournament.id,
 				playersCount: data.tournament.player_count,
 				matches: formattedMatches,
-				client,
 				onMatchClick: (matchId: string) => {
 					// Find the match in tournament data
 					const match = data.matches.find((m: any) => m.id === matchId);
@@ -526,66 +515,6 @@ export default {
 			);
 		}
 
-		// Function to show match notification
-		function showMatchNotification(matchId: string, opponent: any) {
-			// Create a modal notification
-			const modal = document.createElement('div');
-			modal.className = 'fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50';
-			modal.innerHTML = `
-	  <div class="bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full">
-		<h2 class="text-2xl font-bold text-white mb-4">Your Match is Ready!</h2>
-		<div class="bg-gray-700 p-4 rounded-lg mb-4">
-		  <div class="flex items-center gap-4">
-			<div class="size-12 rounded-full bg-pongcyan flex items-center justify-center text-white text-xl font-bold">
-			  ${opponent?.username ? opponent.username.charAt(0).toUpperCase() : '?'}
-			</div>
-			<div>
-			  <div class="text-lg text-white font-medium">${opponent?.username || 'Opponent'}</div>
-			  <div class="text-sm text-gray-300">ELO: ${opponent?.elo || 'N/A'}</div>
-			</div>
-		  </div>
-		</div>
-		<p class="text-gray-300 mb-6">Your tournament match is ready to begin. Click below to start playing!</p>
-		<div class="flex justify-end gap-4">
-		  <button id="start-match-btn" class="px-4 py-2 bg-pongcyan text-white rounded hover:bg-blue-600 transition-colors">
-			Start Match
-		  </button>
-		</div>
-	  </div>
-	`;
-
-			document.body.appendChild(modal);
-
-			// Add event listener to start match button
-			const startBtn = modal.querySelector('#start-match-btn');
-			if (startBtn) {
-				startBtn.addEventListener('click', () => {
-					document.body.removeChild(modal);
-
-					// Start the match
-					// You need to get the match data first
-					const client = new TournamentClient(window.location.origin.replace('http', 'ws'), userId as string);
-					client.on('tournament_details', (data) => {
-						const match = data.matches.find((m: any) => m.id === matchId);
-						if (match) {
-							startTournamentMatch(matchId, {
-								players: match.players.map((p: any) => ({
-									userId: p.user_id,
-									username: p.nickname || `Player ${p.user_id}`,
-									elo: p.elo_before
-								})),
-								tournamentName: data.tournament.name,
-								round: match.round
-							}, userId as string);
-						}
-					});
-
-					// Fetch tournament details to get match data
-					// client.getTournamentDetails(data.tournamentId);
-				});
-			}
-		}
-
 		function showTournamentResults(data: any) {
 			currentView = 'results';
 
@@ -631,8 +560,6 @@ export default {
 
 			mainContent.appendChild(backButton);
 		}
-
-		// Showing match notification would be handled by the tournament brackets component or when client receives match notification
 
 		return container;
 	}
