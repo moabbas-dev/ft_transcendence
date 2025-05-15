@@ -10,6 +10,7 @@ import { CreateTournamentForm } from "./CreateTournamentForm.js";
 import { Tournament, TournamentList, fetchTournaments } from "./TournamentList.js";
 import { showTournamentMatchNotification } from "./TournamentMatchNotification.js";
 import { tournamentClient } from "../../main.js";
+import { navigate } from "../../router.js";
 
 export default {
 	render: (container: HTMLElement) => {
@@ -97,18 +98,7 @@ export default {
 			mainContent.innerHTML = '';
 			mainContent.appendChild(CreateTournamentForm({
 				onTournamentCreated: (tournament: { id: string; playerCount?: number; player_count?: number }) => {
-					currentTournamentId = tournament.id;
-					showWaitingRoom({
-						tournamentId: currentTournamentId,
-						playerCount: tournament.playerCount || tournament.player_count || 0,
-						players: [{
-							userId: userId as string,
-							username: store.nickname || `Player ${userId}`,
-							joinedAt: new Date().toISOString()
-						}],
-						isCreator: true,
-						client
-					});
+					navigate(`/tournaments/${tournament.id}`);
 				}, client
 			}));
 		}
@@ -142,24 +132,11 @@ export default {
 						tournaments,
 						onJoinTournament: (tournamentId: string) => {
 							client.joinTournament(tournamentId);
-							// Show loading state
-							mainContent.innerHTML = `
-				<div class="text-center py-8">
-				  <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-pongcyan"></div>
-				  <p class="mt-2 text-gray-400">${t('play.tournaments.joinTournament.joining')}</p>
-				</div>
-			  `;
+							navigate(`/tournaments/${tournamentId}`);
 						},
 						onTournamentSelected: (tournament: Tournament) => {
 							currentTournamentId = tournament.id;
-							client.getTournamentDetails(tournament.id);
-							// Show loading state
-							mainContent.innerHTML = `
-				<div class="text-center py-8">
-				  <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-pongcyan"></div>
-				  <p class="mt-2 text-gray-400">${t('play.tournaments.loading')}</p>
-				</div>
-			  `;
+							navigate(`/tournaments/${tournament.id}`);
 						}
 					} as TournamentListProps));
 				}

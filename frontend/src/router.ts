@@ -14,6 +14,7 @@ import OnlineGame from './pages/online-game.js';
 import CreateTournamentPage from './pages/create-tournament.js';
 import AccountVerifiedPage from './pages/account-verified.js';
 import store from "../store/store.js";
+import TournamentDetailPage from "./components/Tournament-Game/TournamentDetailPage.js"
 
 const routes: { [key: string]: Page } = {
   "/": HomePage,
@@ -26,6 +27,7 @@ const routes: { [key: string]: Page } = {
   "/play/online-game": OnlineGame,
   "/play/tournaments": TournamentPage,
   "/tournaments/create": CreateTournamentPage,
+  "/tournaments/:tournamentId": TournamentDetailPage,
   "/chat": ChatPage,
   "/chat/:uName": ChatPage,
   "/leader-board": LeaderBoardPage,
