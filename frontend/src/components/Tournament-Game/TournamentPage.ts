@@ -9,21 +9,20 @@ import { fetchUserDetails } from "../../main.js";
 import { CreateTournamentForm } from "./CreateTournamentForm.js";
 import { Tournament, TournamentList, fetchTournaments } from "./TournamentList.js";
 import { showTournamentMatchNotification } from "./TournamentMatchNotification.js";
+import { tournamentClient } from "../../main.js";
 
 export default {
 	render: (container: HTMLElement) => {
 		const userId = store.userId;
-
-		// WebSocket connection URL
-		const wsUrl = `ws://${window.location.hostname}:3001`;
 	
 		// Create a single tournament client instance
-		const client = new TournamentClient(wsUrl, userId as string);
+		const client = tournamentClient || new TournamentClient(`ws://${window.location.hostname}:3001`, userId as string);
 		
-		// Initialize client connection
-		client.initialize().catch(err => {
-		  console.error("Failed to connect to tournament server:", err);
-		});
+		if (!tournamentClient) {
+			client.initialize().catch(err => {
+			  console.error("NO GLOBAL TOURNAMENT CLIENT:", err);
+			});
+		  }
 
 		// Tournament state
 		let currentTournamentId: string | null = null;
@@ -164,7 +163,7 @@ export default {
 						}
 					} as TournamentListProps));
 				}
-			});
+			}, client);
 		}
 
 		function showActiveTournamentsTab() {
@@ -499,7 +498,8 @@ export default {
 			mainContent.appendChild(canvas);
 
 			// Create tournament client for the game
-			const client = new TournamentClient(window.location.origin.replace('http', 'ws'), userId);
+			// const client = new TournamentClient(window.location.origin.replace('http', 'ws'), userId);
+			// we will discuss the line above later when we start the game through tournament
 
 			// Initialize the game using OnlineGameBoard
 			const opponentId = opponent ? opponent.userId : matchData.players.find((p: any) => p.userId !== userId)?.userId;

@@ -4,7 +4,7 @@ import { account } from './appwriteConfig.js';
 import axios from 'axios';
 import store from '../store/store.js';
 import Toast from './toast/Toast.js';
-import { Result } from 'postcss';
+import { TournamentClient } from './components/Tournament-Game/TournamentClient.js';
 
 // window.addEventListener("contextmenu", (e) => e.preventDefault());
 // window.addEventListener("keydown", (e) => {
@@ -77,4 +77,24 @@ export async function fetchUserDetails(userIds: string[]) {
 		console.error('Error fetching user details:', error);
 		return null;
 	}
+}
+
+export let tournamentClient: TournamentClient | null = null;
+
+export const initializeTournamentClient = async () => {
+  if (store.isLoggedIn && store.userId && !tournamentClient) {
+    const wsUrl = `ws://${window.location.hostname}:3001`;
+    tournamentClient = new TournamentClient(wsUrl, store.userId);
+    
+    try {
+      await tournamentClient.initialize();
+      console.log('Tournament client initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize tournament client:', error);
+    }
+  }
+};
+
+if (store.isLoggedIn && store.userId) {
+  initializeTournamentClient();
 }

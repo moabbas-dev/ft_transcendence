@@ -151,13 +151,14 @@ export const TournamentList = createComponent((props: TournamentListProps) => {
   return container;
 });
 
-export async function fetchTournaments(callback: (tournaments: Tournament[]) => void, existingClient?: TournamentClient) {
+export async function fetchTournaments(callback: (tournaments: Tournament[]) => void, existingClient: TournamentClient) {
   const useExistingClient = !!existingClient;
   const client = existingClient || new TournamentClient(window.location.origin.replace('http', 'ws'), store.userId as string);
   
   const onTournamentList = (data: any) => {
     callback(data.tournaments || []);
     if (!useExistingClient) {
+      console.error("NO GLOBAL TOURNAMENT CLIENT");
       client.off('tournament_list', onTournamentList);
       client.disconnect();
     }

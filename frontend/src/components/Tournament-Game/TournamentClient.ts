@@ -8,8 +8,7 @@ export class TournamentClient {
   
 	constructor(private serverUrl: string, userId: string) {
 		this.userId = userId;
-		this.serverUrl = "ws://localhost:3001";
-		console.log('Connecting to WebSocket at: ', this.serverUrl);
+		this.serverUrl = serverUrl || "ws://localhost:3001";
 	}
 
 	public initialize(): Promise<boolean> {

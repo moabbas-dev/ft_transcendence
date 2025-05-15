@@ -132,19 +132,6 @@ export const CreateTournamentForm = createComponent((props: CreateTournamentForm
         </div>
       `;
     }
-
-    try {
-      await tournamentClient.createTournament(name, playerCount);
-    } catch (error) {
-      console.error('Failed to create tournament:', error);
-      
-      if (submitButton) {
-        submitButton.disabled = false;
-        submitButton.textContent = t('play.tournaments.createTournament.createButton');
-      }
-      
-      alert('Failed to create tournament. Please try again.');
-    }
   });
   
   return container;
