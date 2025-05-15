@@ -20,7 +20,7 @@ export interface WaitingRoomProps {
   onTournamentStart?: () => void;
 }
 
-export const WaitingRoom = createComponent((props: WaitingRoomProps ) => {
+export const WaitingRoom = createComponent((props: WaitingRoomProps) => {
   const {
     tournamentId,
     playerCount,
@@ -45,14 +45,14 @@ export const WaitingRoom = createComponent((props: WaitingRoomProps ) => {
       </div>
 
       <div class="flex justify-between">
-        ${isCreator && players.length === playerCount ? 
-          `<button id="start-tournament" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg">${t('play.tournaments.createTournament.startTournament')}</button>` : ''}
+        ${isCreator && players.length === playerCount ?
+      `<button id="start-tournament" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg">${t('play.tournaments.createTournament.startTournament')}</button>` : ''}
         <button id="leave-tournament" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg">${t('play.tournaments.createTournament.leaveTournament')}</button>
       </div>
     </div>
   `;
 
-  renderWaitingRoomSlots(container, playerCount?? 0, players);
+  renderWaitingRoomSlots(container, playerCount ?? 0, players);
 
   const startButton = container.querySelector('#start-tournament');
   if (startButton) {
@@ -71,26 +71,28 @@ export const WaitingRoom = createComponent((props: WaitingRoomProps ) => {
     });
   }
 
-  client.on('tournament_player_joined', (data) => {
-    if (data.tournamentId === tournamentId) {
-      renderWaitingRoomSlots(container, playerCount?? 0, data.players);
-      if (onPlayerJoin) onPlayerJoin(data.newPlayer);
-      
-      if (isCreator && data.players.length === playerCount) {
-        const startButton = container.querySelector('#start-tournament');
-        if (startButton) {
-          startButton.classList.remove('opacity-50', 'cursor-not-allowed');
-          startButton.removeAttribute('disabled');
+  if (client) {
+    client.on('tournament_player_joined', (data) => {
+      if (data.tournamentId === tournamentId) {
+        renderWaitingRoomSlots(container, playerCount ?? 0, data.players);
+        if (onPlayerJoin) onPlayerJoin(data.newPlayer);
+
+        if (isCreator && data.players.length === playerCount) {
+          const startButton = container.querySelector('#start-tournament');
+          if (startButton) {
+            startButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            startButton.removeAttribute('disabled');
+          }
         }
       }
-    }
-  });
+    });
 
-  client.on('tournament_started', (data) => {
-    if (data.tournamentId === tournamentId && onTournamentStart) {
-      onTournamentStart();
-    }
-  });
+    client.on('tournament_started', (data) => {
+      if (data.tournamentId === tournamentId && onTournamentStart) {
+        onTournamentStart();
+      }
+    });
+  }
 
   return container;
 });
@@ -98,7 +100,7 @@ export const WaitingRoom = createComponent((props: WaitingRoomProps ) => {
 export function renderWaitingRoomSlots(container: HTMLElement, playerCount: number, players: Player[] = []) {
   const waitingPlayersContainer = container.querySelector('#waiting-players');
   const playerMaxDisplay = container.querySelectorAll('.player-max-display');
-  
+
   if (waitingPlayersContainer) {
     waitingPlayersContainer.innerHTML = '';
 
@@ -114,10 +116,10 @@ export function renderWaitingRoomSlots(container: HTMLElement, playerCount: numb
           <div class="bg-[rgba(100,100,255,0.2)] p-4 rounded-lg flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div class="size-10 rounded-full bg-pongcyan">
-                ${playerData.avatar ? 
-                  `<img src="${playerData.avatar}" alt="avatar" class="size-full rounded-full object-cover" />` :
-                  `<div class="size-full rounded-full flex items-center justify-center bg-pongcyan text-white text-xl font-bold">${playerData.username ? playerData.username.charAt(0).toUpperCase() : '?'}</div>`
-                }
+                ${playerData.avatar ?
+            `<img src="${playerData.avatar}" alt="avatar" class="size-full rounded-full object-cover" />` :
+            `<div class="size-full rounded-full flex items-center justify-center bg-pongcyan text-white text-xl font-bold">${playerData.username ? playerData.username.charAt(0).toUpperCase() : '?'}</div>`
+          }
               </div>
               <div>
                 <div class="font-medium">${playerData.username || 'Unknown Player'}</div>

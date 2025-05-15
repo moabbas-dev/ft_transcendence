@@ -9,7 +9,7 @@ import AboutPage from "./pages/about.js";
 import { Page } from "./types/types.js";
 import PlayVsAI from "./pages/PlayVsAI.js"
 import { Lang, setLanguage } from "./languages/LanguageController.js";
-import TournamentPage from "./pages/tournaments.js";
+import TournamentPage from "./components/Tournament-Game/TournamentPage.js";
 import OnlineGame from './pages/online-game.js';
 import CreateTournamentPage from './pages/create-tournament.js';
 import AccountVerifiedPage from './pages/account-verified.js';

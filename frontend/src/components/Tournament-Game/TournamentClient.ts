@@ -6,49 +6,57 @@ export class TournamentClient {
 
 	constructor(private serverUrl: string, userId: string) {
 		this.userId = userId;
+
+		this.serverUrl = "ws://localhost:3001";
+		console.log('Connecting to WebSocket at: ', this.serverUrl);
 		this.connect();
 	}
 
-	private connect(): void {
-		const wsUrl = `${this.serverUrl}/?userId=${encodeURIComponent(this.userId)}`;
-
-		this.ws = new WebSocket(wsUrl);
-
-		this.ws.onopen = () => {
-			console.log('Connected to tournament server');
-			this.triggerCallbacks('connection', { status: 'connected' });
-		};
-
-		this.ws.onmessage = (event) => {
-			try {
-				const message = JSON.parse(event.data);
-
-				if (this.callbacks[message.type]) {
-					this.callbacks[message.type].forEach(callback => {
-						try {
-							callback(message.payload);
-						} catch (err) {
-							console.error(`Error in callback for message type ${message.type}:`, err);
-						}
-					});
+	private connect(): Promise<boolean> {
+		return new Promise((resolve, reject) => {
+			const wsUrl = `${this.serverUrl}?userId=${encodeURIComponent(this.userId)}`;
+			console.log(wsUrl);
+			
+			this.ws = new WebSocket(wsUrl);
+	
+			this.ws.onopen = () => {
+				console.log('Connected to tournament server');
+				this.triggerCallbacks('connection', { status: 'connected' });
+				resolve(true);
+			};
+	
+			this.ws.onmessage = (event) => {
+				try {
+					const message = JSON.parse(event.data);
+	
+					if (this.callbacks[message.type]) {
+						this.callbacks[message.type].forEach(callback => {
+							try {
+								callback(message.payload);
+							} catch (err) {
+								console.error(`Error in callback for message type ${message.type}:`, err);
+							}
+						});
+					}
+				} catch (err) {
+					console.error('Error processing message:', err);
 				}
-			} catch (err) {
-				console.error('Error processing message:', err);
-			}
-		};
-
-		this.ws.onclose = () => {
-			console.log('Disconnected from tournament server');
-
-			if (this.reconnectTimer !== null) {
-				clearTimeout(this.reconnectTimer);
-			}
-			this.reconnectTimer = window.setTimeout(() => this.connect(), 3000);
-		};
-
-		this.ws.onerror = (error) => {
-			console.error('WebSocket error:', error);
-		};
+			};
+	
+			this.ws.onclose = () => {
+				console.log('Disconnected from tournament server');
+	
+				if (this.reconnectTimer !== null) {
+					clearTimeout(this.reconnectTimer);
+				}
+				this.reconnectTimer = window.setTimeout(() => this.connect(), 3000);
+			};
+	
+			this.ws.onerror = (error) => {
+				console.error('WebSocket error:', error);
+				reject(error);
+			};
+		})
 	}
 
 	private triggerCallbacks(type: string, payload: any): void {
@@ -59,6 +67,7 @@ export class TournamentClient {
 
 	send(type: string, payload: any = {}): void {
 		if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+			console.log("TEvent: \n", JSON.stringify({ type, payload }));	
 			this.ws.send(JSON.stringify({ type, payload }));
 		} else {
 			console.error('Cannot send message, WebSocket is not connected');

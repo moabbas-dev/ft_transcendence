@@ -94,7 +94,7 @@ export const CreateTournamentForm = createComponent((props: CreateTournamentForm
     }
     
     const client = new TournamentClient(window.location.origin.replace('http', 'ws'), store.userId as string);
-    
+        
     client.on('tournament_created', (data) => {
       if (onTournamentCreated) {
         onTournamentCreated(data.tournament);

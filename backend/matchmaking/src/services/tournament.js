@@ -1,5 +1,7 @@
-import db from '../config/db.js';
+import database from '../config/db.js';
 import EloService from './elo.js';
+
+const db = database.getInstance();
 
 class TournamentService {
   constructor() {
@@ -13,14 +15,20 @@ class TournamentService {
     }
 
     try {
-      const result = await db.run(
-        `INSERT INTO tournaments (name, status, player_count) 
-         VALUES (?, ?, ?)`,
-        [name, 'registering', playerCount]
-      );
-
+      const tournamentId = await new Promise((resolve, reject) => {
+        db.run(
+          `INSERT INTO tournaments (name, status, player_count) 
+           VALUES (?, ?, ?)`,
+          [name, 'registering', playerCount],
+          function (err) {
+            if (err) return reject(err);
+            resolve(this.lastID);
+          }
+        );
+      })
+      
       return {
-        id: result.lastID,
+        id: tournamentId,
         name,
         status: 'registering',
         playerCount
@@ -34,10 +42,16 @@ class TournamentService {
   // Register a player for a tournament
   async registerPlayer(tournamentId, userId) {
     try {
-      const tournament = await db.get(
-        `SELECT * FROM tournaments WHERE id = ?`,
-        [tournamentId]
-      );
+      const tournament = await new Promise((resolve, reject) => {
+        db.get(
+          `SELECT * FROM tournaments WHERE id = ?`,
+          [tournamentId],
+          (err, row) => {
+            if (err) return reject(err);
+            resolve(row);
+          }
+        );
+      })
 
       if (!tournament) {
         throw new Error('Tournament not found');
@@ -48,22 +62,28 @@ class TournamentService {
       }
 
       // Check if user is already registered
-      const existing = await db.get(
-        `SELECT * FROM tournament_players 
-         WHERE tournament_id = ? AND user_id = ?`,
-        [tournamentId, userId]
-      );
+      const existing = await new Promise((resolve, reject) => {
+        db.get(
+          `SELECT * FROM tournament_players 
+           WHERE tournament_id = ? AND user_id = ?`,
+          [tournamentId, userId],
+          (err, row) => err? reject(err): resolve(row)
+        );
+      }) 
 
       if (existing) {
         throw new Error('Player already registered for this tournament');
       }
 
       // Check if tournament is full
-      const currentCount = await db.get(
-        `SELECT COUNT(*) as count FROM tournament_players 
-         WHERE tournament_id = ?`,
-        [tournamentId]
-      );
+      const currentCount = await new Promise((resolve, reject) => {
+        db.get(
+         `SELECT COUNT(*) as count FROM tournament_players 
+          WHERE tournament_id = ?`,
+         [tournamentId],
+         (err, row) => err? reject(err): resolve(row)
+       );
+      })
 
       if (currentCount.count >= tournament.player_count) {
         throw new Error('Tournament is already full');
@@ -91,10 +111,13 @@ class TournamentService {
   // Start a tournament and create first round matches
   async startTournament(tournamentId) {
     try {
-      const tournament = await db.get(
-        `SELECT * FROM tournaments WHERE id = ?`,
-        [tournamentId]
-      );
+      const tournament = await new Promise((resolve, reject) => {
+        db.get(
+         `SELECT * FROM tournaments WHERE id = ?`,
+         [tournamentId],
+         (err, row) => err? reject(err): resolve(row)
+       );
+      })
 
       if (!tournament) {
         throw new Error('Tournament not found');
@@ -105,13 +128,16 @@ class TournamentService {
       }
 
       // Get all players
-      const players = await db.all(
-        `SELECT tp.user_id, u.elo 
-         FROM tournament_players tp
-         JOIN users u ON tp.user_id = u.id
-         WHERE tp.tournament_id = ?`,
-        [tournamentId]
-      );
+      const players = await new Promise((resolve, reject) => {
+        db.all(
+          `SELECT tp.user_id, u.elo 
+           FROM tournament_players tp
+           JOIN users u ON tp.user_id = u.id
+           WHERE tp.tournament_id = ?`,
+          [tournamentId],
+          (err, row) => err? reject(err): resolve(row)
+        );
+      })
 
       if (players.length !== tournament.player_count) {
         throw new Error(`Not enough players (${players.length}/${tournament.player_count})`);
@@ -156,8 +182,12 @@ class TournamentService {
   // Create a match between two tournament players
   async createTournamentMatch(tournamentId, player1Id, player2Id) {
     try {
-      const player1 = await db.get(`SELECT id, elo FROM users WHERE id = ?`, [player1Id]);
-      const player2 = await db.get(`SELECT id, elo FROM users WHERE id = ?`, [player2Id]);
+      const player1 = await new Promise((resolve, reject)=> {
+        db.get(`SELECT id, elo FROM users WHERE id = ?`, [player1Id], (err, row) => err? reject(err): resolve(row));
+      }) 
+      const player2 = await new Promise((resolve, reject) => {
+        db.get(`SELECT id, elo FROM users WHERE id = ?`, [player2Id], (err, row) => err? reject(err): resolve(row));
+      })
 
       // Create match record
       const matchResult = await db.run(
@@ -192,18 +222,23 @@ class TournamentService {
   async updateTournamentMatchResult(matchId, winnerId) {
     try {
       // First update the match result (similar to regular match)
-      const match = await db.get(`SELECT * FROM matches WHERE id = ?`, [matchId]);
+      const match = await new Promise((resolve, reject) => {
+        db.get(`SELECT * FROM matches WHERE id = ?`, [matchId], (err, row) => err? reject(err): resolve(row));
+      })
       if (!match || match.status === 'completed' || match.match_type !== 'tournament') {
         throw new Error('Tournament match not found or already completed');
       }
 
       // Get players in this match
-      const players = await db.all(
-        `SELECT mp.*, u.elo FROM match_players mp 
-         JOIN users u ON mp.user_id = u.id
-         WHERE mp.match_id = ?`,
-        [matchId]
-      );
+      const players = await new Promise((resolve, reject) => {
+        db.all(
+          `SELECT mp.*, u.elo FROM match_players mp 
+           JOIN users u ON mp.user_id = u.id
+           WHERE mp.match_id = ?`,
+          [matchId],
+          (err, row) => err? reject(err): resolve(row)
+        );
+      })
 
       const winner = players.find(p => p.user_id === winnerId);
       const loser = players.find(p => p.user_id !== winnerId);
@@ -238,12 +273,15 @@ class TournamentService {
       );
 
       // Find tournament for this match by querying related players
-      const tournamentPlayers = await db.get(
-        `SELECT tournament_id FROM tournament_players 
-         WHERE user_id = ? OR user_id = ? 
-         LIMIT 1`,
-        [winner.user_id, loser.user_id]
-      );
+      const tournamentPlayers = await new Promise((resolve, reject) => {
+        db.get(
+          `SELECT tournament_id FROM tournament_players 
+           WHERE user_id = ? OR user_id = ? 
+           LIMIT 1`,
+          [winner.user_id, loser.user_id],
+          (err, row) => err? reject(err): resolve(row)
+        );
+      })
 
       if (!tournamentPlayers) {
         throw new Error('Tournament not found for this match');
@@ -273,24 +311,30 @@ class TournamentService {
   // Progress tournament to next round or complete it
   async progressTournament(tournamentId) {
     try {
-      const tournament = await db.get(
-        `SELECT * FROM tournaments WHERE id = ?`,
-        [tournamentId]
-      );
+      const tournament = await new Promise((resolve, reject) => {
+        db.get(
+          `SELECT * FROM tournaments WHERE id = ?`,
+          [tournamentId],
+          (err, row) => err? reject(err): resolve(row)
+        );
+      })
 
       if (!tournament || tournament.status !== 'in_progress') {
         throw new Error('Tournament not found or not in progress');
       }
 
       // Get all completed matches for this tournament
-      const completedMatches = await db.all(
-        `SELECT m.id, m.status, mp.user_id, mp.score
-         FROM matches m
-         JOIN match_players mp ON m.id = mp.match_id
-         JOIN tournament_players tp ON mp.user_id = tp.user_id
-         WHERE tp.tournament_id = ? AND m.match_type = 'tournament' AND m.status = 'completed'`,
-        [tournamentId]
-      );
+      const completedMatches = await new Promise((resolve, reject) => {
+        db.all(
+          `SELECT m.id, m.status, mp.user_id, mp.score
+           FROM matches m
+           JOIN match_players mp ON m.id = mp.match_id
+           JOIN tournament_players tp ON mp.user_id = tp.user_id
+           WHERE tp.tournament_id = ? AND m.match_type = 'tournament' AND m.status = 'completed'`,
+          [tournamentId],
+          (err, row) => err? reject(err): resolve(row)
+        );
+      })
 
       // Group by match ID to get winners
       const matchResults = {};
@@ -380,34 +424,43 @@ class TournamentService {
   async getTournamentDetails(tournamentId) {
     try {
       // Get tournament info
-      const tournament = await db.get(
-        `SELECT * FROM tournaments WHERE id = ?`,
-        [tournamentId]
-      );
+      const tournament = await new Promise((resolve, reject) => {
+        db.get(
+          `SELECT * FROM tournaments WHERE id = ?`,
+          [tournamentId],
+          (err, row) => err? reject(err): resolve(row)
+        );
+      })
 
       if (!tournament) {
         throw new Error('Tournament not found');
       }
 
       // Get all players
-      const players = await db.all(
-        `SELECT tp.*, u.nickname, u.elo
-         FROM tournament_players tp
-         JOIN users u ON tp.user_id = u.id
-         WHERE tp.tournament_id = ?`,
-        [tournamentId]
-      );
+      const players = await new Promise((resolve, reject) => {
+        db.all(
+          `SELECT tp.*, u.nickname, u.elo
+           FROM tournament_players tp
+           JOIN users u ON tp.user_id = u.id
+           WHERE tp.tournament_id = ?`,
+          [tournamentId],
+          (err, row) => err? reject(err): resolve(row)
+        );
+      })
 
       // Get all matches
-      const matches = await db.all(
-        `SELECT m.*, mp.user_id, mp.score, mp.elo_before, mp.elo_after
-         FROM matches m
-         JOIN match_players mp ON m.id = mp.match_id
-         JOIN tournament_players tp ON mp.user_id = tp.user_id
-         WHERE tp.tournament_id = ? AND m.match_type = 'tournament'
-         ORDER BY m.created_at`,
-        [tournamentId]
-      );
+      const matches = await new Promise((resolve, reject) => {
+        db.all(
+          `SELECT m.*, mp.user_id, mp.score, mp.elo_before, mp.elo_after
+           FROM matches m
+           JOIN match_players mp ON m.id = mp.match_id
+           JOIN tournament_players tp ON mp.user_id = tp.user_id
+           WHERE tp.tournament_id = ? AND m.match_type = 'tournament'
+           ORDER BY m.created_at`,
+          [tournamentId],
+          (err, row) => err? reject(err): resolve(row)
+        );
+      })
 
       // Organize matches by round (simplified)
       const groupedMatches = {};
@@ -461,14 +514,17 @@ class TournamentService {
   // Add to TournamentService in tournament.js
   async getActiveTournaments() {
     try {
-      const tournaments = await db.all(
-        `SELECT t.*, COUNT(tp.user_id) as registered_players_count
-       FROM tournaments t
-       LEFT JOIN tournament_players tp ON t.id = tp.tournament_id
-       WHERE t.status IN ('registering', 'in_progress')
-       GROUP BY t.id
-       ORDER BY t.created_at DESC`
-      );
+      const tournaments = await new Promise((resolve, reject) => {
+        db.all(
+          `SELECT t.*, COUNT(tp.user_id) as registered_players_count
+         FROM tournaments t
+         LEFT JOIN tournament_players tp ON t.id = tp.tournament_id
+         WHERE t.status IN ('registering', 'in_progress')
+         GROUP BY t.id
+         ORDER BY t.created_at DESC`,
+         (err, row) => err? reject(err): resolve(row)
+        );
+      })
 
       return tournaments.map(tournament => ({
         id: tournament.id,
@@ -486,24 +542,30 @@ class TournamentService {
 
   async getMatchWithPlayers(matchId) {
     try {
-      const match = await db.get(
-        `SELECT m.*, tm.tournament_id 
-       FROM matches m
-       JOIN tournaments_matches tm ON m.id = tm.match_id
-       WHERE m.id = ?`,
-        [matchId]
-      );
+      const match = await new Promise((resolve, reject) => {
+        db.get(
+          `SELECT m.*, tm.tournament_id 
+         FROM matches m
+         JOIN tournaments_matches tm ON m.id = tm.match_id
+         WHERE m.id = ?`,
+          [matchId],
+          (err, row) => err? reject(err): resolve(row)
+        );
+      })
 
       if (!match) return null;
 
-      const players = await db.all(
-        `SELECT mp.*, p.elo_score, u.nickname 
-       FROM match_players mp
-       JOIN players p ON mp.player_id = p.id
-       LEFT JOIN users u ON mp.player_id = u.id
-       WHERE mp.match_id = ?`,
-        [matchId]
-      );
+      const players = await new Promise((resolve, reject) => {
+        db.all(
+          `SELECT mp.*, p.elo_score, u.nickname 
+         FROM match_players mp
+         JOIN players p ON mp.player_id = p.id
+         LEFT JOIN users u ON mp.player_id = u.id
+         WHERE mp.match_id = ?`,
+          [matchId],
+          (err, row) => err? reject(err): resolve(row)
+        );
+      })
 
       return { match, players };
     } catch (error) {
@@ -514,24 +576,30 @@ class TournamentService {
 
   async getMatchWithPlayers(matchId) {
     try {
-      const match = await db.get(
-        `SELECT m.*, tm.tournament_id 
-         FROM matches m
-         JOIN tournaments_matches tm ON m.id = tm.match_id
-         WHERE m.id = ?`,
-        [matchId]
-      );
+      const match = await new Promise((resolve, reject) => {
+        db.get(
+          `SELECT m.*, tm.tournament_id 
+           FROM matches m
+           JOIN tournaments_matches tm ON m.id = tm.match_id
+           WHERE m.id = ?`,
+          [matchId],
+          (err, row) => err? reject(err): resolve(row)
+        );
+      })
 
       if (!match) return null;
 
-      const players = await db.all(
-        `SELECT mp.*, p.elo_score, u.nickname 
-         FROM match_players mp
-         JOIN players p ON mp.player_id = p.id
-         LEFT JOIN users u ON mp.player_id = u.id
-         WHERE mp.match_id = ?`,
-        [matchId]
-      );
+      const players = await new Promise((resolve, reject) => {
+        db.all(
+          `SELECT mp.*, p.elo_score, u.nickname 
+           FROM match_players mp
+           JOIN players p ON mp.player_id = p.id
+           LEFT JOIN users u ON mp.player_id = u.id
+           WHERE mp.match_id = ?`,
+          [matchId],
+          (err, row) => err? reject(err): resolve(row)
+        );
+      })
 
       return { match, players };
     } catch (error) {

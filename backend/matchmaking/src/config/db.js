@@ -60,7 +60,7 @@ class DatabaseConnection {
       );
     `;
 
-    const tournamentTables = `
+    const tournamentTable = `
       CREATE TABLE IF NOT EXISTS tournaments (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
@@ -71,7 +71,9 @@ class DatabaseConnection {
         started_at DATETIME,
         completed_at DATETIME
       );
+    `;
 
+    const tournamentPlayersTable=  `
       CREATE TABLE IF NOT EXISTS tournament_players (
         tournament_id INTEGER NOT NULL,
         user_id INTEGER NOT NULL,
@@ -81,9 +83,17 @@ class DatabaseConnection {
         FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE CASCADE,
         FOREIGN KEY (user_id) REFERENCES players(id) ON DELETE CASCADE
       );
-    `;
+    `
 
-    this.db.run(tournamentTables, (err) => {
+    this.db.run(tournamentTable, (err) => {
+      if (err) {
+        console.error('Error creating tournament tables', err);
+      } else {
+        console.log('Tournament tables created or already exist');
+      }
+    });
+
+    this.db.run(tournamentPlayersTable, (err) => {
       if (err) {
         console.error('Error creating tournament tables', err);
       } else {
