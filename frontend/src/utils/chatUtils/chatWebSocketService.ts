@@ -75,7 +75,7 @@ class ChatWebSocketService {
    */
   public send(event: string, payload: any): void {
     if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
-      console.error("WebSocket not connected");
+      // console.error("WebSocket not connected");
       return;
     }
 

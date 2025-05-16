@@ -46,7 +46,7 @@ export const Header = createComponent(() => {
         </div>
         <div class="flex items-center justify-end gap-3 sm:gap-4 w-1/2">
             <div class="md:flex-1">
-                ${store.userId? `
+                ${store.userId ? `
                 <form action="" id="search-bar-container" class="search-bar-container flex justify-center items-center gap-2 rounded-md md:p-2 md:bg-black md:border-2 md:border-pongcyan z-50">
                     <input type="text" name="search-bar" id="search-bar" autocomplete="off" placeholder="${t('home.header.search')}" class="w-full hidden md:block text-lg text-white bg-transparent rounded-md placeholder-pongcyan/50 focus:outline-none">
                     <label for="search-bar" class="fas fa-search text-pongcyan text-xl drop-shadow-[0_0_5px_#00f7ff] max-md:text-white hover:text-white hover:drop-shadow-[0_0_10px_#00f7ff] transition-all duration-300"></label>
@@ -137,7 +137,7 @@ export const Header = createComponent(() => {
                 const filteredUsers = allUsers.filter((user: { nickname: string; }) =>
                     user.nickname.toLowerCase().includes(searchQuery)
                 );
-                
+
                 // Show or hide results container
                 if (searchQuery.length > 0) {
                     searchResult.classList.remove('hidden');
@@ -224,19 +224,28 @@ export const Header = createComponent(() => {
                 const msg = document.createElement('p')
                 msg.innerHTML = '<p class="text-slate-500 text-center">No notifications yet!</p>'
                 notificationContainer.appendChild(msg)
-                return 
+                return
             }
             let unreadCount = 0;
+
+
             notifications.forEach(notification => {
+                const createdAt = notification.created_at
+                    ? formatInTimeZone(
+                        new Date(notification.created_at + ' UTC'),
+                        'Asia/Beirut',
+                        'yyyy-MM-dd HH:mm:ss'
+                    )
+                    : null;
                 const body = {
                     senderId: notification.sender_id,
                     recipientId: notification.recipient_id,
                     type: notification.type,
                     content: notification.content,
                     is_read: notification.is_read,
-                    created_at: formatInTimeZone(new Date(notification.created_at.toString().concat(' UTC')), 'Asia/Beirut', 'yyyy-MM-dd HH:mm:ss')
+                    created_at: createdAt
                 };
-                
+
                 if (!notification.is_read) unreadCount++;
                 notificationContainer.appendChild(Notification(body));
             });
@@ -246,8 +255,8 @@ export const Header = createComponent(() => {
 
     fetchUserNotifications(userId).then(data => {
         if (data) {
-            console.log('Fetched notifications:', data);
-            
+            // console.log('Fetched notifications:', data);
+
             renderNotifications(data);
         }
     });
