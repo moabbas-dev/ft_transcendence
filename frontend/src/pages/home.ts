@@ -175,7 +175,7 @@ export default {
         console.log(photoUrl); // this works 100%
         const session = await account.getSession('current');
         try {
-          const data = await axios.post("http://localhost:8001/auth/google/signIn", { email: appwiteUser.email, name: appwiteUser.name, country: session.countryName});
+          const data = await axios.post("/authentication/auth/google/signIn", { email: appwiteUser.email, name: appwiteUser.name, country: session.countryName});
           if (!data.data.require2FA) {
             if (data.data.accessToken) {
               const decodedToken: any = jwtDecode(data.data.accessToken);
@@ -201,7 +201,7 @@ export default {
             Toast.show("First step is complete! Now moving to the 2fa code validation", "success");
           }
           try {
-            await axios.post(`http://localhost:8001/auth/google_upload/${store.sessionUUID}?photo=${photoUrl as string}`, undefined, {
+            await axios.post(`/authentication/auth/google_upload/${store.sessionUUID}?photo=${photoUrl as string}`, undefined, {
               headers:{
                 Authorization: `Bearer ${store.accessToken}`,
               }

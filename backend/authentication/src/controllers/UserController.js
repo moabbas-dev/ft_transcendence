@@ -12,12 +12,14 @@ class UserController {
 	static async createUser(request, reply) {
 		const { email, password, nickname, full_name, age, country, google_id } = request.body;
 		const activationEmailHtml = (activationToken, full_name) => {
+			// Get the host from the request headers
+			const host = request.headers.host.split(':')[0]; // Remove port if present
+			const protocol = request.headers['x-forwarded-proto'] || 'https';
 			return `
 				<div>
 					<h1>Welcome ${full_name} to our website!</h1>
 					<p>Please click on the link below to activate your account</p>
-					<a href="${process.env.BACKEND_DOMAIN}/auth/activate/${activationToken}">Activate your account</a>
-					<p>${process.env.BACKEND_DOMAIN}/auth/activate/${activationToken}</p>
+					${protocol}://${host}/authentication/auth/activate/${activationToken}
 					<p>Have a nice day!</p>
 				</div>
 			`;
@@ -40,7 +42,7 @@ class UserController {
 			const activationToken = crypto.randomUUID();
 			await UserToken.create({ userId, activationToken, tokenType: "account_activation" });
 			try {
-				await axios.post(`http://localhost:3003/api/notifications/email`, {
+				await axios.post(`http://notifications:3003/api/notifications/email`, {
 					recipientId: userId,
 					content: {
 						subject: "New account is here!",
@@ -187,11 +189,14 @@ class UserController {
 
 	static async patchUser(request, reply) {
 		const activationEmailHtml = (activationToken, email, full_name) => {
+			// Get the host from the request headers
+			const host = request.headers.host.split(':')[0]; // Remove port if present
+			const protocol = request.headers['x-forwarded-proto'] || 'https';
 			return `
 				<div>
 					<h1>Welcome ${full_name} to our website!</h1>
 					<p>After updating your email to ${email}, please click on the link below to activate your account</p>
-					<a href="${process.env.BACKEND_DOMAIN}/auth/activate/${activationToken}">Activate your account</a>
+					${protocol}://${host}/authentication/auth/activate/${activationToken}
 					<p>Have a nice day!</p>
 				</div>
 			`;
@@ -244,7 +249,7 @@ class UserController {
 				await UserToken.create({ userId: id, activationToken, tokenType: "account_activation" });
 				try {
 					const fullName = typeof full_name !== 'undefined' ? full_name : user.full_name;
-					await axios.post(`http://localhost:3003/api/notifications/email`, {
+					await axios.post(`http://notifications:3003/api/notifications/email`, {
 						recipientId: id,
 						content: {
 							subject: "Activating your account due to email changing",

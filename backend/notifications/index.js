@@ -12,11 +12,11 @@ dotenv.config();
 database.initializeTables()
 
 const fastify = Fastify({
-  logger: true,
-//   https: {
-//     key: fs.readFileSync('./ssl/server.key'),
-//     cert: fs.readFileSync('./ssl/server.crt'),
-//   }
+	logger: true,
+	//   https: {
+	//     key: fs.readFileSync('./ssl/server.key'),
+	//     cert: fs.readFileSync('./ssl/server.crt'),
+	//   }
 })
 
 
@@ -30,13 +30,13 @@ fastify.register(cors, {
 });
 
 fastify.register(NotificationRoutes, {
-  prefix: '/api/notifications'
+	prefix: '/api/notifications'
 });
 
 // fastify.addHook("preHandler", auth)
 
 fastify.get('/', async (request, reply) => {
-    return { message: 'Notifications API WOOOOOOO!' };
+	return { message: 'Notifications API WOOOOOOO!' };
 });
 
 const handleShutdown = async (signal) => {
@@ -44,7 +44,7 @@ const handleShutdown = async (signal) => {
 	fastify.log.info('Shutting down server...');
 
 	try {
-		await closeDatabase();
+		await database.closeDatabase();
 		fastify.log.info('Server shutdown complete.');
 		process.exit(0);
 	} catch (err) {
@@ -57,14 +57,14 @@ process.on('SIGINT', () => handleShutdown('SIGINT'));
 process.on('SIGTERM', () => handleShutdown('SIGTERM'));
 
 const start = async () => {
-  try {
-    await fastify.listen({ port: process.env.PORT, host: '0.0.0.0' }, () => {
-      
-    });
-  } catch (err) {
-    fastify.log.error(err);
-    process.exit(1);
-  }
+	try {
+		await fastify.listen({ port: process.env.PORT, host: '::' }, () => {
+
+		});
+	} catch (err) {
+		fastify.log.error(err);
+		process.exit(1);
+	}
 };
 
 start();

@@ -24,7 +24,7 @@
     "@types/socket.io-client": "^1.4.36",
     "@vitejs/plugin-basic-ssl": "^2.0.0",
     "appwrite": "^17.0.1",
-    "axios": "^1.7.9",
+    "axios": "^1.8.4",
     "boxicons": "^2.1.4",
     "chart.js": "^4.4.7",
     "country-list": "^2.3.0",

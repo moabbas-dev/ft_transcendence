@@ -101,7 +101,7 @@ export const WaitingRoom = createComponent((props: WaitingRoomProps) => {
           const enrichedPlayers = await Promise.all(
             data.players.map(async (player: {user_id: string, placement: string, joined_at: string}) => {
               try {
-                const response = await fetch(`http://localhost:8001/auth/users/id/${player.user_id}`);
+                const response = await fetch(`/authentication/auth/users/id/${player.user_id}`);
                 
                 if (response.ok) {
                   const userData = await response.json();

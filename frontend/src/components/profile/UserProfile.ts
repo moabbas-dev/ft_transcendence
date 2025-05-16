@@ -28,7 +28,7 @@ export const Profile = createComponent((props: ProfileProps) => {
     const token = store.accessToken;
 
     axios
-      .get(`http://localhost:8001/auth/users/nickname/${props.uName}`, {
+      .get(`/authentication/auth/users/nickname/${props.uName}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -449,8 +449,8 @@ export const Profile = createComponent((props: ProfileProps) => {
       const formData = new FormData();
       formData.append('avatar', file);
       console.log(`Bearer ${store.accessToken}`);
-
-      await axios.post(`http://localhost:8001/auth/uploads/${store.userId}`, formData, {
+      
+      await axios.post(`/authentication/auth/uploads/${store.userId}`, formData, {
         headers: {
           authorization: `Bearer ${store.accessToken}`,
           'Content-Type': 'multipart/form-data'

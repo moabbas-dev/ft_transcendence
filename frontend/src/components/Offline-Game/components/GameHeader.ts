@@ -51,7 +51,7 @@ export const OfflineGameHeader = createComponent((props: OfflineGameHeader) => {
 
 	const fetchUserData = async (userId: string) => {
 		try {
-			const response = await axios.get(`http://localhost:8001/auth/users/id/${userId}`);
+			const response = await axios.get(`/authentication/auth/users/id/${userId}`);
 			return response.data;
 		} catch (error) {
 			console.log("Error fetching user data:", error);

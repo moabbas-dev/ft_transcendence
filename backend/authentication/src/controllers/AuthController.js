@@ -115,11 +115,14 @@ class AuthController {
 	static async verifyResetEmail(request, reply) {
 		const { email } = request.body;
 		const passwordResetEmailMessage = (fullName, uuid) => {
+			// Get the host from the request headers
+			const host = request.headers.host.split(':')[0]; // Remove port if present
+			const protocol = request.headers['x-forwarded-proto'] || 'https';
 			return `
 				<div>
 					<p>Dear ${fullName}, </p>
 					<p>Please follow the below link to reset your password. </p>
-					<p>${process.env.FRONTEND_DOMAIN}/reset_password/${uuid} </p>
+					<p>${protocol}://${host}/reset_password/${uuid} </p>
 					<p>Have a nice day! </p>
 				</div>
 			`;
@@ -133,7 +136,7 @@ class AuthController {
 			const userId = user.id;
 			const uuid = crypto.randomUUID();
 			try {
-				await axios.post(`http://localhost:3003/api/notifications/email`, {
+				await axios.post(`http://notifications:3003/api/notifications/email`, {
 					recipientId: userId,
 					content: {
 						subject: "Reset password email",
@@ -214,8 +217,11 @@ class AuthController {
 				return reply.code(404).send({ message: "User not found!" });
 			await User.activateUser(userId);
 			await UserToken.deleteByToken(token); // Delete expired token
+			// Get the host from the request headers
+			const host = request.headers.host.split(':')[0]; // Remove port if present
+			const protocol = request.headers['x-forwarded-proto'] || 'https';
 			// return reply.code(200).send({ message: "Account activation complete!" });
-			return reply.redirect(`${process.env.FRONTEND_DOMAIN}/account-verified?u=${user.nickname}&e=${user.email}`);
+			return reply.redirect(`${protocol}://${host}/account-verified?u=${user.nickname}&e=${user.email}`);
 		} catch (err) {
 			return reply.code(500).send({ message: "Error activating the account!", error: err.message });
 		}

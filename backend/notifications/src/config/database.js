@@ -45,6 +45,20 @@ class DatabaseConnection {
   getInstance() {
     return this.db;
   }
+
+  async closeDatabase () {
+    return new Promise((resolve, reject) => {
+      this.db.close(err => {
+        if (err) {
+          console.error('Error closing database:', err);
+          reject(err);
+        } else {
+          console.log('Database connection closed.');
+          resolve();
+        }
+      });
+    });
+  };
 }
 
 export default new DatabaseConnection();

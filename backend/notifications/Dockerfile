@@ -13,15 +13,8 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
-# Ensure uploads directory exists
-RUN mkdir -p uploads
-
-# Copy default avatar (if not already included in COPY . .)
-# Make sure binary.png exists in your local uploads directory
-COPY ./uploads/binary.png ./uploads/
-
 # Expose the port
-EXPOSE 8001
+EXPOSE 3003
 
 # Start the application
 CMD ["node", "index.js"]

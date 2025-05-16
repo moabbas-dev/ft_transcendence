@@ -5,6 +5,7 @@ const User = require('../models/User');
 const UserController = require('./UserController');
 const SECRET_KEY = process.env.JWT_SECRET_KEY;
 
+const UPLOADS_DIR = path.join(process.cwd(), 'uploads');
 
 class UploadController {
 	static async uploadHandler(request, reply) {
@@ -46,7 +47,7 @@ class UploadController {
 			}
 
 			// Ensure the uploads/user{id} folder exists
-			const userDir = path.join(__dirname, `../../uploads/user${id}`);
+			const userDir = path.join(UPLOADS_DIR, `user${id}`);
 			// Remove old content if the directory exists
 			if (fs.existsSync(userDir)) {
 				fs.rmSync(userDir, { recursive: true, force: true });
@@ -62,7 +63,7 @@ class UploadController {
 			await pipeline(file.file, fs.createWriteStream(filePath));
 
 			// Return the URL that points to the static route for uploads
-			const url = `${process.env.BACKEND_DOMAIN}/uploads/user${id}/${filename}`;
+			const url = `/authentication/uploads/user${id}/${filename}`;
 			const changes = await User.updateProfile(id, { avatar_url: url });
 			if (changes == 0)
 				reply.code(404).send({ message: 'User not found!' });
@@ -93,7 +94,7 @@ class UploadController {
 			if (!user)
 				return reply.code(404).send({ message: "User not found!" });
 			// Construct the full path of the directory inside the uploads folder
-			const directoryPath = path.join(__dirname, '../../uploads', dirname);
+			const directoryPath = path.join(UPLOADS_DIR, dirname);
 
 			// Check if the directory exists using fs.existsSync
 			if (!fs.existsSync(directoryPath)) {
@@ -104,7 +105,7 @@ class UploadController {
 			const files = await fs.promises.readdir(directoryPath);
 
 			// Construct the base URL for static files
-			const baseUrl = `${process.env.BACKEND_DOMAIN}/uploads/${dirname}`;
+			const baseUrl = `/authentication/uploads/${dirname}`;
 
 			// Map each file to its URL (assuming all files are images)
 			const imageUrls = files.map(file => `${baseUrl}/${file}`);

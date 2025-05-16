@@ -4,14 +4,14 @@ import Toast from "../src/toast/Toast";
 
 const getValidAccessToken = async (): Promise<string | null> => {
     try {
-        await axios.post(`http://localhost:8001/auth/jwt/verify/${store.userId}`, { accessToken: store.accessToken });
+        await axios.post(`/authentication/auth/jwt/verify/${store.userId}`, { accessToken: store.accessToken });
         return store.accessToken;
     } catch (error: any) {
         // Ensure error.response exists before accessing it
         if (error.response && error.response.status === 401) {
             try {
                 const { data } = await axios.post<{ accessToken: string }>(
-                    `http://localhost:8001/auth/jwt/refresh/${store.sessionUUID}`, 
+                    `/authentication/auth/jwt/refresh/${store.sessionUUID}`, 
                     { refreshToken: store.refreshToken }
                 );
                 

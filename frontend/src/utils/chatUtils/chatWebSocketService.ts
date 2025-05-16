@@ -10,9 +10,26 @@ class ChatWebSocketService {
   private connected = false;
   private username: string | null = null;
   private userId: any;
+  private messageQueue: Array<{ event: string, payload: any }> = [];
 
-  constructor(serverUrl: string = "ws://localhost:3002") {
-    this.serverUrl = serverUrl;
+  // constructor(serverUrl: string = "wss://192.168.1.13/social/") {
+  //   this.serverUrl = serverUrl;
+  // }
+
+  constructor(serverUrl: string | null = null) {
+    // Dynamically determine the WebSocket URL based on the current page's protocol and hostname
+    if (!serverUrl) {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const hostname = window.location.hostname; // This will be "localhost" or the IP address
+      const port = window.location.port ? `:${window.location.port}` : '';
+      this.serverUrl = `${protocol}//${hostname}${port}/social/`;
+      console.log("server url is null");
+    } else {
+      this.serverUrl = serverUrl;
+      console.log("server url is not null");
+    }
+
+    console.log("Using WebSocket URL:", this.serverUrl);
   }
 
   /**
@@ -30,6 +47,12 @@ class ChatWebSocketService {
           console.log("WebSocket connection established");
           this.reconnectAttempts = 0;
           this.connected = true;
+
+          // Process any queued messages
+          while (this.messageQueue.length > 0) {
+            const msg = this.messageQueue.shift(); // This removes the first item from the queue
+            if (msg) this.send(msg.event, msg.payload);
+          }
 
           // Send the initial connection message with user data
           if (!this.username || !this.userId) {
@@ -73,18 +96,29 @@ class ChatWebSocketService {
   /**
    * Send a message to the server
    */
+  // public send(event: string, payload: any): void {
+  //   if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
+  //     if (!this.socket)
+  //       console.error("hahahaah");
+  //     console.error("WebSocket not connected");
+  //     return;
+  //   }
+
+  //   this.socket.send(
+  //     JSON.stringify({
+  //       event,
+  //       payload,
+  //     })
+  //   );
+  // }
   public send(event: string, payload: any): void {
     if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
       // console.error("WebSocket not connected");
       return;
     }
 
-    this.socket.send(
-      JSON.stringify({
-        event,
-        payload,
-      })
-    );
+    // Send the message as normal
+    this.socket.send(JSON.stringify({ event, payload }));
   }
 
   /**
@@ -230,22 +264,6 @@ public markMessagesAsRead(roomId: string | null): void {
     console.error("WebSocket not connected");
     return;
   }
-  
-  const userId = store.userId;
-  if (!userId) {
-    console.error("User ID not found");
-    return;
-  }
-  
-  this.send("messages:mark_read", {
-    roomId,
-    userId
-  });
-  
-  // Also trigger an unread count update
-  this.send("messages:unread:get", {
-    userId
-  });
 }
 
   /**
@@ -281,17 +299,17 @@ public markMessagesAsRead(roomId: string | null): void {
   /**
   * checkFriendshipStatus
   */
-    public checkFriendshipStatus(friendId: number): void {
-      if (!this.userId) {
-        console.error('Not authenticated');
-        return;
-      }
-  
-      this.send('friend:checkStatus', {
-        userId: this.userId,
-        friendId
-      });
+  public checkFriendshipStatus(friendId: number): void {
+    if (!this.userId) {
+      console.error('Not authenticated');
+      return;
     }
+
+    this.send('friend:checkStatus', {
+      userId: this.userId,
+      friendId
+    });
+  }
 
   /**
    * Get message history for a specific chat room
