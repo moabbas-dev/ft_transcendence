@@ -99,6 +99,7 @@ export function registerTournamentMessageHandlers(wsAdapter) {
 
 			const updatedTournament = await TournamentService.getTournamentDetails(tournamentId);
 			const remainingPlayers = updatedTournament.players.map(p => p.user_id);
+			console.log(updatedTournament.players);
 
 			remainingPlayers.forEach(playerId => {
 				wsAdapter.sendToClient(playerId, 'tournament_player_left', {
