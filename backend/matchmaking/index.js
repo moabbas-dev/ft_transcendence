@@ -97,7 +97,7 @@ await database.initializeTables();
 // Start the server
 const start = async () => {
   try {
-    await fastify.listen({ port: 3001, host: '0.0.0.0' });
+    await fastify.listen({ port: 3001, host: '::' });
     
     // Setup WebSocket handlers after server is started
     setupWebSocketHandlers(wsAdapter, fastify);

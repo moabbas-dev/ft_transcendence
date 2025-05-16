@@ -29,10 +29,13 @@ export const handleLoginWithGoogle = (container: HTMLElement) => {
 		try {
 			localStorage.setItem("googleAuth", "true");
 			localStorage.setItem("googleAuthClicked", "true");
+			const origin = window.location.origin;
+			const successURL = origin;
+			const failureURL = `${origin}/register`;
 			account.createOAuth2Session(
 				OAuthProvider.Google,
-				'https://localhost', // if success redirect to this url
-				'https://localhost/register' // if fail redirect to this url
+				successURL, // if success redirect to this url
+				failureURL // if fail redirect to this url
 			)
 		} catch (err) {
 			Toast.show("Error: Login failed", "error");
@@ -83,7 +86,8 @@ export let tournamentClient: TournamentClient | null = null;
 
 export const initializeTournamentClient = async () => {
   if (store.isLoggedIn && store.userId && !tournamentClient) {
-    const wsUrl = `ws://${window.location.hostname}:3001`;
+	const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.hostname}:${window.location.port}/matchmaking/`;
     tournamentClient = new TournamentClient(wsUrl, store.userId);
     
     try {

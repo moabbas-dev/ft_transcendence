@@ -104,7 +104,8 @@ export default {
 		const userId = store.userId?? '0';
 		
 		// Connect to your matchmaking backend
-		const client = new PongGameClient("ws://localhost:3001", userId);
+		const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+		const client = new PongGameClient(`${protocol}//${window.location.hostname}:${window.location.port}/matchmaking/`, userId);
 		
 		// State for tracking current match
 		let currentMatchId: string | null = null;

@@ -31,7 +31,8 @@ export default {
     const tournamentId = params.tournamentId;
     const userId = store.userId;
 
-    const client = tournamentClient || new TournamentClient(`ws://${window.location.hostname}:3001`, userId as string);
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const client = tournamentClient || new TournamentClient(`${protocol}//${window.location.hostname}:${window.location.port}/matchmaking/`, userId as string);
 
     if (!tournamentClient) {
       await client.initialize().catch(err => {

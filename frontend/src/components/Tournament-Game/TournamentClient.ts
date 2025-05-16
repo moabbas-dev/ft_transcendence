@@ -8,7 +8,8 @@ export class TournamentClient {
   
 	constructor(private serverUrl: string, userId: string) {
 		this.userId = userId;
-		this.serverUrl = serverUrl || "ws://localhost:3001";
+		const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+		this.serverUrl = serverUrl || `${protocol}//${window.location.hostname}:${window.location.port}/matchmaking/`;
 	}
 
 	public initialize(): Promise<boolean> {
