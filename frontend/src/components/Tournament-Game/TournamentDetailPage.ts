@@ -43,7 +43,7 @@ export default {
     container.innerHTML = `
       <div class="p-4 bg-gray-800 rounded-lg shadow-lg">
         <div class="flex justify-between items-center gap-2 mb-4">
-          <h1 class="text-2xl font-bold text-white">${t('play.tournaments.tournamentDetails')}</h1>
+          <h1 id="tour-name" class="text-2xl font-bold text-white">Loading...</h1>
           <button id="back-button" class="px-4 py-2 bg-pongcyan text-white rounded hover:bg-blue-700">
             ${t('play.tournaments.backToTournaments')}
           </button>
@@ -68,6 +68,7 @@ export default {
     client.getTournamentDetails(tournamentId);
 
     client.on('tournament_details', async (data) => {
+      container.querySelector('#tour-name')!.textContent = data.tournament.name;
       if ((data.tournament.id as string).toString() === tournamentId) {
         try {
           const userIds = data.players.map((p: any) => p.user_id);
@@ -82,7 +83,8 @@ export default {
           });
 
           data.players = enrichedPlayers;          
-
+          console.log(enrichedPlayers);
+          console.log(data.players); 
           if (data.tournament.status === 'registering') {
             showWaitingRoom(container, data, client, userId as string);
           } else if (data.tournament.status === 'in_progress') {

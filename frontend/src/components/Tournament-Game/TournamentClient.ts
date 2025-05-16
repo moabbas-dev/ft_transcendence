@@ -150,6 +150,10 @@ export class TournamentClient {
 		await this.send('join_tournament', { tournamentId });
 	}
 
+	async leaveTournament(tournamentId: string): Promise<void> {
+		await this.send('leave_tournament', { tournamentId });
+	}	  
+
 	async startTournament(tournamentId: string): Promise<void> {
 		await this.send('start_tournament', { tournamentId });
 	}

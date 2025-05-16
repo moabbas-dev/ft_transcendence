@@ -65,9 +65,16 @@ export const WaitingRoom = createComponent((props: WaitingRoomProps) => {
   const leaveButton = container.querySelector('#leave-tournament');
   if (leaveButton) {
     leaveButton.addEventListener('click', () => {
-      // TODO: Implement tournament leave functionality
-      // For now, just navigate back to tournaments list
-      window.history.back();
+      if (confirm(t('play.tournaments.createTournament.leaveConfirmation'))) {
+        client.leaveTournament(tournamentId)
+          .then(() => {
+            window.history.back();
+          })
+          .catch((error) => {
+            console.error("Error leaving tournament:", error);
+            alert(t('play.tournaments.createTournament.leaveError'));
+          });
+      }
     });
   }
 

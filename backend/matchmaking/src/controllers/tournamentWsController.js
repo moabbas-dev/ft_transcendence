@@ -29,9 +29,9 @@ export function registerTournamentMessageHandlers(wsAdapter) {
 
 			const tournamentDetails = await TournamentService.getTournamentDetails(tournament.id);
 
-			wsAdapter.sendToClient(clientId, 'tournament_created', { 
-			  tournament,
-			  tournamentDetails
+			wsAdapter.sendToClient(clientId, 'tournament_created', {
+				tournament,
+				tournamentDetails
 			});
 		} catch (error) {
 			console.error('Error creating tournament:', error);
@@ -60,6 +60,8 @@ export function registerTournamentMessageHandlers(wsAdapter) {
 					tournamentId,
 					players: tournamentDetails.players
 				});
+
+				wsAdapter.sendToClient(playerId, 'tournament_details', tournamentDetails);
 			});
 
 			if (tournamentDetails.tournament.status === 'in_progress') {
@@ -75,6 +77,40 @@ export function registerTournamentMessageHandlers(wsAdapter) {
 			console.error('Error joining tournament:', error);
 			wsAdapter.sendToClient(clientId, 'error', {
 				message: `Error joining tournament: ${error.message}`
+			});
+		}
+	});
+
+	wsAdapter.registerMessageHandler('leave_tournament', async (clientId, payload) => {
+		try {
+			const { tournamentId } = payload;
+
+			const tournament = await TournamentService.getTournamentDetails(tournamentId);
+			if (!tournament) {
+				throw new Error('Tournament not found');
+			}
+
+			await TournamentService.removePlayerFromTournament(tournamentId, clientId);
+
+			wsAdapter.sendToClient(clientId, 'tournament_left', {
+				tournamentId,
+				success: true
+			});
+
+			const updatedTournament = await TournamentService.getTournamentDetails(tournamentId);
+			const remainingPlayers = updatedTournament.players.map(p => p.user_id);
+
+			remainingPlayers.forEach(playerId => {
+				wsAdapter.sendToClient(playerId, 'tournament_player_left', {
+					tournamentId,
+					playerId: clientId,
+					players: updatedTournament.players
+				});
+			});
+		} catch (error) {
+			console.error('Error leaving tournament:', error);
+			wsAdapter.sendToClient(clientId, 'error', {
+				message: `Error leaving tournament: ${error.message}`
 			});
 		}
 	});

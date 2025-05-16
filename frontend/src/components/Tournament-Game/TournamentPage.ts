@@ -165,21 +165,6 @@ export default {
 		}
 
 		function initWebSocketListeners() {
-			client.on('tournament_created', (data) => {
-				currentTournamentId = data.tournament.id;
-				showWaitingRoom({
-					tournamentId: currentTournamentId,
-					playerCount: data.tournament.player_count,
-					players: [{
-						userId: userId as string,
-						username: store.nickname || `Player ${userId}`,
-						joinedAt: new Date().toISOString()
-					}],
-					isCreator: true,
-					client
-				});
-			});
-
 			// Tournament joined response
 			client.on('tournament_joined', (data) => {
 				if (data.success) {
@@ -187,71 +172,6 @@ export default {
 					client.getTournamentDetails(data.tournamentId);
 				}
 			});
-
-			// Tournament details response
-			// client.on('tournament_details', async (data) => {
-			// 	if (currentTournamentId === data.tournament.id) {
-			// 		try {
-			// 			// Fetch user details for all players
-			// 			const userIds: string[] = data.players.map((p: { user_id: string }) => p.user_id);
-			// 			const userDetails = await fetchUserDetails(userIds);
-						
-			// 			// Merge user details with player data
-			// 			interface PlayerDetails {
-			// 			  id: string;
-			// 			  nickname?: string;
-			// 			  avatar_url?: string;
-			// 			}
-
-			// 			interface EnrichedPlayer {
-			// 			  user_id: string;
-			// 			  nickname: string;
-			// 			  avatar_url?: string;
-			// 			}
-
-			// 			const enrichedPlayers: EnrichedPlayer[] = data.players.map((player: { user_id: string }) => {
-			// 			  const userInfo: PlayerDetails | undefined = userDetails?.find((u: PlayerDetails) => u.id === player.user_id);
-			// 			  return {
-			// 				...player,
-			// 				nickname: userInfo?.nickname || `Player ${player.user_id}`,
-			// 				avatar_url: userInfo?.avatar_url
-			// 			  };
-			// 			});
-						
-			// 			// Replace players array with enriched version
-			// 			data.players = enrichedPlayers;
-						
-			// 			// Show appropriate view based on tournament status
-			// 			if (data.tournament.status === 'registering') {
-			// 			  showWaitingRoom({
-			// 				tournamentId: data.tournament.id as string,
-			// 				playerCount: data.tournament.player_count as number,
-			// 				players: data.players.map((p: {
-			// 				  user_id: string;
-			// 				  nickname?: string;
-			// 				  avatar_url?: string;
-			// 				  elo?: number;
-			// 				  joined_at: string;
-			// 				}) => ({
-			// 				  userId: p.user_id,
-			// 				  username: p.nickname || `Player ${p.user_id}`,
-			// 				  avatar: p.avatar_url,
-			// 				  rank: p.elo ? `ELO: ${p.elo}` : undefined,
-			// 				  joinedAt: p.joined_at
-			// 				})),
-			// 				isCreator: data.tournament.creator_id === userId,
-			// 				client
-			// 			  });
-			// 			} else if (data.tournament.status === 'in_progress') {
-			// 			  showTournamentBrackets(data);
-			// 			} else if (data.tournament.status === 'completed') {
-			// 			  showTournamentResults(data);
-			// 			}
-			// 		  } catch (error) {
-			// 			console.error('Error processing tournament details:', error);
-			// 		  }
-			// 	}
-			// });
 
 			// Tournament player joined
 			client.on('tournament_player_joined', (data) => {
@@ -326,26 +246,6 @@ export default {
 					}
 				});
 			});
-		}
-
-		function showWaitingRoom(waitingRoomProps: any) {
-			currentView = 'waiting';
-
-			const mainContent = container.querySelector('#main-content');
-			if (!mainContent) return;
-
-			mainContent.innerHTML = '';
-			mainContent.appendChild(WaitingRoom({
-				...waitingRoomProps,
-				client,
-				onPlayerJoin: (player: Player) => {
-					console.log('Player joined:', player);
-				},
-				onTournamentStart: () => {
-					// Tournament is starting, get details to show brackets
-					client.getTournamentDetails(currentTournamentId!);
-				}
-			}));
 		}
 
 		function showTournamentBrackets(data: any) {

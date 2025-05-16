@@ -26,7 +26,7 @@ class TournamentService {
           }
         );
       })
-      
+
       return {
         id: tournamentId,
         name,
@@ -67,9 +67,9 @@ class TournamentService {
           `SELECT * FROM tournament_players 
            WHERE tournament_id = ? AND user_id = ?`,
           [tournamentId, userId],
-          (err, row) => err? reject(err): resolve(row)
+          (err, row) => err ? reject(err) : resolve(row)
         );
-      }) 
+      })
 
       if (existing) {
         return;
@@ -78,11 +78,11 @@ class TournamentService {
       // Check if tournament is full
       const currentCount = await new Promise((resolve, reject) => {
         db.get(
-         `SELECT COUNT(*) as count FROM tournament_players 
+          `SELECT COUNT(*) as count FROM tournament_players 
           WHERE tournament_id = ?`,
-         [tournamentId],
-         (err, row) => err? reject(err): resolve(row)
-       );
+          [tournamentId],
+          (err, row) => err ? reject(err) : resolve(row)
+        );
       })
 
       if (currentCount.count >= tournament.player_count) {
@@ -108,15 +108,46 @@ class TournamentService {
     }
   }
 
+  async removePlayerFromTournament(tournamentId, userId) {
+    try {
+      const tournament = await new Promise((resolve, reject) => {
+        db.get(
+          `SELECT * FROM tournaments WHERE id = ?`,
+          [tournamentId],
+          (err, row) => err ? reject(err) : resolve(row)
+        );
+      });
+
+      if (!tournament) {
+        throw new Error('Tournament not found');
+      }
+
+      if (tournament.status !== 'registering') {
+        throw new Error('Cannot leave tournament that has already started');
+      }
+
+      await db.run(
+        `DELETE FROM tournament_players 
+       WHERE tournament_id = ? AND user_id = ?`,
+        [tournamentId, userId]
+      );
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error removing player from tournament:', error);
+      throw error;
+    }
+  }
+
   // Start a tournament and create first round matches
   async startTournament(tournamentId) {
     try {
       const tournament = await new Promise((resolve, reject) => {
         db.get(
-         `SELECT * FROM tournaments WHERE id = ?`,
-         [tournamentId],
-         (err, row) => err? reject(err): resolve(row)
-       );
+          `SELECT * FROM tournaments WHERE id = ?`,
+          [tournamentId],
+          (err, row) => err ? reject(err) : resolve(row)
+        );
       })
 
       if (!tournament) {
@@ -135,7 +166,7 @@ class TournamentService {
            JOIN users u ON tp.user_id = u.id
            WHERE tp.tournament_id = ?`,
           [tournamentId],
-          (err, row) => err? reject(err): resolve(row)
+          (err, row) => err ? reject(err) : resolve(row)
         );
       })
 
@@ -182,11 +213,11 @@ class TournamentService {
   // Create a match between two tournament players
   async createTournamentMatch(tournamentId, player1Id, player2Id) {
     try {
-      const player1 = await new Promise((resolve, reject)=> {
-        db.get(`SELECT id, elo FROM users WHERE id = ?`, [player1Id], (err, row) => err? reject(err): resolve(row));
-      }) 
+      const player1 = await new Promise((resolve, reject) => {
+        db.get(`SELECT id, elo FROM users WHERE id = ?`, [player1Id], (err, row) => err ? reject(err) : resolve(row));
+      })
       const player2 = await new Promise((resolve, reject) => {
-        db.get(`SELECT id, elo FROM users WHERE id = ?`, [player2Id], (err, row) => err? reject(err): resolve(row));
+        db.get(`SELECT id, elo FROM users WHERE id = ?`, [player2Id], (err, row) => err ? reject(err) : resolve(row));
       })
 
       // Create match record
@@ -223,7 +254,7 @@ class TournamentService {
     try {
       // First update the match result (similar to regular match)
       const match = await new Promise((resolve, reject) => {
-        db.get(`SELECT * FROM matches WHERE id = ?`, [matchId], (err, row) => err? reject(err): resolve(row));
+        db.get(`SELECT * FROM matches WHERE id = ?`, [matchId], (err, row) => err ? reject(err) : resolve(row));
       })
       if (!match || match.status === 'completed' || match.match_type !== 'tournament') {
         throw new Error('Tournament match not found or already completed');
@@ -236,7 +267,7 @@ class TournamentService {
            JOIN users u ON mp.user_id = u.id
            WHERE mp.match_id = ?`,
           [matchId],
-          (err, row) => err? reject(err): resolve(row)
+          (err, row) => err ? reject(err) : resolve(row)
         );
       })
 
@@ -279,7 +310,7 @@ class TournamentService {
            WHERE user_id = ? OR user_id = ? 
            LIMIT 1`,
           [winner.user_id, loser.user_id],
-          (err, row) => err? reject(err): resolve(row)
+          (err, row) => err ? reject(err) : resolve(row)
         );
       })
 
@@ -315,7 +346,7 @@ class TournamentService {
         db.get(
           `SELECT * FROM tournaments WHERE id = ?`,
           [tournamentId],
-          (err, row) => err? reject(err): resolve(row)
+          (err, row) => err ? reject(err) : resolve(row)
         );
       })
 
@@ -332,7 +363,7 @@ class TournamentService {
            JOIN tournament_players tp ON mp.user_id = tp.user_id
            WHERE tp.tournament_id = ? AND m.match_type = 'tournament' AND m.status = 'completed'`,
           [tournamentId],
-          (err, row) => err? reject(err): resolve(row)
+          (err, row) => err ? reject(err) : resolve(row)
         );
       })
 
@@ -428,7 +459,7 @@ class TournamentService {
         db.get(
           `SELECT * FROM tournaments WHERE id = ?`,
           [tournamentId],
-          (err, row) => err? reject(err): resolve(row)
+          (err, row) => err ? reject(err) : resolve(row)
         );
       })
 
@@ -443,7 +474,7 @@ class TournamentService {
            FROM tournament_players tp
            WHERE tp.tournament_id = ?`,
           [tournamentId],
-          (err, rows) => err? reject(err): resolve(rows)
+          (err, rows) => err ? reject(err) : resolve(rows)
         );
       });
 
@@ -456,7 +487,7 @@ class TournamentService {
             WHERE m.tournament_id = ? AND m.match_type = 'tournament'
             ORDER BY m.created_at`,
           [tournamentId],
-          (err, row) => err? reject(err): resolve(row)
+          (err, row) => err ? reject(err) : resolve(row)
         );
       })
 
@@ -523,7 +554,7 @@ class TournamentService {
          WHERE t.status IN ('registering', 'in_progress')
          GROUP BY t.id
          ORDER BY t.created_at DESC`,
-         (err, row) => err? reject(err): resolve(row)
+          (err, row) => err ? reject(err) : resolve(row)
         );
       })
 
@@ -550,7 +581,7 @@ class TournamentService {
          JOIN tournaments_matches tm ON m.id = tm.match_id
          WHERE m.id = ?`,
           [matchId],
-          (err, row) => err? reject(err): resolve(row)
+          (err, row) => err ? reject(err) : resolve(row)
         );
       })
 
@@ -564,7 +595,7 @@ class TournamentService {
          LEFT JOIN users u ON mp.player_id = u.id
          WHERE mp.match_id = ?`,
           [matchId],
-          (err, row) => err? reject(err): resolve(row)
+          (err, row) => err ? reject(err) : resolve(row)
         );
       })
 
@@ -584,7 +615,7 @@ class TournamentService {
            JOIN tournaments_matches tm ON m.id = tm.match_id
            WHERE m.id = ?`,
           [matchId],
-          (err, row) => err? reject(err): resolve(row)
+          (err, row) => err ? reject(err) : resolve(row)
         );
       })
 
@@ -598,7 +629,7 @@ class TournamentService {
            LEFT JOIN users u ON mp.player_id = u.id
            WHERE mp.match_id = ?`,
           [matchId],
-          (err, row) => err? reject(err): resolve(row)
+          (err, row) => err ? reject(err) : resolve(row)
         );
       })
 
