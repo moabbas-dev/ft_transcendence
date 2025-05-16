@@ -98,6 +98,8 @@ export class TournamentClient {
 	}
 
 	on(messageType: string, callback: (data: any) => void): void {
+		console.log("[TOURNAMENT EVENT RECEIVED]: ", messageType);
+		
 		if (!this.callbacks[messageType]) {
 			this.callbacks[messageType] = [];
 		}

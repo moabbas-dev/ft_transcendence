@@ -7,32 +7,32 @@ import { showTournamentMatchNotification } from "./TournamentMatchNotification";
 import { WaitingRoom } from "./WaitingRoom";
 
 interface Player {
-	user_id: string;
-	nickname?: string;
-	avatar_url?: string;
-	joined_at?: string;
+  user_id: string;
+  nickname?: string;
+  avatar_url?: string;
+  joined_at?: string;
 }
 
 interface UserDetails {
-	id: string;
-	nickname?: string;
-	avatar_url?: string;
+  id: string;
+  nickname?: string;
+  avatar_url?: string;
 }
 
 export default {
   render: async (container: HTMLElement, params?: { [key: string]: string }) => {
-	  
-	if (!params || !params.tournamentId) {
-		console.error("Tournament ID is required");
-		navigate("/play/tournaments");
-		return;
-	}
-		
-	const tournamentId = params.tournamentId;
+
+    if (!params || !params.tournamentId) {
+      console.error("Tournament ID is required");
+      navigate("/play/tournaments");
+      return;
+    }
+
+    const tournamentId = params.tournamentId;
     const userId = store.userId;
 
     const client = tournamentClient || new TournamentClient(`ws://${window.location.hostname}:3001`, userId as string);
-    
+
     if (!tournamentClient) {
       await client.initialize().catch(err => {
         console.error("Failed to initialize tournament client:", err);
@@ -68,21 +68,21 @@ export default {
     client.getTournamentDetails(tournamentId);
 
     client.on('tournament_details', async (data) => {
-      if (data.tournament.id === tournamentId) {
+      if ((data.tournament.id as string).toString() === tournamentId) {
         try {
           const userIds = data.players.map((p: any) => p.user_id);
-          const userDetails = await fetchUserDetails(userIds);
-		  const enrichedPlayers = data.players.map((player: Player) => {
-			const userInfo = userDetails?.find((u: UserDetails) => u.id === player.user_id);
-			return {
-				...player,
-				nickname: userInfo?.nickname || `Player ${player.user_id}`,
-				avatar_url: userInfo?.avatar_url
-			};
-		  });
-          
-          data.players = enrichedPlayers;
-          
+          const userDetails = await fetchUserDetails(userIds);          
+          const enrichedPlayers = data.players.map((player: Player) => {
+            const userInfo = userDetails?.find((u: UserDetails) => u.id === player.user_id);
+            return {
+              ...player,
+              nickname: userInfo?.nickname || `Player ${player.user_id}`,
+              avatar_url: userInfo?.avatar_url
+            };
+          });
+
+          data.players = enrichedPlayers;          
+
           if (data.tournament.status === 'registering') {
             showWaitingRoom(container, data, client, userId as string);
           } else if (data.tournament.status === 'in_progress') {
@@ -140,43 +140,43 @@ export default {
 };
 
 interface WaitingRoomPlayer {
-	userId: string;
-	username: string;
-	avatar?: string;
-	joinedAt?: string;
+  userId: string;
+  username: string;
+  avatar?: string;
+  joinedAt?: string;
 }
 
 interface WaitingRoomData {
-	tournamentId: string;
-	playerCount: number;
-	players: WaitingRoomPlayer[];
-	isCreator: boolean;
-	client: TournamentClient;
-	onTournamentStart: () => void;
+  tournamentId: string;
+  playerCount: number;
+  players: WaitingRoomPlayer[];
+  isCreator: boolean;
+  client: TournamentClient;
+  onTournamentStart: () => void;
 }
 
 function showWaitingRoom(container: HTMLElement, data: { tournament: { id: string; player_count: number; creator_id: string }; players: Player[] }, client: TournamentClient, userId: string): void {
-	const content = container.querySelector('#tournament-content');
-	if (!content) return;
+  const content = container.querySelector('#tournament-content');
+  if (!content) return;
 
-	const waitingRoomData: WaitingRoomData = {
-		tournamentId: data.tournament.id,
-		playerCount: data.tournament.player_count,
-		players: data.players.map((p) => ({
-			userId: p.user_id,
-			username: p.nickname || `Player ${p.user_id}`,
-			avatar: p.avatar_url,
-			joinedAt: p.joined_at
-		})),
-		isCreator: data.tournament.creator_id === userId,
-		client,
-		onTournamentStart: () => {
-			// Will be handled by tournament_started event
-		}
-	};
+  const waitingRoomData: WaitingRoomData = {
+    tournamentId: data.tournament.id,
+    playerCount: data.tournament.player_count,
+    players: data.players.map((p) => ({
+      userId: p.user_id,
+      username: p.nickname || `Player ${p.user_id}`,
+      avatar: p.avatar_url,
+      joinedAt: p.joined_at
+    })),
+    isCreator: data.tournament.creator_id === userId,
+    client,
+    onTournamentStart: () => {
+      // Will be handled by tournament_started event
+    }
+  };
 
-	content.innerHTML = '';
-	content.appendChild(WaitingRoom(waitingRoomData));
+  content.innerHTML = '';
+  content.appendChild(WaitingRoom(waitingRoomData));
 }
 
 function showTournamentBrackets(container: HTMLElement, data: any, client: TournamentClient, userId: string) {

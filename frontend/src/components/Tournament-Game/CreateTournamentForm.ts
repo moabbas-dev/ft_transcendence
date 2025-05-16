@@ -106,6 +106,7 @@ export const CreateTournamentForm = createComponent((props: CreateTournamentForm
     } else {
       const onCreated = (data: any) => {
         if (onTournamentCreated) {
+          console.log('Tournament created, received details:', data);
           onTournamentCreated(data.tournament);
         }
         tournamentClient.off('tournament_created', onCreated);

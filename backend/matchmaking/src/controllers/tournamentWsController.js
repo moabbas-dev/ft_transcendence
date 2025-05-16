@@ -27,7 +27,12 @@ export function registerTournamentMessageHandlers(wsAdapter) {
 
 			await TournamentService.registerPlayer(tournament.id, clientId);
 
-			wsAdapter.sendToClient(clientId, 'tournament_created', { tournament });
+			const tournamentDetails = await TournamentService.getTournamentDetails(tournament.id);
+
+			wsAdapter.sendToClient(clientId, 'tournament_created', { 
+			  tournament,
+			  tournamentDetails
+			});
 		} catch (error) {
 			console.error('Error creating tournament:', error);
 			wsAdapter.sendToClient(clientId, 'error', {
