@@ -142,6 +142,8 @@ export const WaitingRoom = createComponent((props: WaitingRoomProps) => {
     client.on('tournament_started', (data) => {
       if (data.tournamentId === tournamentId && onTournamentStart) {
         onTournamentStart();
+      } else {
+        console.error("[Waiting Room]: Ids don't match");
       }
     });
   }

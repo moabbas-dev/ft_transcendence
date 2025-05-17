@@ -23,7 +23,7 @@ class ChatWebSocketService {
       const hostname = window.location.hostname; // This will be "localhost" or the IP address
       const port = window.location.port ? `:${window.location.port}` : '';
       this.serverUrl = `${protocol}//${hostname}${port}/social/`;
-      console.log("server url is null");
+      console.log("server url is ", this.serverUrl);
     } else {
       this.serverUrl = serverUrl;
       console.log("server url is not null");

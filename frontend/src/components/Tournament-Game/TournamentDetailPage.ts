@@ -108,18 +108,24 @@ export default {
     client.on('tournament_started', (data) => {
       if (data.tournamentId === tournamentId) {
         showTournamentBrackets(container, data, client, userId as string);
+      } else {
+        console.error("[TournamentDetails]: Ids don't match");
       }
     });
 
     client.on('tournament_match_completed', (data) => {
       if (data.tournamentId === tournamentId) {
         showTournamentBrackets(container, data, client, userId as string);
+      } else {
+        console.error("Ids don't match");
       }
     });
 
     client.on('tournament_completed', (data) => {
       if (data.tournamentId === tournamentId) {
         showTournamentResults(container, data);
+      } else {
+        console.error("Ids don't match");
       }
     });
 

@@ -183,7 +183,9 @@ export default {
 			client.on('tournament_started', (data) => {
 				if (currentTournamentId === data.tournamentId) {
 					showTournamentBrackets(data);
-				}
+				} else {
+					console.error("[TournamentPage]: Ids don't match");
+				  }
 			});
 
 			// Tournament match completed
