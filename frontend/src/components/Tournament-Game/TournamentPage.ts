@@ -181,7 +181,7 @@ export default {
 
 			// Tournament started
 			client.on('tournament_started', (data) => {
-				if (currentTournamentId === data.tournamentId) {
+				if (String(currentTournamentId) === String(data.tournamentId)) {
 					showTournamentBrackets(data);
 				} else {
 					console.error("[TournamentPage]: Ids don't match");
@@ -191,7 +191,7 @@ export default {
 			// Tournament match completed
 			client.on('tournament_match_completed', (data) => {
 				// This will be handled by the TournamentBrackets component
-				if (currentTournamentId === data.tournamentId && currentView === 'brackets') {
+				if (String(currentTournamentId) === String(data.tournamentId) && currentView === 'brackets') {
 					// Refresh brackets with updated data
 					showTournamentBrackets(data);
 				}
@@ -199,7 +199,7 @@ export default {
 
 			// Tournament completed
 			client.on('tournament_completed', (data) => {
-				if (currentTournamentId === data.tournamentId) {
+				if (String(currentTournamentId) === String(data.tournamentId)) {
 					showTournamentResults(data);
 				}
 			});

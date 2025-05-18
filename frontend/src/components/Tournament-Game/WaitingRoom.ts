@@ -81,7 +81,7 @@ export const WaitingRoom = createComponent((props: WaitingRoomProps) => {
 
   if (client) {
     client.on('tournament_player_joined', (data) => {
-      if (data.tournamentId === tournamentId) {
+      if (String(data.tournamentId) === String(tournamentId)) {
         renderWaitingRoomSlots(container, playerCount ?? 0, data.players);
         if (onPlayerJoin) onPlayerJoin(data.newPlayer);
 
@@ -96,7 +96,7 @@ export const WaitingRoom = createComponent((props: WaitingRoomProps) => {
     });
 
     client.on('tournament_player_left', async (data) => {
-      if (data.tournamentId === tournamentId) {
+      if (String(data.tournamentId) === String(tournamentId)) {
         try {
           const enrichedPlayers = await Promise.all(
             data.players.map(async (player: {player_id: string, placement: string, joined_at: string}) => {
@@ -140,7 +140,7 @@ export const WaitingRoom = createComponent((props: WaitingRoomProps) => {
     });
 
     client.on('tournament_started', (data) => {
-      if (data.tournamentId === tournamentId && onTournamentStart) {
+      if (String(data.tournamentId) === String(tournamentId) && onTournamentStart) {
         onTournamentStart();
       } else {
         console.error("[Waiting Room]: Ids don't match");

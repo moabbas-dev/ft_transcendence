@@ -53,7 +53,7 @@ export function registerTournamentMessageHandlers(wsAdapter) {
 			});
 
 			const tournamentDetails = await TournamentService.getTournamentDetails(tournamentId);
-			const playerIds = tournamentDetails.players.map(p => p.user_id);
+			const playerIds = tournamentDetails.players.map(p => p.player_id);
 
 			playerIds.forEach(playerId => {
 				wsAdapter.sendToClient(playerId, 'tournament_player_joined', {
@@ -98,7 +98,7 @@ export function registerTournamentMessageHandlers(wsAdapter) {
 			});
 
 			const updatedTournament = await TournamentService.getTournamentDetails(tournamentId);
-			const remainingPlayers = updatedTournament.players.map(p => p.user_id);
+			const remainingPlayers = updatedTournament.players.map(p => p.player_id);
 			console.log(updatedTournament.players);
 
 			remainingPlayers.forEach(playerId => {
@@ -123,7 +123,7 @@ export function registerTournamentMessageHandlers(wsAdapter) {
 			const result = await TournamentService.startTournament(tournamentId);
 
 			const tournamentDetails = await TournamentService.getTournamentDetails(tournamentId);
-			const playerIds = tournamentDetails.players.map(p => p.user_id);
+			const playerIds = tournamentDetails.players.map(p => p.player_id);
 
 			playerIds.forEach(playerId => {
 				wsAdapter.sendToClient(playerId, 'tournament_started', {
@@ -151,7 +151,7 @@ export function registerTournamentMessageHandlers(wsAdapter) {
 			const tournamentDetails = await TournamentService.getTournamentDetails(tournamentId);
 
 			// Get all players in this tournament
-			const playerIds = tournamentDetails.players.map(p => p.user_id);
+			const playerIds = tournamentDetails.players.map(p => p.player_id);
 
 			// Notify all players about match result and tournament progression
 			playerIds.forEach(playerId => {

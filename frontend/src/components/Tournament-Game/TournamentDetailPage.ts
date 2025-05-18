@@ -100,13 +100,13 @@ export default {
     });
 
     client.on('tournament_player_joined', (data) => {
-      if (data.tournamentId === tournamentId) {
+      if (String(data.tournamentId) === String(tournamentId)) {
         client.getTournamentDetails(tournamentId);
       }
     });
 
     client.on('tournament_started', (data) => {
-      if (data.tournamentId === tournamentId) {
+      if (String(data.tournamentId) === String(tournamentId)) {
         showTournamentBrackets(container, data, client, userId as string);
       } else {
         console.error("[TournamentDetails]: Ids don't match");
@@ -114,7 +114,7 @@ export default {
     });
 
     client.on('tournament_match_completed', (data) => {
-      if (data.tournamentId === tournamentId) {
+      if (String(data.tournamentId) === String(tournamentId)) {
         showTournamentBrackets(container, data, client, userId as string);
       } else {
         console.error("Ids don't match");
@@ -122,7 +122,7 @@ export default {
     });
 
     client.on('tournament_completed', (data) => {
-      if (data.tournamentId === tournamentId) {
+      if (String(data.tournamentId) === String(tournamentId)) {
         showTournamentResults(container, data);
       } else {
         console.error("Ids don't match");
@@ -130,7 +130,7 @@ export default {
     });
 
     client.on('tournament_match_notification', (data) => {
-      if (data.tournamentId === tournamentId) {
+      if (String(data.tournamentId) === String(tournamentId)) {
         showTournamentMatchNotification({
           tournamentId: data.tournamentId,
           matchId: data.matchId,
