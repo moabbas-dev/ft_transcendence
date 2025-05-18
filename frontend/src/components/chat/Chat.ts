@@ -3,10 +3,11 @@ import { createComponent } from "../../utils/StateManager.js";
 import chatService from "../../utils/chatUtils/chatWebSocketService.js";
 import bgImage from "../../assets/bg3.jpg";
 import bgImage2 from "../../assets/background1.gif"
-import { emoticons, emoticonsMap } from "./emoticons.js";
+import { emojis, emojisMap, emoticons, emoticonsMap, stickers, stickersMap } from "./emoticons.js";
 import { Profile } from "../profile/UserProfile.js";
 import { t } from "../../languages/LanguageController.js";
 import axios from "axios";
+import { _isClickEvent } from "chart.js/helpers";
 
 interface Message {
   id: number;
@@ -87,17 +88,37 @@ export const Chat = createComponent(
                     </div>
                 </div>
                 
-                <!-- Add emoticon container popup that will be hidden by default -->
-                <div id="emoticon-container" class="fixed bottom-20 sm:bottom-20 left-4 right-8 sm:left-auto sm:w-72 max-h-60 overflow-y-auto max-w-80 bg-black bg-opacity-95 rounded-lg shadow-[0_0_15px_rgba(255,0,228,0.5)] border border-pongpink p-2 z-30 grid grid-cols-5 gap-2 hidden">
-                    <!-- Emoticons will be inserted here dynamically -->
+                <!-- Enhanced emoticon container with tabs -->
+                <div id="emoticon-container" class="fixed bottom-20 sm:bottom-20 left-4 right-8 sm:left-auto sm:w-72 max-h-80 bg-black bg-opacity-95 rounded-lg shadow-[0_0_15px_rgba(255,0,228,0.5)] border border-pongpink p-2 z-30 hidden">
+                  <!-- Tab headers -->
+                  <div class="emoticon-tabs flex justify-start border-b border-pongpink mb-2">
+                    <div id="emojis-tab" class="tab-item px-4 py-1 cursor-pointer text-pongcyan border-b-2 border-pongcyan">Emojis</div>
+                    <div id="emoticon-tab" class="tab-item px-4 py-1 cursor-pointer text-pongcyan">Emoticons</div>
+                    <div id="sticker-tab" class="tab-item px-4 py-1 cursor-pointer text-gray-400 hover:text-pongcyan">Stickers</div>
+
+                    </div>
+                  
+                  <!-- Tab contents with scrollable area -->
+                  <div class="tabs-content h-60 overflow-auto [scrollbar-width:thin] [scrollbar-color:white_pongdark] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-ponghover [&::-webkit-scrollbar-thumb]:bg-pongdark">
+                    
+                    <div id="emogis-tab-content" class="grid grid-cols-5 gap-2">
+                      <!-- Emojis will be inserted here dynamically -->
+                    </div>
+                  <!-- Emoticons tab content -->
+                    <div id="emoticon-tab-content" class="grid grid-cols-5 gap-2">
+                      <!-- Emoticons will be inserted here dynamically -->
+                    </div>
+                    
+                    <!-- Stickers tab content -->
+                    <div id="sticker-tab-content" class="grid grid-cols-4 gap-2 hidden">
+                      <!-- Stickers will be inserted here dynamically -->
+                    </div>
+                  </div>
                 </div>`
           : ""
         }
             </div>
         `;
-
-
-
 
       // Add event listeners after the HTML is rendered
       if (activeUser) {
@@ -137,10 +158,20 @@ export const Chat = createComponent(
       const emoticonRegex = /:([\w]+):/g;
 
       return content.replace(emoticonRegex, (match) => {
+        const emojiUrl = emojisMap[match as keyof typeof emojisMap];
+        if (emojiUrl) {
+          return `<img src="${emojiUrl}" alt="${match}" class="inline-block h-6" />`;
+        }
+        // Check emoticons 
         const emoticonUrl = emoticonsMap[match as keyof typeof emoticonsMap];
-
         if (emoticonUrl) {
-          return `<img src="${emoticonUrl}" alt="${match}" class="inline-block h-8" />`;
+          return `<img src="${emoticonUrl}" alt="${match}" class="inline-block h-6" />`;
+        }
+
+        // Check stickers if not found in emoticons
+        const stickerUrl = stickersMap[match as keyof typeof stickersMap];
+        if (stickerUrl) {
+          return `<img src="${stickerUrl}" alt="${match}" class="inline-block h-16 w-16" />`;
         }
 
         return match;
@@ -216,8 +247,6 @@ export const Chat = createComponent(
         .join("");
     };
 
-
-
     // Setup event listeners for the chat
     const setupEventListeners = () => {
       const sendButton = container.querySelector("#send-button");
@@ -255,7 +284,7 @@ export const Chat = createComponent(
       emoticonButton?.addEventListener("click", () => {
         if (emoticonContainer) {
           if (emoticonContainer.classList.contains("hidden")) {
-            loadEmoticons();
+            loadEmoticonContent();
             emoticonContainer.classList.remove("hidden");
           } else {
             emoticonContainer.classList.add("hidden");
@@ -263,23 +292,138 @@ export const Chat = createComponent(
         }
       });
 
+      const setupTabEvents = () => {
+        const emojisTab = container.querySelector("#emojis-tab");
+        const emoticonTab = container.querySelector("#emoticon-tab");
+        const stickerTab = container.querySelector("#sticker-tab");
+        const emojisContent = container.querySelector("#emogis-tab-content");
+        const emoticonContent = container.querySelector("#emoticon-tab-content");
+        const stickerContent = container.querySelector("#sticker-tab-content");
+
+        // Track loaded state to prevent reloading
+        let emojisLoaded = false;
+        let emoticonsLoaded = false;
+        let stickersLoaded = false;
+
+        // Switch to Emojis tab (default)
+        emojisTab?.addEventListener("click", () => {
+          // Update tab styles
+          emojisTab.classList.add("text-pongcyan", "border-b-2", "border-pongcyan");
+          emojisTab.classList.remove("text-gray-400");
+          emoticonTab?.classList.remove("text-pongcyan", "border-b-2", "border-pongcyan");
+          emoticonTab?.classList.add("text-gray-400", "hover:text-pongcyan");
+          stickerTab?.classList.remove("text-pongpink", "border-b-2", "border-pongpink");
+          stickerTab?.classList.add("text-gray-400", "hover:border-pongcyan");
+
+          // Show/hide content
+          emojisContent?.classList.remove("hidden");
+          emoticonContent?.classList.add("hidden");
+          stickerContent?.classList.add("hidden");
+
+          // Load emojis if not already loaded
+          if (!emojisLoaded) {
+            loadEmojis();
+            emojisLoaded = true;
+          }
+        });
+
+        // Switch to Emoticons tab
+        emoticonTab?.addEventListener("click", () => {
+          // Update tab styles
+          emoticonTab.classList.add("text-pongcyan", "border-b-2", "border-pongcyan");
+          emoticonTab.classList.remove("text-gray-400");
+          emojisTab?.classList.remove("text-pongcyan", "border-b-2", "border-pongcyan");
+          emojisTab?.classList.add("text-gray-400", "hover:text-pongcyan");
+          stickerTab?.classList.remove("text-pongpink", "border-b-2", "border-pongpink");
+          stickerTab?.classList.add("text-gray-400", "hover:border-pongcyan");
+
+          // Show/hide content
+          emoticonContent?.classList.remove("hidden");
+          emojisContent?.classList.add("hidden");
+          stickerContent?.classList.add("hidden");
+
+          // Load emoticons if not already loaded
+          if (!emoticonsLoaded) {
+            loadEmoticons();
+            emoticonsLoaded = true;
+          }
+        });
+
+        // Switch to Stickers tab
+        stickerTab?.addEventListener("click", () => {
+          // Update tab styles
+          stickerTab.classList.add("text-pongcyan", "border-b-2", "border-pongcyan");
+          stickerTab.classList.remove("text-gray-400");
+          emoticonTab?.classList.remove("text-pongcyan", "border-b-2", "border-pongcyan");
+          emoticonTab?.classList.add("text-gray-400", "hover:text-pongcyan");
+          emojisTab?.classList.remove("text-pongcyan", "border-b-2", "border-pongcyan");
+          emojisTab?.classList.add("text-gray-400", "hover:text-pongcyan");
+
+          // Show/hide content
+          stickerContent?.classList.remove("hidden");
+          emoticonContent?.classList.add("hidden");
+          emojisContent?.classList.add("hidden");
+
+          // Load stickers if not already loaded
+          if (!stickersLoaded) {
+            loadStickers();
+            stickersLoaded = true;
+          }
+        });
+      };
+
+      const setupEmoticonContainer = () => {
+        // Initialize only the tab events without loading any content yet
+        setupTabEvents();
+
+        // By default, only load content for the first tab (emojis) which is active by default
+        loadEmojis();
+      };
+
+      // Load both emoticons and stickers content
+      const loadEmoticonContent = () => {
+        // Remove the erroneous if() statement
+        setupEmoticonContainer();
+      };
+
+      const loadEmojis = () => {
+        const emojisContent = container.querySelector("#emogis-tab-content");
+        if (!emojisContent) return;
+
+        emojisContent.innerHTML = "";
+
+        emojis.forEach((emo) => {
+          const emojiDiv = document.createElement("div");
+          emojiDiv.className =
+            "emoticon p-2 rounded cursor-pointer flex items-center justify-center hover:bg-ponghover transition-all duration-200";
+          emojiDiv.title = emo.title;
+          emojiDiv.innerHTML = `<img src="${emo.src}" alt="${emo.title}" class="h-6">`;
+
+          // Add click event to insert emoticon
+          emojiDiv.addEventListener("click", () => {
+            insertEmoticon(emo.title);
+            emoticonContainer?.classList.add("hidden");
+          });
+
+          emojisContent.appendChild(emojiDiv);
+        });
+      };
+
       // Load emoticons into the container
       const loadEmoticons = () => {
-        const emoticonContainer = container.querySelector(
-          "#emoticon-container"
-        );
-        if (!emoticonContainer) return;
+        const emoticonContent = container.querySelector("#emoticon-tab-content");
+        if (!emoticonContent) return;
 
         // Clear existing emoticons
-        emoticonContainer.innerHTML = "";
+        emoticonContent.innerHTML = "";
 
         // Create emoticon elements
         emoticons.forEach((emo) => {
           const emoticonDiv = document.createElement("div");
           emoticonDiv.className =
-            "emoticon p-2 rounded cursor-pointer w-12 h-12 hover:bg-ponghover transition-all duration-200";
+            "emoticon p-2 rounded cursor-pointer flex items-center justify-center hover:bg-ponghover transition-all duration-200";
           emoticonDiv.title = emo.title;
-          emoticonDiv.innerHTML = `<img src="${emo.src}" alt="${emo.title}" class="w-full h-auto">`;
+          emoticonDiv.innerHTML = `<img src="${emo.src}" alt="${emo.title}" class="h-6">`;
 
           // Add click event to insert emoticon
           emoticonDiv.addEventListener("click", () => {
@@ -287,18 +431,45 @@ export const Chat = createComponent(
             emoticonContainer?.classList.add("hidden");
           });
 
-          emoticonContainer.appendChild(emoticonDiv);
+          emoticonContent.appendChild(emoticonDiv);
         });
       };
 
-      // Insert emoticon into message input
-      const insertEmoticon = (emoticonCode: string) => {
+      // Load stickers into the container
+      const loadStickers = () => {
+        const stickerContent = container.querySelector("#sticker-tab-content");
+        if (!stickerContent) return;
+
+        // Clear existing stickers
+        stickerContent.innerHTML = "";
+
+        // Create sticker elements
+        stickers.forEach((sticker) => {
+          const stickerDiv = document.createElement("div");
+          stickerDiv.className =
+            "sticker p-2 rounded cursor-pointer flex items-center justify-center hover:bg-ponghover transition-all duration-200";
+          stickerDiv.title = sticker.title;
+          stickerDiv.innerHTML = `<img src="${sticker.src}" alt="${sticker.title}" class="w-12 h-12">`;
+
+          // Add click event to insert sticker
+          stickerDiv.addEventListener("click", () => {
+            insertEmoticon(sticker.title);
+            emoticonContainer?.classList.add("hidden");
+          });
+
+          stickerContent.appendChild(stickerDiv);
+        });
+      };
+
+      // Insert emoticon or sticker into message input
+      const insertEmoticon = (code: string) => {
         const messageInput = container.querySelector(
           "#message-input"
         ) as HTMLDivElement;
         if (!messageInput) return;
 
-        messageInput.innerText += emoticonCode + " ";
+        messageInput.innerText += code + " ";
+        messageInput.focus();
       };
 
       // Close emoticon container when clicking outside
