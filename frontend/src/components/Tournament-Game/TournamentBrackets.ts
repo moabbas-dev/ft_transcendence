@@ -29,7 +29,7 @@ const TournamentBrackets = createComponent((props: TournamentBracketsProps) => {
   const {
     playersCount = 4,
     matches = [],
-    onMatchClick = (matchId: string) => { }
+    onMatchClick
   } = props;
 
   const rounds = Math.log2(playersCount);
@@ -258,7 +258,10 @@ function generateSVGBracket(): string {
       match.addEventListener('click', () => {
         const matchId = (match.parentElement?.parentElement as HTMLElement).dataset.matchId;
         if (matchId) {
-          onMatchClick(matchId);
+          if (onMatchClick) {
+            onMatchClick(matchId);
+            console.log(`Match ${matchId} clicked`);
+          }
         }
       });
     });
@@ -287,7 +290,7 @@ function generateSVGBracket(): string {
   // Setup event listeners after component is added to DOM
   setTimeout(() => {
     addEventListeners();
-  }, 0);
+  }, 1000);
 
   return component;
 });

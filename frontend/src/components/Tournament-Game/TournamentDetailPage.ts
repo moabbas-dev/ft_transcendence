@@ -114,6 +114,29 @@ export default {
       }
     });
 
+    client.on('tournament_match_starting', (data) => {
+      if (String(data.tournamentId) === String(tournamentId)) {
+        startTournamentMatch(container, data.matchId, {
+          players: [
+            {
+              userId: userId,
+              username: 'You',
+              elo: 1000,
+              avatar: undefined
+            },
+            {
+              userId: data.opponent.id,
+              username: data.opponent.username,
+              elo: data.opponent.elo,
+              avatar: data.opponent.avatar
+            }
+          ],
+          tournamentName: container.querySelector('#tour-name')?.textContent || 'Tournament',
+          round: 1
+        }, userId as string, client);
+      }
+    });
+
     client.on('tournament_match_completed', (data) => {
       if (String(data.tournamentId) === String(tournamentId)) {
         showTournamentBrackets(container, data, client, userId as string);
@@ -231,7 +254,7 @@ function showTournamentBrackets(container: HTMLElement, data: any, client: Tourn
     playersCount: data.tournament.player_count,
     matches: formattedMatches,
     onMatchClick: (matchId: string) => {
-      handleMatchClick(container, matchId, data, client, userId);
+      handleMatchClick(matchId, data, client, userId);
     }
   });
 
@@ -325,7 +348,7 @@ function calculatePosition(matchIndex: number, round: number, playerCount: numbe
   return 0;
 }
 
-function handleMatchClick(container: HTMLElement, matchId: string, tournamentData: any, client: TournamentClient, userId: string) {
+function handleMatchClick(matchId: string, tournamentData: any, client: TournamentClient, userId: string) {
   const match = tournamentData.matches.find((m: any) => String(m.id) === String(matchId));
   
   if (!match) {
@@ -351,7 +374,7 @@ function handleMatchClick(container: HTMLElement, matchId: string, tournamentDat
   if (match.status === 'pending') {
     const opponent = matchPlayers.find((p: any) => String(p.player_id) !== String(userId));
     const opponentDetails = tournamentData.players.find((p: any) => 
-      String(p.player_id) === String(opponent?.player_id) || String(p.id) === String(opponent?.player_id)
+      String(p.player_id) === String(opponent?.player_id)
     );
 
     if (opponentDetails) {
@@ -359,27 +382,13 @@ function handleMatchClick(container: HTMLElement, matchId: string, tournamentDat
         tournamentId: tournamentData.tournament.id,
         matchId: match.id,
         opponent: {
-          id: opponentDetails.player_id || opponentDetails.id,
-          username: opponentDetails.nickname || `Player ${opponentDetails.player_id || opponentDetails.id}`,
+          id: opponentDetails.player_id,
+          username: opponentDetails.nickname || `Player ${opponentDetails.player_id}`,
           elo: opponent?.elo_before || 1000,
           avatar: opponentDetails.avatar_url
         },
         onAccept: (acceptedMatchId) => {
-          startTournamentMatch(container, acceptedMatchId, {
-            players: matchPlayers.map((p: any) => {
-              const playerDetails = tournamentData.players.find((pd: any) => 
-                String(pd.player_id) === String(p.player_id) || String(pd.id) === String(p.player_id)
-              );
-              return {
-                userId: p.player_id,
-                username: playerDetails?.nickname || `Player ${p.player_id}`,
-                elo: p.elo_before || 1000,
-                avatar: playerDetails?.avatar_url
-              };
-            }),
-            tournamentName: tournamentData.tournament.name,
-            round: calculateRound(tournamentData.matches.indexOf(match), tournamentData.tournament.player_count) + 1
-          }, userId, client);
+          client.send('tournament_match_accept', { matchId: acceptedMatchId });
         }
       });
     }
@@ -617,7 +626,6 @@ function formatTournamentResults(tournamentData: any): TournamentResult[] {
   return results;
 }
 
-// Implement startTournamentMatch function
 function startTournamentMatch(container: HTMLElement, matchId: string, matchData: any, userId: string, client: TournamentClient) {
   const content = container.querySelector('#tournament-content');
   if (!content) return;
@@ -633,11 +641,18 @@ function startTournamentMatch(container: HTMLElement, matchId: string, matchData
 
   const isPlayer1 = matchData.players.indexOf(currentPlayer) === 0;
 
-  // Clear content and create match header
+  // Store original tournament view to restore later
+  const originalContent = content.innerHTML;
+
+  // Clear content and create match interface
   content.innerHTML = `
     <div class="tournament-match-container w-full h-full flex flex-col">
       <div class="match-header flex justify-between items-center p-4 bg-gray-800 mb-4 rounded-lg">
         <div class="flex items-center gap-4">
+          <button id="back-to-tournament" class="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Back to Tournament
+          </button>
           <div class="text-xl text-white font-bold">
             <i class="fas fa-trophy text-yellow-400 mr-2"></i>
             Tournament Match
@@ -666,7 +681,7 @@ function startTournamentMatch(container: HTMLElement, matchId: string, matchData
         </div>
       </div>
       
-      <div class="game-container flex-1 flex items-center justify-center">
+      <div class="game-container flex-1 flex items-center justify-center bg-gray-900 rounded-lg p-4">
         <canvas id="tournament-game-canvas" class="bg-black rounded-lg shadow-lg"></canvas>
       </div>
       
@@ -685,7 +700,24 @@ function startTournamentMatch(container: HTMLElement, matchId: string, matchData
     </div>
   `;
 
-  // Get canvas and set up the game
+  // Back to tournament button
+  const backButton = content.querySelector('#back-to-tournament');
+  if (backButton) {
+    backButton.addEventListener('click', () => {
+      if (confirm('Are you sure you want to leave the match? This will count as a forfeit.')) {
+        // Send forfeit and return to tournament view
+        client.completeMatch(matchId, opponent.userId, {
+          player1: 0,
+          player2: 10
+        });
+        
+        // Restore tournament view
+        client.getTournamentDetails(matchData.tournamentId);
+      }
+    });
+  }
+
+  // Set up canvas and game
   const canvas = content.querySelector('#tournament-game-canvas') as HTMLCanvasElement;
   const matchHeader = content.querySelector('.match-header') as HTMLElement;
   
@@ -698,14 +730,26 @@ function startTournamentMatch(container: HTMLElement, matchId: string, matchData
   canvas.width = 800;
   canvas.height = 600;
   
-  // Add resize handling for responsive design
+  // Responsive canvas
   const resizeCanvas = () => {
-    const containerWidth = content.clientWidth - 32; // Account for padding
-    const maxWidth = Math.min(800, containerWidth);
+    const gameContainer = content.querySelector('.game-container') as HTMLElement;
+    if (!gameContainer) return;
+    
+    const containerWidth = gameContainer.clientWidth - 32;
+    const containerHeight = gameContainer.clientHeight - 32;
     const aspectRatio = 600 / 800;
     
-    canvas.style.width = `${maxWidth}px`;
-    canvas.style.height = `${maxWidth * aspectRatio}px`;
+    let width = Math.min(800, containerWidth);
+    let height = width * aspectRatio;
+    
+    // Make sure it fits in height too
+    if (height > containerHeight) {
+      height = containerHeight;
+      width = height / aspectRatio;
+    }
+    
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
   };
   
   resizeCanvas();
@@ -716,16 +760,15 @@ function startTournamentMatch(container: HTMLElement, matchId: string, matchData
   if (forfeitButton) {
     forfeitButton.addEventListener('click', () => {
       if (confirm('Are you sure you want to forfeit this match? This will count as a loss.')) {
-        // Send forfeit message to server
         client.completeMatch(matchId, opponent.userId, {
           player1: 0,
-          player2: 10 // Give opponent a 10-0 win
+          player2: 10
         });
       }
     });
   }
 
-  // Initialize the OnlineGameBoard for tournament match
+  // Initialize the OnlineGameBoard
   const gameBoard = new OnlineGameBoard(
     canvas,
     matchHeader,
@@ -737,8 +780,12 @@ function startTournamentMatch(container: HTMLElement, matchId: string, matchData
   );
 
   // Handle game end event
-  client.on('game_result', (data) => {
+  const handleGameResult = (data: any) => {
     if (String(data.matchId) === String(matchId)) {
+      // Clean up
+      client.off('game_result', handleGameResult);
+      window.removeEventListener('resize', resizeCanvas);
+      
       // Show match result
       showTournamentMatchResult({
         matchId: matchId,
@@ -753,17 +800,24 @@ function startTournamentMatch(container: HTMLElement, matchId: string, matchData
           avatar: opponent.avatar
         },
         onContinue: () => {
-          // Return to tournament view
+          // Return to tournament brackets view
           client.getTournamentDetails(matchData.tournamentId);
         }
       });
-      
-      // Clean up event listener and resize handler
-      client.off('game_result');
-      window.removeEventListener('resize', resizeCanvas);
     }
-  });
+  };
+
+  client.on('game_result', handleGameResult);
 
   // Start the game
   gameBoard.startGame();
+}
+
+function calculateRoundFromMatchId(matchId: string, tournamentData: any): number {
+  if (!tournamentData?.matches) return 1;
+  
+  const matchIndex = tournamentData.matches.findIndex((m: any) => String(m.id) === String(matchId));
+  if (matchIndex === -1) return 1;
+  
+  return calculateRound(matchIndex, tournamentData.tournament?.player_count || 4) + 1;
 }

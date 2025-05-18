@@ -140,6 +140,42 @@ export function registerTournamentMessageHandlers(wsAdapter) {
 		}
 	});
 
+	wsAdapter.registerMessageHandler('tournament_match_accept', async (clientId, payload) => {
+		try {
+			const { matchId } = payload;
+
+			const matchWithPlayers = await TournamentService.getMatchWithPlayers(matchId);
+
+			if (!matchWithPlayers) {
+				throw new Error(`Match ${matchId} not found`);
+			}
+
+			const { match, players } = matchWithPlayers;
+
+			players.forEach(player => {
+				const opponent = players.find(p => p.player_id !== player.player_id);
+
+				if (opponent) {
+					wsAdapter.sendToClient(player.player_id, 'tournament_match_starting', {
+						matchId: match.id,
+						tournamentId: match.tournament_id,
+						opponent: {
+							id: opponent.player_id,
+							username: opponent.nickname || `Player ${opponent.player_id}`,
+							elo: opponent.elo_score
+						},
+						isPlayer1: player.player_id === players[0].player_id
+					});
+				}
+			});
+		} catch (error) {
+			console.error('Error accepting tournament match:', error);
+			wsAdapter.sendToClient(clientId, 'error', {
+				message: `Error accepting tournament match: ${error.message}`
+			});
+		}
+	});
+
 	wsAdapter.registerMessageHandler('tournament_match_result', async (clientId, payload) => {
 		try {
 			const { matchId, winnerId } = payload;
