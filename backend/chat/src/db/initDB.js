@@ -1,9 +1,6 @@
 import sqlite3 from "sqlite3"
 import { open } from "sqlite";
 
-// Configure authentication service API URL
-const AUTH_API_URL = process.env.AUTH_API_URL;
-
 let db = null;
 
 export async function initDatabase() {

@@ -224,29 +224,57 @@ class TournamentService {
         db.get(`SELECT id, elo_score FROM players WHERE id = ?`, [player2Id], (err, row) => err ? reject(err) : resolve(row));
       })
 
+      if (!player1 || !player2) {
+        throw new Error(`Player not found: ${!player1 ? player1Id : player2Id}`);
+      }
+
       // Create match record
-      const matchResult = await db.run(
-        `INSERT INTO matches (match_type, status) VALUES (?, ?)`,
-        ['tournament', 'pending']
-      );
+      const matchResult = await new Promise((resolve, reject) => {
+        db.run(
+          `INSERT INTO matches (match_type, status, tournament_id) VALUES (?, ?, ?)`,
+          ['tournament', 'pending', tournamentId],
+          function (err) {
+            if (err) return reject(err);
+            resolve({ lastID: this.lastID });
+          }
+        );
+      });
+
       const matchId = matchResult.lastID;
+      if (!matchId) {
+        throw new Error('Failed to create match - no ID returned');
+      }
+      console.log(`Created tournament match ${matchId} for tournament ${tournamentId}`);
 
       // Add players to match with their current ELO
-      await db.run(
-        `INSERT INTO match_players (match_id, player_id, elo_before) VALUES (?, ?, ?)`,
-        [matchId, player1.id, player1.elo]
-      );
-      await db.run(
-        `INSERT INTO match_players (match_id, player_id, elo_before) VALUES (?, ?, ?)`,
-        [matchId, player2.id, player2.elo]
-      );
+      await new Promise((resolve, reject) => {
+        db.run(
+          `INSERT INTO match_players (match_id, player_id, elo_before, elo_after, goals) VALUES (?, ?, ?, ?, ?)`,
+          [matchId, player1.id, player1.elo_score, player1.elo_score, 0],
+          (err) => {
+            if (err) return reject(err);
+            resolve();
+          }
+        );
+      });
 
-      return {
-        matchId,
-        tournamentId,
-        player1: { id: player1.id, elo: player1.elo },
-        player2: { id: player2.id, elo: player2.elo }
-      };
+      await new Promise((resolve, reject) => {
+        db.run(
+          `INSERT INTO match_players (match_id, player_id, elo_before, elo_after, goals) VALUES (?, ?, ?, ?, ?)`,
+          [matchId, player2.id, player2.elo_score, player2.elo_score, 0],
+          (err) => {
+            if (err) return reject(err);
+            resolve();
+          }
+        );
+      });
+
+    return {
+      matchId,
+      tournamentId,
+      player1: { id: player1.id, elo_score: player1.elo_score },
+      player2: { id: player2.id, elo_score: player2.elo_score }
+    };
     } catch (error) {
       console.error('Error creating tournament match:', error);
       throw error;

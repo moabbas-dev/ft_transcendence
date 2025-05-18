@@ -28,9 +28,11 @@ class DatabaseConnection {
         match_type TEXT NOT NULL CHECK(match_type IN ('1v1', 'friendly')),
         status TEXT NOT NULL CHECK(status IN ('pending', 'completed')),
         winner_id INTEGER,
+        tournament_id INTEGER,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         started_at DATETIME,
-        completed_at DATETIME
+        completed_at DATETIME,
+        FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE SET NULL
       );
     `;
 
