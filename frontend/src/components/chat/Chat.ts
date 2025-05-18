@@ -140,7 +140,7 @@ export const Chat = createComponent(
         const emoticonUrl = emoticonsMap[match as keyof typeof emoticonsMap];
 
         if (emoticonUrl) {
-          return `<img src="${emoticonUrl}" alt="${match}" class="inline-block h-6" />`;
+          return `<img src="${emoticonUrl}" alt="${match}" class="inline-block h-8" />`;
         }
 
         return match;

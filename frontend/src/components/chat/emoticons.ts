@@ -44,6 +44,7 @@ export const emoticons = [
   { title: ":43:", src: "./emoticon/43.gif" },
   { title: ":44:", src: "./emoticon/44.gif" },
   { title: ":45:", src: "./emoticon/45.gif" },
+  { title: ":46:" , src: "./emoticon/46.gif" }
 ];
 
 export const emoticonsMap = {
@@ -92,4 +93,5 @@ export const emoticonsMap = {
   ":43:": "./emoticon/43.gif",
   ":44:": "./emoticon/44.gif",
   ":45:": "./emoticon/45.gif",
+  ":46:": "./emoticon/46.gif",
 };
