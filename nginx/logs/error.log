@@ -1,2 +1,50 @@
 2025/04/22 08:46:08 [error] 30#30: *222 connect() failed (111: Connection refused) while connecting to upstream, client: 172.18.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://172.18.0.5:5173/", host: "172.20.108.180"
 2025/05/06 15:45:51 [error] 31#31: *1615 connect() failed (111: Connection refused) while connecting to upstream, client: 172.18.0.1, server: _, request: "GET / HTTP/1.1", upstream: "http://172.18.0.5:5173/", host: "192.168.1.11"
+2025/05/18 11:38:40 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/05/18 11:38:49 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/05/18 11:38:56 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/05/18 11:39:03 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/05/18 11:39:10 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/05/18 11:39:19 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/05/18 11:39:26 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/05/18 11:39:56 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/05/18 11:40:03 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/05/18 11:40:10 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/05/18 11:40:17 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/05/18 11:40:27 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/05/18 11:40:34 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/05/18 11:40:40 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/05/18 11:40:50 [emerg] 1#1: no "events" section in configuration
+2025/05/18 11:42:43 [emerg] 1#1: cannot load certificate "/etc/nginx/../ssl/server.crt": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/nginx/../ssl/server.crt, r) error:10000080:BIO routines::no such file)
+2025/05/18 11:42:44 [emerg] 1#1: cannot load certificate "/etc/nginx/../ssl/server.crt": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/nginx/../ssl/server.crt, r) error:10000080:BIO routines::no such file)
+2025/05/18 11:42:45 [emerg] 1#1: cannot load certificate "/etc/nginx/../ssl/server.crt": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/nginx/../ssl/server.crt, r) error:10000080:BIO routines::no such file)
+2025/05/18 11:42:46 [emerg] 1#1: cannot load certificate "/etc/nginx/../ssl/server.crt": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/nginx/../ssl/server.crt, r) error:10000080:BIO routines::no such file)
+2025/05/18 11:42:47 [emerg] 1#1: cannot load certificate "/etc/nginx/../ssl/server.crt": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/nginx/../ssl/server.crt, r) error:10000080:BIO routines::no such file)
+2025/05/18 11:42:49 [emerg] 1#1: cannot load certificate "/etc/nginx/../ssl/server.crt": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/nginx/../ssl/server.crt, r) error:10000080:BIO routines::no such file)
+2025/05/18 11:42:52 [emerg] 1#1: cannot load certificate "/etc/nginx/../ssl/server.crt": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/nginx/../ssl/server.crt, r) error:10000080:BIO routines::no such file)
+2025/05/18 11:42:59 [emerg] 1#1: cannot load certificate "/etc/nginx/../ssl/server.crt": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/nginx/../ssl/server.crt, r) error:10000080:BIO routines::no such file)
+2025/05/18 11:43:15 [emerg] 1#1: cannot load certificate "/etc/nginx/../ssl/server.crt": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/nginx/../ssl/server.crt, r) error:10000080:BIO routines::no such file)
+2025/05/18 11:43:44 [emerg] 1#1: cannot load certificate "/etc/nginx/../ssl/server.crt": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/nginx/../ssl/server.crt, r) error:10000080:BIO routines::no such file)
+2025/05/18 11:44:38 [emerg] 1#1: cannot load certificate "/etc/nginx/../ssl/server.crt": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/nginx/../ssl/server.crt, r) error:10000080:BIO routines::no such file)
+2025/05/18 11:45:43 [emerg] 1#1: cannot load certificate "/etc/nginx/../ssl/server.crt": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/nginx/../ssl/server.crt, r) error:10000080:BIO routines::no such file)
+2025/05/18 11:46:49 [emerg] 1#1: cannot load certificate "/etc/nginx/../ssl/server.crt": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/nginx/../ssl/server.crt, r) error:10000080:BIO routines::no such file)
+2025/05/18 11:47:55 [emerg] 1#1: cannot load certificate "/etc/nginx/../ssl/server.crt": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/nginx/../ssl/server.crt, r) error:10000080:BIO routines::no such file)
+2025/05/18 11:49:01 [emerg] 1#1: cannot load certificate "/etc/nginx/../ssl/server.crt": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/nginx/../ssl/server.crt, r) error:10000080:BIO routines::no such file)
+2025/05/18 11:50:07 [emerg] 1#1: cannot load certificate "/etc/nginx/../ssl/server.crt": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/nginx/../ssl/server.crt, r) error:10000080:BIO routines::no such file)
+2025/05/18 11:51:15 [emerg] 1#1: cannot load certificate "/etc/nginx/../ssl/server.crt": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/nginx/../ssl/server.crt, r) error:10000080:BIO routines::no such file)
+2025/05/18 11:52:21 [emerg] 1#1: cannot load certificate "/etc/nginx/../ssl/server.crt": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/nginx/../ssl/server.crt, r) error:10000080:BIO routines::no such file)
+2025/05/18 12:11:34 [emerg] 1#1: cannot load certificate "/etc/nginx/../ssl/server.crt": BIO_new_file() failed (SSL: error:80000002:system library::No such file or directory:calling fopen(/etc/nginx/../ssl/server.crt, r) error:10000080:BIO routines::no such file)
+2025/05/18 12:17:16 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/05/18 12:17:23 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/05/18 12:17:30 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/05/18 12:17:40 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/05/18 12:17:46 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/05/18 12:17:53 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/05/18 12:18:00 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/05/18 12:18:13 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/05/18 12:18:29 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/05/18 12:19:01 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/05/18 12:20:01 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/05/18 12:32:03 [error] 30#30: *732 client intended to send too large body: 1901461 bytes, client: 172.18.0.1, server: _, request: "POST /authentication/auth/uploads/1 HTTP/1.1", host: "192.168.1.11", referrer: "https://192.168.1.11/"
+2025/05/18 12:32:34 [error] 30#30: *755 client intended to send too large body: 1901461 bytes, client: 172.18.0.1, server: _, request: "POST /authentication/auth/uploads/1 HTTP/1.1", host: "192.168.1.11", referrer: "https://192.168.1.11/"
+2025/05/18 12:32:54 [error] 30#30: *766 client intended to send too large body: 1901461 bytes, client: 172.18.0.1, server: _, request: "POST /authentication/auth/uploads/1 HTTP/1.1", host: "192.168.1.11", referrer: "https://192.168.1.11/"
