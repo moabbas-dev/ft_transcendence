@@ -80,10 +80,10 @@ const TournamentBrackets = createComponent((props: TournamentBracketsProps) => {
       <div class="flex items-center justify-between p-2 ${isWinner ? 'bg-green-50 border-l-4 border-green-500' : 'bg-gray-50'} rounded">
         <div class="flex items-center gap-2">
           ${player?.avatar ?
-          `<div class="size-6 rounded-full overflow-hidden">
+          `<div class="size-7 rounded-full overflow-hidden">
                 <img src="${player.avatar}" alt="${player.username}" class="w-full h-full object-cover" />
               </div>` :
-          `<div class="size-6 bg-gray-200 rounded-full"></div>`
+          `<div class="size-7 bg-gray-200 rounded-full text-lg flex items-center justify-center">${player?.username.at(0)}</div>`
           }
           <span class="text-sm text-pongdark ${isWinner ? 'font-bold' : ''}">${player?.username || t('play.tournaments.createTournament.TBD')}</span>
         </div>
@@ -217,7 +217,7 @@ function generateSVGBracket(): string {
   }).join('');
   
   return `
-    <svg class="bracket-svg ${playersCount === 4? 'w-1/2' : 'w-3/4'}" width="100%" viewBox="0 0 ${bracketWidth} ${svgHeight}">
+    <svg class="bracket-svg max-md:scale-125 max-md:overflow-y-hidden max-md:rotate-90 ${playersCount === 4? 'w-1/2' : 'w-3/4'}" width="100%" viewBox="0 0 ${bracketWidth} ${svgHeight}">
       <!-- Round labels -->
       ${roundLabelsContent}
       
@@ -269,8 +269,8 @@ function generateSVGBracket(): string {
    */
   function render() {
     const html = `
-      <div class="tournament-bracket-container w-full overflow-x-auto">
-        <div class="tournament-bracket relative flex justify-center">
+      <div class="tournament-bracket-container size-full overflow-x-auto">
+        <div class="tournament-bracket relative flex justify-center size-full">
           ${generateSVGBracket()}
         </div>
       </div>
@@ -281,7 +281,7 @@ function generateSVGBracket(): string {
 
   // Initial render
   const component = document.createElement('div');
-  component.className = "tournament-brackets w-full";
+  component.className = "tournament-brackets size-full";
   component.innerHTML = render();
 
   // Setup event listeners after component is added to DOM

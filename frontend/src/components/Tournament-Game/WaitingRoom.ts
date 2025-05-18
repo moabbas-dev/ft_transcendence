@@ -1,7 +1,6 @@
 import { createComponent } from "../../utils/StateManager.js";
 import { t } from "../../languages/LanguageController.js";
 import { TournamentClient } from "./TournamentClient.js";
-import axios from "axios";
 
 export interface Player {
   userId: string;

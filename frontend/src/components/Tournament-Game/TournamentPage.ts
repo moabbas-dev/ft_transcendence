@@ -1,11 +1,9 @@
 import { t } from "../../languages/LanguageController.js";
 import { TournamentClient } from "./TournamentClient.js";
-import { Player, WaitingRoom } from "./WaitingRoom.js";
 import TournamentBrackets from "./TournamentBrackets.js";
 import { renderResultsTab } from "./TournamentResults.js";
 import { OnlineGameBoard } from "../Online-Game/components/OnlineGameBoard.js";
 import store from "../../../store/store.js";
-import { fetchUserDetails } from "../../main.js";
 import { CreateTournamentForm } from "./CreateTournamentForm.js";
 import { Tournament, TournamentList, fetchTournaments } from "./TournamentList.js";
 import { showTournamentMatchNotification } from "./TournamentMatchNotification.js";
@@ -172,11 +170,6 @@ export default {
 					currentTournamentId = data.tournamentId;
 					client.getTournamentDetails(data.tournamentId);
 				}
-			});
-
-			// Tournament player joined
-			client.on('tournament_player_joined', (data) => {
-				// This will be handled by the WaitingRoom component
 			});
 
 			// Tournament started
