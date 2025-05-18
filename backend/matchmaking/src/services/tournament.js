@@ -65,14 +65,14 @@ class TournamentService {
       const existing = await new Promise((resolve, reject) => {
         db.get(
           `SELECT * FROM tournament_players 
-           WHERE tournament_id = ? AND user_id = ?`,
+           WHERE tournament_id = ? AND player_id = ?`,
           [tournamentId, userId],
           (err, row) => err ? reject(err) : resolve(row)
         );
       })
 
       if (existing) {
-        return;
+        throw new Error('Player is already registered for this tournament');
       }
 
       // Check if tournament is full
@@ -84,14 +84,15 @@ class TournamentService {
           (err, row) => err ? reject(err) : resolve(row)
         );
       })
-
+      console.log("[COUNT]: ", currentCount.count >= tournament.player_count);
+      
       if (currentCount.count >= tournament.player_count) {
         throw new Error('Tournament is already full');
       }
 
       // Add player to tournament
       await db.run(
-        `INSERT INTO tournament_players (tournament_id, user_id) 
+        `INSERT INTO tournament_players (tournament_id, player_id) 
          VALUES (?, ?)`,
         [tournamentId, userId]
       );
@@ -128,7 +129,7 @@ class TournamentService {
 
       await db.run(
         `DELETE FROM tournament_players 
-       WHERE tournament_id = ? AND user_id = ?`,
+       WHERE tournament_id = ? AND player_id = ?`,
         [tournamentId, userId]
       );
 
@@ -161,9 +162,9 @@ class TournamentService {
       // Get all players
       const players = await new Promise((resolve, reject) => {
         db.all(
-          `SELECT tp.user_id, u.elo 
+          `SELECT tp.player_id, p.elo_score
            FROM tournament_players tp
-           JOIN users u ON tp.user_id = u.id
+           JOIN players p ON tp.player_id = p.id
            WHERE tp.tournament_id = ?`,
           [tournamentId],
           (err, row) => err ? reject(err) : resolve(row)
@@ -175,11 +176,14 @@ class TournamentService {
       }
 
       // Update tournament status
-      await db.run(
-        `UPDATE tournaments SET status = 'in_progress', started_at = CURRENT_TIMESTAMP 
-         WHERE id = ?`,
-        [tournamentId]
-      );
+      await new Promise((resolve, reject) => {
+        db.run(
+          `UPDATE tournaments SET status = 'in_progress', started_at = CURRENT_TIMESTAMP 
+           WHERE id = ?`,
+          [tournamentId],
+          (err) => err ? reject(err) : resolve()
+        );
+      });
 
       // Randomize player order for fair matchmaking
       const shuffledPlayers = this.shufflePlayers(players);
@@ -192,10 +196,10 @@ class TournamentService {
 
         const matchResult = await this.createTournamentMatch(
           tournamentId,
-          player1.user_id,
-          player2.user_id
+          player1.player_id,
+          player2.player_id
         );
-
+        console.log("Tournament Match Created: ", matchResult);
         matches.push(matchResult);
       }
 
@@ -214,10 +218,10 @@ class TournamentService {
   async createTournamentMatch(tournamentId, player1Id, player2Id) {
     try {
       const player1 = await new Promise((resolve, reject) => {
-        db.get(`SELECT id, elo FROM users WHERE id = ?`, [player1Id], (err, row) => err ? reject(err) : resolve(row));
+        db.get(`SELECT id, elo_score FROM players WHERE id = ?`, [player1Id], (err, row) => err ? reject(err) : resolve(row));
       })
       const player2 = await new Promise((resolve, reject) => {
-        db.get(`SELECT id, elo FROM users WHERE id = ?`, [player2Id], (err, row) => err ? reject(err) : resolve(row));
+        db.get(`SELECT id, elo_score FROM players WHERE id = ?`, [player2Id], (err, row) => err ? reject(err) : resolve(row));
       })
 
       // Create match record
@@ -229,11 +233,11 @@ class TournamentService {
 
       // Add players to match with their current ELO
       await db.run(
-        `INSERT INTO match_players (match_id, user_id, elo_before) VALUES (?, ?, ?)`,
+        `INSERT INTO match_players (match_id, player_id, elo_before) VALUES (?, ?, ?)`,
         [matchId, player1.id, player1.elo]
       );
       await db.run(
-        `INSERT INTO match_players (match_id, user_id, elo_before) VALUES (?, ?, ?)`,
+        `INSERT INTO match_players (match_id, player_id, elo_before) VALUES (?, ?, ?)`,
         [matchId, player2.id, player2.elo]
       );
 
@@ -263,16 +267,16 @@ class TournamentService {
       // Get players in this match
       const players = await new Promise((resolve, reject) => {
         db.all(
-          `SELECT mp.*, u.elo FROM match_players mp 
-           JOIN users u ON mp.user_id = u.id
+          `SELECT mp.*, p.elo_score FROM match_players mp 
+           JOIN players p ON mp.player_id = p.id
            WHERE mp.match_id = ?`,
           [matchId],
           (err, row) => err ? reject(err) : resolve(row)
         );
       })
 
-      const winner = players.find(p => p.user_id === winnerId);
-      const loser = players.find(p => p.user_id !== winnerId);
+      const winner = players.find(p => p.player_id === winnerId);
+      const loser = players.find(p => p.player_id !== winnerId);
 
       if (!winner) {
         throw new Error('Winner not found in this match');
@@ -289,12 +293,12 @@ class TournamentService {
 
       // Update match_players with scores and new ELO
       await db.run(
-        `UPDATE match_players SET score = 1, elo_after = ? WHERE match_id = ? AND user_id = ?`,
-        [winnerNewElo, matchId, winner.user_id]
+        `UPDATE match_players SET score = 1, elo_after = ? WHERE match_id = ? AND player_id = ?`,
+        [winnerNewElo, matchId, winner.player_id]
       );
       await db.run(
-        `UPDATE match_players SET score = 0, elo_after = ? WHERE match_id = ? AND user_id = ?`,
-        [loserNewElo, matchId, loser.user_id]
+        `UPDATE match_players SET score = 0, elo_after = ? WHERE match_id = ? AND player_id = ?`,
+        [loserNewElo, matchId, loser.player_id]
       );
 
       // Update match status
@@ -307,9 +311,9 @@ class TournamentService {
       const tournamentPlayers = await new Promise((resolve, reject) => {
         db.get(
           `SELECT tournament_id FROM tournament_players 
-           WHERE user_id = ? OR user_id = ? 
+           WHERE player_id = ? OR player_id = ? 
            LIMIT 1`,
-          [winner.user_id, loser.user_id],
+          [winner.player_id, loser.player_id],
           (err, row) => err ? reject(err) : resolve(row)
         );
       })
@@ -324,14 +328,14 @@ class TournamentService {
       await this.progressTournament(tournamentId);
 
       // Update user stats in auth service
-      await this.updateUserStats(winner.user_id, winnerNewElo, true);
-      await this.updateUserStats(loser.user_id, loserNewElo, false);
+      await this.updateUserStats(winner.player_id, winnerNewElo, true);
+      await this.updateUserStats(loser.player_id, loserNewElo, false);
 
       return {
         matchId,
         tournamentId,
-        winner: { id: winner.user_id, newElo: winnerNewElo },
-        loser: { id: loser.user_id, newElo: loserNewElo }
+        winner: { id: winner.player_id, newElo: winnerNewElo },
+        loser: { id: loser.player_id, newElo: loserNewElo }
       };
     } catch (error) {
       console.error('Error updating tournament match:', error);
@@ -357,10 +361,10 @@ class TournamentService {
       // Get all completed matches for this tournament
       const completedMatches = await new Promise((resolve, reject) => {
         db.all(
-          `SELECT m.id, m.status, mp.user_id, mp.score
+          `SELECT m.id, m.status, mp.player_id, mp.score
            FROM matches m
            JOIN match_players mp ON m.id = mp.match_id
-           JOIN tournament_players tp ON mp.user_id = tp.user_id
+           JOIN tournament_players tp ON mp.player_id = tp.player_id
            WHERE tp.tournament_id = ? AND m.match_type = 'tournament' AND m.status = 'completed'`,
           [tournamentId],
           (err, row) => err ? reject(err) : resolve(row)
@@ -380,7 +384,7 @@ class TournamentService {
       const winners = Object.values(matchResults)
         .map(players => {
           // Find player with score 1 (winner)
-          return players.find(p => p.score === 1)?.user_id;
+          return players.find(p => p.score === 1)?.player_id;
         })
         .filter(Boolean);
 
@@ -432,7 +436,7 @@ class TournamentService {
       // Set winner's placement to 1
       await db.run(
         `UPDATE tournament_players SET placement = 1
-         WHERE tournament_id = ? AND user_id = ?`,
+         WHERE tournament_id = ? AND player_id = ?`,
         [tournamentId, champion]
       );
 
@@ -440,7 +444,7 @@ class TournamentService {
       // For simplicity, let's just mark everyone else as placed 2
       await db.run(
         `UPDATE tournament_players SET placement = 2
-         WHERE tournament_id = ? AND user_id != ?`,
+         WHERE tournament_id = ? AND player_id != ?`,
         [tournamentId, champion]
       );
 
@@ -470,7 +474,7 @@ class TournamentService {
       // Get all players
       const players = await new Promise((resolve, reject) => {
         db.all(
-          `SELECT tp.user_id, tp.placement, tp.joined_at
+          `SELECT tp.player_id, tp.placement, tp.joined_at
            FROM tournament_players tp
            WHERE tp.tournament_id = ?`,
           [tournamentId],
@@ -506,7 +510,7 @@ class TournamentService {
           };
         }
         groupedMatches[match.id].players.push({
-          player_id: match.user_id,
+          player_id: match.player_id,
           score: match.score,
           elo_before: match.elo_before,
           elo_after: match.elo_after,
@@ -548,7 +552,7 @@ class TournamentService {
     try {
       const tournaments = await new Promise((resolve, reject) => {
         db.all(
-          `SELECT t.*, COUNT(tp.user_id) as registered_players_count
+          `SELECT t.*, COUNT(tp.player_id) as registered_players_count
          FROM tournaments t
          LEFT JOIN tournament_players tp ON t.id = tp.tournament_id
          WHERE t.status IN ('registering', 'in_progress')
@@ -589,10 +593,9 @@ class TournamentService {
 
       const players = await new Promise((resolve, reject) => {
         db.all(
-          `SELECT mp.*, p.elo_score, u.nickname 
+          `SELECT mp.*, p.id, p.elo_score
          FROM match_players mp
          JOIN players p ON mp.player_id = p.id
-         LEFT JOIN users u ON mp.player_id = u.id
          WHERE mp.match_id = ?`,
           [matchId],
           (err, row) => err ? reject(err) : resolve(row)
@@ -623,10 +626,9 @@ class TournamentService {
 
       const players = await new Promise((resolve, reject) => {
         db.all(
-          `SELECT mp.*, p.elo_score, u.nickname 
+          `SELECT mp.*, p.id, p.elo_score,
            FROM match_players mp
            JOIN players p ON mp.player_id = p.id
-           LEFT JOIN users u ON mp.player_id = u.id
            WHERE mp.match_id = ?`,
           [matchId],
           (err, row) => err ? reject(err) : resolve(row)
@@ -650,7 +652,7 @@ class TournamentService {
         throw new Error(`Match ${matchId} not found in tournament ${tournamentId}`);
       }
 
-      const playerIds = tournamentDetails.players.map(p => p.user_id);
+      const playerIds = tournamentDetails.players.map(p => p.player_id);
 
       playerIds.forEach(playerId => {
         wsAdapter.sendToClient(playerId, 'tournament_match_completed', {
@@ -669,7 +671,7 @@ class TournamentService {
           wsAdapter.sendToClient(playerId, 'tournament_completed', {
             tournamentId,
             tournament: tournamentDetails.tournament,
-            champion: champion ? champion.user_id : null,
+            champion: champion ? champion.player_id : null,
             players: tournamentDetails.players
           });
         });
@@ -683,15 +685,15 @@ class TournamentService {
 
         pendingMatches.forEach(match => {
           match.players.forEach(player => {
-            const opponent = match.players.find(p => p.user_id !== player.user_id);
+            const opponent = match.players.find(p => p.player_id !== player.player_id);
 
             if (opponent) {
-              wsAdapter.sendToClient(player.user_id, 'tournament_match_notification', {
+              wsAdapter.sendToClient(player.player_id, 'tournament_match_notification', {
                 tournamentId,
                 matchId: match.id,
                 opponent: {
-                  id: opponent.user_id,
-                  username: opponent.nickname || `Player ${opponent.user_id}`,
+                  id: opponent.player_id,
+                  username: opponent.nickname || `Player ${opponent.player_id}`,
                   elo: opponent.elo_before
                 },
                 round: match.round || 0

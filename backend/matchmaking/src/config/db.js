@@ -76,12 +76,12 @@ class DatabaseConnection {
     const tournamentPlayersTable=  `
       CREATE TABLE IF NOT EXISTS tournament_players (
         tournament_id INTEGER NOT NULL,
-        user_id INTEGER NOT NULL,
+        player_id INTEGER NOT NULL,
         placement INTEGER,
         joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (tournament_id, user_id),
+        PRIMARY KEY (tournament_id, player_id),
         FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE CASCADE,
-        FOREIGN KEY (user_id) REFERENCES players(id) ON DELETE CASCADE
+        FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
       );
     `
 

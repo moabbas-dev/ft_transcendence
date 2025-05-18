@@ -282,15 +282,15 @@ export default {
 
 					// Check if this player is part of this match
 					const matchPlayers = match.players || [];
-					const isPlayerInMatch = matchPlayers.some((p: any) => p.user_id === userId);
+					const isPlayerInMatch = matchPlayers.some((p: any) => p.player_id === userId);
 
 					// Only allow interaction if player is in this match and match is not completed
 					if (isPlayerInMatch && match.status !== 'completed') {
 						// Start the match
 						startTournamentMatch(matchId, {
 							players: matchPlayers.map((p: any) => ({
-								userId: p.user_id,
-								username: p.nickname || `Player ${p.user_id}`,
+								userId: p.player_id,
+								username: p.nickname || `Player ${p.player_id}`,
 								elo: p.elo_before
 							})),
 							tournamentName: data.tournament.name,
@@ -311,16 +311,16 @@ export default {
 					round: match.round || 0,
 					position: match.position || 0,
 					player1: player1 ? {
-						id: player1.user_id,
-						username: player1.nickname || `Player ${player1.user_id}`
+						id: player1.player_id,
+						username: player1.nickname || `Player ${player1.player_id}`
 					} : undefined,
 					player2: player2 ? {
-						id: player2.user_id,
-						username: player2.nickname || `Player ${player2.user_id}`
+						id: player2.player_id,
+						username: player2.nickname || `Player ${player2.player_id}`
 					} : undefined,
 					winner: match.winner_id ? {
 						id: match.winner_id,
-						username: tournamentData.players.find((p: any) => p.user_id === match.winner_id)?.nickname || `Player ${match.winner_id}`
+						username: tournamentData.players.find((p: any) => p.player_id === match.winner_id)?.nickname || `Player ${match.winner_id}`
 					} : undefined,
 					score1: match.player1_score,
 					score2: match.player2_score,
@@ -421,10 +421,10 @@ export default {
 			// Format results data
 			const results = data.players.map((player: any) => {
 				return {
-					userId: player.user_id,
-					username: player.nickname || `Player ${player.user_id}`,
+					userId: player.player_id,
+					username: player.nickname || `Player ${player.player_id}`,
 					avatarUrl: player.avatar_url,
-					place: player.placement || (player.user_id === data.champion ? 1 : 2)
+					place: player.placement || (player.player_id === data.champion ? 1 : 2)
 				};
 			});
 

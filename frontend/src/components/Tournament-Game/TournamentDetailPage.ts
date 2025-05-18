@@ -7,7 +7,7 @@ import { showTournamentMatchNotification } from "./TournamentMatchNotification";
 import { WaitingRoom } from "./WaitingRoom";
 
 interface Player {
-  user_id: string;
+  player_id: string;
   nickname?: string;
   avatar_url?: string;
   joined_at?: string;
@@ -72,13 +72,13 @@ export default {
       container.querySelector('#tour-name')!.textContent = data.tournament.name;
       if ((data.tournament.id as string).toString() === tournamentId) {
         try {
-          const userIds = data.players.map((p: any) => p.user_id);
+          const userIds = data.players.map((p: any) => p.player_id);
           const userDetails = await fetchUserDetails(userIds);          
           const enrichedPlayers = data.players.map((player: Player) => {
-            const userInfo = userDetails?.find((u: UserDetails) => u.id === player.user_id);
+            const userInfo = userDetails?.find((u: UserDetails) => u.id === player.player_id);
             return {
               ...player,
-              nickname: userInfo?.nickname || `Player ${player.user_id}`,
+              nickname: userInfo?.nickname || `Player ${player.player_id}`,
               avatar_url: userInfo?.avatar_url
             };
           });
@@ -172,8 +172,8 @@ function showWaitingRoom(container: HTMLElement, data: { tournament: { id: strin
     tournamentId: data.tournament.id,
     playerCount: data.tournament.player_count,
     players: data.players.map((p) => ({
-      userId: p.user_id,
-      username: p.nickname || `Player ${p.user_id}`,
+      userId: p.player_id,
+      username: p.nickname || `Player ${p.player_id}`,
       avatar: p.avatar_url,
       joinedAt: p.joined_at
     })),

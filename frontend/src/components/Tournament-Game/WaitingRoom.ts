@@ -99,15 +99,15 @@ export const WaitingRoom = createComponent((props: WaitingRoomProps) => {
       if (data.tournamentId === tournamentId) {
         try {
           const enrichedPlayers = await Promise.all(
-            data.players.map(async (player: {user_id: string, placement: string, joined_at: string}) => {
+            data.players.map(async (player: {player_id: string, placement: string, joined_at: string}) => {
               try {
-                const response = await fetch(`/authentication/auth/users/id/${player.user_id}`);
+                const response = await fetch(`/authentication/auth/users/id/${player.player_id}`);
                 
                 if (response.ok) {
                   const userData = await response.json();
                   return {
-                    userId: player.user_id,
-                    username: userData.nickname || `Player ${player.user_id}`,
+                    userId: player.player_id,
+                    username: userData.nickname || `Player ${player.player_id}`,
                     avatar: userData.avatar_url,
                     rank: player.placement || 'Unranked',
                     joinedAt: player.joined_at || new Date().toISOString()
@@ -116,10 +116,10 @@ export const WaitingRoom = createComponent((props: WaitingRoomProps) => {
                   throw new Error(`Failed to fetch user data: ${response.statusText}`);
                 }
               } catch (error) {
-                console.error(`Error fetching user data for player ${player.user_id}:`, error);
+                console.error(`Error fetching user data for player ${player.player_id}:`, error);
                 return {
-                  userId: player.user_id,
-                  username: `Player ${player.user_id}`,
+                  userId: player.player_id,
+                  username: `Player ${player.player_id}`,
                   rank: player.placement || 'Unranked',
                   joinedAt: player.joined_at || new Date().toISOString()
                 };
@@ -130,9 +130,9 @@ export const WaitingRoom = createComponent((props: WaitingRoomProps) => {
           renderWaitingRoomSlots(container, playerCount ?? 0, enrichedPlayers);
         } catch (error) {
           console.error('Error processing tournament_player_left event:', error);
-            renderWaitingRoomSlots(container, playerCount ?? 0, data.players.map((p: { user_id: string; joined_at: string }) => ({
-            userId: p.user_id,
-            username: `Player ${p.user_id}`,
+            renderWaitingRoomSlots(container, playerCount ?? 0, data.players.map((p: { player_id: string; joined_at: string }) => ({
+            userId: p.player_id,
+            username: `Player ${p.player_id}`,
             joinedAt: p.joined_at || new Date().toISOString()
             })));
         }
