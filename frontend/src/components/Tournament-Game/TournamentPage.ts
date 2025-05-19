@@ -225,15 +225,12 @@ export default {
 				}
 			});
 
-			// Tournament match notification
 			client.on('tournament_match_notification', (data) => {
-				// Show match notification popup
 				showTournamentMatchNotification({
 					tournamentId: data.tournamentId,
 					matchId: data.matchId,
 					opponent: data.opponent,
 					onAccept: (matchId) => {
-						// Start the match
 						startTournamentMatch(matchId, {
 							players: data.matchPlayers,
 							tournamentName: "Tournament Match",
@@ -322,12 +319,11 @@ export default {
 			});
 		}
 
-		// Function to handle starting a tournament match
 		function startTournamentMatch(matchId: string, matchData: any, userId: string) {
-			// Clear the current view
 			const mainContent = document.querySelector('#main-content');
+			console.log("Starting tournament match:", matchId, matchData);
 			if (!mainContent) return;
-
+			
 			mainContent.innerHTML = '';
 
 			// Create a match header

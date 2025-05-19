@@ -253,15 +253,12 @@ function generateSVGBracket(): string {
   /**
    * Add event listeners to matches
    */
-  function addEventListeners() {
-    document.querySelectorAll('.match').forEach(match => {
+  function addEventListeners(container: HTMLElement) {
+    container.querySelectorAll('.match').forEach(match => {
       match.addEventListener('click', () => {
-        const matchId = (match.parentElement?.parentElement as HTMLElement).dataset.matchId;
-        if (matchId) {
-          if (onMatchClick) {
-            onMatchClick(matchId);
-            console.log(`Match ${matchId} clicked`);
-          }
+        const matchId = (match.closest('.match-container') as HTMLElement).dataset.matchId;
+        if (matchId && onMatchClick) {
+          onMatchClick(matchId);
         }
       });
     });
@@ -289,7 +286,7 @@ function generateSVGBracket(): string {
 
   // Setup event listeners after component is added to DOM
   setTimeout(() => {
-    addEventListeners();
+    addEventListeners(component);
   }, 1000);
 
   return component;
