@@ -4,7 +4,7 @@ import { createComponent } from "../../utils/StateManager.js";
 
 export const Footer = createComponent(() => {
     const container = document.createElement("footer");
-    container.className = "w-full h-[68px] flex items-center justify-center px-4 text-lg font-normal text-white bg-black border-t-2 border-pongcyan shadow-[0_-5px_15px_rgba(0,247,255,0.5)] relative overflow-hidden";
+    container.className = "w-full h-[68px] flex items-center justify-center px-4 text-lg font-normal text-white bg-black border-t-2  border-pongcyan shadow-[0_-5px_15px_rgba(0,247,255,0.5)] relative overflow-hidden";
     container.innerHTML = `
         <div class="absolute inset-0 bg-gradient-to-r from-transparent via-pongcyan/5 to-transparent opacity-30"></div>
         <div class="relative z-10 flex items-center justify-center text-center">

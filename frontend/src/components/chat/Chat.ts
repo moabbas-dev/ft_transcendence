@@ -26,48 +26,46 @@ export const Chat = createComponent(
     let roomId: string | null = null;
 
     // Create the chat UI
-    const renderChat = () => {
+const renderChat = () => {
       container.innerHTML = `
-            <div class="flex flex-col bg-black bg-custom-gradient justify-between h-screen z-20 gap-2 bg-cover bg-center" style="background-image: ${activeUser ? `url(${bgImage})` : `url(${bgImage2})`}">
-                <header class="flex h-fit items-center justify-between py-3 px-2 bg-[#202c33] shadow-[0_0_15px_rgba(0,247,255,0.3)]">
-                    <div class="flex">
-                        <div class="back_arrow sm:hidden text-pongcyan text-3xl flex items-center justify-center hover:cursor-pointer hover:opacity-80">
+            <div class="flex flex-col bg-black bg-custom-gradient justify-between h-[100svh] w-full z-20 gap-1 md:gap-2 bg-cover bg-center" style="background-image: ${activeUser ? `url(${bgImage})` : `url(${bgImage2})`}">
+                <header class="flex h-fit w-full items-center justify-between py-2 md:py-3 px-1 md:px-2 bg-[#202c33] shadow-[0_0_15px_rgba(0,247,255,0.3)]">
+                    <div class="flex w-full">
+                        <div class="back_arrow block md:hidden text-pongcyan text-2xl md:text-3xl flex items-center justify-center hover:cursor-pointer hover:opacity-80 mr-1">
                             <i class='bx bx-left-arrow-alt'></i>
                         </div>
                         <div class="flex items-center z-10 justify-center gap-1 sm:gap-2"  id="friend_name">
                                     
-                            <div class="avatar h-12 w-12 rounded-full bg-black border-2 ${activeUser ? 'border-pongcyan' : 'border-pongpink'} flex items-center justify-center text-xl font-semibold ${activeUser ? 'text-pongcyan' : 'text-pongpink'} ${activeUser ? 'shadow-[0_0_10px_rgba(0,247,255,0.4)]' : 'shadow-[0_0_10px_rgba(255,0,228,0.4)]'}">
+                            <div class="avatar h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 rounded-full bg-black border-2 ${activeUser ? 'border-pongcyan' : 'border-pongpink'} flex items-center justify-center text-base sm:text-lg md:text-xl font-semibold ${activeUser ? 'text-pongcyan' : 'text-pongpink'} ${activeUser ? 'shadow-[0_0_10px_rgba(0,247,255,0.4)]' : 'shadow-[0_0_10px_rgba(255,0,228,0.4)]'}">
                               ${activeUser?.avatar_url ?
-          `<img src="${activeUser?.avatar_url}" class="h-11 w-11 rounded-full" alt="lol"/>` :
+          `<img src="${activeUser?.avatar_url}" class="h-7 w-7 sm:h-9 sm:w-9 md:h-11 md:w-11 rounded-full" alt="user avatar"/>` :
           activeUser?.full_name?.charAt(0)?.toUpperCase() || "💬"
         }
                             </div>
-
                             <div>
-                                <p class="text-base sm:text-xl ${activeUser ? "cursor-pointer hover:underline text-pongcyan" : "text-pongpink"} ">${activeUser
+                                <p class="text-sm sm:text-base md:text-xl ${activeUser ? "cursor-pointer hover:underline text-pongcyan" : "text-pongpink"} truncate max-w-[200px] sm:max-w-none">${activeUser
           ? `${activeUser.full_name} - ${activeUser.nickname}`
           : t('chat.nochat')
         }</p>
                             </div>
                         </div>
                     </div>
-
                 </header>
-                <section id="message-container" class="chat_core overflow-y-auto [scrollbar-width:thin] [scrollbar-color:white_pongdark]
-                [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2
+                <section id="message-container" class="chat_core w-full overflow-y-auto [scrollbar-width:thin] [scrollbar-color:white_pongdark]
+                [&::-webkit-scrollbar]:w-1 md:[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2
                 [&::-webkit-scrollbar-track]:bg-ponghover [&::-webkit-scrollbar-track]:rounded
                 [&::-webkit-scrollbar-thumb]:bg-pongdark [&::-webkit-scrollbar-thumb]:rounded
-                [&::-webkit-scrollbar-thumb:hover]:bg-[#2d3748] h-fit flex-1 flex flex-col-reverse gap-0.5">
+                [&::-webkit-scrollbar-thumb:hover]:bg-[#2d3748] h-fit flex-1 flex flex-col-reverse gap-0.5 px-1 md:px-2">
                     ${renderMessages()}
                 </section>
                 ${activeUser
-          ? `<div id="message-input-container" class="message-input-container flex items-center h-fit bg-[#202c33] border-t-2 border-pongcyan shadow-[0_0_15px_rgba(0,247,255,0.3)] gap-2 w-full px-3">
-                    <div class="flex items-center w-full px-2 py-2">
+          ? `<div id="message-input-container" class="message-input-container flex items-center h-fit bg-[#202c33] border-t-2 border-pongcyan shadow-[0_0_15px_rgba(0,247,255,0.3)] gap-1 md:gap-2 w-full px-2 md:px-3 pb-safe">
+                    <div class="flex items-center w-full px-1 md:px-2 py-2">
                         <div 
                             id="message-input" 
                             contenteditable="true"
                             role="textbox"
-                            class="border border-pongcyan rounded-full lg:py-2 py-1 pl-4 [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-[#a0aec0] [&:empty]:before:pointer-events-none focus:outline-none bg-black text-lg text-pongcyan flex-1 max-h-[4.75rem] overflow-y-auto whitespace-pre-wrap [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-pongdark [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:my-2 shadow-[0_0_5px_rgba(0,247,255,0.2)]"
+                            class="border border-pongcyan rounded-full py-1 md:py-2 pl-3 md:pl-4 [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-[#a0aec0] [&:empty]:before:pointer-events-none focus:outline-none bg-black text-base md:text-lg text-pongcyan flex-1 max-h-[3rem] md:max-h-[4.75rem] overflow-y-auto whitespace-pre-wrap [&::-webkit-scrollbar]:w-1 md:[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-pongdark [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:my-1 md:[&::-webkit-scrollbar-track]:my-2 shadow-[0_0_5px_rgba(0,247,255,0.2)]"
                             autocorrect="off"
                             autocapitalize="off"
                             spellcheck="false"
@@ -75,13 +73,13 @@ export const Chat = createComponent(
                         ></div>
                         <div 
                             id="emoticon-button" 
-                            class="flex items-center justify-center hover:cursor-pointer hover:opacity-80 max-sm:bg-pongdark hover:bg-ponghover rounded-full w-10 h-10 text-2xl text-pongpink bg-black transition-all duration-300 mx-1 border border-pongpink shadow-[0_0_5px_rgba(255,0,228,0.3)]"
+                            class="flex items-center justify-center hover:cursor-pointer hover:opacity-80 bg-black hover:bg-ponghover rounded-full w-8 h-8 md:w-10 md:h-10 text-xl md:text-2xl text-pongpink transition-all duration-300 mx-1 border border-pongpink shadow-[0_0_5px_rgba(255,0,228,0.3)]"
                         >
                             <i class='bx bx-smile'></i>
                         </div>
                         <div 
                             id="send-button" 
-                            class="flex items-center justify-center hover:cursor-pointer hover:opacity-80 max-sm:bg-pongdark hover:bg-ponghover rounded-full w-10 h-10 text-2xl text-pongcyan bg-black transition-all duration-300 -mr-2 border border-pongcyan shadow-[0_0_5px_rgba(0,247,255,0.3)]"
+                            class="flex items-center justify-center hover:cursor-pointer hover:opacity-80 bg-black hover:bg-ponghover rounded-full w-8 h-8 md:w-10 md:h-10 text-xl md:text-2xl text-pongcyan transition-all duration-300 -mr-1 md:-mr-2 border border-pongcyan shadow-[0_0_5px_rgba(0,247,255,0.3)]"
                         >
                             <i class='bx bx-send'></i>
                         </div>
@@ -89,28 +87,27 @@ export const Chat = createComponent(
                 </div>
                 
                 <!-- Enhanced emoticon container with tabs -->
-                <div id="emoticon-container" class="fixed bottom-20 sm:bottom-20 left-4 right-8 sm:left-auto sm:w-72 max-h-80 bg-black bg-opacity-95 rounded-lg shadow-[0_0_15px_rgba(255,0,228,0.5)] border border-pongpink p-2 z-30 hidden">
+                <div id="emoticon-container" class="fixed bottom-20 left-1 right-1 sm:left-auto sm:right-8 sm:w-72 max-h-64 sm:max-h-80 bg-black bg-opacity-95 rounded-lg shadow-[0_0_15px_rgba(255,0,228,0.5)] border border-pongpink p-1 sm:p-2 z-30 hidden">
                   <!-- Tab headers -->
-                  <div class="emoticon-tabs flex justify-start border-b border-pongpink mb-2">
-                    <div id="emojis-tab" class="tab-item px-4 py-1 cursor-pointer text-pongcyan border-b-2 border-pongcyan">Emojis</div>
-                    <div id="emoticon-tab" class="tab-item px-4 py-1 cursor-pointer text-pongcyan">Emoticons</div>
-                    <div id="sticker-tab" class="tab-item px-4 py-1 cursor-pointer text-gray-400 hover:text-pongcyan">Stickers</div>
-
+                  <div class="emoticon-tabs flex justify-start border-b border-pongpink mb-1 sm:mb-2 text-sm sm:text-base">
+                    <div id="emojis-tab" class="tab-item px-2 sm:px-4 py-1 cursor-pointer text-pongcyan border-b-2 border-pongcyan">Emojis</div>
+                    <div id="emoticon-tab" class="tab-item px-2 sm:px-4 py-1 cursor-pointer text-pongcyan">Emoticons</div>
+                    <div id="sticker-tab" class="tab-item px-2 sm:px-4 py-1 cursor-pointer text-gray-400 hover:text-pongcyan">Stickers</div>
                     </div>
                   
                   <!-- Tab contents with scrollable area -->
-                  <div class="tabs-content h-60 overflow-auto [scrollbar-width:thin] [scrollbar-color:white_pongdark] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-ponghover [&::-webkit-scrollbar-thumb]:bg-pongdark">
+                  <div class="tabs-content h-40 sm:h-60 overflow-auto [scrollbar-width:thin] [scrollbar-color:white_pongdark] [&::-webkit-scrollbar]:w-1 sm:[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-ponghover [&::-webkit-scrollbar-thumb]:bg-pongdark">
                     
-                    <div id="emogis-tab-content" class="grid grid-cols-5 gap-2">
+                    <div id="emogis-tab-content" class="grid grid-cols-6 sm:grid-cols-5 gap-1 sm:gap-2">
                       <!-- Emojis will be inserted here dynamically -->
                     </div>
                   <!-- Emoticons tab content -->
-                    <div id="emoticon-tab-content" class="grid grid-cols-5 gap-2">
+                    <div id="emoticon-tab-content" class="grid grid-cols-6 sm:grid-cols-5 gap-1 sm:gap-2">
                       <!-- Emoticons will be inserted here dynamically -->
                     </div>
                     
                     <!-- Stickers tab content -->
-                    <div id="sticker-tab-content" class="grid grid-cols-4 gap-2 hidden">
+                    <div id="sticker-tab-content" class="grid grid-cols-3 sm:grid-cols-4 gap-1 sm:gap-2 hidden">
                       <!-- Stickers will be inserted here dynamically -->
                     </div>
                   </div>
