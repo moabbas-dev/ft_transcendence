@@ -390,6 +390,11 @@ function handleMatchClick(matchId: string, tournamentData: any, client: Tourname
     return;
   }
 
+  console.log("TOURNAMENT DATA: ", tournamentData);
+  console.log("MATCH DATA: ", match);
+  console.log("USER ID: ", userId);
+  console.log("MATCH ID: ", matchId);
+
   const matchPlayers = match.players || [];
   const isPlayerInMatch = matchPlayers.some((p: any) => 
     String(p.player_id) === String(userId)
@@ -662,7 +667,10 @@ function formatTournamentResults(tournamentData: any): TournamentResult[] {
 
 function startTournamentMatch(container: HTMLElement, matchId: string, matchData: any, userId: string, client: TournamentClient) {
   const content = container.querySelector('#tournament-content');
-  if (!content) return;
+  if (!content) {
+    console.log("Tournament DOM Content not found");
+    return;
+  }
 
   // Get opponent info
   const currentPlayer = matchData.players.find((p: any) => String(p.userId) === String(userId));

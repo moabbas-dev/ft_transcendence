@@ -70,6 +70,7 @@ export const TournamentMatchNotification = createComponent((props: TournamentMat
       }
 
       onAccept(matchId);
+      console.log("Accepted match:", matchId);
     });
   }
   
