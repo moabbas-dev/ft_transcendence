@@ -169,6 +169,40 @@ export default {
         });
       }
     });
+
+    client.on('tournament_match_accepted', (data) => {
+      console.log('Match accepted:', data);
+    });
+
+    client.on('tournament_opponent_accepted', (data) => {
+      console.log('Opponent accepted:', data);
+    });
+
+    client.on('tournament_match_starting', (data) => {
+      if (String(data.tournamentId) === String(tournamentId)) {
+        console.log('Match starting:', data);
+        
+        startTournamentMatch(container, data.matchId, {
+          players: [
+            {
+              userId: userId,
+              username: 'You',
+              elo: 1000,
+              avatar: undefined
+            },
+            {
+              userId: data.opponent.id,
+              username: data.opponent.username,
+              elo: data.opponent.elo,
+              avatar: data.opponent.avatar
+            }
+          ],
+          tournamentName: container.querySelector('#tour-name')?.textContent || 'Tournament',
+          tournamentId: data.tournamentId,
+          round: 1
+        }, userId as string, client);
+      }
+    });
   }
 };
 

@@ -18,40 +18,40 @@ export default {
     <div class="profile"></div>
     <div class="header bg-black w-full h-fit"></div>
     <div class="w-full overflow-x-none bg-black flex-1 flex items-center justify-center">
-      <div class="container mx-auto grid place-content-center px-4">
-        <div class="flex items-center justify-center gap-5">
-          <div class="xl:w-1/2 h-full hidden sm:flex items-center">
-            <div class="relative">
-              <canvas id="pongCanvas" class="w-full h-[50vh] border-4 border-pongcyan rounded-2xl shadow-[0_0_50px_rgba(0,247,255,0.5)] transform transition-transform animate-flip-up animate-duration-[3s]"></canvas>
+      <div class="container mx-auto grid place-content-center px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row items-center justify-center gap-5">
+          <div class="xl:w-1/2 w-full max-w-screen-sm hidden md:flex items-center justify-center">
+            <div class="relative w-full">
+              <canvas id="pongCanvas" class="w-full h-[40vh] lg:h-[50vh] border-4 border-pongcyan rounded-2xl shadow-[0_0_50px_rgba(0,247,255,0.5)] transform transition-transform animate-flip-up animate-duration-[3s]"></canvas>
               <div class="absolute inset-0 bg-pongcyan -z-50 opacity-10 rounded-2xl animate-flip-down animate-duration-[3s]"></div>
             </div>
           </div>
-          <div class="flex flex-col gap-3 justify-center max-sm:w-full max-sm:px-3">
-            <div class="bg-[rgba(0,0,0,0.7)] border-2 border-pongpink rounded-xl p-6 transform transition-transform hover:scale-[1.02] shadow-[0_0_20px_rgba(255,0,228,0.4)]">
-              <h1 class="text-nowrap text-5xl max-sm:text-center max-sm:font-bold sm:text-6xl lg:text-8xl xl:text-9xl text-pongpink text-start drop-shadow-[0_0_10px_#ff00e4] animate-fade-right animate-once animate-duration-700 animate-ease-linear">
+          <div class="flex flex-col gap-3 justify-center w-full md:w-auto">
+            <div class="bg-[rgba(0,0,0,0.7)] border-2 border-pongpink rounded-xl p-4 sm:p-6 transform transition-transform hover:scale-[1.02] shadow-[0_0_20px_rgba(255,0,228,0.4)] z-40">
+              <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-8xl xl:text-9xl text-pongpink text-center md:text-start font-bold md:font-normal drop-shadow-[0_0_10px_#ff00e4] animate-fade-right animate-once animate-duration-700 animate-ease-linear">
                 ${t("home.title")}
               </h1>
-              <p class="text-pongcyan text-2xl max-sm:text-center lg:text-4xl mt-4 drop-shadow-[0_0_5px_#00f7ff] animate-fade-left sm:animate-fade-right animate-once animate-duration-700 animate-delay-700 animate-ease-linear">
+              <p class="text-pongcyan text-xl sm:text-2xl md:text-3xl lg:text-4xl mt-4 text-center md:text-start drop-shadow-[0_0_5px_#00f7ff] animate-fade-left sm:animate-fade-right animate-once animate-duration-700 animate-delay-700 animate-ease-linear">
                 ${t("home.tagline")}
               </p>
             </div>
-            <div class="flex flex-wrap justify-center sm:justify-start items-center gap-4">
+            <div class="flex flex-wrap justify-center md:justify-start items-center gap-3 sm:gap-4">
               ${store.userId ? `
-              <button id="chat-friends-btn" class="group relative text-lg rounded-lg text-white flex justify-center items-center bg-black border-2 border-pongcyan px-6 py-3 
+              <button id="chat-friends-btn" class="group relative text-base sm:text-lg rounded-lg text-white flex justify-center items-center bg-black border-2 border-pongcyan px-4 sm:px-6 py-2 sm:py-3 
                 transition-all duration-300 ease-in-out
                 hover:text-pongcyan hover:shadow-[0_0_15px_rgba(0,247,255,0.7)]
                 focus:outline-none
                 animate-fade-up animate-duration-700 animate-delay-1000 animate-ease-linear">
                 <span class="relative z-10 drop-shadow-[0_0_5px_#00f7ff]">Chat with Friends</span>
               </button>
-              <button id="play-online-btn" class="group relative text-lg rounded-lg text-white flex justify-center items-center bg-black border-2 border-pongpink px-6 py-3 
+              <button id="play-online-btn" class="group relative text-base sm:text-lg rounded-lg text-white flex justify-center items-center bg-black border-2 border-pongpink px-4 sm:px-6 py-2 sm:py-3 
                 transition-all duration-300 ease-in-out
                 hover:text-pongpink hover:shadow-[0_0_15px_rgba(255,0,228,0.7)]
                 focus:outline-none
                 animate-fade-up animate-duration-700 animate-delay-[1200ms] animate-ease-linear">
                 <span class="relative z-10 drop-shadow-[0_0_5px_#ff00e4]">Play Online</span>
               </button>
-              <button id="start-tournament-btn" class="group relative text-lg rounded-lg text-white flex justify-center items-center bg-black border-2 border-pongcyan px-6 py-3 
+              <button id="start-tournament-btn" class="group relative text-base sm:text-lg rounded-lg text-white flex justify-center items-center bg-black border-2 border-pongcyan px-4 sm:px-6 py-2 sm:py-3 
                 transition-all duration-300 ease-in-out
                 hover:text-pongcyan hover:shadow-[0_0_15px_rgba(0,247,255,0.7)]
                 focus:outline-none
@@ -59,21 +59,21 @@ export default {
                 <span class="relative z-10 drop-shadow-[0_0_5px_#00f7ff]">Start a Tournament</span>
               </button>
               ` : `
-              <button id="register-btn" class="group relative text-lg rounded-lg text-white flex justify-center items-center bg-black border-2 border-pongcyan px-6 py-3 
+              <button id="register-btn" class="group relative text-base sm:text-lg rounded-lg text-white flex justify-center items-center bg-black border-2 border-pongcyan px-4 sm:px-6 py-2 sm:py-3 
                 transition-all duration-300 ease-in-out
                 hover:text-pongcyan hover:shadow-[0_0_15px_rgba(0,247,255,0.7)]
                 focus:outline-none
                 animate-fade-up animate-duration-700 animate-delay-1000 animate-ease-linear">
                 <span class="relative z-10 drop-shadow-[0_0_5px_#00f7ff]">${t("home.register")}</span>
               </button>
-              <button id="ai-btn" class="group relative text-lg rounded-lg text-white flex justify-center items-center bg-black border-2 border-pongpink px-6 py-3 
+              <button id="ai-btn" class="group relative text-base sm:text-lg rounded-lg text-white flex justify-center items-center bg-black border-2 border-pongpink px-4 sm:px-6 py-2 sm:py-3 
                 transition-all duration-300 ease-in-out
                 hover:text-pongpink hover:shadow-[0_0_15px_rgba(255,0,228,0.7)]
                 focus:outline-none
                 animate-fade-up animate-duration-700 animate-delay-[1200ms] animate-ease-linear">
                 <span class="relative z-10 drop-shadow-[0_0_5px_#ff00e4]">${t("home.playAI")}</span>
               </button>
-              <button id="local-btn" class="group relative text-lg rounded-lg text-white flex justify-center items-center bg-black border-2 border-pongcyan px-6 py-3 
+              <button id="local-btn" class="group relative text-base sm:text-lg rounded-lg text-white flex justify-center items-center bg-black border-2 border-pongcyan px-4 sm:px-6 py-2 sm:py-3 
                 transition-all duration-300 ease-in-out
                 hover:text-pongcyan hover:shadow-[0_0_15px_rgba(0,247,255,0.7)]
                 focus:outline-none
@@ -86,6 +86,7 @@ export default {
         </div>
       </div>
     </div> 
+
     `;
 
     if(window.location.href.endsWith('/#') && localStorage.getItem("googleAuthClicked")) {

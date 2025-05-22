@@ -264,6 +264,29 @@ public markMessagesAsRead(roomId: string | null): void {
     console.error("WebSocket not connected");
     return;
   }
+  
+  // Check if roomId is valid
+  if (!roomId) {
+    console.error("Invalid roomId");
+    return;
+  }
+  
+  // Get the current user ID (assuming it's stored in the class or accessible)
+  const userId = this.userId; // Replace with how you actually get the user ID
+  
+  if (!userId) {
+    console.error("User ID not available");
+    return;
+  }
+  
+  // Send the mark_read event to the WebSocket server
+  this.send("messages:mark_read", {
+    roomId,
+    userId
+  });
+  
+  // Optionally, you could update the UI immediately before server confirmation
+  console.log(`Sent request to mark messages as read in room ${roomId} for user ${userId}`);
 }
 
   /**

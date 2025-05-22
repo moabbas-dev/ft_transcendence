@@ -23,7 +23,7 @@ export default {
     container.className = 'flex flex-col h-dvh';
     container.innerHTML = `
       <div class="profile"></div>
-      <div class="header z-50 w-full bg-black"></div>
+      <div class="header w-full bg-black"></div>
       
       <div class="content flex-1 overflow-x-hidden bg-black relative z-10">
         <!-- Neon glow effects -->
@@ -31,23 +31,22 @@ export default {
         
         <div class="container mx-auto px-4 py-8 flex flex-col gap-8 relative z-10">
           <div class="flex flex-col gap-8">
-            <h1 class="text-5xl text-center font-bold text-pongcyan drop-shadow-[0_0_15px_#00f7ff] animate-fade-down animate-once animate-duration-700">
+            <h1 class="text-3xl sm:text-4xl md:text-5xl text-center font-bold text-pongcyan drop-shadow-[0_0_15px_#00f7ff] animate-fade-down animate-once animate-duration-700">
               <span class="max-sm:hidden">Ping-</span>Pong ${t('leaderBoard.title')}
             </h1>
             
             <!-- Top 3 Players Podium -->
-            <div class="top-players flex items-end justify-center gap-4 min-w-0 w-full max-w-4xl mx-auto">
+            <div class="top-players flex items-end justify-center gap-2 sm:gap-4 min-w-0 w-full max-w-4xl mx-auto px-1">
               <!-- 2nd Place -->
               <div class="second-place w-[30%] flex flex-col items-center gap-0.5 animate-fade-right animate-once animate-duration-700">
                 <div class="relative">
                   <div class="crown absolute -top-6 left-1/2 transform -translate-x-1/2 text-2xl animate-bounce animate-infinite animate-duration-1000">🥈</div>
-                  <div class="avatar-container relative size-16 sm:size-24 mb-2 overflow-hidden">
-                    <img src="${pic2}" alt="2nd Place" class="second-avatar absolute rounded-full w-16 h-16 object-cover top-10 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
-                    <img src="${playerFrame1}" alt="Player Frame" class="absolute w-full -top-4 left-0 pointer-events-none z-10" />
+                  <div class="avatar-container relative size-16 sm:size-24 sm:mb-2 overflow-hidden">
+                    <img src="${pic2}" alt="2nd Place" class="second-avatar absolute rounded-full  w-12 h-12 sm:w-16 sm:h-16 object-cover top-7 sm:top-10 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+                    <img src="${playerFrame1}" alt="Player Frame" class="absolute w-full -top-3 sm:-top-4 left-0 pointer-events-none z-10" />
                   </div>
-                  <div class="rank-badge bg-black text-pongcyan rounded-full w-8 h-8 mb-2 flex items-center justify-center absolute -bottom-2 -right-2 border-2 border-pongcyan shadow-[0_0_8px_rgba(0,247,255,0.6)] font-bold">2</div>
                 </div>
-                <p class="username text-xl text-white font-semibold second-name drop-shadow-[0_0_5px_rgba(255,255,255,0.6)]"></p>
+                <!--<p class="username text-xl text-white font-semibold second-name drop-shadow-[0_0_5px_rgba(255,255,255,0.6)]"></p>-->
                 <p class="score text-pongcyan text-lg second-score drop-shadow-[0_0_8px_rgba(0,247,255,0.6)]"></p>
                 <div class="podium bg-silver border-t-2 border-pongcyan w-full h-28 rounded-t-lg shadow-[0_-5px_15px_rgba(0,247,255,0.4)]"></div>
               </div>
@@ -57,12 +56,11 @@ export default {
                 <div class="relative">
                   <div class="crown absolute -top-6 left-1/2 transform -translate-x-1/2 text-3xl animate-bounce animate-infinite animate-duration-1000">🥇</div>
                   <div class="avatar-container relative size-28 mb-2 sm:size-32">
-                    <img src="${pic1}" alt="1st Place" class="first-avatar absolute rounded-full w-24 h-24 object-cover top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
-                    <img src="${playerFrame}" alt="Player Frame" class="absolute w-full -top-4 left-0 pointer-events-none z-10" />
+                    <img src="${pic1}" alt="1st Place" class="first-avatar absolute rounded-full w-20 h-20 sm:w-24 sm:h-24 object-cover top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+                    <img src="${playerFrame}" alt="Player Frame" class="absolute w-full -top-3  sm:-top-4 left-0 pointer-events-none z-10" />
                   </div>
-                  <div class="rank-badge bg-black text-pongpink rounded-full size-10 flex items-center justify-center absolute -bottom-2 mb-2 -right-2 border-2 border-pongpink shadow-[0_0_8px_rgba(255,0,228,0.6)] font-bold">1</div>
                 </div>
-                <p class="username text-2xl text-white font-bold first-name drop-shadow-[0_0_5px_rgba(255,255,255,0.6)]"></p>
+                <!--<p class="username text-2xl text-white font-bold first-name drop-shadow-[0_0_5px_rgba(255,255,255,0.6)]"></p>-->
                 <p class="score text-pongpink text-xl first-score drop-shadow-[0_0_8px_rgba(255,0,228,0.6)]"></p>
                 <div class="podium bg-gold border-t-2 border-pongpink w-full h-40 rounded-t-lg shadow-[0_-5px_15px_rgba(255,0,228,0.4)]"></div>
               </div>
@@ -72,12 +70,11 @@ export default {
                 <div class="relative">
                   <div class="crown absolute -top-6 left-1/2 transform -translate-x-1/2 text-2xl animate-bounce animate-infinite animate-duration-1000">🥉</div>
                   <div class="avatar-container relative size-16 sm:size-24 mb-2 overflow-hidden">
-                    <img src="${pic3}" alt="3rd Place" class="second-avatar rounded-full absolute w-16 object-cover top-10 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
-                    <img src="${playerFrame2}" alt="Player Frame" class="absolute w-full -top-4 left-0 pointer-events-none z-10" />
+                    <img src="${pic3}" alt="3rd Place" class="second-avatar absolute rounded-full  w-12 h-12 sm:w-16 sm:h-16 object-cover top-7 sm:top-10 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+                    <img src="${playerFrame2}" alt="Player Frame" class="absolute w-full -top-3 sm:-top-4 left-0 pointer-events-none z-10" />
                   </div>
-                  <div class="rank-badge bg-black text-pongcyan rounded-full w-8 h-8 mb-2 flex items-center justify-center absolute -bottom-2 -right-2 border-2 border-pongcyan shadow-[0_0_8px_rgba(0,247,255,0.6)] font-bold">3</div>
                 </div>
-                <p class="username text-xl text-white font-semibold third-name drop-shadow-[0_0_5px_rgba(255,255,255,0.6)]"></p>
+                <!--<p class="username text-xl text-white font-semibold third-name drop-shadow-[0_0_5px_rgba(255,255,255,0.6)]"></p>-->
                 <p class="score text-pongcyan text-lg third-score drop-shadow-[0_0_8px_rgba(0,247,255,0.6)]"></p>
                 <div class="podium bg-bronze border-t-2 border-pongcyan w-full h-20 rounded-t-lg shadow-[0_-5px_15px_rgba(0,247,255,0.4)]"></div>
               </div>
@@ -90,7 +87,7 @@ export default {
                 <thead class="sticky top-0 z-10">
                   <tr class="bg-black text-pongcyan text-center text-lg sm:text-xl border-b border-pongcyan/50">
                     <th class="py-3 px-4">${t('leaderBoard.rank')}</th>
-                    <th class="py-3 px-4" colspan="2">${t('leaderBoard.player')}</th>
+                    <th class="py-3 px-6" colspan="2">${t('leaderBoard.player')}</th>
                     <th class="py-3 px-4">${t('leaderBoard.wins')}</th>
                     <th class="py-3 px-4">${t('leaderBoard.score')}</th>
                   </tr>
@@ -252,19 +249,21 @@ async function fetchAndDisplayLeaderboard() {
       leaderboardBody.innerHTML = "";
 
       // Skip the first 3 players (already shown in podium)
-      players.slice(3).forEach((player) => {
+      // players.slice(3).forEach((player) => {
+      players.forEach((player) => {
+
         const row = document.createElement("tr");
         row.className =
           "border-b border-pongcyan/20 hover:bg-pongcyan/10 transition-colors";
 
         row.innerHTML = `
           <td class="py-3 px-4 text-pongcyan text-center font-semibold">${player.rank}</td>
-          <td colspan="2" class="py-3 px-4">
-            <div class="flex items-center gap-3 justify-center sm:justify-start">
+          <td colspan="2" class="py-3 px-6">
+            <div class="flex items-center gap-3 w-28 sm:w-auto justify-center sm:justify-start">
               <div class="size-10 rounded-full overflow-hidden border-2 border-pongcyan shadow-[0_0_8px_rgba(0,247,255,0.4)]">
                 <img src="${player.avatar}" alt="${player.username}" class="w-full h-full object-cover" />
               </div>
-              <p class="text-white max-w-[120px] truncate text-center">${player.username}</p>
+              <p class="text-white max-w-[60px] sm:max-w-[120px]  text-center">${player.username}</p>
             </div>
           </td>
           <td class="py-3 px-4 text-center text-pongpink font-medium">${player.wins}</td>
@@ -296,19 +295,19 @@ async function fetchAndDisplayLeaderboard() {
 function updateTopThreePlayers(topPlayers: Player[]) {
   if (topPlayers.length >= 1) {
     const firstPlayer = topPlayers[0];
-    document.querySelector('.first-name')!.textContent = firstPlayer.username;
+    // document.querySelector('.first-name')!.textContent = firstPlayer.username;
     document.querySelector('.first-score')!.textContent = firstPlayer.score.toString();
   }
   
   if (topPlayers.length >= 2) {
     const secondPlayer = topPlayers[1];
-    document.querySelector('.second-name')!.textContent = secondPlayer.username;
+    // document.querySelector('.second-name')!.textContent = secondPlayer.username;
     document.querySelector('.second-score')!.textContent = secondPlayer.score.toString();
   }
   
   if (topPlayers.length >= 3) {
     const thirdPlayer = topPlayers[2];
-    document.querySelector('.third-name')!.textContent = thirdPlayer.username;
+    // document.querySelector('.third-name')!.textContent = thirdPlayer.username;
     document.querySelector('.third-score')!.textContent = thirdPlayer.score.toString();
   }
 }

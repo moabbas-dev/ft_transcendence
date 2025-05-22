@@ -3,10 +3,11 @@ import { createComponent } from "../../utils/StateManager.js";
 import chatService from "../../utils/chatUtils/chatWebSocketService.js";
 import bgImage from "../../assets/bg3.jpg";
 import bgImage2 from "../../assets/background1.gif"
-import { emoticons, emoticonsMap } from "./emoticons.js";
+import { emojis, emojisMap, emoticons, emoticonsMap, stickers, stickersMap } from "./emoticons.js";
 import { Profile } from "../profile/UserProfile.js";
 import { t } from "../../languages/LanguageController.js";
 import axios from "axios";
+import { _isClickEvent } from "chart.js/helpers";
 
 interface Message {
   id: number;
@@ -25,48 +26,46 @@ export const Chat = createComponent(
     let roomId: string | null = null;
 
     // Create the chat UI
-    const renderChat = () => {
+const renderChat = () => {
       container.innerHTML = `
-            <div class="flex flex-col bg-black bg-custom-gradient justify-between h-screen z-20 gap-2 bg-cover bg-center" style="background-image: ${activeUser ? `url(${bgImage})` : `url(${bgImage2})`}">
-                <header class="flex h-fit items-center justify-between py-3 px-2 bg-[#202c33] shadow-[0_0_15px_rgba(0,247,255,0.3)]">
-                    <div class="flex">
-                        <div class="back_arrow sm:hidden text-pongcyan text-3xl flex items-center justify-center hover:cursor-pointer hover:opacity-80">
+            <div class="flex flex-col bg-black bg-custom-gradient justify-between h-[100svh] w-full z-20 gap-1 md:gap-2 bg-cover bg-center" style="background-image: ${activeUser ? `url(${bgImage})` : `url(${bgImage2})`}">
+                <header class="flex h-fit w-full items-center justify-between py-2 md:py-3 px-1 md:px-2 bg-[#202c33] shadow-[0_0_15px_rgba(0,247,255,0.3)]">
+                    <div class="flex w-full">
+                        <div class="back_arrow block md:hidden text-pongcyan text-2xl md:text-3xl flex items-center justify-center hover:cursor-pointer hover:opacity-80 mr-1">
                             <i class='bx bx-left-arrow-alt'></i>
                         </div>
                         <div class="flex items-center z-10 justify-center gap-1 sm:gap-2"  id="friend_name">
                                     
-                            <div class="avatar h-12 w-12 rounded-full bg-black border-2 ${activeUser ? 'border-pongcyan' : 'border-pongpink'} flex items-center justify-center text-xl font-semibold ${activeUser ? 'text-pongcyan' : 'text-pongpink'} ${activeUser ? 'shadow-[0_0_10px_rgba(0,247,255,0.4)]' : 'shadow-[0_0_10px_rgba(255,0,228,0.4)]'}">
+                            <div class="avatar h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 rounded-full bg-black border-2 ${activeUser ? 'border-pongcyan' : 'border-pongpink'} flex items-center justify-center text-base sm:text-lg md:text-xl font-semibold ${activeUser ? 'text-pongcyan' : 'text-pongpink'} ${activeUser ? 'shadow-[0_0_10px_rgba(0,247,255,0.4)]' : 'shadow-[0_0_10px_rgba(255,0,228,0.4)]'}">
                               ${activeUser?.avatar_url ?
-          `<img src="${activeUser?.avatar_url}" class="h-11 w-11 rounded-full" alt="lol"/>` :
+          `<img src="${activeUser?.avatar_url}" class="h-7 w-7 sm:h-9 sm:w-9 md:h-11 md:w-11 rounded-full" alt="user avatar"/>` :
           activeUser?.full_name?.charAt(0)?.toUpperCase() || "💬"
         }
                             </div>
-
                             <div>
-                                <p class="text-base sm:text-xl ${activeUser ? "cursor-pointer hover:underline text-pongcyan" : "text-pongpink"} ">${activeUser
+                                <p class="text-sm sm:text-base md:text-xl ${activeUser ? "cursor-pointer hover:underline text-pongcyan" : "text-pongpink"} truncate max-w-[200px] sm:max-w-none">${activeUser
           ? `${activeUser.full_name} - ${activeUser.nickname}`
           : t('chat.nochat')
         }</p>
                             </div>
                         </div>
                     </div>
-
                 </header>
-                <section id="message-container" class="chat_core overflow-y-auto [scrollbar-width:thin] [scrollbar-color:white_pongdark]
-                [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2
+                <section id="message-container" class="chat_core w-full overflow-y-auto [scrollbar-width:thin] [scrollbar-color:white_pongdark]
+                [&::-webkit-scrollbar]:w-1 md:[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2
                 [&::-webkit-scrollbar-track]:bg-ponghover [&::-webkit-scrollbar-track]:rounded
                 [&::-webkit-scrollbar-thumb]:bg-pongdark [&::-webkit-scrollbar-thumb]:rounded
-                [&::-webkit-scrollbar-thumb:hover]:bg-[#2d3748] h-fit flex-1 flex flex-col-reverse gap-0.5">
+                [&::-webkit-scrollbar-thumb:hover]:bg-[#2d3748] h-fit flex-1 flex flex-col-reverse gap-0.5 px-1 md:px-2">
                     ${renderMessages()}
                 </section>
                 ${activeUser
-          ? `<div id="message-input-container" class="message-input-container flex items-center h-fit bg-[#202c33] border-t-2 border-pongcyan shadow-[0_0_15px_rgba(0,247,255,0.3)] gap-2 w-full px-3">
-                    <div class="flex items-center w-full px-2 py-2">
+          ? `<div id="message-input-container" class="message-input-container flex items-center h-fit bg-[#202c33] border-t-2 border-pongcyan shadow-[0_0_15px_rgba(0,247,255,0.3)] gap-1 md:gap-2 w-full px-2 md:px-3 pb-safe">
+                    <div class="flex items-center w-full px-1 md:px-2 py-2">
                         <div 
                             id="message-input" 
                             contenteditable="true"
                             role="textbox"
-                            class="border border-pongcyan rounded-full lg:py-2 py-1 pl-4 [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-[#a0aec0] [&:empty]:before:pointer-events-none focus:outline-none bg-black text-lg text-pongcyan flex-1 max-h-[4.75rem] overflow-y-auto whitespace-pre-wrap [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-pongdark [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:my-2 shadow-[0_0_5px_rgba(0,247,255,0.2)]"
+                            class="border border-pongcyan rounded-full py-1 md:py-2 pl-3 md:pl-4 [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-[#a0aec0] [&:empty]:before:pointer-events-none focus:outline-none bg-black text-base md:text-lg text-pongcyan flex-1 max-h-[3rem] md:max-h-[4.75rem] overflow-y-auto whitespace-pre-wrap [&::-webkit-scrollbar]:w-1 md:[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-pongdark [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:my-1 md:[&::-webkit-scrollbar-track]:my-2 shadow-[0_0_5px_rgba(0,247,255,0.2)]"
                             autocorrect="off"
                             autocapitalize="off"
                             spellcheck="false"
@@ -74,30 +73,49 @@ export const Chat = createComponent(
                         ></div>
                         <div 
                             id="emoticon-button" 
-                            class="flex items-center justify-center hover:cursor-pointer hover:opacity-80 max-sm:bg-pongdark hover:bg-ponghover rounded-full w-10 h-10 text-2xl text-pongpink bg-black transition-all duration-300 mx-1 border border-pongpink shadow-[0_0_5px_rgba(255,0,228,0.3)]"
+                            class="flex items-center justify-center hover:cursor-pointer hover:opacity-80 bg-black hover:bg-ponghover rounded-full w-8 h-8 md:w-10 md:h-10 text-xl md:text-2xl text-pongpink transition-all duration-300 mx-1 border border-pongpink shadow-[0_0_5px_rgba(255,0,228,0.3)]"
                         >
                             <i class='bx bx-smile'></i>
                         </div>
                         <div 
                             id="send-button" 
-                            class="flex items-center justify-center hover:cursor-pointer hover:opacity-80 max-sm:bg-pongdark hover:bg-ponghover rounded-full w-10 h-10 text-2xl text-pongcyan bg-black transition-all duration-300 -mr-2 border border-pongcyan shadow-[0_0_5px_rgba(0,247,255,0.3)]"
+                            class="flex items-center justify-center hover:cursor-pointer hover:opacity-80 bg-black hover:bg-ponghover rounded-full w-8 h-8 md:w-10 md:h-10 text-xl md:text-2xl text-pongcyan transition-all duration-300 -mr-1 md:-mr-2 border border-pongcyan shadow-[0_0_5px_rgba(0,247,255,0.3)]"
                         >
                             <i class='bx bx-send'></i>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Add emoticon container popup that will be hidden by default -->
-                <div id="emoticon-container" class="fixed bottom-20 sm:bottom-20 left-4 right-8 sm:left-auto sm:w-72 max-h-60 overflow-y-auto max-w-80 bg-black bg-opacity-95 rounded-lg shadow-[0_0_15px_rgba(255,0,228,0.5)] border border-pongpink p-2 z-30 grid grid-cols-5 gap-2 hidden">
-                    <!-- Emoticons will be inserted here dynamically -->
+                <!-- Enhanced emoticon container with tabs -->
+                <div id="emoticon-container" class="fixed bottom-20 left-1 right-1 sm:left-auto sm:right-8 sm:w-72 max-h-64 sm:max-h-80 bg-black bg-opacity-95 rounded-lg shadow-[0_0_15px_rgba(255,0,228,0.5)] border border-pongpink p-1 sm:p-2 z-30 hidden">
+                  <!-- Tab headers -->
+                  <div class="emoticon-tabs flex justify-start border-b border-pongpink mb-1 sm:mb-2 text-sm sm:text-base">
+                    <div id="emojis-tab" class="tab-item px-2 sm:px-4 py-1 cursor-pointer text-pongcyan border-b-2 border-pongcyan">Emojis</div>
+                    <div id="emoticon-tab" class="tab-item px-2 sm:px-4 py-1 cursor-pointer text-pongcyan">Emoticons</div>
+                    <div id="sticker-tab" class="tab-item px-2 sm:px-4 py-1 cursor-pointer text-gray-400 hover:text-pongcyan">Stickers</div>
+                    </div>
+                  
+                  <!-- Tab contents with scrollable area -->
+                  <div class="tabs-content h-40 sm:h-60 overflow-auto [scrollbar-width:thin] [scrollbar-color:white_pongdark] [&::-webkit-scrollbar]:w-1 sm:[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-ponghover [&::-webkit-scrollbar-thumb]:bg-pongdark">
+                    
+                    <div id="emogis-tab-content" class="grid grid-cols-6 sm:grid-cols-5 gap-1 sm:gap-2">
+                      <!-- Emojis will be inserted here dynamically -->
+                    </div>
+                  <!-- Emoticons tab content -->
+                    <div id="emoticon-tab-content" class="grid grid-cols-6 sm:grid-cols-5 gap-1 sm:gap-2">
+                      <!-- Emoticons will be inserted here dynamically -->
+                    </div>
+                    
+                    <!-- Stickers tab content -->
+                    <div id="sticker-tab-content" class="grid grid-cols-3 sm:grid-cols-4 gap-1 sm:gap-2 hidden">
+                      <!-- Stickers will be inserted here dynamically -->
+                    </div>
+                  </div>
                 </div>`
           : ""
         }
             </div>
         `;
-
-
-
 
       // Add event listeners after the HTML is rendered
       if (activeUser) {
@@ -137,10 +155,20 @@ export const Chat = createComponent(
       const emoticonRegex = /:([\w]+):/g;
 
       return content.replace(emoticonRegex, (match) => {
+        const emojiUrl = emojisMap[match as keyof typeof emojisMap];
+        if (emojiUrl) {
+          return `<img src="${emojiUrl}" alt="${match}" class="inline-block h-6" />`;
+        }
+        // Check emoticons 
         const emoticonUrl = emoticonsMap[match as keyof typeof emoticonsMap];
-
         if (emoticonUrl) {
           return `<img src="${emoticonUrl}" alt="${match}" class="inline-block h-6" />`;
+        }
+
+        // Check stickers if not found in emoticons
+        const stickerUrl = stickersMap[match as keyof typeof stickersMap];
+        if (stickerUrl) {
+          return `<img src="${stickerUrl}" alt="${match}" class="inline-block h-16 w-16" />`;
         }
 
         return match;
@@ -216,8 +244,6 @@ export const Chat = createComponent(
         .join("");
     };
 
-
-
     // Setup event listeners for the chat
     const setupEventListeners = () => {
       const sendButton = container.querySelector("#send-button");
@@ -255,7 +281,7 @@ export const Chat = createComponent(
       emoticonButton?.addEventListener("click", () => {
         if (emoticonContainer) {
           if (emoticonContainer.classList.contains("hidden")) {
-            loadEmoticons();
+            loadEmoticonContent();
             emoticonContainer.classList.remove("hidden");
           } else {
             emoticonContainer.classList.add("hidden");
@@ -263,23 +289,138 @@ export const Chat = createComponent(
         }
       });
 
+      const setupTabEvents = () => {
+        const emojisTab = container.querySelector("#emojis-tab");
+        const emoticonTab = container.querySelector("#emoticon-tab");
+        const stickerTab = container.querySelector("#sticker-tab");
+        const emojisContent = container.querySelector("#emogis-tab-content");
+        const emoticonContent = container.querySelector("#emoticon-tab-content");
+        const stickerContent = container.querySelector("#sticker-tab-content");
+
+        // Track loaded state to prevent reloading
+        let emojisLoaded = false;
+        let emoticonsLoaded = false;
+        let stickersLoaded = false;
+
+        // Switch to Emojis tab (default)
+        emojisTab?.addEventListener("click", () => {
+          // Update tab styles
+          emojisTab.classList.add("text-pongcyan", "border-b-2", "border-pongcyan");
+          emojisTab.classList.remove("text-gray-400");
+          emoticonTab?.classList.remove("text-pongcyan", "border-b-2", "border-pongcyan");
+          emoticonTab?.classList.add("text-gray-400", "hover:text-pongcyan");
+          stickerTab?.classList.remove("text-pongpink", "border-b-2", "border-pongpink");
+          stickerTab?.classList.add("text-gray-400", "hover:border-pongcyan");
+
+          // Show/hide content
+          emojisContent?.classList.remove("hidden");
+          emoticonContent?.classList.add("hidden");
+          stickerContent?.classList.add("hidden");
+
+          // Load emojis if not already loaded
+          if (!emojisLoaded) {
+            loadEmojis();
+            emojisLoaded = true;
+          }
+        });
+
+        // Switch to Emoticons tab
+        emoticonTab?.addEventListener("click", () => {
+          // Update tab styles
+          emoticonTab.classList.add("text-pongcyan", "border-b-2", "border-pongcyan");
+          emoticonTab.classList.remove("text-gray-400");
+          emojisTab?.classList.remove("text-pongcyan", "border-b-2", "border-pongcyan");
+          emojisTab?.classList.add("text-gray-400", "hover:text-pongcyan");
+          stickerTab?.classList.remove("text-pongpink", "border-b-2", "border-pongpink");
+          stickerTab?.classList.add("text-gray-400", "hover:border-pongcyan");
+
+          // Show/hide content
+          emoticonContent?.classList.remove("hidden");
+          emojisContent?.classList.add("hidden");
+          stickerContent?.classList.add("hidden");
+
+          // Load emoticons if not already loaded
+          if (!emoticonsLoaded) {
+            loadEmoticons();
+            emoticonsLoaded = true;
+          }
+        });
+
+        // Switch to Stickers tab
+        stickerTab?.addEventListener("click", () => {
+          // Update tab styles
+          stickerTab.classList.add("text-pongcyan", "border-b-2", "border-pongcyan");
+          stickerTab.classList.remove("text-gray-400");
+          emoticonTab?.classList.remove("text-pongcyan", "border-b-2", "border-pongcyan");
+          emoticonTab?.classList.add("text-gray-400", "hover:text-pongcyan");
+          emojisTab?.classList.remove("text-pongcyan", "border-b-2", "border-pongcyan");
+          emojisTab?.classList.add("text-gray-400", "hover:text-pongcyan");
+
+          // Show/hide content
+          stickerContent?.classList.remove("hidden");
+          emoticonContent?.classList.add("hidden");
+          emojisContent?.classList.add("hidden");
+
+          // Load stickers if not already loaded
+          if (!stickersLoaded) {
+            loadStickers();
+            stickersLoaded = true;
+          }
+        });
+      };
+
+      const setupEmoticonContainer = () => {
+        // Initialize only the tab events without loading any content yet
+        setupTabEvents();
+
+        // By default, only load content for the first tab (emojis) which is active by default
+        loadEmojis();
+      };
+
+      // Load both emoticons and stickers content
+      const loadEmoticonContent = () => {
+        // Remove the erroneous if() statement
+        setupEmoticonContainer();
+      };
+
+      const loadEmojis = () => {
+        const emojisContent = container.querySelector("#emogis-tab-content");
+        if (!emojisContent) return;
+
+        emojisContent.innerHTML = "";
+
+        emojis.forEach((emo) => {
+          const emojiDiv = document.createElement("div");
+          emojiDiv.className =
+            "emoticon p-2 rounded cursor-pointer flex items-center justify-center hover:bg-ponghover transition-all duration-200";
+          emojiDiv.title = emo.title;
+          emojiDiv.innerHTML = `<img src="${emo.src}" alt="${emo.title}" class="h-6">`;
+
+          // Add click event to insert emoticon
+          emojiDiv.addEventListener("click", () => {
+            insertEmoticon(emo.title);
+            emoticonContainer?.classList.add("hidden");
+          });
+
+          emojisContent.appendChild(emojiDiv);
+        });
+      };
+
       // Load emoticons into the container
       const loadEmoticons = () => {
-        const emoticonContainer = container.querySelector(
-          "#emoticon-container"
-        );
-        if (!emoticonContainer) return;
+        const emoticonContent = container.querySelector("#emoticon-tab-content");
+        if (!emoticonContent) return;
 
         // Clear existing emoticons
-        emoticonContainer.innerHTML = "";
+        emoticonContent.innerHTML = "";
 
         // Create emoticon elements
         emoticons.forEach((emo) => {
           const emoticonDiv = document.createElement("div");
           emoticonDiv.className =
-            "emoticon p-2 rounded cursor-pointer w-12 h-12 hover:bg-ponghover transition-all duration-200";
+            "emoticon p-2 rounded cursor-pointer flex items-center justify-center hover:bg-ponghover transition-all duration-200";
           emoticonDiv.title = emo.title;
-          emoticonDiv.innerHTML = `<img src="${emo.src}" alt="${emo.title}" class="w-full h-auto">`;
+          emoticonDiv.innerHTML = `<img src="${emo.src}" alt="${emo.title}" class="h-6">`;
 
           // Add click event to insert emoticon
           emoticonDiv.addEventListener("click", () => {
@@ -287,18 +428,45 @@ export const Chat = createComponent(
             emoticonContainer?.classList.add("hidden");
           });
 
-          emoticonContainer.appendChild(emoticonDiv);
+          emoticonContent.appendChild(emoticonDiv);
         });
       };
 
-      // Insert emoticon into message input
-      const insertEmoticon = (emoticonCode: string) => {
+      // Load stickers into the container
+      const loadStickers = () => {
+        const stickerContent = container.querySelector("#sticker-tab-content");
+        if (!stickerContent) return;
+
+        // Clear existing stickers
+        stickerContent.innerHTML = "";
+
+        // Create sticker elements
+        stickers.forEach((sticker) => {
+          const stickerDiv = document.createElement("div");
+          stickerDiv.className =
+            "sticker p-2 rounded cursor-pointer flex items-center justify-center hover:bg-ponghover transition-all duration-200";
+          stickerDiv.title = sticker.title;
+          stickerDiv.innerHTML = `<img src="${sticker.src}" alt="${sticker.title}" class="w-12 h-12">`;
+
+          // Add click event to insert sticker
+          stickerDiv.addEventListener("click", () => {
+            insertEmoticon(sticker.title);
+            emoticonContainer?.classList.add("hidden");
+          });
+
+          stickerContent.appendChild(stickerDiv);
+        });
+      };
+
+      // Insert emoticon or sticker into message input
+      const insertEmoticon = (code: string) => {
         const messageInput = container.querySelector(
           "#message-input"
         ) as HTMLDivElement;
         if (!messageInput) return;
 
-        messageInput.innerText += emoticonCode + " ";
+        messageInput.innerText += code + " ";
+        messageInput.focus();
       };
 
       // Close emoticon container when clicking outside

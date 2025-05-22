@@ -29,10 +29,10 @@ export default {
           <!-- Toggle buttons for Friends and Message Requests -->
         <div class="flex justify-center px-4 pb-2">
           <div class="flex bg-black rounded-lg p-1 w-full border border-pongcyan shadow-[0_0_10px_rgba(0,247,255,0.3)]">
-            <button id="friends-tab" class="flex-1 text-white py-2 px-4 rounded-md bg-pongcyan text-center transition-all hover:bg-pongcyan">
+            <button id="friends-tab" class="flex-1 text-white py-2 px-1 sm:px-4 rounded-md bg-pongcyan text-center transition-all hover:bg-pongcyan">
               ${t('chat.friends')}
             </button>
-            <button id="requests-tab" class="flex-1 text-white py-2 px-4 rounded-md text-center transition-all hover:bg-pongpink">
+            <button id="requests-tab" class="flex-1 text-white py-2 px-1 sm:px-4 rounded-md text-center transition-all hover:bg-pongpink">
               ${t('chat.messageRequests')}
             </button>
           </div>
