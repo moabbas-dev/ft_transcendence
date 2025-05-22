@@ -6,7 +6,7 @@ import { t } from "../languages/LanguageController.js";
 import { Footer } from "../components/header_footer/footer.js";
 import { PongGameClient } from "../components/Online-Game/components/Game.js";
 import { OnlineGameBoard } from "../components/Online-Game/components/OnlineGameBoard.js";
-import { refreshRouter } from "../router.js";
+import { navigate, refreshRouter } from "../router.js";
 import store from "../../store/store.js";
 import { OfflineGameHeader } from "../components/Offline-Game/components/GameHeader.js";
 
@@ -213,49 +213,49 @@ export default {
 				// Add cancel button event handler
 				findOpponent.querySelector('#cancel-matchmaking')?.addEventListener('click', () => {
 					client.cancelMatchmaking();
-					showMainMenu();
+					// showMainMenu();
 				});
 			}
 		});
 		
 		// Helper functions for UI transitions
 		
-		function showMainMenu() {
-			heading.textContent = t('play.title');
-			heading.className = "text-4xl md:text-6xl font-bold text-center text-pongcyan drop-shadow-[0_0_15px_#00f7ff] animate-fade-down animate-once animate-duration-700";
+		// function showMainMenu() {
+		// 	heading.textContent = t('play.title');
+		// 	heading.className = "text-4xl md:text-6xl font-bold text-center text-pongcyan drop-shadow-[0_0_15px_#00f7ff] animate-fade-down animate-once animate-duration-700";
 			
-			const gameModeDetails = document.getElementById("game-mode-details");
-			if (gameModeDetails) {
-				gameModeDetails.innerHTML = `
-					<div class="relative w-full flex items-center justify-center">
-						<div class="animation-container relative w-full max-w-md aspect-square">
-							<i id="icon-friends" class="fa-solid fa-users text-7xl md:text-8xl absolute top-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-100 bg-gradient-to-r from-pongcyan via-[rgba(100,100,255,0.8)] to-pongcyan text-transparent bg-clip-text"></i>
-							<span id="text-friends" class="text-3xl md:text-4xl text-center font-bold absolute top-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-0">${t('play.onlineGame.vsFriend')}</span>
+		// 	const gameModeDetails = document.getElementById("game-mode-details");
+		// 	if (gameModeDetails) {
+		// 		gameModeDetails.innerHTML = `
+		// 			<div class="relative w-full flex items-center justify-center">
+		// 				<div class="animation-container relative w-full max-w-md aspect-square">
+		// 					<i id="icon-friends" class="fa-solid fa-users text-7xl md:text-8xl absolute top-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-100 bg-gradient-to-r from-pongcyan via-[rgba(100,100,255,0.8)] to-pongcyan text-transparent bg-clip-text"></i>
+		// 					<span id="text-friends" class="text-3xl md:text-4xl text-center font-bold absolute top-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-0">${t('play.onlineGame.vsFriend')}</span>
 							
-							<div id="loading-pong" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-125"></div>
+		// 					<div id="loading-pong" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-125"></div>
 							
-							<i id="icon-online" class="fa-solid fa-globe text-7xl md:text-8xl absolute bottom-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-100 bg-gradient-to-b from-pongpink via-[rgba(255,0,228,0.8)] to-pongpink text-transparent bg-clip-text"></i>
-							<span id="text-online" class="text-3xl md:text-4xl text-center font-bold absolute bottom-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-0">${t('play.onlineGame.vsRivals')}</span>
-						</div>
-					</div>
-				`;
+		// 					<i id="icon-online" class="fa-solid fa-globe text-7xl md:text-8xl absolute bottom-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-100 bg-gradient-to-b from-pongpink via-[rgba(255,0,228,0.8)] to-pongpink text-transparent bg-clip-text"></i>
+		// 					<span id="text-online" class="text-3xl md:text-4xl text-center font-bold absolute bottom-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-0">${t('play.onlineGame.vsRivals')}</span>
+		// 				</div>
+		// 			</div>
+		// 		`;
 				
-				// Restart animation
-				toggleInterval = setInterval(() => {
-					isIconVisible = !isIconVisible;
-					document.getElementById("icon-friends")?.classList.toggle("opacity-0", !isIconVisible);
-					document.getElementById("icon-friends")?.classList.toggle("opacity-100");
-					document.getElementById("text-friends")?.classList.toggle("opacity-0", isIconVisible);
-					document.getElementById("icon-online")?.classList.toggle("opacity-0", !isIconVisible);
-					document.getElementById("icon-online")?.classList.toggle("opacity-100");
-					document.getElementById("text-online")?.classList.toggle("opacity-0", isIconVisible);
-				}, 3000);
+		// 		// Restart animation
+		// 		toggleInterval = setInterval(() => {
+		// 			isIconVisible = !isIconVisible;
+		// 			document.getElementById("icon-friends")?.classList.toggle("opacity-0", !isIconVisible);
+		// 			document.getElementById("icon-friends")?.classList.toggle("opacity-100");
+		// 			document.getElementById("text-friends")?.classList.toggle("opacity-0", isIconVisible);
+		// 			document.getElementById("icon-online")?.classList.toggle("opacity-0", !isIconVisible);
+		// 			document.getElementById("icon-online")?.classList.toggle("opacity-100");
+		// 			document.getElementById("text-online")?.classList.toggle("opacity-0", isIconVisible);
+		// 		}, 3000);
 				
-				// Add loading animation
-				const loadingPong = document.getElementById('loading-pong');
-				loadingPong?.appendChild(PongLoading({text: t('play.onlineGame.or')}));
-			}
-		}
+		// 		// Add loading animation
+		// 		const loadingPong = document.getElementById('loading-pong');
+		// 		loadingPong?.appendChild(PongLoading({text: t('play.onlineGame.or')}));
+		// 	}
+		// }
 		
 		function showWaitingForFriend(friendId:string) {
 			const gameModeDetails = document.getElementById("game-mode-details");
@@ -272,9 +272,9 @@ export default {
 				`;
 				
 				// Add cancel button handler
-				document.getElementById('cancel-invite')?.addEventListener('click', () => {
-					showMainMenu();
-				});
+				// document.getElementById('cancel-invite')?.addEventListener('click', () => {
+				// 	// showMainMenu();
+				// });
 			}
 		}
 		
@@ -353,10 +353,11 @@ export default {
 			// Create results overlay
 			const resultsOverlay = document.createElement('div');
 			resultsOverlay.className = 'game-results fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50';
-			
+			console.log(results);
 			// Determine if player won
-			const isWinner = results.winner === userId;
-			
+			const isWinner = (results.winner === Number(store.userId));
+			console.log(results.winner, store.userId);
+			console.log(isWinner);			
 			// Calculate ELO change
 			const eloChange = results.eloChange[userId] || 0;
 			const eloChangeDisplay = eloChange >= 0 ? `+${eloChange}` : eloChange;
@@ -373,9 +374,6 @@ export default {
 						<button id="play-again-btn" class="flex-1 py-3 px-4 bg-pongcyan text-white rounded-md">
 							${t('play.onlineGame.playAgain')}
 						</button>
-						<button id="main-menu-btn" class="flex-1 py-3 px-4 bg-gray-700 text-white rounded-md">
-							${t('play.onlineGame.mainMenu')}
-						</button>
 					</div>
 				</div>
 			`;
@@ -387,14 +385,8 @@ export default {
 			document.getElementById('play-again-btn')?.addEventListener('click', () => {
 				document.body.removeChild(resultsOverlay);
 				gameBoard = null;
-				refreshRouter()
-			});
-			
-			document.getElementById('main-menu-btn')?.addEventListener('click', () => {
-				document.body.removeChild(resultsOverlay);
-				gameBoard = null;
-				refreshRouter()
-				showMainMenu();
+				refreshRouter();
+				navigate("/play/online-game");
 			});
 		}
 
