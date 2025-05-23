@@ -22,6 +22,7 @@ export const Profile = createComponent((props: ProfileProps) => {
   let currentFriendshipStatus = 'unknown';
   let currentInitiator: any = null;
   let currentDirection: any = null;
+  let userData: any = null;
 
   // Modify the existing API call section to request friendship status via WebSocket
   if (props && props.uName) {
@@ -34,7 +35,7 @@ export const Profile = createComponent((props: ProfileProps) => {
         },
       })
       .then((response) => {
-        const userData = response.data;
+        userData = response.data;
         updateUIWithUserData(userData, container);
 
         // Request friendship status via WebSocket
@@ -503,7 +504,7 @@ export const Profile = createComponent((props: ProfileProps) => {
 
     // Set up the content with three canvases
     contentContainer.innerHTML = "";
-    contentContainer?.appendChild(UserStatistics());
+    contentContainer?.appendChild(UserStatistics({ userId: userData.id }));
 
     // Initialize the Elo Rating Line Chart
     const statsCtx = document.getElementById(
@@ -591,7 +592,7 @@ export const Profile = createComponent((props: ProfileProps) => {
     clearActiveTabs();
     historyTab.classList.add("bg-pongcyan", "text-white");
     contentContainer.innerHTML = "";
-    contentContainer?.appendChild(GamesHistory());
+    contentContainer?.appendChild(GamesHistory({ userId: userData.id }));
   });
 
   infoTab?.addEventListener("click", () => {

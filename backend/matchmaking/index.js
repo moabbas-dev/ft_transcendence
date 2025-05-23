@@ -60,6 +60,7 @@ import { createWebSocketAdapter } from './src/services/websocketAdapter.js';
 import { setupWebSocketHandlers } from './src/controllers/websocketController.js';
 import matchmakingRoutes from './src/routes/matches.js'; 
 import tournamentRoutes from './src/routes/tournament.js';
+import historyRoutes from './src/routes/history.js';
 import matchmakingService from './src/services/matchmaking.js';
 import database from './src/config/db.js';
 
@@ -85,6 +86,7 @@ fastify.decorate('wsAdapter', wsAdapter);
 // Register routes
 fastify.register(matchmakingRoutes);
 fastify.register(tournamentRoutes);
+fastify.register(historyRoutes);
 
 // Basic health check route
 fastify.get('/', async (request, reply) => {

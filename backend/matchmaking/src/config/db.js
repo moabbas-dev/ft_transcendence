@@ -1,6 +1,7 @@
 import sqlite3 from 'sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import axios from 'axios';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -75,7 +76,7 @@ class DatabaseConnection {
       );
     `;
 
-    const tournamentPlayersTable=  `
+    const tournamentPlayersTable = `
       CREATE TABLE IF NOT EXISTS tournament_players (
         tournament_id INTEGER NOT NULL,
         player_id INTEGER NOT NULL,
@@ -102,30 +103,30 @@ class DatabaseConnection {
         console.log('Tournament tables created or already exist');
       }
     });
-  
+
     this.db.all("PRAGMA table_info(matches)", (err, rows) => {
-        if (err) {
-          console.error('Error checking matches table schema:', err);
-          return;
-        }
-    
-        const hasTournamentId = rows.some(row => row.name === 'tournament_id');
-        
-        if (!hasTournamentId) {
-          this.db.run(
-            `ALTER TABLE matches ADD COLUMN tournament_id INTEGER NULL 
+      if (err) {
+        console.error('Error checking matches table schema:', err);
+        return;
+      }
+
+      const hasTournamentId = rows.some(row => row.name === 'tournament_id');
+
+      if (!hasTournamentId) {
+        this.db.run(
+          `ALTER TABLE matches ADD COLUMN tournament_id INTEGER NULL 
               REFERENCES tournaments(id) 
               ON DELETE SET NULL`, (err) => {
-                if (err)
-                  console.error('Error adding tournament_id column to matches table:', err);
-                else
-                  console.log('Added tournament_id column to matches table');
-            }
-          );
+          if (err)
+            console.error('Error adding tournament_id column to matches table:', err);
+          else
+            console.log('Added tournament_id column to matches table');
         }
+        );
       }
+    }
     );
-    
+
     this.db.run(matchesTable, (err) => {
       if (err) {
         console.error('Error creating matches table', err);
@@ -167,7 +168,7 @@ class DatabaseConnection {
 
   run(sql, params = []) {
     return new Promise((resolve, reject) => {
-      this.db.run(sql, params, function(err) {
+      this.db.run(sql, params, function (err) {
         if (err) {
           console.error('SQL Error:', err);
           reject(err);
@@ -229,10 +230,10 @@ class DatabaseConnection {
              elo_after = ? 
          WHERE match_id = ? AND player_id = ?`,
         [
-          player1Goals, 
-          eloData.player1OldElo, 
-          eloData.player1NewElo, 
-          matchId, 
+          player1Goals,
+          eloData.player1OldElo,
+          eloData.player1NewElo,
+          matchId,
           player1Id
         ]
       );
@@ -245,10 +246,10 @@ class DatabaseConnection {
              elo_after = ? 
          WHERE match_id = ? AND player_id = ?`,
         [
-          player2Goals, 
-          eloData.player2OldElo, 
-          eloData.player2NewElo, 
-          matchId, 
+          player2Goals,
+          eloData.player2OldElo,
+          eloData.player2NewElo,
+          matchId,
           player2Id
         ]
       );
@@ -337,6 +338,7 @@ class DatabaseConnection {
   getInstance() {
     return this.db;
   }
+  
 }
 
 export default new DatabaseConnection();

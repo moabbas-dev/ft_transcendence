@@ -49,6 +49,25 @@ services:
       - notifications
       - authentication
 
+  matchmaking:
+    build: ./backend/matchmaking
+    container_name: ft_matchmaking
+    restart: always
+    # ports:
+    #   - "3001:3001"
+    networks:
+      - ft_network
+    env_file:
+      - ./backend/matchmaking/.env
+    volumes:
+      - ./backend/matchmaking:/app
+      - matchmaking_node_modules:/app/node_modules
+      - matchmaking_data:/app/data
+    depends_on:
+      - notifications
+      - authentication
+      - chat
+
   frontend:
     build: ./frontend
     container_name: ft_frontend
@@ -64,6 +83,7 @@ services:
       - notifications
       - authentication
       - chat
+      - matchmaking
 
   nginx:
     build: ./nginx
@@ -81,6 +101,7 @@ services:
       - notifications
       - authentication
       - chat
+      - matchmaking
       - frontend
 
 networks:
@@ -91,7 +112,9 @@ volumes:
   auth_data:
   notifications_data:
   chat_data:
+  matchmaking_data:
   auth_node_modules:
   notifications_node_modules:
   chat_node_modules:
+  matchmaking_node_modules:
   frontend_node_modules:

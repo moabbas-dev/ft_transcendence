@@ -28,7 +28,7 @@ class TwoFactorCodeController {
 				secret: secret,
 				encoding: 'base32',
 				token: code,
-				window: 1 // Allow a 30-second window for time drift
+				// window: 1 // Allow a 30-second window for time drift
 			});
 			if (!verified)
 				return reply.code(400).send({ key: "wrong", message: "Invalid code!" });
@@ -110,7 +110,7 @@ class TwoFactorCodeController {
 				secret: secret,
 				encoding: 'base32',
 				token: code,
-				window: 1 // Allow a 30-second window for time drift
+				// window: 1 // Allow a 30-second window for time drift
 			});
 			if (!verified)
 				return reply.code(400).send({ key: "wrong", message: "Invalid code!" });
