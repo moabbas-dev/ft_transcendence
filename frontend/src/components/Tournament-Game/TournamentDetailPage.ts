@@ -134,6 +134,8 @@ export default {
           tournamentName: container.querySelector('#tour-name')?.textContent || 'Tournament',
           round: 1
         }, userId as string, client);
+      } else {
+        console.error("[tournament_match_starting]: Ids don't match");
       }
     });
 
@@ -201,6 +203,8 @@ export default {
           tournamentId: data.tournamentId,
           round: 1
         }, userId as string, client);
+      } else {
+        console.error("[tournament_match_starting 2]: Ids don't match");
       }
     });
   }
