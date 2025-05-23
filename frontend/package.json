@@ -26,7 +26,7 @@
     "appwrite": "^17.0.1",
     "axios": "^1.8.4",
     "boxicons": "^2.1.4",
-    "chart.js": "^4.4.7",
+    "chart.js": "^4.4.9",
     "country-list": "^2.3.0",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",

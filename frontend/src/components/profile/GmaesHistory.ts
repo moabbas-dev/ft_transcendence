@@ -1,45 +1,9 @@
-// import axios from "axios";
-// import { t } from "../../languages/LanguageController.js";
-// import { createComponent } from "../../utils/StateManager.js";
-// import { HistorySection } from "./HistorySection.js";
-// import store from "../../../store/store.js";
-
-// export const GamesHistory = createComponent(() => {
-//     const container = document.createElement("div");
-//     container.innerHTML = `
-//     <div class="">
-//       <table class="min-w-full divide-y divide-gray-200">
-//         <thead class="bg-gray-50">
-//           <tr>
-//             <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase tracking-wider">${t('profile.historyTab.oponent')}</th>
-//             <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase tracking-wider">${t('profile.historyTab.result')}</th>
-//             <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase tracking-wider">${t('profile.historyTab.outcome')}</th>
-//             <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase tracking-wider">${t('profile.historyTab.played')}</th>
-//             <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase tracking-wider">${t('profile.historyTab.duration')}</th>
-//           </tr>
-//         </thead>
-//         <tbody class="history bg-white divide-y divide-gray-200">
-//           <!-- History Sections Here -->
-//         </tbody>
-//       </table>
-//     </div>
-//     `;
-//     const history = container.querySelector('.history');
-//     const historyData = await axios.get(`/matchmaking/api/player/history/${store.userId}`);
-//     history?.appendChild(HistorySection({ opponentName: 'User1', resPlayer: 10, resOpponent: 8, played: '1mo', duration: '5 min' }));
-//     history?.appendChild(HistorySection({ opponentName: 'User2', resPlayer: 6, resOpponent: 10, played: '2mo', duration: '7 min' }));
-//     history?.appendChild(HistorySection({ opponentName: 'User3', resPlayer: 8, resOpponent: 8, played: '2mo', duration: '11 min' }));
-//     history?.appendChild(HistorySection({ opponentName: 'User4', resPlayer: 7, resOpponent: 9, played: '5mo', duration: '8 min' }));
-//     history?.appendChild(HistorySection({ opponentName: 'User5', resPlayer: 10, resOpponent: 5, played: '1y', duration: '6 min' }));
-//     history?.appendChild(HistorySection({ opponentName: 'User6', resPlayer: 10, resOpponent: 9, played: '2y', duration: '9 min' }));
-//     history?.appendChild(HistorySection({ opponentName: 'User7', resPlayer: 9, resOpponent: 9, played: '2y', duration: '6 min' }));
-//     return container;
-// });
-
 import axios from "axios";
 import { t } from "../../languages/LanguageController.js";
 import { createComponent } from "../../utils/StateManager.js";
 import { HistorySection } from "./HistorySection.js";
+import getValidAccessToken from "../../../refresh/RefreshToken.js";
+import Toast from "../../toast/Toast.js";
 import store from "../../../store/store.js";
 
 // Interfaces for API response
@@ -72,7 +36,7 @@ interface HistoryResponse {
   };
 }
 
-export const GamesHistory = createComponent(() => {
+export const GamesHistory = createComponent((props: { userId: number }) => {
   const container = document.createElement("div");
   let currentPage = 1;
   let pageSize = 10;
@@ -166,7 +130,7 @@ export const GamesHistory = createComponent(() => {
 
   // Fetch history data
   async function fetchHistory(page: number = 1): Promise<void> {
-    console.log(`fetchHistory called for page ${page}, userId: ${store.userId}`);
+    console.log(`fetchHistory called for page ${page}, userId: ${props.userId}`);
     
     if (isLoading) {
       console.log('Already loading, skipping request');
@@ -178,10 +142,14 @@ export const GamesHistory = createComponent(() => {
       hideError();
 
       const offset = (page - 1) * pageSize;
-      const url = `/matchmaking/api/player/history/${store.userId}?limit=${pageSize}&offset=${offset}`;
+      const url = `/matchmaking/api/player/history/${store.userId}/${props.userId}?limit=${pageSize}&offset=${offset}`;
       console.log('Making request to:', url);
-      
-      const response = await axios.get<HistoryResponse>(url);
+      const token = await getValidAccessToken();
+      const response = await axios.get<HistoryResponse>(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
       console.log('API Response:', response.data);
 
       const data = response.data;
@@ -196,8 +164,7 @@ export const GamesHistory = createComponent(() => {
       renderPagination();
 
     } catch (error: any) {
-      console.error('Error fetching history:', error);
-      console.error('Error details:', error.response?.data || error.message);
+      Toast.show(`Error fetching history: ${error.message}`, "error");
       showError('Failed to load match history');
     } finally {
       hideLoading();
