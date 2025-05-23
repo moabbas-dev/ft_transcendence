@@ -134,26 +134,42 @@ export class OnlineGameBoard extends GameBoard {
 		if (!this.state.gameEnded) {
 			requestAnimationFrame(this.gameLoop);
 		} else {
-			const resultsPopup = document.querySelector("#result-popup")!;
-			resultsPopup.classList.toggle("hidden")
-			let text = ""
-			if (this.gameScore.player1 > this.gameScore.player2)
-				text = "Player 1"
-			else if (this.gameType == "AI") {
-				text = "AI"
-			} else {
-				text = "Player 2"
-			}
-			const winnerText = resultsPopup.querySelector('#winner-text')!
-			winnerText.textContent = `${text} ${t('play.resultsPopup.title')}`;
+		// 	const resultsPopup = document.querySelector("#result-popup")!;
+		// 	resultsPopup.classList.toggle("hidden")
+		// 	let text = ""
+		// 	if (this.gameScore.player1 > this.gameScore.player2)
+		// 		text = "Player 1"
+		// 	else if (this.gameType == "AI") {
+		// 		text = "AI"
+		// 	} else {
+		// 		text = "Player 2"
+		// 	}
+		// 	const winnerText = resultsPopup.querySelector('#winner-text')!
+		// 	winnerText.textContent = `${text} ${t('play.resultsPopup.title')}`;
 
-			const scoreText = resultsPopup.querySelector('#score-text')!
-			scoreText.textContent = `${t('play.resultsPopup.finalScore')}: ${this.gameScore.player1} - ${this.gameScore.player2}`
+		// 	const scoreText = resultsPopup.querySelector('#score-text')!
+		// 	scoreText.textContent = `${t('play.resultsPopup.finalScore')}: ${this.gameScore.player1} - ${this.gameScore.player2}`
 
-			const restartButton = resultsPopup.querySelector("#restart-btn")
-			restartButton?.addEventListener('click', () => {
-				navigate("/play")
-			}, { once: true });
+		// 	const restartButton = resultsPopup.querySelector("#restart-btn")
+		// 	restartButton?.addEventListener('click', () => {
+		// 		navigate("/play")
+		// 	}, { once: true });
+		
+		// this.updateScoreDisplay();
+		// this.client.on('game_result', (data: any) => {
+		// 	console.log("Game result received!");
+		// 	console.log(data);
+		// 	this.state.gameEnded = true;
+		// 	this.showGameOverScreen(data.winner === this.playerId ? 'You' : 'Opponent',
+		// 		data.finalScore);
+		// });
+		if(this.isPlayer1){
+			updateBackgrounds(this.state.scores.player1, this.state.scores.player2);
+
+		} else {
+			updateBackgrounds(this.state.scores.player1, this.state.scores.player2);
+
+		}
 		}
 	}
 
@@ -241,8 +257,10 @@ export class OnlineGameBoard extends GameBoard {
 		// const currentPosition = this.isPlayer1 ? this.state.player2Y : this.state.player1Y;
 		const currentPosition = this.state.player1Y;
 
+		const normalizedY = currentPosition / this.canvas.height;
+
 		if (currentPosition !== this.lastSentPaddlePosition) {
-			this.client.updatePaddlePosition(this.matchId, currentPosition);
+			this.client.updatePaddlePosition(this.matchId, normalizedY);
 			this.lastSentPaddlePosition = currentPosition;
 			this.lastInputTime = now;
 		}
@@ -255,18 +273,24 @@ export class OnlineGameBoard extends GameBoard {
 			// } else {
 			// 	this.state.player2Y = data.position;
 			// }
-			this.state.player2Y = data.position;
+			const paddleY = data.position * this.canvas.height;
+			this.state.player2Y = paddleY;
 		});
 
 		this.client.on('ball_update', (data: any) => {
 			if (!this.isPlayer1) {
 				// console.log("NICE!!!");
 				// console.log(data);
+				const denormalizedPosition = this.denormalizePosition(data.position.x, data.position.y);
+				const denormalizedVelocity = {
+				  x: data.velocity.x * this.canvas.width,
+				  y: data.velocity.y * this.canvas.height
+				};
 
-				this.state.ballX = data.position.x;
-				this.state.ballY = data.position.y;
-				this.state.ballSpeedX = data.velocity.x;
-				this.state.ballSpeedY = data.velocity.y;
+				this.state.ballX = denormalizedPosition.x;
+				this.state.ballY = denormalizedPosition.y;
+				this.state.ballSpeedX = denormalizedVelocity.x;
+				this.state.ballSpeedY = denormalizedVelocity.y;
 				const player1Score = typeof data.scores.player1 === 'number' ? data.scores.player1 : -1;
 				const player2Score = typeof data.scores.player2 === 'number' ? data.scores.player2 : -1;
 				this.state.scores = {
@@ -281,11 +305,7 @@ export class OnlineGameBoard extends GameBoard {
 			this.state.scores.player2 = data.player2Score;
 		});
 
-		this.client.on('match_results', (data: any) => {
-			this.state.gameEnded = true;
-			this.showGameOverScreen(data.winner === this.playerId ? 'You' : 'Opponent',
-				data.finalScore, data.eloChange);
-		});
+
 	}
 
 	// Override update method to rely on server state
@@ -322,19 +342,23 @@ export class OnlineGameBoard extends GameBoard {
 		// console.log(this.gameScore.player2);
 		if (Math.max(this.gameScore.player1, this.gameScore.player2) >= 10) {
 			this.state.gameEnded = true;
+
 			const winnerId = this.gameScore.player1 > this.gameScore.player2
 				? (this.isPlayer1 ? this.playerId : this.opponentId)
 				: (this.isPlayer1 ? this.opponentId : this.playerId);
 
 			// Send game_end message with correct property names
-			if (this.isPlayer1) {
+			// if (this.isPlayer1) {
+			console.log("Sending game_end message");
 				this.client.send('game_end', {
 					matchId: this.matchId,
 					winner: winnerId, // Changed from winnerId to winner to match backend expectations
 					player1Goals: this.gameScore.player1, // Changed from nested goals object to match backend
 					player2Goals: this.gameScore.player2  // Changed to match backend expectations
 				});
-			}
+			// }
+
+			this.updateScoreDisplay();
 
 		}
 	}
@@ -344,10 +368,16 @@ export class OnlineGameBoard extends GameBoard {
 		const now = Date.now();
 		if (now - this.lastSentBallUpdate < this.ballUpdateInterval) return;
 
+		const normalizedPosition = this.normalizePosition(this.state.ballX, this.state.ballY);
+		const normalizedVelocity = {
+			x: this.state.ballSpeedX / this.canvas.width,
+			y: this.state.ballSpeedY / this.canvas.height
+		  };
+
 		this.client.send('ball_update', {
 			matchId: this.matchId,
-			position: { x: this.state.ballX, y: this.state.ballY },
-			velocity: { x: this.state.ballSpeedX, y: this.state.ballSpeedY },
+			position: { x: normalizedPosition.x, y: normalizedPosition.y },
+			velocity: { x: normalizedVelocity.x, y: normalizedVelocity.y },
 			scores: {
 				player1: this.state.scores.player1,
 				player2: this.state.scores.player2
@@ -398,53 +428,64 @@ export class OnlineGameBoard extends GameBoard {
 		}
 	}
 
+	private normalizePosition(x: number, y: number): { x: number, y: number } {
+  return {
+    x: x / this.canvas.width,
+    y: y / this.canvas.height
+  };
+}
+
+// Denormalize a position from 0-1 range back to pixel coordinates for this screen
+private denormalizePosition(normalizedX: number, normalizedY: number): { x: number, y: number } {
+  return {
+    x: normalizedX * this.canvas.width,
+    y: normalizedY * this.canvas.height
+  };
+}
+
 	// Show game over screen with player stats
-	private showGameOverScreen(winner: string, finalScore: { player1: number, player2: number }, eloChange: any): void {
-		// Implementation depends on your UI, but could create a modal or overlay
-		const gameOver = document.createElement('div');
-		gameOver.className = 'game-over';
-		gameOver.innerHTML = `
-		<h2>${winner} won!</h2>
-		<p>Final Score: ${finalScore.player1} - ${finalScore.player2}</p>
-		<p>ELO Change: ${eloChange[this.playerId] > 0 ? '+' : ''}${eloChange[this.playerId]}</p>
-		<button class="play-again">Play Again</button>
-		<button class="return-to-menu">Return to Menu</button>
-	  `;
+	// private showGameOverScreen(winner: string, finalScore: { player1: number, player2: number }): void {
+	// 		const resultsPopup = document.querySelector("#result-popup")!;
+	// 		resultsPopup.classList.toggle("hidden")
+	// 		// let text = ""
+	// 		// if (finalScore.player1 > finalScore.player2)
+	// 		// 	text = "Player 1"
+	// 		// else {
+	// 		// 	text = "Player 2"
+	// 		// }
+	// 		const winnerText = resultsPopup.querySelector('#winner-text')!
+	// 		winnerText.textContent = `${winner} ${t('play.resultsPopup.title')}`;
 
-		document.body.appendChild(gameOver);
+	// 		const scoreText = resultsPopup.querySelector('#score-text')!
+	// 		scoreText.textContent = `${t('play.resultsPopup.finalScore')}: ${finalScore.player1} - ${finalScore.player2}`
 
-		// Add event listeners for buttons
-		gameOver.querySelector('.play-again')?.addEventListener('click', () => {
-			document.body.removeChild(gameOver);
-			(this.client as PongGameClient).findMatch(); // Find a new match
-		});
+	// 		const restartButton = resultsPopup.querySelector("#restart-btn")
+	// 		restartButton?.addEventListener('click', () => {
+	// 			navigate("/play")
+	// 		}, { once: true });
 
-		gameOver.querySelector('.return-to-menu')?.addEventListener('click', () => {
-			document.body.removeChild(gameOver);
-			window.location.href = '/dashboard'; // Return to dashboard or main menu
-		});
-	}
+	// }
 
 	// Method to handle when game ends or player leaves
-	stopGame(): void {
-		if (!this.state.gameEnded) {
-			// Report that player forfeited the match
-			this.client.completeMatch(
-				this.matchId,
-				this.opponentId, // Opponent wins if player leaves
-				{
-					player1: this.state.scores.player1,
-					player2: this.state.scores.player2
-				}
-			);
-		}
+	// stopGame(): void {
+	// 	if (!this.state.gameEnded) {
+	// 		// Report that player forfeited the match
+	// 		this.client.completeMatch(
+	// 			this.matchId,
+	// 			this.opponentId, // Opponent wins if player leaves
+	// 			{
+	// 				player1: this.state.scores.player1,
+	// 				player2: this.state.scores.player2
+	// 			}
+	// 		);
+	// 	}
 
-		// Clean up event listeners
-		window.removeEventListener('resize', () => this.resize());
-		window.removeEventListener("beforeunload", this.handleNavigation.bind(this));
-		window.removeEventListener("hashchange", this.handleNavigation.bind(this));
-		window.removeEventListener("popstate", this.handleNavigation.bind(this));
-	}
+	// 	// Clean up event listeners
+	// 	window.removeEventListener('resize', () => this.resize());
+	// 	window.removeEventListener("beforeunload", this.handleNavigation.bind(this));
+	// 	window.removeEventListener("hashchange", this.handleNavigation.bind(this));
+	// 	window.removeEventListener("popstate", this.handleNavigation.bind(this));
+	// }
 
 	get getState(): gameState {
 		return this.state;

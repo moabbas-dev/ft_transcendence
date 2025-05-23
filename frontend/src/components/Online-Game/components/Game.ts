@@ -122,7 +122,9 @@ export class PongGameClient {
 	updateBall(matchId: string, ballData: { x: number, y: number, speedX: number, speedY: number }): void {
 	  this.send('ball_update', { matchId, ballData });
 	}
-	
+
+
+
 	// reportGoal(matchId: string, scoringPlayer: 1 | 2, newScore: { player1: number, player2: number }): void {
 	//   this.send('goal_scored', { matchId, scoringPlayer, newScore });
 	// }

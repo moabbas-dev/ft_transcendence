@@ -571,9 +571,21 @@ class MatchmakingService {
  * @param {number} result - 1 for win, 0 for loss
  * @returns {number} - New ELO rating
  */
-    async calculateNewElo(playerRating, opponentRating, result) {
-        // Use the EloService that's already imported
-        return this.eloService.calculateNewRatings(playerRating, opponentRating, result);
+    async calculateNewElo(playerElo, opponentElo, result) {
+        try {
+            // Use the existing eloService to calculate the new rating
+            const newElo = eloService.calculateNewRatings(playerElo, opponentElo, result);
+
+            // Log the calculation for debugging
+            const expectedScore = eloService.calculateExpectedScore(playerElo, opponentElo);
+            console.log(`ELO calculation: ${playerElo} + ${eloService.kFactor} * (${result} - ${expectedScore.toFixed(4)}) = ${newElo}`);
+
+            return newElo;
+        } catch (error) {
+            console.error('Error calculating new ELO:', error);
+            // Return original ELO if calculation fails
+            return playerElo;
+        }
     }
 
     /**
