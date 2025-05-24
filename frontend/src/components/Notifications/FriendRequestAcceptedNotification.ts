@@ -6,7 +6,7 @@ import axios from "axios";
 export const FriendRequestAcceptedNotification = createComponent((props: NotificationProps) => {
     const fetchSenderNickname = async (senderId:number) => {
 		try {
-			const response = await axios.get(`https://localhost:8001/auth/users/id/${senderId}`)
+			const response = await axios.get(`/authentication/auth/users/id/${senderId}`)
 			return response.data
 		} catch(err) {
 			console.error(err);
@@ -26,7 +26,7 @@ export const FriendRequestAcceptedNotification = createComponent((props: Notific
         </div>
         <div>
             <p class="text-gray-700">
-                <span id="sender-name" class="text-pongblue font-semibold cursor-pointer hover:underline hover:opacity-90">Loading...</span>
+                <span id="sender-name" class="text-pongcyan font-semibold cursor-pointer hover:underline hover:opacity-90">Loading...</span>
                 accepted your friend invitation
             </p>
         </div>

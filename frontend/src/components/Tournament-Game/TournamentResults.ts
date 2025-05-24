@@ -49,7 +49,7 @@ const TournamentResults = (results: TournamentResult[] = []) => {
             
             playerInfoHTML = `
                 <div class="flex flex-col items-center mb-2">
-                    <div class="w-16 h-16 rounded-full overflow-hidden border-2 border-white mb-2 bg-pongblue">
+                    <div class="w-16 h-16 rounded-full overflow-hidden border-2 border-white mb-2 bg-pongcyan">
                         ${avatarHTML}
                     </div>
                     <span class="font-medium text-center break-all max-w-[100px] text-sm">${player.username}</span>
@@ -86,7 +86,7 @@ const TournamentResults = (results: TournamentResult[] = []) => {
             let avatarHTML = '';
             if (player.avatarUrl) {
                 avatarHTML = `
-                    <div class="size-8 rounded-full overflow-hidden mr-3 bg-pongblue">
+                    <div class="size-8 rounded-full overflow-hidden mr-3 bg-pongcyan">
                         <img src="${player.avatarUrl}" alt="${player.username}" class="size-full object-cover">
                     </div>
                 `;
@@ -99,7 +99,7 @@ const TournamentResults = (results: TournamentResult[] = []) => {
             }
             
             playerCardsHTML += `
-                <div class="flex items-center gap-2 p-3 bg-pongblue bg-opacity-30 rounded-lg">
+                <div class="flex items-center gap-2 p-3 bg-pongcyan bg-opacity-30 rounded-lg">
 					<span>${player.place}</span>
                     <span class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-700 font-medium">${player.place}</span>
                     ${avatarHTML}
@@ -120,7 +120,7 @@ const TournamentResults = (results: TournamentResult[] = []) => {
     let noResultsHTML = '';
     if (results.length === 0) {
         noResultsHTML = `
-            <div class="flex flex-col items-center justify-center text-center p-8 bg-pongblue bg-opacity-20 rounded-lg">
+            <div class="flex flex-col items-center justify-center text-center p-8 bg-pongcyan bg-opacity-20 rounded-lg">
                 <div class="text-4xl mb-4">🏆</div>
                 <p class="text-lg text-gray-300">No tournament results available yet</p>
                 <p class="text-sm text-gray-400 mt-2">Complete the tournament to see the final standings</p>

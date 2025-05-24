@@ -1,38 +1,41 @@
+// This is a simplified example - you may need to adjust based on your actual implementation
 class EloService {
-    // Default K-factor (determines how much ratings change)
-    constructor(kFactor = 32) {
-      this.kFactor = kFactor;
-    }
-  
-    // Calculate expected score (probability of winning)
-    calculateExpectedScore(playerRating, opponentRating) {
-      return 1 / (1 + Math.pow(10, (opponentRating - playerRating) / 400));
-    }
-  
-    // Calculate new ELO rating
-    calculateNewRating(playerRating, expectedScore, actualScore) {
-      return Math.round(playerRating + this.kFactor * (actualScore - expectedScore));
-    }
-  
-    // Calculate rating changes for both players after a match
-    calculateRatingChanges(player1Rating, player2Rating, player1Won) {
-      const player1ExpectedScore = this.calculateExpectedScore(player1Rating, player2Rating);
-      const player2ExpectedScore = this.calculateExpectedScore(player2Rating, player1Rating);
-      
-      const player1ActualScore = player1Won ? 1 : 0;
-      const player2ActualScore = player1Won ? 0 : 1;
-      
-      const player1NewRating = this.calculateNewRating(player1Rating, player1ExpectedScore, player1ActualScore);
-      const player2NewRating = this.calculateNewRating(player2Rating, player2ExpectedScore, player2ActualScore);
-      
-      return {
-        player1Change: player1NewRating - player1Rating,
-        player2Change: player2NewRating - player2Rating,
-        player1NewRating,
-        player2NewRating
-      };
-    }
+  constructor(kFactor = 32) {
+    this.kFactor = kFactor;
   }
-  
-  export default new EloService();
-  
+
+  /**
+   * Calculate expected score (probability of winning)
+   * @param {number} playerRating - Player's current rating
+   * @param {number} opponentRating - Opponent's current rating
+   * @returns {number} - Expected score between 0 and 1
+   */
+  calculateExpectedScore(playerRating, opponentRating) {
+    return 1 / (1 + Math.pow(10, (opponentRating - playerRating) / 400));
+  }
+
+  /**
+   * Calculate new rating after a match
+   * @param {number} currentRating - Current rating
+   * @param {number} expectedScore - Expected score
+   * @param {number} actualScore - Actual score (1 for win, 0.5 for draw, 0 for loss)
+   * @returns {number} - New rating
+   */
+  calculateNewRating(currentRating, expectedScore, actualScore) {
+    return Math.round(currentRating + this.kFactor * (actualScore - expectedScore));
+  }
+
+  /**
+   * Calculate new ratings for a player
+   * @param {number} playerRating - Player's current rating
+   * @param {number} opponentRating - Opponent's current rating
+   * @param {number} result - Match result (1 for win, 0.5 for draw, 0 for loss)
+   * @returns {number} - New player rating
+   */
+  calculateNewRatings(playerRating, opponentRating, result) {
+    const expectedScore = this.calculateExpectedScore(playerRating, opponentRating);
+    return this.calculateNewRating(playerRating, expectedScore, result);
+  }
+}
+
+export default new EloService();

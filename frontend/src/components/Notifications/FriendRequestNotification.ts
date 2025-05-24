@@ -6,7 +6,7 @@ import axios from "axios";
 export const FriendRequestNotification = createComponent((props: NotificationProps) => {
     const fetchSenderNickname = async (senderId:number) => {
 		try {
-			const response = await axios.get(`https://localhost:8001/auth/users/id/${senderId}`)
+			const response = await axios.get(`/authentication/auth/users/id/${senderId}`)
 			return response.data
 		} catch(err) {
 			console.error(err);
@@ -27,7 +27,7 @@ export const FriendRequestNotification = createComponent((props: NotificationPro
         </div>
         <div class="flex flex-col">
             <p class="text-gray-700">
-                <span id="sender-name" class="text-pongblue font-semibold hover:cursor-pointer hover:underline hover:opacity-90">Loading...</span>
+                <span id="sender-name" class="text-pongcyan font-semibold hover:cursor-pointer hover:underline hover:opacity-90">Loading...</span>
                 Sent you a friend request
             </p>
             <div class="flex justify-between gap-2">

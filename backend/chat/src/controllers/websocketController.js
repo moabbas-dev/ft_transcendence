@@ -1,7 +1,10 @@
 import { blockUser, getBlockedUsers, unblockUser } from "../services/blockService.js";
-import { getUser, createOrUpdateUser, getUserByUsername, createChatRoom, getUsersFromAuth } from "../services/userService.js";
+import { getUser, createOrUpdateUser, getUserByUsername, createChatRoom, getUsersFromAuth, getMessageRequests } from "../services/userService.js";
 import { createFriendRequest, cancelFriendRequest, addFriend, getPendingFriendRequests, removeFriend, getFriendshipStatus } from "../services/friendService.js"
-import { saveMessage, getMessages } from "../services/chatService.js"
+import { saveMessage, getMessages, getUnreadMessageCount, markMessagesAsRead } from "../services/chatService.js";
+
+import { getDatabase } from "../db/initDB.js";
+
 
 export function setupWebSocketHandlers(wsAdapter, fastify) {
   // Track online users mapping username to clientId
@@ -14,7 +17,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       return;
     }
     console.log("new user has connected: ", username, " | with ID:", userId);
-    console.log("#########");
+    console.log("######### ", clientId, "#########");
     wsAdapter.sendTo(clientId, "msg", { message: "User connected" });
 
     try {
@@ -30,34 +33,8 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       }
 
       // Track user as online
-      onlineUsers.set(clientId, username);
+      onlineUsers.set(userId.toString(), clientId);
 
-      //   // Send friend list to user with online status
-      //   const friendsWithStatus = await Promise.all(
-      //     (user.friends || []).map(async (friendUsername) => {
-      //       const friend = await getUser(friendUsername);
-      //       if (!friend) return null;
-
-      //       return {
-      //         username: friend.username,
-      //         firstname: friend.firstname,
-      //         lastname: friend.lastname,
-      //         isOnline: onlineUsers.has(friendUsername),
-      //       };
-      //     })
-      //   );
-
-      //   // Filter out null entries
-      //   const validFriends = friendsWithStatus.filter((f) => f !== null);
-
-      //   wsAdapter.sendTo(clientId, "friends:list", {
-      //     friends: validFriends,
-      //   });
-
-      //   // Send pending friend requests
-      //   wsAdapter.sendTo(clientId, "friends:pending", {
-      //     pending: user.pendingFriends || [],
-      //   });
     } catch (error) {
       fastify.log.error("Error in user:connect handler", error);
       wsAdapter.sendTo(clientId, "error", {
@@ -70,16 +47,18 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
   wsAdapter.on("user:disconnect", async ({ clientId }) => {
     fastify.log.info(`Disconnected: ${clientId}`);
 
-    // Find username by client id
-    let disconnectedUser;
-    onlineUsers.forEach((cId, username) => {
+    // Find userId by client id and remove from online users
+    let disconnectedUserId = null;
+    for (const [userId, cId] of onlineUsers.entries()) {
       if (cId === clientId) {
-        disconnectedUser = username;
+        disconnectedUserId = userId;
+        break;
       }
-    });
-    console.log("user disconnected:", username);
-    if (disconnectedUser) {
-      onlineUsers.delete(disconnectedUser);
+    }
+
+    if (disconnectedUserId) {
+      console.log(`User ${disconnectedUserId} disconnected`);
+      onlineUsers.delete(disconnectedUserId);
     }
   });
 
@@ -115,39 +94,74 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
 
 
 
-//   // Canceling a friend request
-// Add this to websocketController.js where other friend-related handlers are
-wsAdapter.on("friend:decline", async ({ clientId, payload }) => {
-  try {
-    const { from, to } = payload;
-    
-    console.log("friend request declined:");
-    console.log("from user:", from);
-    console.log("to user:", to);
-    
-    // Decline the friend request in the database
-    await cancelFriendRequest(from, to);
-    
-    // Send confirmation to the user who declined the request
-    wsAdapter.sendTo(clientId, "friend:declined", {
-      success: true,
-      userId: from
-    });
-    
-    // Optionally, notify the sender that their request was declined
-    // wsAdapter.sendTo(from, "friend:request:declined", {
-    //   success: true,
-    //   userId: to
-    // });
-    
-  } catch (error) {
-    console.error("Error in friend:decline handler:", error);
-    wsAdapter.sendTo(clientId, "error", {
-      message: "Failed to decline friend request",
-      details: error.message
-    });
-  }
-});
+  //   // Canceling a friend request
+  // Add this to websocketController.js where other friend-related handlers are
+  wsAdapter.on("friend:decline", async ({ clientId, payload }) => {
+    try {
+      const { from, to } = payload;
+
+      console.log("friend request declined:");
+      console.log("from user:", from);
+      console.log("to user:", to);
+
+      // Decline the friend request in the database
+      await cancelFriendRequest(from, to);
+
+      // Send confirmation to the user who declined the request
+      wsAdapter.sendTo(clientId, "friend:declined", {
+        success: true,
+        userId: from
+      });
+
+      // Optionally, notify the sender that their request was declined
+      // wsAdapter.sendTo(from, "friend:request:declined", {
+      //   success: true,
+      //   userId: to
+      // });
+
+    } catch (error) {
+      console.error("Error in friend:decline handler:", error);
+      wsAdapter.sendTo(clientId, "error", {
+        message: "Failed to decline friend request",
+        details: error.message
+      });
+    }
+  });
+
+  // Handle canceling a sent friend request
+  wsAdapter.on("friend:cancel_request", async ({ clientId, payload }) => {
+    try {
+      const { from, to } = payload;
+      
+      console.log("friend request canceled:");
+      console.log("from user:", from);
+      console.log("to user:", to);
+      
+      // Cancel the friend request in the database (using the same function as decline)
+      await cancelFriendRequest(from, to);
+      
+      // Send confirmation to the user who canceled their request
+      wsAdapter.sendTo(clientId, "friend:request_cancelled", {
+        success: true,
+        targetId: to
+      });
+      
+      // Optionally notify the recipient that the request was canceled
+      const recipientClientId = onlineUsers.get(to.toString());
+      if (recipientClientId) {
+        wsAdapter.sendTo(recipientClientId, "friend:request_cancelled", {
+          fromId: from
+        });
+      }
+      
+    } catch (error) {
+      console.error("Error in friend:cancel_request handler:", error);
+      wsAdapter.sendTo(clientId, "error", {
+        message: "Failed to cancel friend request",
+        details: error.message
+      });
+    }
+  });
 
 
   // Handle friend acceptance
@@ -241,6 +255,25 @@ wsAdapter.on("friend:decline", async ({ clientId, payload }) => {
     try {
       const { from, to, content, timestamp } = payload;
 
+
+      // Check if either user has blocked the other
+      const blockedUsers = await getBlockedUsers(from);
+      const isBlocked = blockedUsers.some(user => user.id === parseInt(to));
+
+      // Also check if recipient has blocked the sender
+      const recipientBlockedUsers = await getBlockedUsers(to);
+      const isBlockedByRecipient = recipientBlockedUsers.some(user => user.id === parseInt(from));
+      
+      if (isBlocked || isBlockedByRecipient) {
+        console.log(`Message blocked: User ${from} and ${to} have a block relationship`);
+        wsAdapter.sendTo(clientId, "message:blocked", {
+          to,
+          timestamp,
+          reason: isBlocked ? "You have blocked this user" : "You have been blocked by this user"
+        });
+        return;
+      }
+      
       // Create a room ID (combination of both usernames sorted alphabetically)
       const roomId = [from, to].sort().join("-");
 
@@ -260,28 +293,93 @@ wsAdapter.on("friend:decline", async ({ clientId, payload }) => {
       await saveMessage(newMessage, roomId);
 
       // Send the message to recipient if online
-      // const toClientId = onlineUsers.get(to);
-      // if (toClientId) {
-      wsAdapter.sendTo(to, "message:received", {
+      let recipientClientId = onlineUsers.get(to.toString());
+      console.log(`Sending message to user ${to}, client ID: ${recipientClientId}`);
+      // for (const [wsClientId, userId] of onlineUsers.entries()) {
+      //   if (userId === to.toString()) {
+      //     recipientClientId = wsClientId;
+      //     break;
+      //   }
+      // }
+
+      // Send the message to recipient if online
+      if (recipientClientId) {
+        wsAdapter.sendTo(recipientClientId, "message:received", {
+          roomId,
+          message: newMessage,
+        });
+      }
+
+
+      // Also send confirmation to sender
+      wsAdapter.sendTo(clientId, "message:sent", {
         roomId,
         message: newMessage,
       });
 
-      const unreadCounts = await getUnreadMessageCount(to);
-      wsAdapter.sendTo(to, "messages:unread", {
-        unreadCounts
-      });
-      // }
-
-      // Also send confirmation to sender
-      // wsAdapter.sendTo(clientId, "message:sent", {
-      //   roomId,
-      //   message: newMessage,
-      // });
     } catch (error) {
       fastify.log.error("Error in message:private handler", error);
       wsAdapter.sendTo(clientId, "error", {
         message: "Failed to send message",
+      });
+    }
+  });
+
+
+  wsAdapter.on("messages:unread:get", async ({ clientId, payload }) => {
+    try {
+      const { userId } = payload;
+
+      // Get unread message counts from database
+      const unreadCounts = await getUnreadMessageCount(userId);
+
+      // Send to client
+      wsAdapter.sendTo(clientId, "messages:unread", {
+        unreadCounts
+      });
+    } catch (error) {
+      console.error("Error getting unread message counts:", error);
+      wsAdapter.sendTo(clientId, "error", {
+        message: "Failed to get unread message counts",
+        details: error.message
+      });
+    }
+  });
+
+
+  wsAdapter.on("messages:mark_read", async ({ clientId, payload }) => {
+    try {
+      const { roomId, userId } = payload;
+
+      // Validate input
+      if (!roomId || !userId) {
+        throw new Error('Missing roomId or userId');
+      }
+
+      console.log(`Marking messages as read in room ${roomId} for user ${userId}`);
+
+      // Update message read status in database
+      await markMessagesAsRead(roomId, userId);
+
+      // Send confirmation back to client
+      wsAdapter.sendTo(clientId, "messages:marked_read", {
+        roomId,
+        success: true
+      });
+
+      // Get the updated unread counts for this user
+      const unreadCounts = await getUnreadMessageCount(userId);
+
+      // Send updated unread counts to user
+      wsAdapter.sendTo(clientId, "messages:unread", {
+        unreadCounts
+      });
+
+    } catch (error) {
+      console.error("Error marking messages as read:", error);
+      wsAdapter.sendTo(clientId, "error", {
+        message: "Failed to mark messages as read",
+        details: error.message
       });
     }
   });
@@ -315,25 +413,35 @@ wsAdapter.on("friend:decline", async ({ clientId, payload }) => {
   wsAdapter.on("user:block", async ({ clientId, payload }) => {
     try {
       const { from: blockerId, blocked: blockedId } = payload;
-      console.log(blockerId, "blocked", blockedId);
       // Ensure IDs are valid numbers
-      if (typeof blockerId !== "number" || typeof blockedId !== "number") {
-        throw new Error("Invalid user IDs");
+      if (!blockerId || !blockedId) {
+        throw new Error("Missing user IDs");
       }
 
-      // Block the user
-      await blockUser(blockerId, blockedId);
+      const blockerIdNum = parseInt(blockerId);
+      const blockedIdNum = parseInt(blockedId);
 
-      console.log("the user:", blockerId, ", blocked:", blockedId);
+      if (isNaN(blockerIdNum) || isNaN(blockedIdNum)) {
+        throw new Error("Invalid user IDs - not valid numbers");
+      }
+      // Block the user
+      await blockUser(blockerIdNum, blockedIdNum);
+
+      await cancelFriendRequest(blockerIdNum, blockedIdNum);
+      await cancelFriendRequest(blockedIdNum, blockerIdNum);
+
+      console.log("the user:", blockerId, ",has blocked:", blockedId);
 
       // Notify the blocker
       wsAdapter.sendTo(clientId, "user:blocked", {
         userId: blockedId, // Send the blocked user's ID
       });
     } catch (error) {
-      fastify.log.error("Block error:", error);
+      console.error("Block error details:", error.message, error.stack);
+      fastify.log.error(`Block error: ${error.message}`);
       wsAdapter.sendTo(clientId, "error", {
         message: "Failed to block user",
+        details: error.message
       });
     }
   });
@@ -342,22 +450,39 @@ wsAdapter.on("friend:decline", async ({ clientId, payload }) => {
   wsAdapter.on("user:unblock", async ({ clientId, payload }) => {
     try {
       const { from, unblocked } = payload;
+      
+      if (!from || !unblocked) {
+        throw new Error("Missing user IDs");
+      }
+
+      const blockerIdNum = parseInt(from);
+      const blockedIdNum = parseInt(unblocked);
+
+      console.log(blockedIdNum, blockerIdNum);
+      if (isNaN(blockerIdNum) || isNaN(blockedIdNum)) {
+        throw new Error("Invalid user IDs - not valid numbers");
+      }
 
       // Remove from blocked users in database
-      await unblockUser(from, unblocked);
+      await unblockUser(blockerIdNum, blockedIdNum);
+
+      console.log(blockerIdNum, "unblocked user", blockedIdNum);
 
       // Confirm unblock to user
-      wsAdapter.sendTo(clientId, "user:unblocked", { username: unblocked });
+      wsAdapter.sendTo(clientId, "user:unblocked", { 
+        userId: blockedIdNum 
+      });
     } catch (error) {
-      fastify.log.error("Error in user:unblock handler", error);
+      console.error("Unblock error details:", error.message, error.stack);
+      fastify.log.error(`Error in user:unblock handler: ${error.message}`);
       wsAdapter.sendTo(clientId, "error", {
         message: "Failed to unblock user",
+        details: error.message
       });
     }
   });
 
 
-  // In websocketController.js
   wsAdapter.on("friends:get", async ({ clientId, payload }) => {
     try {
       const { userId } = payload;
@@ -417,23 +542,51 @@ wsAdapter.on("friend:decline", async ({ clientId, payload }) => {
 
   wsAdapter.on("friendship:check", async ({ clientId, payload }) => {
     // Look up friendship status for the given nickname
-  
+
     const { currentUserId, targetUserId } = payload;
-  
+
     const status = await getFriendshipStatus(currentUserId, targetUserId);
 
     console.log(status);
+
     wsAdapter.sendTo(clientId, "friendship:status", {
       status: status
     });
   });
 
-  wsAdapter.on("users:blocked_list", async ({clientId, payload}) => {
+  wsAdapter.on("message:requests:get", async ({ clientId, payload }) => {
     try {
       const { userId } = payload;
 
-      if (!userId)
-      {
+      // Validate input
+      if (!userId) {
+        throw new Error('Missing userId');
+      }
+
+      console.log(`Fetching chat requests for user ${userId}`);
+
+      // Get message requests using the service function
+      const messageRequests = await getMessageRequests(userId);
+
+      // Send the non-friends chat list to client
+      wsAdapter.sendTo(clientId, "message:requests", {
+        requests: messageRequests
+      });
+
+    } catch (error) {
+      console.error("Error fetching message requests:", error);
+      wsAdapter.sendTo(clientId, "error", {
+        message: "Failed to fetch message requests",
+        details: error.message
+      });
+    }
+  });
+
+  wsAdapter.on("users:blocked_list", async ({ clientId, payload }) => {
+    try {
+      const { userId } = payload;
+
+      if (!userId) {
         wsAdapter.sendTo(clientId, "error", {
           message: "User ID is required"
         });
@@ -459,7 +612,39 @@ wsAdapter.on("friend:decline", async ({ clientId, payload }) => {
       });
     }
   });
+
+  wsAdapter.on("user:check_blocked", async ({ clientId, payload }) => {
+    try {
+      const { userId, targetId } = payload;
+      
+      if (!userId || !targetId) {
+        wsAdapter.sendTo(clientId, "error", {
+          message: "Both user ID and target ID are required"
+        });
+        return;
+      }
+      
+      // Get the list of users blocked by userId
+      const blockedUsers = await getBlockedUsers(userId);
+      
+      // Check if targetId is in the list of blocked users
+      const isBlocked = blockedUsers.some(user => user.id === parseInt(targetId));
+      
+      console.log(`Checking if user ${userId} has blocked user ${targetId}: ${isBlocked}`);
+      
+      // Send the result back to the client
+      wsAdapter.sendTo(clientId, "user:blocked_status", {
+        userId,
+        targetId,
+        isBlocked
+      });
+      
+    } catch (error) {
+      console.error("Error checking blocked status:", error);
+      wsAdapter.sendTo(clientId, "error", {
+        message: "Failed to check blocked status",
+        details: error.message
+      });
+    }
+  });
 }
-
-
-

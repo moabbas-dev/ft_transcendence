@@ -7,7 +7,7 @@ export const ChatNotification = createComponent((props: NotificationProps) => {
 
 	const fetchSenderNickname = async (senderId:number) => {
 		try {
-			const response = await axios.get(`https://localhost:8001/auth/users/id/${senderId}`)
+			const response = await axios.get(`/authentication/auth/users/id/${senderId}`)
 			return response.data
 		} catch(err) {
 			console.error(err);
@@ -20,7 +20,7 @@ export const ChatNotification = createComponent((props: NotificationProps) => {
 	notification.innerHTML = `
 		<div class="flex justify-between items-center">
 			<span>
-				<span id="sender-name" class="text-lg font-bold text-pongblue hover:underline cursor-pointer">Loading...</span>
+				<span id="sender-name" class="text-lg font-bold text-pongcyan hover:underline cursor-pointer">Loading...</span>
 				<span>Messages you!</span>
 			</span>
 			<div class="flex items-center gap-2">

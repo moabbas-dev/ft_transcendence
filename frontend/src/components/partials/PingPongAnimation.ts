@@ -60,7 +60,7 @@ export class PongAnimation {
 		if (this.ctx === null)
 			return
 		// Clear canvas
-		this.ctx.fillStyle = 'rgba(17, 24, 39, 0.9)'; // Match bg-gray-900 with opacity
+		this.ctx.fillStyle = 'black'; // Match bg-gray-900 with opacity
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
 		// Draw center line

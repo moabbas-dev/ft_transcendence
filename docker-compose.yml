@@ -1,12 +1,25 @@
 # version: '3.8'
 
 services:
+  notifications:
+    build: ./backend/notifications
+    container_name: ft_notifications
+    restart: always
+    # ports:
+    #   - "3003:3003"
+    networks:
+      - ft_network
+    volumes:
+      - ./backend/notifications:/app
+      - notifications_node_modules:/app/node_modules
+      - notifications_data:/app/data # Persistent storage for notifications database
+
   authentication:
     build: ./backend/authentication
     container_name: ft_authentication
     restart: always
-    ports:
-      - "8001:8001"
+    # ports:
+    #   - "8001"
     networks:
       - ft_network
     env_file:
@@ -14,29 +27,16 @@ services:
     volumes:
       - ./backend/authentication:/app
       - auth_node_modules:/app/node_modules
-      - auth_data:/app/data  # Persistent storage for authentication database
-
-  notifications:
-    build: ./backend/notifications
-    container_name: ft_notifications
-    restart: always
-    ports:
-      - "8000:8000"
-    networks:
-      - ft_network
-    volumes:
-      - ./backend/notifications:/app
-      - notifications_node_modules:/app/node_modules
-      - notifications_data:/app/data  # Persistent storage for notifications database
+      - auth_data:/app/data # Persistent storage for authentication database
     depends_on:
-      - authentication
+      - notifications
 
   chat:
     build: ./backend/chat
     container_name: ft_chat
     restart: always
-    ports:
-      - "3002:3002"
+    # ports:
+    #   - "3002:3002"
     networks:
       - ft_network
     env_file:
@@ -44,25 +44,65 @@ services:
     volumes:
       - ./backend/chat:/app
       - chat_node_modules:/app/node_modules
-      - chat_data:/app/data  # Persistent storage for chat database
+      - chat_data:/app/data # Persistent storage for chat database
     depends_on:
+      - notifications
       - authentication
+
+  matchmaking:
+    build: ./backend/matchmaking
+    container_name: ft_matchmaking
+    restart: always
+    # ports:
+    #   - "3001:3001"
+    networks:
+      - ft_network
+    env_file:
+      - ./backend/matchmaking/.env
+    volumes:
+      - ./backend/matchmaking:/app
+      - matchmaking_node_modules:/app/node_modules
+      - matchmaking_data:/app/data
+    depends_on:
+      - notifications
+      - authentication
+      - chat
 
   frontend:
     build: ./frontend
     container_name: ft_frontend
     restart: always
-    ports:
-      - "5173:5173"
+    # ports:
+    #   - "5173"
     networks:
       - ft_network
     volumes:
       - ./frontend:/app
       - frontend_node_modules:/app/node_modules
     depends_on:
+      - notifications
       - authentication
       - chat
+      - matchmaking
+
+  nginx:
+    build: ./nginx
+    container_name: ft_nginx
+    restart: always
+    ports:
+      - "443:443"
+    networks:
+      - ft_network
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
       - notifications
+      - authentication
+      - chat
+      - matchmaking
+      - frontend
 
 networks:
   ft_network:
@@ -72,7 +112,9 @@ volumes:
   auth_data:
   notifications_data:
   chat_data:
+  matchmaking_data:
   auth_node_modules:
   notifications_node_modules:
   chat_node_modules:
+  matchmaking_node_modules:
   frontend_node_modules:

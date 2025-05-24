@@ -1,78 +1,191 @@
-import { createComponent } from "../../../utils/StateManager.js";
-import moabbas from '../../../assets/moabbas.jpg';
-import afarachi from '../../../assets/afarachi.jpg';
-import jfatfat from '../../../assets/jfatfat.jpg';
-import odib from '../../../assets/omar.webp';
 import { t } from "../../../languages/LanguageController.js";
+import chatService from "../../../utils/chatUtils/chatWebSocketService.js";
+import store from "../../../../store/store.js";
+import { createComponent } from "../../../utils/StateManager.js";
 
-// Sample user data for search results [For testing purposes]
-const sampleUsers = [
-	{ username: "Ahmad Farachi - afarachi", status: "online", avatar: afarachi },
-	{ username: "Jihad Fatfat - jfatfat", status: "offline", avatar: jfatfat },
-	{ username: "Mohamad Abbass - moabbas", status: "online", avatar: moabbas },
-	{ username: "Omar Dib - odib", status: "away", avatar: odib }
-];
+export interface FriendProps {
+  id: string;
+  nickname: string;
+  full_name?: string;
+  status: 'online' | 'offline' | 'in-game';
+  avatar_url: string;
+}
 
+const Friend = createComponent((props: FriendProps) => {
+  const friendElement = document.createElement('div');
+  friendElement.className = 'friend-item flex items-center justify-between bg-black/40 p-4 rounded-lg mb-3 border border-gray-800 hover:border-pongcyan transition-all duration-300';
+  
+  // Status color
+  let statusColor = 'bg-gray-500'; // offline by default
+  if (props.status === 'online') statusColor = 'bg-green-500';
+  if (props.status === 'in-game') statusColor = 'bg-blue-500';
+  
+  // Determine if friend is available for invite
+  const isAvailable = props.status === 'online';
+  
+  friendElement.innerHTML = `
+    <div class="flex items-center space-x-3">
+      <div class="avatar-container relative">
+        <img 
+          src="${props.avatar_url}" 
+          alt="${props.nickname}" 
+          class="w-12 h-12 rounded-full object-cover border-2 border-gray-700"
+        >
+        <div class="status-indicator absolute bottom-0 right-0 w-3 h-3 ${statusColor} rounded-full border border-gray-900"></div>
+      </div>
+      <div class="user-info">
+        <div class="font-semibold text-white">${props.full_name || props.nickname}</div>
+        <div class="text-xs text-gray-400">${props.full_name ? `@${props.nickname}` : props.status}</div>
+      </div>
+    </div>
+    <button 
+      class="invite-button px-4 py-2 rounded-md text-sm ${isAvailable 
+        ? 'bg-pongcyan hover:bg-pongcyan/80 text-white' 
+        : 'bg-gray-700 text-gray-400 cursor-not-allowed'}"
+      ${!isAvailable ? 'disabled' : ''}
+    >
+      ${'invite'}
+    </button>
+  `;
+  
+  // Add event listener to the invite button if friend is available
+  if (isAvailable) {
+    const inviteButton = friendElement.querySelector('.invite-button');
+    inviteButton?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      // Dispatch custom event with friend data
+      const event = new CustomEvent('friend-invite', {
+        bubbles: true,
+        detail: props.id
+      });
+      friendElement.dispatchEvent(event);
+    });
+  }
+  
+  return friendElement;
+});
 
-export const FetchFriendsList = createComponent(() => {
-	const container = document.createElement('div')
-	container.className = 'size-full flex flex-col items-center justify-start gap-6 py-8'
-	container.innerHTML = `
-		<div class="relative w-full">
-			<input type="text" id="friend-search" placeholder="${t('play.onlineGame.searchFriends')}" class="w-full py-3 px-4 pl-10 rounded-lg bg-[rgba(100,100,255,0.2)] border border-pongblue focus:outline-none focus:border-[rgba(100,100,255,0.8)]">
-			<i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-[rgba(255,255,255,0.6)]"></i>
-		</div>
-		<div id="search-results" class="w-full flex-1 overflow-y-auto max-h-96">
-			<!-- Search results will be populated here -->
-		</div>
-	`
-	const populateSearchResults = (users: { username: string; status: string; avatar: string;}[]) => {
-		const searchResults = container.querySelector("#search-results");
-		if (searchResults) {
-			if (users.length === 0) {
-				searchResults.innerHTML = `
-					<div class="text-center py-6 text-[rgba(255,255,255,0.6)]">
-						${t('play.onlineGame.noUsersSearch')}
-					</div>
-				`;
-				return;
-			}
-			
-			searchResults.innerHTML = users.map((user) => `
-				<div class="flex items-center justify-between p-4 border-b border-[rgba(100,100,255,0.3)] hover:bg-[rgba(100,100,255,0.1)] cursor-pointer">
-					<div class="flex items-center gap-4">
-						<div class="size-12 rounded-full bg-pongblue relative">
-							<img src="${user.avatar}" alt="${user.username}" class="rounded-full size-full">
-							<div class="absolute bottom-0 right-0 size-3 rounded-full ${
-								user.status === 'online' ? 'bg-green-500' : 
-								user.status === 'away' ? 'bg-yellow-500' : 'bg-gray-500'
-							} border border-pongdark"></div>
-						</div>
-						<div>
-							<p class="font-semibold">${user.username}</p>
-							<p class="text-sm text-[rgba(255,255,255,0.6)] capitalize">${user.status}</p>
-						</div>
-					</div>
-					<button class="bg-gradient-to-r from-pongblue to-[rgba(100,100,255,0.8)] hover:from-[rgba(100,100,255,0.9)] hover:to-pongblue px-4 py-2 rounded-full text-sm">
-						Invite
-					</button>
-				</div>
-			`).join('');
-		}
-	}
-
-	// HERE: instead of this we should fetch the friend list data from the backend
-	populateSearchResults(sampleUsers)
-
-	const searchInput = container.querySelector("#friend-search");
-	searchInput?.addEventListener("input", (e:Event) => {
-		const target = e.target as HTMLInputElement;
-		const query = target.value.toLowerCase();
-		const filteredUsers = sampleUsers.filter(user => 
-			user.username.toLowerCase().includes(query)
-		);
-		populateSearchResults(filteredUsers);
-	});
-
-	return container
-})
+export function FetchFriendsList() {
+  const friendsListContainer = document.createElement('div');
+  friendsListContainer.className = 'friends-list w-full max-w-md mx-auto max-h-96 overflow-y-auto px-2 py-4';
+  
+  // Search input
+  const searchContainer = document.createElement('div');
+  searchContainer.className = 'search-container mb-4';
+  searchContainer.innerHTML = `
+    <div class="relative">
+      <input 
+        type="text" 
+        placeholder="${t('play.onlineGame.searchFriends')}" 
+        class="w-full bg-black/40 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-pongcyan"
+      >
+      <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+        <i class="fa-solid fa-search"></i>
+      </span>
+    </div>
+  `;
+  
+  friendsListContainer.appendChild(searchContainer);
+  
+  // Friends list wrapper
+  const friendsList = document.createElement('div');
+  friendsList.className = 'friends-list-wrapper';
+  friendsListContainer.appendChild(friendsList);
+  
+  // Loading state
+  friendsList.innerHTML = `
+    <div class="loading flex flex-col items-center justify-center py-6">
+      <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-pongcyan mb-2"></div>
+      <div class="text-gray-400">${t('chat.loadingFriends')}</div>
+    </div>
+  `;
+  
+  // Handle search functionality
+  const searchInput = searchContainer.querySelector('input');
+  searchInput?.addEventListener('input', (e) => {
+    const target = e.target as HTMLInputElement;
+    const searchValue = target.value.toLowerCase();
+    
+    // Filter friends based on search value
+    const friendElements = friendsList.querySelectorAll('.friend-item');
+    friendElements.forEach(el => {
+      const friendName = el.querySelector('.user-info')?.textContent?.toLowerCase() || '';
+      if (friendName.includes(searchValue)) {
+        (el as HTMLElement).style.display = 'flex';
+      } else {
+        (el as HTMLElement).style.display = 'none';
+      }
+    });
+  });
+  
+  // Fetch friends list
+  loadFriendsList();
+  
+  async function loadFriendsList() {
+    try {
+      // Request friends list from server
+      if (chatService.isConnected()) {
+        chatService.send("friends:get", {
+          userId: store.userId,
+        });
+      } else {
+        throw new Error("Chat service not connected");
+      }
+    } catch (error) {
+      console.error("Error loading friends list:", error);
+      friendsList.innerHTML = `
+        <div class="error-message text-center py-6">
+          <i class="fa-solid fa-circle-exclamation text-red-500 text-2xl mb-2"></i>
+          <div class="text-red-400">${t('chat.errorLoadingFriends')}</div>
+          <button class="retry-button mt-3 px-4 py-1 bg-pongcyan text-white rounded-md hover:bg-pongcyan/80">
+            ${t('chat.retry')}
+          </button>
+        </div>
+      `;
+      
+      const retryButton = friendsList.querySelector('.retry-button');
+      retryButton?.addEventListener('click', () => {
+        loadFriendsList();
+      });
+    }
+  }
+  
+  // Handle friend invite
+  friendsListContainer.addEventListener('friend-invite', (e: any) => {
+    const friendId = e.detail;
+    
+    // Dispatch event to parent component
+    const event = new CustomEvent('friend-selected', {
+      bubbles: true,
+      detail: friendId
+    });
+    friendsListContainer.dispatchEvent(event);
+  });
+  
+  function handleFriendsReceived(friendsData: FriendProps[]) {
+    // Clear the loading state
+    friendsList.innerHTML = '';
+    
+    if (friendsData && friendsData.length > 0) {
+      // Render each friend
+      friendsData.forEach(friend => {
+        friendsList.appendChild(Friend(friend));
+      });
+    } else {
+      // No friends found
+      friendsList.innerHTML = `
+        <div class="no-friends text-center py-8">
+          <i class="fa-solid fa-user-group text-gray-600 text-4xl mb-3"></i>
+          <div class="text-gray-400">${t('chat.noFriendsFound')}</div>
+        </div>
+      `;
+    }
+  }
+  
+  // Set up event listener for friends data
+  chatService.on("friends:list", (data) => {
+    handleFriendsReceived(data.friends);
+  });
+  
+  return friendsListContainer;
+}

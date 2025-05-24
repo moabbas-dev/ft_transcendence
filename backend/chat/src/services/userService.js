@@ -2,13 +2,10 @@ import { getDatabase } from "../db/initDB.js";
 import axios from "axios";
 
 
-// Configure authentication service API URL
-const AUTH_API_URL = "https://localhost:8001";
-
 // Helper function to get user from auth service API
 export async function getUserFromAuth(userId) {
   try {
-    const response = await axios.get(`${AUTH_API_URL}/auth/users/id/${userId}`);
+    const response = await axios.get(`http://localhost:8001/auth/users/id/${userId}`);
     return response.data;
   } catch (error) {
     console.error(
@@ -21,7 +18,7 @@ export async function getUserFromAuth(userId) {
 
 export async function getUserByUsername(username) {
   try {
-    const response = await axios.get(`${AUTH_API_URL}/auth/users/username/${username}`);
+    const response = await axios.get(`/authentication/auth/users/nickname/${username}`);
     return response.data;
   } catch (error) {
     console.error(`Error fetching user ${username}:`, error.message);
@@ -36,7 +33,7 @@ export async function getUsersFromAuth(userIds) {
   try {
     // Get all users and filter locally - this could be optimized with a
     // custom endpoint in the auth service that accepts multiple IDs
-    const response = await axios.get(`${AUTH_API_URL}/auth/users`);
+    const response = await axios.get(`http://localhost:8001/auth/users`);
     const allUsers = response.data;
     return allUsers.filter((user) => userIds.includes(user.id));
   } catch (error) {
@@ -86,7 +83,7 @@ export async function getUser(userId) {
 
 export async function getAllUsers() {
   try {
-    const response = await axios.get(`${AUTH_API_URL}/auth/users`);
+    const response = await axios.get(`/authentication/auth/users`);
     return response.data;
   } catch (error) {
     console.error("Error fetching all users from auth service:", error.message);
@@ -106,7 +103,7 @@ export async function getPendingFriendRequests(userId) {
 // In chatService.js
 export async function createChatRoom(roomId, participants) {
   const db = await getDatabase();
-  
+
   try {
     await db.run('BEGIN TRANSACTION');
 
@@ -126,11 +123,71 @@ export async function createChatRoom(roomId, participants) {
 
     await db.run('COMMIT');
     return true;
-    
+
   } catch (error) {
     await db.run('ROLLBACK');
     console.error('Error creating chat room:', error);
     throw new Error('Failed to create chat room');
+  }
+}
+
+/**
+ * Get all message requests from non-friends
+ * @param {number} userId - The ID of the user to check for
+ * @returns {Promise<Array>} - Array of users who have sent messages but aren't friends
+ */
+export async function getMessageRequests(userId) {
+  try {
+    const db = await getDatabase();
+
+    // Get all rooms where the user is a participant
+    const rooms = await db.all(
+      `SELECT rp.room_id
+       FROM room_participants rp
+       WHERE rp.user_id = ?`,
+      [userId]
+    );
+
+    const messageRequests = [];
+
+    // For each room, check if it's with a non-friend
+    for (const room of rooms) {
+      const roomId = room.room_id;
+
+      // Get the other user in this chat room
+      const otherUser = await db.get(
+        `SELECT user_id FROM room_participants
+         WHERE room_id = ? AND user_id != ?`,
+        [roomId, userId]
+      );
+
+      if (!otherUser) continue;
+
+      // Check if they are friends
+      const isFriend = await db.get(
+        `SELECT 1 FROM friends
+         WHERE user_id = ? AND friend_id = ?`,
+        [userId, otherUser.user_id]
+      );
+
+      // If not friends, add to requests
+      if (!isFriend) {
+        // Get user details
+        const userDetails = await getUserFromAuth(otherUser.user_id);
+
+        if (userDetails) {
+          messageRequests.push({
+            user: userDetails,
+          });
+        }
+      }
+    }
+
+    return messageRequests;
+
+  } catch (error) {
+    console.error("Error getting message requests:", error);
+    throw new Error(`Failed to get message requests: ${error.message}`);
   }
 }
 

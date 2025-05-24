@@ -2,8 +2,8 @@
 
 // // Incoming requests [For Testing Purposes]
 // const requests = [
-// 	{ name: "Casey Parker", timeSent: "2 days ago", avatar: "https://placehold.co/40x40" },
-// 	{ name: "Riley Martin", timeSent: "1 week ago", avatar: "https://placehold.co/40x40" }
+// 	{ name: "Casey Parker", timeSent: "2 days ago", avatar: "http://placehold.co/40x40" },
+// 	{ name: "Riley Martin", timeSent: "1 week ago", avatar: "http://placehold.co/40x40" }
 // ];
 
 // interface RequestProps {
@@ -22,7 +22,7 @@
 // 			<span class="text-sm text-gray-500">${props.timeSent}</span>
 // 		</div>
 // 		<div class="flex flex-1 justify-end gap-2">
-// 			<button id="accept" class="px-3 py-1 bg-pongblue text-white text-sm rounded hover:opacity-80">
+// 			<button id="accept" class="px-3 py-1 bg-pongcyan text-white text-sm rounded hover:opacity-80">
 // 				Accept
 // 			</button>
 // 			<button id="decline" class="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300">
@@ -62,7 +62,7 @@
 
 
 import { createComponent } from "../../utils/StateManager.js";
-import chatService from "../../utils/chatWebSocketService.js";
+import chatService from "../../utils/chatUtils/chatWebSocketService.js";
 import store from "../../../store/store.js";
 
 // We'll replace the hardcoded requests with an empty array initially
@@ -88,7 +88,7 @@ const Request = createComponent((props: RequestProps) => {
 			<span class="text-sm text-gray-500">${props.timeSent}</span>
 		</div>
 		<div class="flex flex-1 justify-end gap-2">
-			<button id="accept" class="px-3 py-1 bg-pongblue text-white text-sm rounded hover:opacity-80">
+			<button id="accept" class="px-3 py-1 bg-pongcyan text-white text-sm rounded hover:opacity-80">
 				Accept
 			</button>
 			<button id="decline" class="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300">
@@ -164,7 +164,7 @@ export const RequestsSection = createComponent(() => {
 		requests = data.pending.map((req: any) => ({
 			nickname: req.nickname,
 			timeSent: formatTimeSent(req.created_at || Date.now()),
-			avatar: req.avatar || "https://placehold.co/40x40",
+			avatar: req.avatar || "http://placehold.co/40x40",
 			userId: store.userId,
 			fromUser: req.from_user || req.id
 		}));

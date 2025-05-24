@@ -9,9 +9,12 @@ import AboutPage from "./pages/about.js";
 import { Page } from "./types/types.js";
 import PlayVsAI from "./pages/PlayVsAI.js"
 import { Lang, setLanguage } from "./languages/LanguageController.js";
-import TournamentPage from "./pages/tournaments.js";
+import TournamentPage from "./components/Tournament-Game/TournamentPage.js";
 import OnlineGame from './pages/online-game.js';
 import CreateTournamentPage from './pages/create-tournament.js';
+import AccountVerifiedPage from './pages/account-verified.js';
+import store from "../store/store.js";
+import TournamentDetailPage from "./components/Tournament-Game/TournamentDetailPage.js"
 
 const routes: { [key: string]: Page } = {
   "/": HomePage,
@@ -24,46 +27,113 @@ const routes: { [key: string]: Page } = {
   "/play/online-game": OnlineGame,
   "/play/tournaments": TournamentPage,
   "/tournaments/create": CreateTournamentPage,
+  "/tournaments/:tournamentId": TournamentDetailPage,
   "/chat": ChatPage,
   "/chat/:uName": ChatPage,
   "/leader-board": LeaderBoardPage,
-  "/about-us": AboutPage
+  "/about-us": AboutPage,
+  "/account-verified": AccountVerifiedPage,
 };
 
 // export function refreshRouter() {
-//   const path = window.location.pathname;
-//   const page = routes[path] || NotFound;
-//   const appContainer = document.getElementById("app")!;
-//   appContainer.className = "";
-//   appContainer.innerHTML = "";
+// 	const path = window.location.pathname;
+// 	let page: Page | null = null;
+// 	let params: { [key: string]: string } = {};
 
-//   const savedLanguage = localStorage.getItem("selectedLanguage");
-//   if (savedLanguage) {
-//     setLanguage(savedLanguage as Lang);
-//   }
+// 	const restrictedForAuthUsers = [
+// 		"/register",
+// 		"/register/twofactor",
+// 		// "/reset_password/:uuid",
+// 		"/account-verified"
+// 	];
 
-//   page.render(appContainer);
+// 	for (const route in routes) {
+// 		if (store.isLoggedIn && restrictedForAuthUsers.includes(path))
+// 			page = NotFound
+// 		else if (!store.isLoggedIn && !restrictedForAuthUsers.includes(path) && path !== "/")
+// 			page = NotFound
+// 		else {
+// 			// Convert route to a regex: "/reset_password/:uuid" → "^/reset_password/([^/]+)$"
+// 			const regex = new RegExp("^" + route.replace(/:\w+/g, "([^/]+)") + "$");
+// 			const match = path.match(regex);
+
+// 			if (match) {
+// 				page = routes[route]; // Corrected: Now correctly fetches the page
+// 				const keys = (route.match(/:(\w+)/g) || []).map((key) => key.substring(1));
+
+// 				keys.forEach((key, index) => {
+// 					params[key] = match[index + 1]; // Extract params from URL
+// 				});
+
+// 				break;
+// 			}
+// 		}
+// 	}
+
+// 	if (!page) {
+// 		page = NotFound;
+// 	}
+
+// 	const appContainer = document.getElementById("app")!;
+// 	appContainer.className = "";
+// 	appContainer.innerHTML = "";
+
+// 	const savedLanguage = localStorage.getItem("selectedLanguage");
+// 	if (savedLanguage) {
+// 		setLanguage(savedLanguage as Lang);
+// 	}
+
+// 	// Pass params to the page if needed
+// 	page.render(appContainer, params);
 // }
+
 
 export function refreshRouter() {
 	const path = window.location.pathname;
 	let page: Page | null = null;
 	let params: { [key: string]: string } = {};
 
-	for (const route in routes) {
-		// Convert route to a regex: "/reset_password/:uuid" → "^/reset_password/([^/]+)$"
-		const regex = new RegExp("^" + route.replace(/:\w+/g, "([^/]+)") + "$");
-		const match = path.match(regex);
+	const restrictedForAuthUsers = [
+		"/register",
+		"/register/twofactor",
+		"/reset_password/:uuid",
+		"/account-verified"
+	];
 
-		if (match) {
-			page = routes[route]; // Corrected: Now correctly fetches the page
-			const keys = (route.match(/:(\w+)/g) || []).map((key) => key.substring(1));
+	// Check if the current path matches any restricted route pattern
+	function matchesRestrictedPattern(currentPath: string): boolean {
+		return restrictedForAuthUsers.some(route => {
+			// Convert route to a regex for pattern matching
+			const regex = new RegExp("^" + route.replace(/:\w+/g, "([^/]+)") + "$");
+			return regex.test(currentPath);
+		});
+	}
 
-			keys.forEach((key, index) => {
-				params[key] = match[index + 1]; // Extract params from URL
-			});
+	// First check if logged-in users are trying to access restricted pages
+	if (store.isLoggedIn && matchesRestrictedPattern(path)) {
+		page = NotFound;
+	}
+	// Then check if non-logged-in users are trying to access protected pages
+	else if (!store.isLoggedIn && !matchesRestrictedPattern(path) && path !== "/") {
+		page = NotFound;
+	}
+	else {
+		// Try to find a matching route
+		for (const route in routes) {
+			// Convert route to a regex: "/reset_password/:uuid" → "^/reset_password/([^/]+)$"
+			const regex = new RegExp("^" + route.replace(/:\w+/g, "([^/]+)") + "$");
+			const match = path.match(regex);
 
-			break;
+			if (match) {
+				page = routes[route];
+				const keys = (route.match(/:(\w+)/g) || []).map((key) => key.substring(1));
+
+				keys.forEach((key, index) => {
+					params[key] = match[index + 1]; // Extract params from URL
+				});
+
+				break;
+			}
 		}
 	}
 

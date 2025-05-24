@@ -1,6 +1,6 @@
 import store from "../../../store/store.js";
 import { createComponent } from "../../utils/StateManager.js";
-import { chatService } from "../../utils/chatWebSocketService.js";
+import { chatService } from "../../utils/chatUtils/chatWebSocketService.js";
 
 
 interface BlockedUserProps {
@@ -26,13 +26,13 @@ const BlockedUser = createComponent((props: BlockedUserProps) => {
 	const blockedUsersItem = document.createElement('div');
 	blockedUsersItem.className = "flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm";
 	blockedUsersItem.innerHTML = `
-    <img alt="${props.username}" src="${props.avatar || 'https://placehold.co/40x40'}" class="size-10 rounded-full"/>
+    <img alt="${props.username}" src="${props.avatar || 'http://placehold.co/40x40'}" class="size-10 rounded-full"/>
     <div>
       <p class="font-medium">${props.username}</p>
       <span class="text-sm text-gray-500">Blocked on ${props.blockedOn}</span>
     </div>
     <div class="flex flex-1 justify-end gap-2">
-      <button id="unblock-${props.id}" class="px-3 py-1 bg-pongblue text-white text-sm rounded hover:bg-opacity-80">
+      <button id="unblock-${props.id}" class="px-3 py-1 bg-pongcyan text-white text-sm rounded hover:bg-opacity-80">
         Unblock
       </button>
     </div>
@@ -92,7 +92,7 @@ export const BlockedUsersSection = createComponent(() => {
 			id: user.id,
 			username: user.nickname,
 			blockedOn: blockedDate,
-			avatar: user.avatar || 'https://placehold.co/40x40'
+			avatar: user.avatar || 'http://placehold.co/40x40'
 		  }));
 		});
 	  } else {

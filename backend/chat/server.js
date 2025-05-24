@@ -3,10 +3,14 @@ import fastifyCors from "@fastify/cors";
 import { registerWebSocketAdapter } from "./src/services/WebSocketAdapter.js";
 import { setupWebSocketHandlers } from "./src/controllers/websocketController.js";
 import { initDatabase, closeDatabase } from "./src/db/initDB.js";
+import fs from 'fs'
+import { auth } from './src/middlewares/auth.js'
 
 const fastify = Fastify({
-  logger: true,
-});
+	logger: true,
+})
+
+fastify.addHook("preHandler", auth);
 
 fastify.register(fastifyCors, {
   origin: true,
@@ -17,6 +21,8 @@ fastify.register(fastifyCors, {
 fastify.get("/", async (request, reply) => {
   return { status: "Chat microservice running" };
 });
+
+// fastify.addHook("preHandler", auth)
 
 // Initialize the database
 const setupDatabase = async () => {
@@ -32,7 +38,7 @@ const setupDatabase = async () => {
 const start = async () => {
   try {
     await setupDatabase();
-    await fastify.listen({ port: 3002, host: "0.0.0.0" });
+    await fastify.listen({ port: 3002, host: "::" });
 
     const wsAdapter = registerWebSocketAdapter(fastify);
     setupWebSocketHandlers(wsAdapter, fastify);

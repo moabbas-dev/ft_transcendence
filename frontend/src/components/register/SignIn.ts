@@ -6,6 +6,7 @@ import { navigate } from '../../router.js';
 import store from '../../../store/store.js';
 import { jwtDecode } from "jwt-decode";
 import Toast from '../../toast/Toast.js';
+import { handleLoginWithGoogle } from '../../main.js';
 
 interface SignInProps {
 	styles: string,
@@ -18,7 +19,7 @@ export const SignIn = createComponent((props: SignInProps) => {
 	form.className = `flex flex-col justify-center gap-3 w-[93vw] sm:w-96 xl:w-[30vw] bg-white rounded-lg p-4 sm:p-8 ${props.styles || ''}`;
 	form.innerHTML = `
   	<div class="flex flex-col gap-3">
-    	<h1 class="text-2xl sm:text-3xl font-bold text-center text-pongblue">${t('register.signin.title')}</h1>
+    	<h1 class="text-2xl sm:text-3xl font-bold text-center text-pongcyan">${t('register.signin.title')}</h1>
 		<form class="flex flex-col gap-2">
 			<div class="flex flex-col gap-1 px-1">
 				<label for="email" class="text-base font-medium text-gray-700">Email</label>
@@ -27,7 +28,7 @@ export const SignIn = createComponent((props: SignInProps) => {
 					<i class="bx bx-envelope text-lg"></i>
 					</span>
 					<input type="email" id="email" placeholder="${t('register.signup.emailPlaceholder')}" autocomplete="email" name="email" 
-					class="w-full pl-8 pr-2 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue">
+					class="w-full pl-8 pr-2 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongcyan focus:outline-none focus:ring-1 focus:ring-pongcyan focus:border-pongcyan">
 				</div>
 			</div>
 
@@ -38,7 +39,7 @@ export const SignIn = createComponent((props: SignInProps) => {
 						<i class="bx bx-lock-alt text-lg"></i>
 					</span>
 					<input type="password" id="password" placeholder="${t('register.signup.passwordPlaceholder')}" autocomplete="current-password" name="password"
-					class="w-full pl-8 pr-8 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongblue focus:outline-none focus:ring-1 focus:ring-pongblue focus:border-pongblue">
+					class="w-full pl-8 pr-8 py-2 border border-gray-300 rounded-lg focus:shadow-[0_0_5px] focus:shadow-pongcyan focus:outline-none focus:ring-1 focus:ring-pongcyan focus:border-pongcyan">
 					<span class="absolute inset-y-0 right-0 flex items-center pr-2 cursor-pointer toggle-password">
 						<i class='bx bx-hide hide-show text-lg text-gray-500'></i>
 					</span>
@@ -58,12 +59,12 @@ export const SignIn = createComponent((props: SignInProps) => {
       	</div>
     </div>
 	<div class="flex flex-col gap-3" id="google-btn">
-		<a href="https://localhost:8001/auth/google" id="google-sign" class="w-full flex items-center gap-2 justify-center py-2 text-white bg-pongblue hover:cursor-pointer hover:opacity-80 rounded-md transition-all duration-300">
+		<button id="google-sign" class="w-full flex items-center gap-2 justify-center py-2 text-white bg-pongcyan hover:cursor-pointer hover:opacity-80 rounded-md transition-all duration-300">
 			<i class='bx bxl-google text-2xl'></i>
 			<span class="text-center">${t('register.continueGoogle')}</span>
-		</a>
+		</button>
 		<div class="w-full text-center">
-			${t('register.signin.acc_question')} <span class="signup-link hover:cursor-pointer hover:underline text-pongblue">${t('register.signin.signup_btn')}</span>
+			${t('register.signin.acc_question')} <span class="signup-link hover:cursor-pointer hover:underline text-pongcyan">${t('register.signin.signup_btn')}</span>
 		</div>
 	</div>
   `;
@@ -77,13 +78,14 @@ export const SignIn = createComponent((props: SignInProps) => {
 				email: emailData,
 				password: passwordData
 			};
-			const signIn = await axios.post("https://localhost:8001/auth/login", data);
+			const signIn = await axios.post("/authentication/auth/login", data);
 			if (signIn.data.require2FA == false) {
 				if (signIn.data.accessToken) {
 					const decodedToken: any = jwtDecode(signIn.data.accessToken);
+					console.log(`User id: ${decodedToken.userId}`);
 					store.update("accessToken", signIn.data.accessToken);
 					store.update("refreshToken", signIn.data.refreshToken);
-					store.update("sessionId", signIn.data.sessionId);
+					store.update("sessionUUID", signIn.data.sessUUID);
 					store.update("userId", decodedToken.userId);
 					store.update("email", decodedToken.email);
 					store.update("nickname", decodedToken.nickname);
@@ -92,13 +94,14 @@ export const SignIn = createComponent((props: SignInProps) => {
 					store.update("country", decodedToken.country);
 					store.update("createdAt", decodedToken.createdAt);
 					store.update("avatarUrl", decodedToken.avatarUrl);
+					store.update("is2faEnabled", decodedToken.is2fa);
 					store.update("isLoggedIn", true);
-					navigate("/play");
-					Toast.show(`Login successful, Welcome ${store.fullName}!`, "success");
+					navigate("/");
+					Toast.show(`Login successful, Welcome ${decodedToken.fullName}!`, "success");
 				}
 			}
 			else {
-				store.update("sessionId", signIn.data.sessionId);
+				store.update("sessionUUID", signIn.data.sessUUID);
 				navigate("/register/twofactor");
 				Toast.show("First step is complete! Now moving to the 2fa code validation", "success");
 			}
@@ -115,6 +118,7 @@ export const SignIn = createComponent((props: SignInProps) => {
 				Toast.show(`No response from server: ${error.request}`, "error");
 			else
 				Toast.show(`Error setting up the request: ${error.message}`, "error");
+			console.log(error);	
 		}
 	};
 
@@ -133,7 +137,7 @@ export const SignIn = createComponent((props: SignInProps) => {
 	const forgotBtn = Button({
 		type: 'button',
 		text: t('register.signin.forgotpass'),
-		styles: 'bg-white text-pongblue p-0 rounded-none hover:opacity-100 hover:underline',
+		styles: 'bg-white text-pongcyan p-0 rounded-none hover:opacity-100 hover:underline',
 		eventType: 'click',
 		onClick: (e: Event) => {
 			e.preventDefault()
@@ -161,11 +165,11 @@ export const SignIn = createComponent((props: SignInProps) => {
 		eyeIcon.classList.add(wasPassword ? 'bx-show' : 'bx-hide');
 	};
 
-	const googleBtn = form.querySelector('#google-sign');
-	googleBtn?.addEventListener('click', () => {
-		localStorage.setItem("googleAuth", "true");
-	});
-
+	// const googleBtn = form.querySelector('#google-sign');
+	// googleBtn?.addEventListener('click', () => {
+	// 	localStorage.setItem("googleAuthClicked", "true");
+	// });
+	handleLoginWithGoogle(form)
 	togglePassword.addEventListener('click', handleTogglePassword);
 	useCleanup(() => togglePassword.removeEventListener('click', handleTogglePassword))
 	return form;

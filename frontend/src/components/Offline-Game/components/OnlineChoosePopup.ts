@@ -11,8 +11,8 @@ export const OnlineChoosePopup = createComponent(() => {
 	container.innerHTML = `
 		<h1 class="text-2xl font-semibold text-white">Choose a Mode</h1>
 		<div class="flex flex-col gap-3">
-			<button class="flex items-center justify-center w-[18ch] rounded-xl p-2 bg-gradient-to-br from-pongblue to-[rgba(100,100,255,0.8)] hover:from-[rgba(100,100,255,0.9)] hover:to-pongblue text-white text-lg animate-fade-left">Play with Friend</button>
-			<button class="flex items-center justify-center w-[18ch] rounded-xl p-2 bg-gradient-to-br from-pongblue to-[rgba(100,100,255,0.8)] hover:from-[rgba(100,100,255,0.9)] hover:to-pongblue text-white text-lg animate-fade-right">Online matchmaking</button>
+			<button class="flex items-center justify-center w-[18ch] rounded-xl p-2 bg-gradient-to-br from-pongcyan to-[rgba(100,100,255,0.8)] hover:from-[rgba(100,100,255,0.9)] hover:to-pongcyan text-white text-lg animate-fade-left">Play with Friend</button>
+			<button class="flex items-center justify-center w-[18ch] rounded-xl p-2 bg-gradient-to-br from-pongcyan to-[rgba(100,100,255,0.8)] hover:from-[rgba(100,100,255,0.9)] hover:to-pongcyan text-white text-lg animate-fade-right">Online matchmaking</button>
 		</div>
 	`
 	overlay.addEventListener('click', () => {

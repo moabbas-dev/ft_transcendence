@@ -1,6 +1,6 @@
 import { t } from "../../../languages/LanguageController.js";
 import { refreshRouter } from "../../../router.js";
-import { AIDifficulty } from "../../../types/types.js";
+import { AIDifficulty, GameType } from "../../../types/types.js";
 import { AIController, BallController, Controller, HumanPlayerController } from "./GameControllers.js";
 import { updateBackgrounds } from "./HeaderAnimations_utils.js";
 
@@ -30,14 +30,14 @@ export interface gameState {
 }
 
 export class GameBoard {
-	private gameType: "AI" | "Local";
-	private canvas: HTMLCanvasElement;
-	private ctx: CanvasRenderingContext2D;
-	private state:gameState;
-	private player1Controller!: Controller;
-	private player2Controller!: Controller;
-	private ballController: Controller;
-	private gameHeader: HTMLElement;
+	protected gameType: GameType;
+	protected canvas: HTMLCanvasElement;
+	protected ctx: CanvasRenderingContext2D;
+	protected state:gameState;
+	protected player1Controller!: Controller;
+	protected player2Controller!: Controller;
+	protected ballController: Controller;
+	protected gameHeader: HTMLElement;
 	private AIDifficulty: AIDifficulty | undefined;
 
 	/** Overload signatures 
@@ -47,9 +47,9 @@ export class GameBoard {
 	 * from this class some methods like draw(), initEventListerners() ...
 	*/
 	constructor();
-	constructor(gameType: "AI" | "Local", canvas:HTMLCanvasElement, gameHeader:HTMLElement, difficulty?:AIDifficulty);
+	constructor(gameType: GameType, canvas:HTMLCanvasElement, gameHeader:HTMLElement, difficulty?:AIDifficulty);
 
-	constructor(gameType?: "AI" | "Local", canvas?:HTMLCanvasElement, gameHeader?:HTMLElement, difficulty?:AIDifficulty) {
+	constructor(gameType?: GameType, canvas?:HTMLCanvasElement, gameHeader?:HTMLElement, difficulty?:AIDifficulty) {
 		this.gameType = gameType!;
 		this.canvas = canvas!;
 		this.gameHeader = gameHeader!
@@ -72,11 +72,11 @@ export class GameBoard {
 		window.addEventListener("popstate", this.handleNavigation.bind(this));
 	}
 
-	private handleNavigation() {
+	protected handleNavigation() {
 		this.state.gameEnded = true;
 	}
 
-	private createInitialState(): gameState {
+	protected createInitialState(): gameState {
 		return {
 			paddleHeight: 120,
 			paddleWidth: 20,
@@ -125,7 +125,7 @@ export class GameBoard {
 		window.addEventListener('keydown', (e) => {
 			const key = e.key.toLowerCase();
 
-			if (key === 'escape' && this.state.gameStarted && !this.state.gameEnded) {
+			if (key === 'escape' && this.state.gameStarted && !this.state.gameEnded && this.gameType !== "online") {
 			  if (!this.state.keys[key]) {
 				this.state.gamePaused = !this.state.gamePaused;
 			  }
@@ -377,13 +377,13 @@ export class GameBoard {
 		}
 	}
 
-	private clampPaddlePosition(positionKey: 'player1Y' | 'player2Y') {
+	protected clampPaddlePosition(positionKey: 'player1Y' | 'player2Y') {
 		this.state[positionKey] = Math.max(0,
 		  Math.min(this.canvas.height - this.state.paddleHeight, this.state[positionKey])
 		);
 	}
 
-	startGame() {
+	protected startGame() {
 		this.init();
 		this.gameLoop();
 	}
@@ -397,7 +397,7 @@ export class GameBoard {
 		this.startGame()
 	}
 
-	private gameLoop = () => {
+	gameLoop = () => {
 		this.draw();
 		if (!this.state.gamePaused)
 			this.update();

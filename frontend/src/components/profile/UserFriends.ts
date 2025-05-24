@@ -41,7 +41,7 @@ export const UserFriends = createComponent(() => {
     // Update tab styling
     Array.from(tabNav.children).forEach((tab, index) => {
       if (tabs[index].id === sectionId) {
-        tab.className += " border-b-2 border-pongblue text-pongblue focus:outline-none";
+        tab.className += " border-b-2 border-pongcyan text-pongcyan focus:outline-none";
       } else {
         tab.className = "px-2 sm:px-4 py-2 font-medium max-sm:text-sm text-gray-500 hover:text-gray-700 focus:outline-none";
       }
