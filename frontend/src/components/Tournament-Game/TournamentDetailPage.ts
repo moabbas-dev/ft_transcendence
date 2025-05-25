@@ -49,6 +49,12 @@ export default {
     const tournamentId = params.tournamentId;
     const userId = store.userId;
 
+    if (!/^\d+$/.test(tournamentId)) {
+      console.error("Invalid tournament ID format");
+      navigate("/404");
+      return;
+    }
+    
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const client = tournamentClient || new TournamentClient(`${protocol}//${window.location.hostname}:${window.location.port}/matchmaking/`, userId as string);
 
@@ -197,6 +203,18 @@ export default {
             client: client
           }
         });
+      }
+    });
+
+    client.on('tournament_not_found', (error) => {
+      console.error('Tournament error received:', error);
+      
+      if (error.message && (
+        error.message.includes('Tournament not found') || 
+        error.message.includes('Error getting tournament details')
+      )) {
+        navigate('/play/tournaments');
+        Toast.show("Tournament not found", "error");
       }
     });
   }
@@ -498,6 +516,7 @@ function showMatchDetails(match: any, tournamentData: any) {
 }
 
 import { TournamentResult, renderResultsTab } from "./TournamentResults.js";
+import Toast from "../../toast/Toast.js";
 
 // Implement showTournamentResults function
 function showTournamentResults(container: HTMLElement, data: any, client: TournamentClient, userId: string) {

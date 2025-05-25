@@ -35,6 +35,7 @@ const routes: { [key: string]: Page } = {
   "/leader-board": LeaderBoardPage,
   "/about-us": AboutPage,
   "/account-verified": AccountVerifiedPage,
+  "404": NotFound,
 };
 
 let navigationState: any = null;

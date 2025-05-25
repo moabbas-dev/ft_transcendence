@@ -301,6 +301,12 @@ export function registerTournamentMessageHandlers(wsAdapter) {
 			const { tournamentId } = payload;
 
 			const tournamentDetails = await TournamentService.getTournamentDetails(tournamentId);
+			if (!tournamentDetails || !tournamentDetails.tournament) {
+				wsAdapter.sendToClient(clientId, 'tournament_not_found', {
+				  message: 'Tournament not found'
+				});
+				return;
+			}
 
 			wsAdapter.sendToClient(clientId, 'tournament_details', tournamentDetails);
 		} catch (error) {

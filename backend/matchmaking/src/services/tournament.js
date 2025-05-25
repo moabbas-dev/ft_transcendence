@@ -486,7 +486,10 @@ class TournamentService {
   // Get tournament details with matches and players
   async getTournamentDetails(tournamentId) {
     try {
-      // Get tournament info
+      if (isNaN(tournamentId) || tournamentId <= 0) {
+        return null;
+      }
+
       const tournament = await new Promise((resolve, reject) => {
         db.get(
           `SELECT * FROM tournaments WHERE id = ?`,
@@ -496,7 +499,7 @@ class TournamentService {
       })
 
       if (!tournament) {
-        throw new Error('Tournament not found');
+        return null
       }
 
       // Get all players
