@@ -60,13 +60,7 @@ export default {
       </div>
     `;
 
-    const backButton = container.querySelector('#back-button');
-    if (backButton) {
-      backButton.addEventListener('click', () => {
-        navigate('/play/tournaments');
-      });
-    }
-
+    container.querySelector('#back-button')?.addEventListener('click', () => navigate('/play/tournaments'));
     client.getTournamentDetails(tournamentId);
 
     client.on('tournament_details', async (data) => {

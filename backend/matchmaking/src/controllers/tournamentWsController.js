@@ -1,24 +1,5 @@
 import TournamentService from '../services/tournament.js';
 
-/**
- * events:
- * 	create_tournament
- * 	 sendToClient:
- *    tournament_created
- * 
- *  join_tournament
- *   sendToClient:
- *    tournament_joined
- *    tournament_player_joined
- * 
- *  start_tournament
- *   sendToClient:
- *    tournament_started
- * 
- *  
- *    
- */
-
 export function registerTournamentMessageHandlers(wsAdapter) {
 	wsAdapter.registerMessageHandler('create_tournament', async (clientId, payload) => {
 		try {
@@ -43,41 +24,64 @@ export function registerTournamentMessageHandlers(wsAdapter) {
 
 	wsAdapter.registerMessageHandler('join_tournament', async (clientId, payload) => {
 		try {
-			const { tournamentId } = payload;
-
-			const result = await TournamentService.registerPlayer(tournamentId, clientId);
-
-			wsAdapter.sendToClient(clientId, 'tournament_joined', {
+		  const { tournamentId } = payload;
+	  
+		  const result = await TournamentService.registerPlayer(tournamentId, clientId);
+	  
+		  wsAdapter.sendToClient(clientId, 'tournament_joined', {
+			tournamentId,
+			success: true
+		  });
+	  
+		  const tournamentDetails = await TournamentService.getTournamentDetails(tournamentId);
+		  const playerIds = tournamentDetails.players.map(p => p.player_id);
+	  
+		  wsAdapter.sendToClient(clientId, 'tournament_details', tournamentDetails);
+	  
+		  playerIds.forEach(playerId => {
+			if (playerId !== clientId) {
+			  wsAdapter.sendToClient(playerId, 'tournament_player_joined', {
 				tournamentId,
-				success: true
-			});
-
-			const tournamentDetails = await TournamentService.getTournamentDetails(tournamentId);
-			const playerIds = tournamentDetails.players.map(p => p.player_id);
-
-			playerIds.forEach(playerId => {
-				wsAdapter.sendToClient(playerId, 'tournament_player_joined', {
-					tournamentId,
-					players: tournamentDetails.players
-				});
-
-				wsAdapter.sendToClient(playerId, 'tournament_details', tournamentDetails);
-			});
-
-			if (tournamentDetails.tournament.status === 'in_progress') {
-				playerIds.forEach(playerId => {
-					wsAdapter.sendToClient(playerId, 'tournament_started', {
-						tournamentId,
-						tournament: tournamentDetails.tournament,
-						matches: tournamentDetails.matches
-					});
-				});
+				players: tournamentDetails.players
+			  });
 			}
-		} catch (error) {
-			console.error('Error joining tournament:', error);
-			wsAdapter.sendToClient(clientId, 'error', {
-				message: `Error joining tournament: ${error.message}`
+		  });
+	  
+		  if (tournamentDetails.tournament.status === 'in_progress') {
+			wsAdapter.sendToClient(clientId, 'tournament_started', {
+			  tournamentId,
+			  tournament: tournamentDetails.tournament,
+			  matches: tournamentDetails.matches
 			});
+
+			const playerMatches = tournamentDetails.matches.filter(match => 
+			  match.status === 'pending' && 
+			  match.players && 
+			  match.players.some(p => p.player_id === clientId)
+			);
+			
+			playerMatches.forEach(match => {
+			  const opponent = match.players.find(p => p.player_id !== clientId);
+			  if (opponent) {
+				wsAdapter.sendToClient(clientId, 'tournament_match_notification', {
+				  tournamentId,
+				  matchId: match.id,
+				  opponent: {
+					id: opponent.player_id,
+					username: opponent.nickname || `Player ${opponent.player_id}`,
+					elo: opponent.elo_before,
+					avatar: opponent.avatar_url
+				  },
+				  round: match.round || 1
+				});
+			  }
+			});
+		  }
+		} catch (error) {
+		  console.error('Error joining tournament:', error);
+		  wsAdapter.sendToClient(clientId, 'error', {
+			message: `Error joining tournament: ${error.message}`
+		  });
 		}
 	});
 

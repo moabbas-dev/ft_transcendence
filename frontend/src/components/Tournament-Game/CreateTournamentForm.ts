@@ -12,9 +12,9 @@ export const CreateTournamentForm = createComponent((props: CreateTournamentForm
   const { onTournamentCreated, client } = props;
   
   const container = document.createElement('div');
-  container.className = "w-full max-w-md mx-auto";
+  container.className = "w-full";
   container.innerHTML = `
-    <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+    <div class="w-full bg-gray-800 p-6 rounded-lg shadow-lg">
       <h2 class="text-xl font-bold text-white mb-4">${t('play.tournaments.createTournament.title')}</h2>
       
       <form id="create-tournament-form" class="space-y-4">
