@@ -20,6 +20,23 @@ interface UserDetails {
   avatar_url?: string;
 }
 
+interface WaitingRoomPlayer {
+  userId: string;
+  username: string;
+  avatar?: string;
+  joinedAt?: string;
+}
+
+interface WaitingRoomData {
+  tournamentId: string;
+  playerCount: number;
+  players: WaitingRoomPlayer[];
+  isCreator: boolean;
+  client: TournamentClient;
+  onTournamentStart: () => void;
+}
+
+
 export default {
   render: async (container: HTMLElement, params?: { [key: string]: string }) => {
 
@@ -116,7 +133,7 @@ export default {
               userId: userId,
               username: 'You',
               elo: 1000,
-              avatar: undefined
+              avatar: store.avatarUrl || undefined
             },
             {
               userId: data.opponent.id,
@@ -126,6 +143,7 @@ export default {
             }
           ],
           tournamentName: container.querySelector('#tour-name')?.textContent || 'Tournament',
+          tournamentId: data.tournamentId,
           round: 1
         }, userId as string, client);
       } else {
@@ -174,51 +192,8 @@ export default {
       console.log('Opponent accepted:', data);
     });
 
-    client.on('tournament_match_starting', (data) => {
-      if (String(data.tournamentId) === String(tournamentId)) {
-        console.log('Match starting:', data);
-        
-        startTournamentMatch(container, data.matchId, {
-          players: [
-            {
-              userId: userId,
-              username: 'You',
-              elo: 1000,
-              avatar: undefined
-            },
-            {
-              userId: data.opponent.id,
-              username: data.opponent.username,
-              elo: data.opponent.elo,
-              avatar: data.opponent.avatar
-            }
-          ],
-          tournamentName: container.querySelector('#tour-name')?.textContent || 'Tournament',
-          tournamentId: data.tournamentId,
-          round: 1
-        }, userId as string, client);
-      } else {
-        console.error("[tournament_match_starting 2]: Ids don't match");
-      }
-    });
   }
 };
-
-interface WaitingRoomPlayer {
-  userId: string;
-  username: string;
-  avatar?: string;
-  joinedAt?: string;
-}
-
-interface WaitingRoomData {
-  tournamentId: string;
-  playerCount: number;
-  players: WaitingRoomPlayer[];
-  isCreator: boolean;
-  client: TournamentClient;
-  onTournamentStart: () => void;
-}
 
 function showWaitingRoom(container: HTMLElement, data: { tournament: { id: string; player_count: number; creator_id: string }; players: Player[] }, client: TournamentClient, userId: string): void {
   const content = container.querySelector('#tournament-content');
@@ -684,7 +659,6 @@ function startTournamentMatch(container: HTMLElement, matchId: string, matchData
   // Store original tournament view to restore later
   const originalContent = content.innerHTML;
 
-  // Clear content and create match interface
   content.innerHTML = `
     <div class="tournament-match-container w-full h-full flex flex-col">
       <div class="match-header flex justify-between items-center p-4 bg-gray-800 mb-4 rounded-lg">
