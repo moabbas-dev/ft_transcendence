@@ -183,6 +183,22 @@ export default {
         }, 3000);
       }
     });
+
+    client.on('tournament_match_starting', (data) => {
+      console.log('Tournament match starting event received:', data);
+      if (String(data.tournamentId) === String(tournamentId)) {
+        document.querySelectorAll('.fixed.top-4.right-4').forEach(el => el.remove());
+        navigate(`/tournaments/${tournamentId}/match/${data.matchId}`, {
+          state: {
+            matchId: data.matchId,
+            tournamentId: data.tournamentId,
+            opponent: data.opponent,
+            isPlayer1: data.isPlayer1,
+            client: client
+          }
+        });
+      }
+    });
   }
 };
 

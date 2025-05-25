@@ -15,6 +15,7 @@ import CreateTournamentPage from './pages/create-tournament.js';
 import AccountVerifiedPage from './pages/account-verified.js';
 import store from "../store/store.js";
 import TournamentDetailPage from "./components/Tournament-Game/TournamentDetailPage.js"
+import TournamentMatchPage from "./components/Tournament-Game/tournament-match.js";
 
 const routes: { [key: string]: Page } = {
   "/": HomePage,
@@ -28,6 +29,7 @@ const routes: { [key: string]: Page } = {
   "/play/tournaments": TournamentPage,
   "/tournaments/create": CreateTournamentPage,
   "/tournaments/:tournamentId": TournamentDetailPage,
+  "/tournaments/:tournamentId/match/:matchId": TournamentMatchPage, // Add this new route
   "/chat": ChatPage,
   "/chat/:uName": ChatPage,
   "/leader-board": LeaderBoardPage,
@@ -35,58 +37,7 @@ const routes: { [key: string]: Page } = {
   "/account-verified": AccountVerifiedPage,
 };
 
-// export function refreshRouter() {
-// 	const path = window.location.pathname;
-// 	let page: Page | null = null;
-// 	let params: { [key: string]: string } = {};
-
-// 	const restrictedForAuthUsers = [
-// 		"/register",
-// 		"/register/twofactor",
-// 		// "/reset_password/:uuid",
-// 		"/account-verified"
-// 	];
-
-// 	for (const route in routes) {
-// 		if (store.isLoggedIn && restrictedForAuthUsers.includes(path))
-// 			page = NotFound
-// 		else if (!store.isLoggedIn && !restrictedForAuthUsers.includes(path) && path !== "/")
-// 			page = NotFound
-// 		else {
-// 			// Convert route to a regex: "/reset_password/:uuid" → "^/reset_password/([^/]+)$"
-// 			const regex = new RegExp("^" + route.replace(/:\w+/g, "([^/]+)") + "$");
-// 			const match = path.match(regex);
-
-// 			if (match) {
-// 				page = routes[route]; // Corrected: Now correctly fetches the page
-// 				const keys = (route.match(/:(\w+)/g) || []).map((key) => key.substring(1));
-
-// 				keys.forEach((key, index) => {
-// 					params[key] = match[index + 1]; // Extract params from URL
-// 				});
-
-// 				break;
-// 			}
-// 		}
-// 	}
-
-// 	if (!page) {
-// 		page = NotFound;
-// 	}
-
-// 	const appContainer = document.getElementById("app")!;
-// 	appContainer.className = "";
-// 	appContainer.innerHTML = "";
-
-// 	const savedLanguage = localStorage.getItem("selectedLanguage");
-// 	if (savedLanguage) {
-// 		setLanguage(savedLanguage as Lang);
-// 	}
-
-// 	// Pass params to the page if needed
-// 	page.render(appContainer, params);
-// }
-
+let navigationState: any = null;
 
 export function refreshRouter() {
 	const path = window.location.pathname;
@@ -100,27 +51,21 @@ export function refreshRouter() {
 		"/account-verified"
 	];
 
-	// Check if the current path matches any restricted route pattern
 	function matchesRestrictedPattern(currentPath: string): boolean {
 		return restrictedForAuthUsers.some(route => {
-			// Convert route to a regex for pattern matching
 			const regex = new RegExp("^" + route.replace(/:\w+/g, "([^/]+)") + "$");
 			return regex.test(currentPath);
 		});
 	}
 
-	// First check if logged-in users are trying to access restricted pages
 	if (store.isLoggedIn && matchesRestrictedPattern(path)) {
 		page = NotFound;
 	}
-	// Then check if non-logged-in users are trying to access protected pages
 	else if (!store.isLoggedIn && !matchesRestrictedPattern(path) && path !== "/") {
 		page = NotFound;
 	}
 	else {
-		// Try to find a matching route
 		for (const route in routes) {
-			// Convert route to a regex: "/reset_password/:uuid" → "^/reset_password/([^/]+)$"
 			const regex = new RegExp("^" + route.replace(/:\w+/g, "([^/]+)") + "$");
 			const match = path.match(regex);
 
@@ -129,7 +74,7 @@ export function refreshRouter() {
 				const keys = (route.match(/:(\w+)/g) || []).map((key) => key.substring(1));
 
 				keys.forEach((key, index) => {
-					params[key] = match[index + 1]; // Extract params from URL
+					params[key] = match[index + 1];
 				});
 
 				break;
@@ -150,11 +95,16 @@ export function refreshRouter() {
 		setLanguage(savedLanguage as Lang);
 	}
 
-	// Pass params to the page if needed
-	page.render(appContainer, params);
+	page.render(appContainer, params, navigationState);
+	
+	navigationState = null;
 }
 
-export function navigate(path: string) {
+export function navigate(path: string, options?: { state?: any }) {
+	if (options?.state) {
+		navigationState = options.state;
+	}
+	
 	window.history.pushState({}, "", path);
 	refreshRouter();
 }
