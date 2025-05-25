@@ -608,61 +608,25 @@ class TournamentService {
     try {
       const match = await new Promise((resolve, reject) => {
         db.get(
-          `SELECT m.*, tm.tournament_id 
-         FROM matches m
-         JOIN tournaments_matches tm ON m.id = tm.match_id
-         WHERE m.id = ?`,
+          `SELECT * FROM matches WHERE id = ?`,
           [matchId],
           (err, row) => err ? reject(err) : resolve(row)
         );
-      })
-
+      });
+  
       if (!match) return null;
-
+  
       const players = await new Promise((resolve, reject) => {
         db.all(
-          `SELECT mp.*, p.id, p.elo_score
-         FROM match_players mp
-         JOIN players p ON mp.player_id = p.id
-         WHERE mp.match_id = ?`,
-          [matchId],
-          (err, row) => err ? reject(err) : resolve(row)
-        );
-      })
-
-      return { match, players };
-    } catch (error) {
-      console.error('Error fetching tournament match with players:', error);
-      throw error;
-    }
-  }
-
-  async getMatchWithPlayers(matchId) {
-    try {
-      const match = await new Promise((resolve, reject) => {
-        db.get(
-          `SELECT m.*, tm.tournament_id 
-           FROM matches m
-           JOIN tournaments_matches tm ON m.id = tm.match_id
-           WHERE m.id = ?`,
-          [matchId],
-          (err, row) => err ? reject(err) : resolve(row)
-        );
-      })
-
-      if (!match) return null;
-
-      const players = await new Promise((resolve, reject) => {
-        db.all(
-          `SELECT mp.*, p.id, p.elo_score,
+          `SELECT mp.*, p.elo_score
            FROM match_players mp
            JOIN players p ON mp.player_id = p.id
            WHERE mp.match_id = ?`,
           [matchId],
-          (err, row) => err ? reject(err) : resolve(row)
+          (err, rows) => err ? reject(err) : resolve(rows)
         );
-      })
-
+      });
+  
       return { match, players };
     } catch (error) {
       console.error('Error fetching tournament match with players:', error);

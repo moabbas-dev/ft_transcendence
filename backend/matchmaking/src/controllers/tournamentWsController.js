@@ -149,18 +149,14 @@ export function registerTournamentMessageHandlers(wsAdapter) {
 	wsAdapter.registerMessageHandler('tournament_match_accept', async (clientId, payload) => {
 		try {
 			const { matchId } = payload;
-
 			const matchWithPlayers = await TournamentService.getMatchWithPlayers(matchId);
-
-			if (!matchWithPlayers) {
+			if (!matchWithPlayers) 
 				throw new Error(`Match ${matchId} not found`);
-			}
 
 			const { match, players } = matchWithPlayers;
 
-			if (!matchAcceptances.has(matchId)) {
+			if (!matchAcceptances.has(matchId))
 				matchAcceptances.set(matchId, new Set());
-			}
 
 			const acceptedPlayers = matchAcceptances.get(matchId);
 			acceptedPlayers.add(clientId);
@@ -168,13 +164,14 @@ export function registerTournamentMessageHandlers(wsAdapter) {
 			console.log(`Player ${clientId} accepted match ${matchId}. Accepted: ${acceptedPlayers.size}/${players.length}`);
 
 			wsAdapter.sendToClient(clientId, 'tournament_match_accepted', {
+				tournamentId: match.tournament_id,
 				matchId,
 				message: 'Match accepted! Waiting for opponent...'
 			});
-
-			const otherPlayer = players.find(p => p.player_id !== clientId);
+			const otherPlayer = players.find(p => String(p.player_id) !== String(clientId));
 			if (otherPlayer) {
 				wsAdapter.sendToClient(otherPlayer.player_id, 'tournament_opponent_accepted', {
+					tournamentId: match.tournament_id,
 					matchId,
 					acceptingPlayer: clientId,
 					message: 'Your opponent is ready!'
@@ -186,8 +183,6 @@ export function registerTournamentMessageHandlers(wsAdapter) {
 
 				matchAcceptances.delete(matchId);
 
-				wsAdapter.send('tournament_match_ready', { matchId });
-
 				players.forEach(player => {
 					const opponent = players.find(p => p.player_id !== player.player_id);
 
@@ -198,7 +193,8 @@ export function registerTournamentMessageHandlers(wsAdapter) {
 							opponent: {
 								id: opponent.player_id,
 								username: opponent.nickname || `Player ${opponent.player_id}`,
-								elo: opponent.elo_score
+								elo: opponent.elo_score,
+								avatar: opponent.avatar_url || undefined
 							},
 							isPlayer1: player.player_id === players[0].player_id
 						});
