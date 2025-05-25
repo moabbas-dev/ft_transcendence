@@ -330,4 +330,17 @@ export function registerTournamentMessageHandlers(wsAdapter) {
 		}
 	});
 
+	wsAdapter.registerMessageHandler('list_user_tournaments', async (clientId, payload) => {
+		try {
+		  const { limit = 10, offset = 0 } = payload;
+		  const tournaments = await TournamentService.getUserTournaments(clientId, limit, offset);
+	  
+		  wsAdapter.sendToClient(clientId, 'user_tournament_list', { tournaments });
+		} catch (error) {
+		  console.error('Error listing user tournaments:', error);
+		  wsAdapter.sendToClient(clientId, 'error', {
+			message: `Error listing user tournaments: ${error.message}`
+		  });
+		}
+	});
 }

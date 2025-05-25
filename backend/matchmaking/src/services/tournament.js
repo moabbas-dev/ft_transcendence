@@ -701,6 +701,44 @@ class TournamentService {
       console.error(`Error notifying tournament progress: ${error.message}`);
     }
   }
+
+  async getUserTournaments(userId, limit = 10, offset = 0) {
+    try {
+      const tournaments = await new Promise((resolve, reject) => {
+        db.all(
+          `SELECT t.*, 
+          COUNT(tp.player_id) as registered_players_count,
+          CASE WHEN t.creator_id = ? THEN 1 ELSE 0 END as is_creator,
+          CASE WHEN user_tp.player_id IS NOT NULL THEN 1 ELSE 0 END as is_participant
+          FROM tournaments t
+          LEFT JOIN tournament_players tp ON t.id = tp.tournament_id
+          LEFT JOIN tournament_players user_tp ON t.id = user_tp.tournament_id AND user_tp.player_id = ?
+          WHERE t.creator_id = ? OR user_tp.player_id = ?
+          GROUP BY t.id
+          ORDER BY t.created_at DESC
+          LIMIT ? OFFSET ?`,
+          [userId, userId, userId, userId, limit, offset],
+          (err, rows) => err ? reject(err) : resolve(rows)
+        );
+      });
+
+      return tournaments.map(tournament => ({
+        id: tournament.id,
+        name: tournament.name,
+        status: tournament.status,
+        player_count: tournament.player_count,
+        registered_players: tournament.registered_players_count,
+        created_at: tournament.created_at,
+        started_at: tournament.started_at,
+        completed_at: tournament.completed_at,
+        is_creator: Boolean(tournament.is_creator),
+        is_participant: Boolean(tournament.is_participant)
+      }));
+    } catch (error) {
+      console.error('Error fetching user tournaments:', error);
+      throw error;
+    }
+  }
 }
 
 export default new TournamentService();

@@ -128,18 +128,48 @@ export default {
 			currentView = 'list';
 			const mainContent = container.querySelector('#main-content');
 			if (!mainContent) return;
+			
 			mainContent.innerHTML = `
-				<div class="text-center py-8">
-					<div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-pongcyan"></div>
-					<p class="mt-2 text-gray-400">${t('play.tournaments.myTournaments.loading')}</p>
-				</div>
+			  <div class="text-center py-8">
+				<div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-pongcyan"></div>
+				<p class="mt-2 text-gray-400">${t('play.tournaments.myTournaments.loading')}</p>
+			  </div>
 			`;
-
-			// For real implementation, you would need a backend route to get user's tournaments
-			// For now, we'll just use the existing tournaments and filter client-side
-			client.listTournaments();
+		  
+			const onUserTournamentList = (data: any) => {
+			  tournaments = data.tournaments || [];
+			  
+			  if (mainContent) {
+				mainContent.innerHTML = '';
+				
+				if (tournaments.length === 0) {
+				  mainContent.innerHTML = `
+					<div class="text-center py-8 text-gray-400">
+					  <i class="fas fa-trophy text-4xl mb-4 opacity-30"></i>
+					  <p>${t('play.tournaments.myTournaments.noTournaments')}</p>
+					  <p class="text-sm mt-2">${t('play.tournaments.myTournaments.createOrJoin')}</p>
+					</div>
+				  `;
+				} else {
+				  mainContent.appendChild(TournamentList({
+					tournaments,
+					onJoinTournament: (tournamentId: string) => {
+					  navigate(`/tournaments/${tournamentId}`);
+					},
+					onTournamentSelected: (tournament: Tournament) => {
+					  currentTournamentId = tournament.id;
+					  navigate(`/tournaments/${tournament.id}`);
+					}
+				  } as TournamentListProps));
+				}
+			  }
+			  
+			  client.off('user_tournament_list', onUserTournamentList);
+			};
+			
+			client.on('user_tournament_list', onUserTournamentList);
+			client.listUserTournaments();
 		}
-
 		return container;
 	}
 };

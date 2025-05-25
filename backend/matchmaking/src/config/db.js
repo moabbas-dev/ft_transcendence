@@ -31,7 +31,7 @@ class DatabaseConnection {
         winner_id INTEGER,
         tournament_id INTEGER,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        started_at DATETIME,
+        started_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         completed_at DATETIME,
         FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE SET NULL
       );

@@ -87,6 +87,8 @@ export class TournamentClient {
 			}
 			
 			if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+				console.log("[TOURNAMENT SEND]: ", type);
+				
 				this.ws.send(JSON.stringify({ type, payload }));
 			} else {
 				console.error('Cannot send message, WebSocket is not connected');
@@ -169,6 +171,10 @@ export class TournamentClient {
 
 	async listTournaments(): Promise<void> {
 		await this.send('list_tournaments', {});
+	}
+
+	async listUserTournaments(): Promise<void> {
+		await this.send('list_user_tournaments', {});
 	}
 
 	updatePaddlePosition(matchId: string, position: number): void {
