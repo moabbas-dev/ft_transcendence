@@ -151,7 +151,8 @@ function registerMessageHandlers(wsAdapter) {
         return;
       }
       
-      setTimeout(() => {
+      setTimeout(async () => {
+        await matchmakingService.updateMatchStartTime(match.matchId);
         wsAdapter.sendToClient(match.player1.id, 'game_start', { matchId: match.matchId });
         wsAdapter.sendToClient(match.player2.id, 'game_start', { matchId: match.matchId });
       }, 3000);
@@ -239,41 +240,56 @@ function registerMessageHandlers(wsAdapter) {
     }
   });
   
-  // Paddle move handler
+  // Paddle move handler with mirrored positioning
   wsAdapter.registerMessageHandler('paddle_move', async (clientId, payload) => {
     const { matchId, position } = payload;
     const opponentId = await matchmakingService.getOpponentId(clientId, matchId);
     
     if (opponentId) {
+      // Send the exact same normalized position to opponent
+      // The frontend will handle the mirroring transformation
       wsAdapter.sendToClient(opponentId, 'opponent_paddle_move', {
-        position
+        position: position // Keep the same normalized Y position (0-1)
       });
     }
   });
   
-  // Ball update handler
+  // FIXED: Ball update handler - REMOVE score mirroring from backend
   wsAdapter.registerMessageHandler('ball_update', async (clientId, payload) => {
     const { matchId, position, velocity, scores } = payload;
     const opponentId = await matchmakingService.getOpponentId(clientId, matchId);
     
     if (opponentId) {
+      // Mirror the ball position and velocity for the opponent
+      const mirroredPosition = {
+        x: 1.0 - position.x, // Mirror X coordinate: opponent sees ballX = 1 - senderBallX
+        y: position.y        // Keep Y coordinate the same
+      };
+      
+      const mirroredVelocity = {
+        x: -velocity.x,      // Reverse X velocity for opponent
+        y: velocity.y        // Keep Y velocity the same
+      };
+      
+      // FIXED: Send original scores (NO mirroring) - frontend will handle display
       wsAdapter.sendToClient(opponentId, 'ball_update', {
-        position,
-        velocity,
-        scores
+        position: mirroredPosition,
+        velocity: mirroredVelocity,
+        scores: scores // Send original scores without mirroring
       });
     }
   });
   
-  // Game score update handler
+  // FIXED: Score update handler - REMOVE score mirroring from backend
   wsAdapter.registerMessageHandler('score_update', async (clientId, payload) => {
     const { matchId, player1Score, player2Score } = payload;
     const opponentId = await matchmakingService.getOpponentId(clientId, matchId);
     
     if (opponentId) {
+      // FIXED: Send original scores (NO mirroring) - frontend will handle display
       wsAdapter.sendToClient(opponentId, 'score_update', {
-        player1Score,
-        player2Score
+        player1Score: player1Score, // Send original scores
+        player2Score: player2Score  // Send original scores
       });
     }
   });

@@ -2,6 +2,7 @@
 /data
 /node_modules
 /uploads
+/src/db
 
 # debug
 npm-debug.log*
