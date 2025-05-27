@@ -354,6 +354,7 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
   
   let activeTab: MatchType = '1v1';
   const pageSize = 10;
+  const trophiesHeader = activeTab === "1v1" ? `<th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase tracking-wider">${t('profile.historyTab.trophies')}</th>` : ``;
 
   container.innerHTML = `
     <div class="games-history-container">
@@ -400,6 +401,7 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
               <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase tracking-wider">${t('profile.historyTab.oponent')}</th>
               <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase tracking-wider">${t('profile.historyTab.result')}</th>
               <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase tracking-wider">${t('profile.historyTab.outcome')}</th>
+              ${trophiesHeader}
               <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase tracking-wider">${t('profile.historyTab.played')}</th>
               <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase tracking-wider">${t('profile.historyTab.duration')}</th>
             </tr>
@@ -559,7 +561,8 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
         played: match.played.replace(' ago', ''), // Remove 'ago' since HistorySection adds it
         duration: match.duration,
         outcome: match.outcome,
-        result: match.result
+        result: match.result,
+        trophies: activeTab === "1v1" ? match.eloChange : null
       });
       console.log(`Created row for ${activeTab} match ${index}:`, historyRow);
       historyTBody.appendChild(historyRow);
