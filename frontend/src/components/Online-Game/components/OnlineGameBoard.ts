@@ -11,9 +11,9 @@ export class OnlineGameBoard extends GameBoard {
 	private matchId: string;
 	private playerId: string;
 	private opponentId: string;
-	private isPlayer1: boolean; // Determines which paddle this player controls
+	private isPlayer1: boolean; // Determines game role (who sends ball updates)
 	private lastSentBallUpdate: number = 0;
-	private ballUpdateInterval: number = 30; // Send ball updates every 50ms
+	private ballUpdateInterval: number = 30; // Send ball updates every 30ms
 	protected canvas: HTMLCanvasElement;
 	private lastReceivedState: any = null;
 	private lastInputTime: number = 0;
@@ -62,30 +62,22 @@ export class OnlineGameBoard extends GameBoard {
 	}
 
 	private initializeOnlineControllers(): void {
-		// if (this.isPlayer1) {
-		// 	this.player1Controller = new NetworkController();
-		// 	this.player2Controller = new HumanPlayerController({ up: 'w', down: 's' }, 'player2Y');
-		// } else {
-		// 	this.player1Controller = new HumanPlayerController({ up: 'w', down: 's' }, 'player1Y');
-		// 	this.player2Controller = new NetworkController();
-		// }
+		// UPDATED: Both players control left paddle (player1Y) on their screen
+		// The opponent's movements will be mapped to right paddle (player2Y)
 		this.player1Controller = new HumanPlayerController({ up: 'w', down: 's' }, 'player1Y');
 		this.player2Controller = new NetworkController();
 	}
 
 	private initOnlineEventListeners(): void {
-		// We'll override the keyboard and touch controls to only affect the player's paddle
-		// and send those updates to the opponent
+		// UPDATED: Only send paddle updates for the left paddle (player controls)
 		window.addEventListener('keydown', (e) => {
 			this.state.keys[e.key] = true;
-
-			// Only send paddle updates for the paddle we control
+			// Send paddle position when local player moves
 			this.sendPaddlePosition();
 		});
 
 		window.addEventListener('keyup', (e) => {
 			this.state.keys[e.key] = false;
-
 			// Send updated paddle position when key is released
 			this.sendPaddlePosition();
 		});
@@ -96,31 +88,24 @@ export class OnlineGameBoard extends GameBoard {
 		this.canvas.addEventListener('touchend', this.handleTouchEnd.bind(this));
 	}
 
-	// Override the startGame method to properly initialize the ball
+	// UPDATED: Override the startGame method with mirrored ball initialization
 	startGame() {
 		this.state.gameStarted = true;
 		this.state.gameEnded = false;
 
-		// Initialize ball position at center
+		// UPDATED: Initialize ball position at center for both players
 		this.state.ballX = this.canvas.width / 2;
 		this.state.ballY = this.canvas.height / 2;
 
-		// Initialize ball velocity - let's have player 1 always serve first
-		this.state.servingPlayer = 2;
-
-		// Set initial ball direction based on serving player
-		// const angle = (Math.random() * Math.PI / 2) - Math.PI / 4; // Between -45 and 45 degrees
-		// const speed = 8;
-		// this.state.ballSpeedX = Math.cos(angle) * speed * (this.state.servingPlayer === 1 ? 1 : -1);
-		// this.state.ballSpeedY = Math.sin(angle) * speed;
+		// UPDATED: Only Player 1 (game authority) initializes ball velocity
 		if (this.isPlayer1) {
 			this.state.servingPlayer = 1;
-			const angle = (Math.random() * Math.PI / 2) - Math.PI / 4;
+			const angle = (Math.random() * Math.PI / 2) - Math.PI / 4; // Random angle between -45 and 45 degrees
 			const speed = 8;
 			this.state.ballSpeedX = Math.cos(angle) * speed;
 			this.state.ballSpeedY = Math.sin(angle) * speed;
 
-			// Send initial ball state to Player 2
+			// Send initial ball state to Player 2 (will be automatically mirrored)
 			this.sendBallUpdate();
 		}
 
@@ -134,42 +119,12 @@ export class OnlineGameBoard extends GameBoard {
 		if (!this.state.gameEnded) {
 			requestAnimationFrame(this.gameLoop);
 		} else {
-		// 	const resultsPopup = document.querySelector("#result-popup")!;
-		// 	resultsPopup.classList.toggle("hidden")
-		// 	let text = ""
-		// 	if (this.gameScore.player1 > this.gameScore.player2)
-		// 		text = "Player 1"
-		// 	else if (this.gameType == "AI") {
-		// 		text = "AI"
-		// 	} else {
-		// 		text = "Player 2"
-		// 	}
-		// 	const winnerText = resultsPopup.querySelector('#winner-text')!
-		// 	winnerText.textContent = `${text} ${t('play.resultsPopup.title')}`;
-
-		// 	const scoreText = resultsPopup.querySelector('#score-text')!
-		// 	scoreText.textContent = `${t('play.resultsPopup.finalScore')}: ${this.gameScore.player1} - ${this.gameScore.player2}`
-
-		// 	const restartButton = resultsPopup.querySelector("#restart-btn")
-		// 	restartButton?.addEventListener('click', () => {
-		// 		navigate("/play")
-		// 	}, { once: true });
-		
-		// this.updateScoreDisplay();
-		// this.client.on('game_result', (data: any) => {
-		// 	console.log("Game result received!");
-		// 	console.log(data);
-		// 	this.state.gameEnded = true;
-		// 	this.showGameOverScreen(data.winner === this.playerId ? 'You' : 'Opponent',
-		// 		data.finalScore);
-		// });
-		if(this.isPlayer1){
-			updateBackgrounds(this.state.scores.player1, this.state.scores.player2);
-
-		} else {
-			updateBackgrounds(this.state.scores.player1, this.state.scores.player2);
-
-		}
+			// UPDATED: Update backgrounds based on player perspective
+			if (this.isPlayer1) {
+				updateBackgrounds(this.state.scores.player1, this.state.scores.player2);
+			} else {
+				updateBackgrounds(this.state.scores.player2, this.state.scores.player1);
+			}
 		}
 	}
 
@@ -241,22 +196,17 @@ export class OnlineGameBoard extends GameBoard {
 		const relativeY = avgY - rect.top;
 		const paddleTarget = (relativeY / this.canvas.height) * this.canvas.height;
 
-		// Move the player's paddle
-		// if (this.isPlayer1) {
-		// 	this.state.player2Y = paddleTarget - (this.state.paddleHeight / 2);
-		// } else {
-		// 	this.state.player1Y = paddleTarget - (this.state.paddleHeight / 2);
-		// }
+		// UPDATED: Always move the left paddle (player1Y) for local player
 		this.state.player1Y = paddleTarget - (this.state.paddleHeight / 2);
 	}
 
+	// UPDATED: Send local left paddle position (player1Y)
 	private sendPaddlePosition(): void {
 		const now = Date.now();
 		if (now - this.lastInputTime < this.inputDelay) return;
 
-		// const currentPosition = this.isPlayer1 ? this.state.player2Y : this.state.player1Y;
+		// UPDATED: Always send left paddle position (player1Y)
 		const currentPosition = this.state.player1Y;
-
 		const normalizedY = currentPosition / this.canvas.height;
 
 		if (currentPosition !== this.lastSentPaddlePosition) {
@@ -266,31 +216,32 @@ export class OnlineGameBoard extends GameBoard {
 		}
 	}
 
+	// UPDATED: Setup WebSocket handlers with mirrored coordinate system
 	private setupWebSocketHandlers(): void {
+		// UPDATED: Opponent paddle movement maps to right paddle (player2Y)
 		this.client.on('opponent_paddle_move', (data: any) => {
-			// if (this.isPlayer1) {
-			// 	this.state.player1Y = data.position;
-			// } else {
-			// 	this.state.player2Y = data.position;
-			// }
+			// Opponent's paddle movement goes to the right side (player2Y)
 			const paddleY = data.position * this.canvas.height;
 			this.state.player2Y = paddleY;
 		});
 
+		// UPDATED: Ball update handling with coordinate transformation
 		this.client.on('ball_update', (data: any) => {
+			// UPDATED: Only Player 2 receives ball updates (Player 1 is authoritative)
 			if (!this.isPlayer1) {
-				// console.log("NICE!!!");
-				// console.log(data);
+				// Backend already mirrors the coordinates, so we use them directly
 				const denormalizedPosition = this.denormalizePosition(data.position.x, data.position.y);
 				const denormalizedVelocity = {
-				  x: data.velocity.x * this.canvas.width,
-				  y: data.velocity.y * this.canvas.height
+					x: data.velocity.x * this.canvas.width,
+					y: data.velocity.y * this.canvas.height
 				};
 
 				this.state.ballX = denormalizedPosition.x;
 				this.state.ballY = denormalizedPosition.y;
 				this.state.ballSpeedX = denormalizedVelocity.x;
 				this.state.ballSpeedY = denormalizedVelocity.y;
+				
+				// FIXED: Update scores (backend sends original scores)
 				const player1Score = typeof data.scores.player1 === 'number' ? data.scores.player1 : -1;
 				const player2Score = typeof data.scores.player2 === 'number' ? data.scores.player2 : -1;
 				this.state.scores = {
@@ -300,24 +251,16 @@ export class OnlineGameBoard extends GameBoard {
 			}
 		});
 
+		// FIXED: Score update handler (backend sends original scores)
 		this.client.on('score_update', (data: any) => {
 			this.state.scores.player1 = data.player1Score;
 			this.state.scores.player2 = data.player2Score;
 		});
-
-
 	}
 
-	// Override update method to rely on server state
+	// UPDATED: Override update method with mirrored game logic
 	update() {
-		// Handle local player's paddle
-		// if (this.isPlayer1) {
-		// 	this.player1Controller.update(this.canvas, this.state);
-		// 	this.sendPaddlePosition();
-		// } else {
-		// 	this.player2Controller.update(this.canvas, this.state);
-		// 	this.sendPaddlePosition();
-		// }
+		// UPDATED: Local player always controls left paddle (player1Y)
 		this.player1Controller.update(this.canvas, this.state);
 		this.sendPaddlePosition();
 
@@ -328,7 +271,7 @@ export class OnlineGameBoard extends GameBoard {
 		this.clampPaddlePosition('player1Y');
 		this.clampPaddlePosition('player2Y');
 
-		// only one player should update the ball position
+		// UPDATED: Only Player 1 (authoritative) updates ball position and sends updates
 		if (this.isPlayer1) {
 			this.ballController.update(this.canvas, this.state);
 			this.sendBallUpdate();
@@ -338,41 +281,41 @@ export class OnlineGameBoard extends GameBoard {
 		this.clampPaddlePosition('player2Y');
 
 		this.updateScoreDisplay();
-		// console.log(this.gameScore.player1);
-		// console.log(this.gameScore.player2);
-		if (Math.max(this.gameScore.player1, this.gameScore.player2) >= 10) {
+
+		// FIXED: Game end condition using correct score references
+		if (Math.max(this.state.scores.player1, this.state.scores.player2) >= 10) {
 			this.state.gameEnded = true;
 
-			const winnerId = this.gameScore.player1 > this.gameScore.player2
+			// FIXED: Determine winner based on actual game scores
+			const winnerId = this.state.scores.player1 > this.state.scores.player2
 				? (this.isPlayer1 ? this.playerId : this.opponentId)
 				: (this.isPlayer1 ? this.opponentId : this.playerId);
 
-			// Send game_end message with correct property names
-			// if (this.isPlayer1) {
+			// Send game_end message with actual game scores
 			console.log("Sending game_end message");
-				this.client.send('game_end', {
-					matchId: this.matchId,
-					winner: winnerId, // Changed from winnerId to winner to match backend expectations
-					player1Goals: this.gameScore.player1, // Changed from nested goals object to match backend
-					player2Goals: this.gameScore.player2  // Changed to match backend expectations
-				});
-			// }
+			this.client.send('game_end', {
+				matchId: this.matchId,
+				winner: winnerId,
+				player1Goals: this.state.scores.player1, // Use state.scores instead of gameScore
+				player2Goals: this.state.scores.player2  // Use state.scores instead of gameScore
+			});
 
 			this.updateScoreDisplay();
-
 		}
 	}
 
-	// Add method to send ball updates
+	// UPDATED: Send ball updates with local coordinate system
 	private sendBallUpdate(): void {
 		const now = Date.now();
 		if (now - this.lastSentBallUpdate < this.ballUpdateInterval) return;
 
+		// UPDATED: Send ball position in local coordinate system
+		// Backend will mirror coordinates for the opponent
 		const normalizedPosition = this.normalizePosition(this.state.ballX, this.state.ballY);
 		const normalizedVelocity = {
 			x: this.state.ballSpeedX / this.canvas.width,
 			y: this.state.ballSpeedY / this.canvas.height
-		  };
+		};
 
 		this.client.send('ball_update', {
 			matchId: this.matchId,
@@ -387,23 +330,22 @@ export class OnlineGameBoard extends GameBoard {
 		this.lastSentBallUpdate = now;
 	}
 
+	// FIXED: Score display with correct perspective mapping
 	private updateScoreDisplay(): void {
 		const score1Element = this.gameHeader.querySelector('#player-score1');
 		const score2Element = this.gameHeader.querySelector('#player-score2');
 
 		if (score1Element && score2Element) {
+			// FIXED: Display scores based on player perspective
 			if (this.isPlayer1) {
+				// Player 1 sees: their score on left (player1), opponent score on right (player2)
 				score1Element.textContent = String(this.state.scores.player1);
 				score2Element.textContent = String(this.state.scores.player2);
-			}
-			else {
-				score1Element.textContent = String(this.state.scores.player2);
-				score2Element.textContent = String(this.state.scores.player1);
-			}
-
-			if (this.isPlayer1) {
 				updateBackgrounds(this.state.scores.player1, this.state.scores.player2);
 			} else {
+				// Player 2 sees: their score on left (they are player2), opponent score on right (player1)
+				score1Element.textContent = String(this.state.scores.player2);
+				score2Element.textContent = String(this.state.scores.player1);
 				updateBackgrounds(this.state.scores.player2, this.state.scores.player1);
 			}
 		}
@@ -420,82 +362,35 @@ export class OnlineGameBoard extends GameBoard {
 		this.state.scores.player1 = serverState.scores.player1;
 		this.state.scores.player2 = serverState.scores.player2;
 
-		// Update opponent paddle position
-		if (this.isPlayer1) {
-			this.state.player2Y = serverState.player2Y;
-		} else {
-			this.state.player1Y = serverState.player1Y;
-		}
+		// UPDATED: Opponent paddle position always goes to right side
+		this.state.player2Y = serverState.player2Y;
 	}
 
+	// Position normalization (unchanged)
 	private normalizePosition(x: number, y: number): { x: number, y: number } {
-  return {
-    x: x / this.canvas.width,
-    y: y / this.canvas.height
-  };
-}
+		return {
+			x: x / this.canvas.width,
+			y: y / this.canvas.height
+		};
+	}
 
-// Denormalize a position from 0-1 range back to pixel coordinates for this screen
-private denormalizePosition(normalizedX: number, normalizedY: number): { x: number, y: number } {
-  return {
-    x: normalizedX * this.canvas.width,
-    y: normalizedY * this.canvas.height
-  };
-}
-
-	// Show game over screen with player stats
-	// private showGameOverScreen(winner: string, finalScore: { player1: number, player2: number }): void {
-	// 		const resultsPopup = document.querySelector("#result-popup")!;
-	// 		resultsPopup.classList.toggle("hidden")
-	// 		// let text = ""
-	// 		// if (finalScore.player1 > finalScore.player2)
-	// 		// 	text = "Player 1"
-	// 		// else {
-	// 		// 	text = "Player 2"
-	// 		// }
-	// 		const winnerText = resultsPopup.querySelector('#winner-text')!
-	// 		winnerText.textContent = `${winner} ${t('play.resultsPopup.title')}`;
-
-	// 		const scoreText = resultsPopup.querySelector('#score-text')!
-	// 		scoreText.textContent = `${t('play.resultsPopup.finalScore')}: ${finalScore.player1} - ${finalScore.player2}`
-
-	// 		const restartButton = resultsPopup.querySelector("#restart-btn")
-	// 		restartButton?.addEventListener('click', () => {
-	// 			navigate("/play")
-	// 		}, { once: true });
-
-	// }
-
-	// Method to handle when game ends or player leaves
-	// stopGame(): void {
-	// 	if (!this.state.gameEnded) {
-	// 		// Report that player forfeited the match
-	// 		this.client.completeMatch(
-	// 			this.matchId,
-	// 			this.opponentId, // Opponent wins if player leaves
-	// 			{
-	// 				player1: this.state.scores.player1,
-	// 				player2: this.state.scores.player2
-	// 			}
-	// 		);
-	// 	}
-
-	// 	// Clean up event listeners
-	// 	window.removeEventListener('resize', () => this.resize());
-	// 	window.removeEventListener("beforeunload", this.handleNavigation.bind(this));
-	// 	window.removeEventListener("hashchange", this.handleNavigation.bind(this));
-	// 	window.removeEventListener("popstate", this.handleNavigation.bind(this));
-	// }
+	// Position denormalization (unchanged)
+	private denormalizePosition(normalizedX: number, normalizedY: number): { x: number, y: number } {
+		return {
+			x: normalizedX * this.canvas.width,
+			y: normalizedY * this.canvas.height
+		};
+	}
 
 	get getState(): gameState {
 		return this.state;
 	}
 }
 
-// NetworkController is responsible for handling opponent's paddle
+// UPDATED: NetworkController handles opponent paddle (right side)
 class NetworkController implements Controller {
 	update(canvas: HTMLCanvasElement, state: gameState): void {
 		// This controller doesn't actively update the paddle position
-		// It receives updates via the WebSocket and the position is set directly
+		// It receives updates via WebSocket and the position is set directly to player2Y
 	}
 }

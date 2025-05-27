@@ -21,6 +21,16 @@ class MatchmakingService {
         this.activeGames = new Map();
     }
 
+    async updateMatchStartTime(matchId) {
+        try {
+            await database.updateMatchStartTime(matchId);
+            return true;
+        } catch (error) {
+            console.error('Error updating match start time in service:', error);
+            return false;
+        }
+    }
+
     //add a player looking for a match
     async addToQueue(playerId) {
         try {
@@ -574,11 +584,11 @@ class MatchmakingService {
     async calculateNewElo(playerElo, opponentElo, result) {
         try {
             // Use the existing eloService to calculate the new rating
-            const newElo = eloService.calculateNewRatings(playerElo, opponentElo, result);
+            const newElo = this.eloService.calculateNewRatings(playerElo, opponentElo, result);
 
             // Log the calculation for debugging
-            const expectedScore = eloService.calculateExpectedScore(playerElo, opponentElo);
-            console.log(`ELO calculation: ${playerElo} + ${eloService.kFactor} * (${result} - ${expectedScore.toFixed(4)}) = ${newElo}`);
+            const expectedScore = this.eloService.calculateExpectedScore(playerElo, opponentElo);
+            console.log(`ELO calculation: ${playerElo} + ${this.eloService.kFactor} * (${result} - ${expectedScore.toFixed(4)}) = ${newElo}`);
 
             return newElo;
         } catch (error) {
