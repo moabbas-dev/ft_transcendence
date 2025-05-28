@@ -2,17 +2,25 @@ import db from "./db.js";
 import axios from "axios";
 
 // helper function to get the total played matches by a player
-export async function getTotalMatchesForPlayer(playerId) {
+export async function getTotalMatchesForPlayer(playerId, matchType = null) {
     try {
-        const query = `
-      SELECT COUNT(*) as total
-      FROM matches m
-      JOIN match_players mp ON m.id = mp.match_id
-      WHERE mp.player_id = ?
-        AND m.status = 'completed'
-        AND m.match_type = '1v1'
-    `;
-        const rows = await db.query(query, [playerId]);
+        let query = `
+            SELECT COUNT(*) as total
+            FROM matches m
+            JOIN match_players mp ON m.id = mp.match_id
+            WHERE mp.player_id = ?
+                AND m.status = 'completed'
+        `;
+        
+        let params = [playerId];
+        
+        // Add match type filter if specified
+        if (matchType) {
+            query += ` AND m.match_type = ?`;
+            params.push(matchType);
+        }
+        
+        const rows = await db.query(query, params);
         return rows[0].total;
     } catch (error) {
         console.error('Error getting total matches:', error);
@@ -20,54 +28,62 @@ export async function getTotalMatchesForPlayer(playerId) {
     }
 }
 
-// Method to get player history
-async function getPlayerHistory(playerId, limit = 10, offset = 0) {
+// Function for getting the player's history
+async function getPlayerHistory(playerId, limit = 10, offset = 0, matchType = null) {
     try {
-        const query = `
-      SELECT 
-        m.id as match_id,
-        m.match_type,
-        m.winner_id,
-        m.completed_at,
-        m.started_at,
-        
-        -- Current player info
-        mp_current.player_id as player_id,
-        mp_current.goals as player_goals,
-        mp_current.elo_before as player_elo_before,
-        mp_current.elo_after as player_elo_after,
-        
-        -- Opponent info
-        mp_opponent.player_id as opponent_id,
-        mp_opponent.goals as opponent_goals,
-        
-        -- Determine outcome
-        CASE 
-          WHEN m.winner_id = ? THEN 'win'
-          WHEN m.winner_id IS NULL THEN 'draw'
-          ELSE 'lose'
-        END as outcome
-        
-      FROM matches m
-      
-      -- Join current player
-      JOIN match_players mp_current ON m.id = mp_current.match_id 
-        AND mp_current.player_id = ?
-      
-      -- Join opponent player  
-      JOIN match_players mp_opponent ON m.id = mp_opponent.match_id 
-        AND mp_opponent.player_id != ?
-      
-      WHERE m.status = 'completed'
-        AND m.match_type = '1v1'  -- Only 1v1 matches for history
-        AND m.started_at IS NOT NULL
-        AND m.completed_at IS NOT NULL
-      
-      ORDER BY m.completed_at DESC
-      LIMIT ? OFFSET ?
-    `;
+        let query = `
+            SELECT 
+                m.id as match_id,
+                m.match_type,
+                m.winner_id,
+                m.completed_at,
+                m.started_at,
+                
+                -- Current player info
+                mp_current.player_id as player_id,
+                mp_current.goals as player_goals,
+                mp_current.elo_before as player_elo_before,
+                mp_current.elo_after as player_elo_after,
+                
+                -- Opponent info
+                mp_opponent.player_id as opponent_id,
+                mp_opponent.goals as opponent_goals,
+                
+                -- Determine outcome
+                CASE 
+                    WHEN m.winner_id = ? THEN 'win'
+                    WHEN m.winner_id IS NULL THEN 'draw'
+                    ELSE 'lose'
+                END as outcome
+                
+            FROM matches m
+            
+            -- Join current player
+            JOIN match_players mp_current ON m.id = mp_current.match_id 
+                AND mp_current.player_id = ?
+            
+            -- Join opponent player  
+            JOIN match_players mp_opponent ON m.id = mp_opponent.match_id 
+                AND mp_opponent.player_id != ?
+            
+            WHERE m.status = 'completed'
+                AND m.started_at IS NOT NULL
+                AND m.completed_at IS NOT NULL
+        `;
 
-        const rows = await db.query(query, [playerId, playerId, playerId, limit, offset]);
+        let params = [playerId, playerId, playerId];
+
+        // Add match type filter if specified
+        if (matchType) {
+            query += ` AND m.match_type = ?`;
+            params.push(matchType);
+        }
+
+        query += ` ORDER BY m.completed_at DESC LIMIT ? OFFSET ?`;
+        params.push(limit, offset);
+
+        const rows = await db.query(query, params);
+
         // Format the results
         const history = rows.map(row => {
             // Calculate duration in JavaScript
@@ -84,7 +100,7 @@ async function getPlayerHistory(playerId, limit = 10, offset = 0) {
                 result: `${row.player_goals} - ${row.opponent_goals}`,
                 outcome: row.outcome,
                 played: formatTimeAgo(row.completed_at),
-                duration: formatDuration(durationSeconds), // JavaScript calculated duration
+                duration: formatDuration(durationSeconds),
                 eloChange: row.player_elo_after - row.player_elo_before,
                 matchType: row.match_type,
                 completedAt: row.completed_at,
@@ -149,10 +165,10 @@ async function getUserInfo(userId) {
     }
 }
 // Method to get player history with opponent nicknames
-export async function getPlayerHistoryWithNicknames(playerId, limit = 10, offset = 0) {
+export async function getPlayerHistoryWithNicknames(playerId, limit = 10, offset = 0, match_type = null) {
     try {
         // First get the basic history
-        const history = await getPlayerHistory(playerId, limit, offset);
+        const history = await getPlayerHistory(playerId, limit, offset, match_type);
 
         // You'll need to implement db based on how you access your main users database
         // For example, if you have a method to get user info:

@@ -26,7 +26,7 @@ class DatabaseConnection {
     const matchesTable = `
       CREATE TABLE IF NOT EXISTS matches (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        match_type TEXT NOT NULL CHECK(match_type IN ('1v1', 'friendly')),
+        match_type TEXT NOT NULL CHECK(match_type IN ('1v1', 'friendly', 'tournament')),
         status TEXT NOT NULL CHECK(status IN ('pending', 'completed')),
         winner_id INTEGER,
         tournament_id INTEGER,
@@ -323,6 +323,21 @@ class DatabaseConnection {
     }
   }
 
+  async updateMatchStartTime(matchId) {
+    try {
+      await this.run(
+        `UPDATE matches 
+       SET started_at = DATETIME('now') 
+       WHERE id = ?`,
+        [matchId]
+      );
+      console.log(`Match ${matchId} started_at updated to current time`);
+    } catch (error) {
+      console.error('Error updating match start time:', error);
+      throw error;
+    }
+  }
+
   closeDatabase() {
     try {
       if (this.db) {
@@ -338,7 +353,6 @@ class DatabaseConnection {
   getInstance() {
     return this.db;
   }
-  
 }
 
 export default new DatabaseConnection();

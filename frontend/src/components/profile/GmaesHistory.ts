@@ -24,27 +24,54 @@ interface HistoryItem {
 }
 
 interface HistoryResponse {
-  player: {
-    id: number;
-    stats: any;
-  };
   matches: HistoryItem[];
   pagination: {
     limit: number;
     offset: number;
     total: number;
+    type: string;
   };
 }
 
+type MatchType = '1v1' | 'friendly' | 'tournament';
+
 export const GamesHistory = createComponent((props: { userId: number }) => {
   const container = document.createElement("div");
-  let currentPage = 1;
-  let pageSize = 10;
-  let totalMatches = 0;
-  let isLoading = false;
+  
+  // State for each match type
+  const state = {
+    '1v1': { currentPage: 1, totalMatches: 0, isLoading: false },
+    'friendly': { currentPage: 1, totalMatches: 0, isLoading: false },
+    'tournament': { currentPage: 1, totalMatches: 0, isLoading: false }
+  };
+  
+  let activeTab: MatchType = '1v1';
+  const pageSize = 10;
 
   container.innerHTML = `
     <div class="games-history-container">
+      <!-- Match Type Tabs -->
+      <div class="match-type-tabs flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg">
+        <button 
+          data-type="1v1" 
+          class="match-tab flex-1 py-2 px-4 text-sm font-medium text-center rounded-md transition-all bg-white text-blue-600 shadow-sm"
+        >
+          1v1 Matches
+        </button>
+        <button 
+          data-type="friendly" 
+          class="match-tab flex-1 py-2 px-4 text-sm font-medium text-center rounded-md transition-all text-gray-600 hover:text-gray-900"
+        >
+          Friendly Matches
+        </button>
+        <button 
+          data-type="tournament" 
+          class="match-tab flex-1 py-2 px-4 text-sm font-medium text-center rounded-md transition-all text-gray-600 hover:text-gray-900"
+        >
+          Tournament Matches
+        </button>
+      </div>
+
       <div class="loading-indicator hidden">
         <div class="flex justify-center items-center py-8">
           <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -62,12 +89,8 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
       <div class="history-content">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
-            <tr>
-              <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase tracking-wider">${t('profile.historyTab.oponent')}</th>
-              <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase tracking-wider">${t('profile.historyTab.result')}</th>
-              <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase tracking-wider">${t('profile.historyTab.outcome')}</th>
-              <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase tracking-wider">${t('profile.historyTab.played')}</th>
-              <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase tracking-wider">${t('profile.historyTab.duration')}</th>
+            <tr class="table-header-row">
+              <!-- Table headers will be dynamically inserted here -->
             </tr>
           </thead>
           <tbody class="history bg-white divide-y divide-gray-200">
@@ -76,7 +99,7 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
         </table>
 
         <div class="no-matches hidden text-center py-8 text-gray-500">
-          <p>No matches found</p>
+          <p id="no-matches-text">No matches found</p>
         </div>
       </div>
 
@@ -102,19 +125,38 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
   const historyContent = container.querySelector('.history-content') as HTMLElement;
   const historyTBody = container.querySelector('.history') as HTMLElement;
   const noMatchesDiv = container.querySelector('.no-matches') as HTMLElement;
+  const noMatchesText = container.querySelector('#no-matches-text') as HTMLElement;
   const paginationInfo = container.querySelector('.pagination-info') as HTMLElement;
   const paginationControls = container.querySelector('.pagination-controls') as HTMLElement;
+  const matchTabs = container.querySelectorAll('.match-tab') as NodeListOf<HTMLButtonElement>;
+  const tableHeaderRow = container.querySelector('.table-header-row') as HTMLElement;
+
+  // Update table header based on active tab
+  function updateTableHeader() {
+    const trophiesHeader = activeTab === "1v1" ? 
+      `<th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase tracking-wider">${t('profile.historyTab.trophies')}</th>` : 
+      '';
+    
+    tableHeaderRow.innerHTML = `
+      <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase tracking-wider">${t('profile.historyTab.oponent')}</th>
+      <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase tracking-wider">${t('profile.historyTab.result')}</th>
+      <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase tracking-wider">${t('profile.historyTab.outcome')}</th>
+      ${trophiesHeader}
+      <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase tracking-wider">${t('profile.historyTab.played')}</th>
+      <th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase tracking-wider">${t('profile.historyTab.duration')}</th>
+    `;
+  }
 
   // Show/hide elements
   function showLoading() {
-    isLoading = true;
+    state[activeTab].isLoading = true;
     loadingIndicator.classList.remove('hidden');
     errorMessage.classList.add('hidden');
     historyContent.classList.add('opacity-50');
   }
 
   function hideLoading() {
-    isLoading = false;
+    state[activeTab].isLoading = false;
     loadingIndicator.classList.add('hidden');
     historyContent.classList.remove('opacity-50');
   }
@@ -128,11 +170,35 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
     errorMessage.classList.add('hidden');
   }
 
+  // Update active tab styling
+  function updateTabStyling() {
+    matchTabs.forEach(tab => {
+      const tabType = tab.dataset.type as MatchType;
+      if (tabType === activeTab) {
+        tab.className = 'match-tab flex-1 py-2 px-4 text-sm font-medium text-center rounded-md transition-all bg-white text-blue-600 shadow-sm';
+      } else {
+        tab.className = 'match-tab flex-1 py-2 px-4 text-sm font-medium text-center rounded-md transition-all text-gray-600 hover:text-gray-900';
+      }
+    });
+  }
+
+  // Switch to a different match type
+  function switchMatchType(type: MatchType) {
+    if (type === activeTab || state[type].isLoading) return;
+    
+    activeTab = type;
+    updateTabStyling();
+    updateTableHeader(); // Update the table header when switching tabs
+    
+    // Load the first page of the new match type
+    fetchHistory(1);
+  }
+
   // Fetch history data
   async function fetchHistory(page: number = 1): Promise<void> {
-    console.log(`fetchHistory called for page ${page}, userId: ${props.userId}`);
+    console.log(`fetchHistory called for ${activeTab} page ${page}, userId: ${props.userId}`);
     
-    if (isLoading) {
+    if (state[activeTab].isLoading) {
       console.log('Already loading, skipping request');
       return;
     }
@@ -142,30 +208,33 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
       hideError();
 
       const offset = (page - 1) * pageSize;
-      const url = `/matchmaking/api/player/history/${store.userId}/${props.userId}?limit=${pageSize}&offset=${offset}`;
+      const url = `/matchmaking/api/player/history/${activeTab}/${store.userId}/${props.userId}?limit=${pageSize}&offset=${offset}`;
       console.log('Making request to:', url);
+      
       const token = await getValidAccessToken();
       const response = await axios.get<HistoryResponse>(url, {
         headers: {
           Authorization: `Bearer ${token}`,
         }
       });
+      
       console.log('API Response:', response.data);
 
       const data = response.data;
-      currentPage = page;
-      totalMatches = data.pagination.total;
+      state[activeTab].currentPage = page;
+      state[activeTab].totalMatches = data.pagination.total;
       
-      console.log('Total matches:', totalMatches);
-      console.log('Current page:', currentPage);
+      console.log(`Total ${activeTab} matches:`, state[activeTab].totalMatches);
+      console.log(`Current ${activeTab} page:`, state[activeTab].currentPage);
       console.log('Matches data:', data.matches);
       
       renderHistory(data.matches);
       renderPagination();
 
     } catch (error: any) {
-      Toast.show(`Error fetching history: ${error.message}`, "error");
-      showError('Failed to load match history');
+      console.error(`Error fetching ${activeTab} history:`, error);
+      Toast.show(`Error fetching ${activeTab} history: ${error.message}`, "error");
+      showError(`Failed to load ${activeTab} match history`);
     } finally {
       hideLoading();
     }
@@ -173,16 +242,16 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
 
   // Render history rows
   function renderHistory(matches: HistoryItem[]): void {
-    console.log('renderHistory called with matches:', matches);
-    console.log('historyTBody element:', historyTBody);
+    console.log(`renderHistory called with ${matches.length} ${activeTab} matches`);
     
     // Clear existing rows
     historyTBody.innerHTML = '';
 
     if (matches.length === 0) {
-      console.log('No matches found, showing no-matches div');
+      console.log(`No ${activeTab} matches found, showing no-matches div`);
       historyContent.classList.add('hidden');
       noMatchesDiv.classList.remove('hidden');
+      noMatchesText.textContent = `No ${activeTab} matches found`;
       return;
     }
 
@@ -191,29 +260,31 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
 
     // Add each match
     matches.forEach((match, index) => {
-      console.log(`Processing match ${index}:`, match);
+      console.log(`Processing ${activeTab} match ${index}:`, match);
       const historyRow = HistorySection({
         opponentName: match.opponent.nickname,
         played: match.played.replace(' ago', ''), // Remove 'ago' since HistorySection adds it
         duration: match.duration,
         outcome: match.outcome,
-        result: match.result
+        result: match.result,
+        trophies: activeTab === "1v1" ? match.eloChange : null
       });
-      console.log(`Created row for match ${index}:`, historyRow);
+      console.log(`Created row for ${activeTab} match ${index}:`, historyRow);
       historyTBody.appendChild(historyRow);
     });
   }
 
   // Render pagination
   function renderPagination(): void {
-    const totalPages = Math.ceil(totalMatches / pageSize);
+    const currentState = state[activeTab];
+    const totalPages = Math.ceil(currentState.totalMatches / pageSize);
 
     // Update pagination info
-    const start = ((currentPage - 1) * pageSize) + 1;
-    const end = Math.min(currentPage * pageSize, totalMatches);
+    const start = ((currentState.currentPage - 1) * pageSize) + 1;
+    const end = Math.min(currentState.currentPage * pageSize, currentState.totalMatches);
     
-    paginationInfo.innerHTML = totalMatches > 0 
-      ? `Showing ${start}-${end} of ${totalMatches} matches`
+    paginationInfo.innerHTML = currentState.totalMatches > 0 
+      ? `Showing ${start}-${end} of ${currentState.totalMatches} ${activeTab} matches`
       : '';
 
     // Clear pagination controls
@@ -224,15 +295,15 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
     }
 
     // Previous button
-    if (currentPage > 1) {
-      const prevBtn = createPaginationButton(currentPage - 1, 'Previous');
+    if (currentState.currentPage > 1) {
+      const prevBtn = createPaginationButton(currentState.currentPage - 1, 'Previous');
       prevBtn.classList.add('bg-white', 'border', 'border-gray-300', 'text-gray-500', 'hover:bg-gray-50');
       paginationControls.appendChild(prevBtn);
     }
 
     // Page numbers
     const maxVisiblePages = 5;
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let startPage = Math.max(1, currentState.currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
     // Adjust if we're near the end
@@ -254,7 +325,7 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
     // Page numbers
     for (let i = startPage; i <= endPage; i++) {
       const pageBtn = createPaginationButton(i, i.toString());
-      if (i === currentPage) {
+      if (i === currentState.currentPage) {
         pageBtn.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
       } else {
         pageBtn.classList.add('bg-white', 'text-gray-500', 'border-gray-300', 'hover:bg-gray-50');
@@ -274,8 +345,8 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
     }
 
     // Next button
-    if (currentPage < totalPages) {
-      const nextBtn = createPaginationButton(currentPage + 1, 'Next');
+    if (currentState.currentPage < totalPages) {
+      const nextBtn = createPaginationButton(currentState.currentPage + 1, 'Next');
       nextBtn.classList.add('bg-white', 'border', 'border-gray-300', 'text-gray-500', 'hover:bg-gray-50');
       paginationControls.appendChild(nextBtn);
     }
@@ -287,19 +358,28 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
     button.textContent = text;
     button.className = 'px-3 py-2 text-sm font-medium border rounded-md transition-colors duration-200';
     button.addEventListener('click', () => {
-      if (page !== currentPage && !isLoading) {
+      if (page !== state[activeTab].currentPage && !state[activeTab].isLoading) {
         fetchHistory(page);
       }
     });
     return button;
   }
 
-  // Event listeners
-  retryBtn.addEventListener('click', () => {
-    fetchHistory(currentPage);
+  // Event listeners for tabs
+  matchTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const tabType = tab.dataset.type as MatchType;
+      switchMatchType(tabType);
+    });
   });
 
-  // Initial load
+  // Event listeners
+  retryBtn.addEventListener('click', () => {
+    fetchHistory(state[activeTab].currentPage);
+  });
+
+  // Initialize table header and load initial data
+  updateTableHeader();
   fetchHistory(1);
 
   return container;

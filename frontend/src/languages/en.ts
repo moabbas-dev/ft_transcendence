@@ -213,6 +213,7 @@ export default {
 			oponent: "OPONENT",
 			result: "RESULT",
 			outcome: "OUTCOME",
+			trophies: "TROPHIES",
 			played: "PLAYED",
 			duration: "DURATION",
 			win: "Win",

@@ -151,7 +151,8 @@ function registerMessageHandlers(wsAdapter) {
         return;
       }
       
-      setTimeout(() => {
+      setTimeout(async () => {
+        await matchmakingService.updateMatchStartTime(match.matchId);
         wsAdapter.sendToClient(match.player1.id, 'game_start', { matchId: match.matchId });
         wsAdapter.sendToClient(match.player2.id, 'game_start', { matchId: match.matchId });
       }, 3000);
@@ -232,299 +233,204 @@ function registerMessageHandlers(wsAdapter) {
         }
       });
       
-      setTimeout(() => {
+      setTimeout(async () => {
+        await matchmakingService.updateMatchStartTime(friendMatch.matchId);
         wsAdapter.sendToClient(fromId, 'game_start', { matchId: friendMatch.matchId });
         wsAdapter.sendToClient(clientId, 'game_start', { matchId: friendMatch.matchId });
       }, 3000);
     }
   });
   
-  // Paddle move handler
+  // Paddle move handler with mirrored positioning
   wsAdapter.registerMessageHandler('paddle_move', async (clientId, payload) => {
     const { matchId, position } = payload;
     const opponentId = await matchmakingService.getOpponentId(clientId, matchId);
     
     if (opponentId) {
+      // Send the exact same normalized position to opponent
+      // The frontend will handle the mirroring transformation
       wsAdapter.sendToClient(opponentId, 'opponent_paddle_move', {
-        position
+        position: position // Keep the same normalized Y position (0-1)
       });
     }
   });
   
-  // Ball update handler
+  // Ball update handler - REMOVE score mirroring from backend
   wsAdapter.registerMessageHandler('ball_update', async (clientId, payload) => {
     const { matchId, position, velocity, scores } = payload;
     const opponentId = await matchmakingService.getOpponentId(clientId, matchId);
     
     if (opponentId) {
+      // Mirror the ball position and velocity for the opponent
+      const mirroredPosition = {
+        x: 1.0 - position.x, // Mirror X coordinate: opponent sees ballX = 1 - senderBallX
+        y: position.y        // Keep Y coordinate the same
+      };
+      
+      const mirroredVelocity = {
+        x: -velocity.x,      // Reverse X velocity for opponent
+        y: velocity.y        // Keep Y velocity the same
+      };
+      
+      // Send original scores (NO mirroring) - frontend will handle display
       wsAdapter.sendToClient(opponentId, 'ball_update', {
-        position,
-        velocity,
-        scores
+        position: mirroredPosition,
+        velocity: mirroredVelocity,
+        scores: scores // Send original scores without mirroring
       });
     }
   });
   
-  // Game score update handler
+  // Score update handler - REMOVE score mirroring from backend
   wsAdapter.registerMessageHandler('score_update', async (clientId, payload) => {
     const { matchId, player1Score, player2Score } = payload;
     const opponentId = await matchmakingService.getOpponentId(clientId, matchId);
     
     if (opponentId) {
+      // Send original scores (NO mirroring) - frontend will handle display
       wsAdapter.sendToClient(opponentId, 'score_update', {
-        player1Score,
-        player2Score
+        player1Score: player1Score, // Send original scores
+        player2Score: player2Score  // Send original scores
       });
     }
   });
-  
-//     wsAdapter.registerMessageHandler('game_end', async (clientId, payload) => {
-//       const { matchId, winner, player1Goals, player2Goals } = payload;
-      
-//       matchmakingService.removeFromQueue(winner);
 
-//       try {
-//         // Get match details
-//         const match = await matchmakingService.getMatchById(matchId);
-//         if (!match) {
-//           throw new Error(`Match with ID ${matchId} not found`);
-//         }
-//         console.log("Match found:", match);
-//         if (match.match_type === 'tournament') {
-//           await TournamentService.updateTournamentMatchResult(matchId, winner);
-//           return;
-//         }
-        
-//         // Get players for this match from match_players table
-//         const matchPlayers = await matchmakingService.getMatchPlayers(matchId);
-//         console.log("matchPlayers: ", matchPlayers);
-//         if (!matchPlayers || matchPlayers.length < 2) {
-//           throw new Error(`Could not find players for match ${matchId}`);
-//         }
-        
-//         // Determine which player is which (we need to know player1 and player2)
-//         const player1Id = matchPlayers[0].player_id;
-//         const player2Id = matchPlayers[1].player_id;
-//         matchmakingService.removeFromQueue(player1Id);
-//         matchmakingService.removeFromQueue(player2Id);
-//         console.log("Players removed from queue:", player1Id, player2Id);
-//         console.log(`Player 1: ${player1Id}, Player 2: ${player2Id}`);
-        
-//         // Make sure winner is a number
-//         const winnerId = Number(winner);
-//         console.log(`Winner ID (converted to number): ${winnerId}`);
-        
-//         // Get current ELO ratings for both players
-//         const player1 = await matchmakingService.getUserWithElo(player1Id);
-//         const player2 = await matchmakingService.getUserWithElo(player2Id);
-        
-//         const player1OldElo = player1?.elo_score || 1000;
-//         const player2OldElo = player2?.elo_score || 1000;
-        
-//         // Determine match result (1 = win, 0.5 = draw, 0 = loss)
-//         const player1Result = winnerId === player1Id ? 1 : 0;
-//         const player2Result = winnerId === player2Id ? 1 : 0;
-//         console.log(`Match result: Player 1 ${player1Result}, Player 2 ${player2Result}`);
-        
-//         // Calculate new ELO ratings
-//         const player1NewElo = await matchmakingService.calculateNewElo(
-//           player1OldElo, 
-//           player2OldElo, 
-//           player1Result
-//         );
-        
-//         const player2NewElo = await matchmakingService.calculateNewElo(
-//           player2OldElo, 
-//           player1OldElo, 
-//           player2Result
-//         );
-        
-//         console.log(`ELO changes: Player 1 ${player1OldElo} -> ${player1NewElo}, Player 2 ${player2OldElo} -> ${player2NewElo}`);
-        
-//         // Update player ELO ratings in database
-//         await matchmakingService.updateUserElo(player1Id, player1NewElo);
-//         await matchmakingService.updateUserElo(player2Id, player2NewElo);
-        
-//         // Update match result in database with ELO information
-//         const result = await matchmakingService.updateMatchResult(
-//           matchId,
-//           winnerId,
-//           player1Id,
-//           player2Id,
-//           player1Goals,
-//           player2Goals,
-//           {
-//             player1OldElo,
-//             player1NewElo,
-//             player2OldElo,
-//             player2NewElo
-//           }
-//         );
-        
-//         // Add ELO changes to the result object
-//         result.eloChanges = {
-//           [player1Id]: player1NewElo - player1OldElo,
-//           [player2Id]: player2NewElo - player2OldElo
-//         };
-        
-//         // Notify both players about the result
-//         wsAdapter.sendToClient(player1Id, 'game_result', {
-//           ...result,
-//           winner: winnerId,
-//           finalScore: {
-//             player1: player1Goals,
-//             player2: player2Goals
-//           }
-//         });
-        
-//         wsAdapter.sendToClient(player2Id, 'game_result', {
-//           ...result,
-//           winner: winnerId,
-//           finalScore: {
-//             player1: player1Goals,
-//             player2: player2Goals
-//           }
-//         });
-        
-//         console.log(`Match ${matchId} completed. Winner: ${winnerId}. ELO updates: P1 ${player1OldElo}->${player1NewElo}, P2 ${player2OldElo}->${player2NewElo}`);
-//       } catch (error) {
-//         console.error(`Error processing game end for match ${matchId}:`, error);
-//         wsAdapter.sendToClient(clientId, 'error', {
-//           message: 'Failed to process game end',
-//           details: error.message
-//         });
-//       }
-//     });
-
-// Game end handler
-wsAdapter.registerMessageHandler('game_end', async (clientId, payload) => {
-  const { matchId, winner, player1Goals, player2Goals } = payload;
-  
-  try {
-    // Get match details
-    const match = await matchmakingService.getMatchById(matchId);
-    if (!match) {
-      throw new Error(`Match with ID ${matchId} not found`);
-    }
+  // FIXED: Game end handler - Remove duplicate ELO updates
+  wsAdapter.registerMessageHandler('game_end', async (clientId, payload) => {
+    const { matchId, winner, player1Goals, player2Goals } = payload;
     
-    // Check if match is already completed to prevent duplicate processing
-    if (match.status === 'completed') {
-      console.log(`Match ${matchId} already completed, ignoring duplicate game_end message`);
-      return;
-    }
-    
-    console.log("Match found:", match);
-    if (match.match_type === 'tournament') {
-      await TournamentService.updateTournamentMatchResult(matchId, winner);
-      return;
-    }
-    
-    // Get players for this match from match_players table
-    const matchPlayers = await matchmakingService.getMatchPlayers(matchId);
-    console.log("matchPlayers: ", matchPlayers);
-    if (!matchPlayers || matchPlayers.length < 2) {
-      throw new Error(`Could not find players for match ${matchId}`);
-    }
-    
-    // Determine which player is which (we need to know player1 and player2)
-    const player1Id = matchPlayers[0].player_id;
-    const player2Id = matchPlayers[1].player_id;
-    matchmakingService.removeFromQueue(player1Id);
-    matchmakingService.removeFromQueue(player2Id);
-    console.log("Players removed from queue:", player1Id, player2Id);
-    console.log(`Player 1: ${player1Id}, Player 2: ${player2Id}`);
-    
-    // Make sure winner is a number
-    const winnerId = Number(winner);
-    console.log(`Winner ID (converted to number): ${winnerId}`);
-    
-    // Get current ELO ratings for both players
-    const player1 = await matchmakingService.getUserWithElo(player1Id);
-    const player2 = await matchmakingService.getUserWithElo(player2Id);
-    
-    const player1OldElo = player1?.elo_score || 1000;
-    const player2OldElo = player2?.elo_score || 1000;
-    
-    // Determine match result (1 = win, 0.5 = draw, 0 = loss)
-    const player1Result = winnerId === Number(player1Id) ? 1 : 0;
-    const player2Result = winnerId === Number(player2Id) ? 1 : 0;
-    console.log(`Match result: Player 1 ${player1Result}, Player 2 ${player2Result}`);
-    
-    // Calculate new ELO ratings
-    const player1NewElo = await matchmakingService.calculateNewElo(
-      player1OldElo, 
-      player2OldElo, 
-      player1Result
-    );
-    
-    const player2NewElo = await matchmakingService.calculateNewElo(
-      player2OldElo, 
-      player1OldElo, 
-      player2Result
-    );
-    
-    console.log(`ELO changes: Player 1 ${player1OldElo} -> ${player1NewElo}, Player 2 ${player2OldElo} -> ${player2NewElo}`);
-    
-    // Update player ELO ratings in database
-    await matchmakingService.updateUserElo(player1Id, player1NewElo);
-    await matchmakingService.updateUserElo(player2Id, player2NewElo);
-    
-    // Calculate ELO changes
-    const player1EloChange = player1NewElo - player1OldElo;
-    const player2EloChange = player2NewElo - player2OldElo;
-    
-    // Update match result in database with ELO information
-    const result = await matchmakingService.updateMatchResult(
-      matchId,
-      winnerId,
-      player1Id,
-      player2Id,
-      player1Goals,
-      player2Goals,
-      {
-        player1OldElo,
-        player1NewElo,
-        player2OldElo,
-        player2NewElo
+    try {
+      // Get match details
+      const match = await matchmakingService.getMatchById(matchId);
+      if (!match) {
+        throw new Error(`Match with ID ${matchId} not found`);
       }
-    );
-    
-    // Add ELO changes to the result object
-    const eloChanges = {
-      [player1Id]: player1EloChange,
-      [player2Id]: player2EloChange
-    };
-    
-    console.log("ELO changes:", eloChanges);
-    
-    // Notify both players about the result
-    wsAdapter.sendToClient(player1Id, 'match_results', {
-      winner: winnerId,
-      finalScore: {
-        player1: player1Goals,
-        player2: player2Goals
-      },
-      eloChange: eloChanges
-    });
-    
-    wsAdapter.sendToClient(player2Id, 'match_results', {
-      winner: winnerId,
-      finalScore: {
-        player1: player1Goals,
-        player2: player2Goals
-      },
-      eloChange: eloChanges
-    });
-    
-    console.log(`Match ${matchId} completed. Winner: ${winnerId}. ELO updates: P1 ${player1OldElo}->${player1NewElo} (${player1EloChange}), P2 ${player2OldElo}->${player2NewElo} (${player2EloChange})`);
-  } catch (error) {
-    console.error(`Error processing game end for match ${matchId}:`, error);
-    wsAdapter.sendToClient(clientId, 'error', {
-      message: 'Failed to process game end',
-      details: error.message
-    });
-  }
-});
+      
+      // Check if match is already completed to prevent duplicate processing
+      if (match.status === 'completed') {
+        console.log(`Match ${matchId} already completed, ignoring duplicate game_end message`);
+        return;
+      }
+      
+      console.log("Match found:", match);
+      if (match.match_type === 'tournament') {
+        await TournamentService.updateTournamentMatchResult(matchId, winner);
+        return;
+      }
+      
+      // Get players for this match from match_players table
+      const matchPlayers = await matchmakingService.getMatchPlayers(matchId);
+      console.log("matchPlayers: ", matchPlayers);
+      if (!matchPlayers || matchPlayers.length < 2) {
+        throw new Error(`Could not find players for match ${matchId}`);
+      }
+      
+      // Determine which player is which (we need to know player1 and player2)
+      const player1Id = matchPlayers[0].player_id;
+      const player2Id = matchPlayers[1].player_id;
+      matchmakingService.removeFromQueue(player1Id);
+      matchmakingService.removeFromQueue(player2Id);
+      console.log("Players removed from queue:", player1Id, player2Id);
+      console.log(`Player 1: ${player1Id}, Player 2: ${player2Id}`);
+      
+      // Make sure winner is a number
+      const winnerId = Number(winner);
+      console.log(`Winner ID (converted to number): ${winnerId}`);
+      
+      // Get current ELO ratings for both players
+      const player1 = await matchmakingService.getUserWithElo(player1Id);
+      const player2 = await matchmakingService.getUserWithElo(player2Id);
+      
+      const player1OldElo = player1?.elo_score || 1000;
+      const player2OldElo = player2?.elo_score || 1000;
+      
+      console.log(`BEFORE ELO CALCULATION:`);
+      console.log(`Player 1 (${player1Id}): ${player1OldElo} ELO`);
+      console.log(`Player 2 (${player2Id}): ${player2OldElo} ELO`);
+      
+      // Determine match result (1 = win, 0.5 = draw, 0 = loss)
+      const player1Result = winnerId === Number(player1Id) ? 1 : 0;
+      const player2Result = winnerId === Number(player2Id) ? 1 : 0;
+      console.log(`Match result: Player 1 ${player1Result}, Player 2 ${player2Result}`);
+      
+      // Calculate new ELO ratings
+      const player1NewElo = await matchmakingService.calculateNewElo(
+        player1OldElo, 
+        player2OldElo, 
+        player1Result
+      );
+      
+      const player2NewElo = await matchmakingService.calculateNewElo(
+        player2OldElo, 
+        player1OldElo, 
+        player2Result
+      );
+      
+      console.log(`ELO CALCULATION RESULTS:`);
+      console.log(`Player 1: ${player1OldElo} -> ${player1NewElo} (change: ${player1NewElo - player1OldElo})`);
+      console.log(`Player 2: ${player2OldElo} -> ${player2NewElo} (change: ${player2NewElo - player2OldElo})`);
+      
+      // Calculate ELO changes
+      const player1EloChange = player1NewElo - player1OldElo;
+      const player2EloChange = player2NewElo - player2OldElo;
+      
+      // FIXED: Only call updateMatchResult - it handles both player ELO updates and match_players updates
+      // REMOVED: await matchmakingService.updateUserElo(player1Id, player1NewElo);
+      // REMOVED: await matchmakingService.updateUserElo(player2Id, player2NewElo);
+      
+      // Update match result in database with ELO information
+      // This method handles updating both players table ELO and match_players table
+      const result = await matchmakingService.updateMatchResult(
+        matchId,
+        winnerId,
+        player1Id,
+        player2Id,
+        player1Goals,
+        player2Goals,
+        {
+          player1OldElo,
+          player1NewElo,
+          player2OldElo,
+          player2NewElo
+        }
+      );
+      
+      // Add ELO changes to the result object
+      const eloChanges = {
+        [player1Id]: player1EloChange,
+        [player2Id]: player2EloChange
+      };
+      
+      console.log("Final ELO changes object:", eloChanges);
+      
+      // Notify both players about the result
+      wsAdapter.sendToClient(player1Id, 'match_results', {
+        winner: winnerId,
+        finalScore: {
+          player1: player1Goals,
+          player2: player2Goals
+        },
+        eloChange: eloChanges
+      });
+      
+      wsAdapter.sendToClient(player2Id, 'match_results', {
+        winner: winnerId,
+        finalScore: {
+          player1: player1Goals,
+          player2: player2Goals
+        },
+        eloChange: eloChanges
+      });
+      
+      console.log(`Match ${matchId} completed. Winner: ${winnerId}. ELO updates: P1 ${player1OldElo}->${player1NewElo} (${player1EloChange}), P2 ${player2OldElo}->${player2NewElo} (${player2EloChange})`);
+    } catch (error) {
+      console.error(`Error processing game end for match ${matchId}:`, error);
+      wsAdapter.sendToClient(clientId, 'error', {
+        message: 'Failed to process game end',
+        details: error.message
+      });
+    }
+  });
 }
 
 async function notifyTournamentMatchPlayers(matchId, wsAdapter) {
