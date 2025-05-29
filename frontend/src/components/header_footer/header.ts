@@ -11,6 +11,7 @@ import { formatInTimeZone } from 'date-fns-tz';
 import { NotificationData } from "../../types/types.js";
 import defaultImage from "../../assets/guests.png";
 import chatService from "../../utils/chatUtils/chatWebSocketService.js";
+import audioManager from "../../utils/audioUtils.js";
 
 export const Header = createComponent(() => {
     const container = document.createElement("header");
@@ -357,6 +358,9 @@ export const Header = createComponent(() => {
             console.error(`Error!, ${data.message}`);
         })
         chatService.on('notification:new', (data) => {
+
+            audioManager.playNotificationSound();
+
             // Add new notification to UI without full refresh
             addNewNotificationToUI(data);
 

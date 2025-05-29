@@ -297,6 +297,15 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
     try {
       const { from, to, content, timestamp } = payload;
 
+      const fromUser = await getUser(from);
+      const toUser = await getUser(to);
+
+      if (!fromUser || !toUser) {
+        wsAdapter.sendTo(clientId, "error", {
+          message: `Error retrieving user's data`
+        });
+        return ;
+      }
       // Check if either user has blocked the other
       const blockedUsers = await getBlockedUsers(from);
       const isBlocked = blockedUsers.some(user => user.id === parseInt(to));
@@ -343,6 +352,13 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
           roomId,
           message: newMessage,
         });
+        wsAdapter.sendTo(recipientClientId, "notification:new", {
+          type: "USER_MESSAGE",
+          senderId: from,
+          recipientId: to,
+          senderName: fromUser.nickname,
+          content: `${fromUser.nickname}: ${newMessage.content}`
+        })
       }
 
       // Also send confirmation to sender
