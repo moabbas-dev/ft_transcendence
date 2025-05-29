@@ -128,7 +128,7 @@ export class PongGameClient {
 	completeMatch(matchId: string, winner: string, finalScore: { player1: number, player2: number }): void {
 	  this.send('match_complete', { matchId, winner, finalScore });
 	}
-	
+
 	// For playing with friends
 	inviteFriend(friendId: string): void {
 	  this.send('friend_match_request', { friendId });

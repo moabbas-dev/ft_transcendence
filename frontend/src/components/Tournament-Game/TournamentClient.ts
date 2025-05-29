@@ -194,12 +194,8 @@ export class TournamentClient {
 	}
 
 	// to be deleted
-	completeMatch(matchId: string, winner: string, finalScore: any): void {
-		this.send('game_end', {
-			matchId,
-			winner,
-			player1Goals: finalScore.player1,
-			player2Goals: finalScore.player2
-		}).catch(err => console.error('Failed to complete match:', err));
-	}
+	completeMatch(matchId: string, winner: string, finalScore: { player1: number, player2: number }): void {
+		this.send('match_complete', { matchId, winner, finalScore });
+	  }
+  
 }

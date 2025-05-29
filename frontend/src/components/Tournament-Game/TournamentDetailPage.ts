@@ -206,6 +206,37 @@ export default {
       }
     });
 
+    client.on('tournament_match_completed', (data) => {
+      if (String(data.tournamentId) === String(tournamentId)) {
+        console.log('Tournament match completed, refreshing details...');
+        client.getTournamentDetails(tournamentId);
+        
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-4 right-4 bg-green-600 text-white p-4 rounded-lg shadow-lg z-50 animate-fade-in';
+        notification.innerHTML = `
+          <div class="flex items-center gap-3">
+            <i class="fas fa-check-circle text-xl"></i>
+            <div>
+              <div class="font-semibold">Match Completed!</div>
+              <div class="text-sm opacity-90">Brackets updated</div>
+            </div>
+          </div>
+        `;
+        document.getElementById("app")!.appendChild(notification);
+        setTimeout(() => {
+          if (document.body.contains(notification)) {
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+              if (document.body.contains(notification)) {
+                document.body.removeChild(notification);
+              }
+            }, 300);
+          }
+        }, 4000);
+      }
+    });
+
     client.on('tournament_not_found', (error) => {
       console.error('Tournament error received:', error);
       

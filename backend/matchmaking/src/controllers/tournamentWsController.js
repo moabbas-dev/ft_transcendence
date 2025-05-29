@@ -261,7 +261,7 @@ export function registerTournamentMessageHandlers(wsAdapter) {
 	wsAdapter.registerMessageHandler('tournament_match_result', async (clientId, payload) => {
 		try {
 			const { matchId, winnerId, finalScore } = payload;
-			console.log(`Tournament match result received: Match ${matchId}, Winner ${winnerId}`);
+			console.log(`Tournament match result received: Match ${matchId}, Winner ${winnerId}, Score:`, finalScore);
 
 			const result = await TournamentService.updateTournamentMatchResult(matchId, winnerId, finalScore);
 
@@ -279,6 +279,8 @@ export function registerTournamentMessageHandlers(wsAdapter) {
 					tournamentId,
 					matchId,
 					winnerId: result.winnerId,
+					winnerGoals: result.winnerGoals,
+					loserGoals: result.loserGoals,
 					winnerEloChange: result.winnerEloChange,
 					loserEloChange: result.loserEloChange,
 					tournament: tournamentDetails.tournament,

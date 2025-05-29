@@ -85,7 +85,7 @@ class TournamentService {
         );
       })
       console.log("[COUNT]: ", currentCount.count >= tournament.player_count);
-      
+
       if (currentCount.count >= tournament.player_count) {
         throw new Error('Tournament is already full');
       }
@@ -269,12 +269,12 @@ class TournamentService {
         );
       });
 
-    return {
-      matchId,
-      tournamentId,
-      player1: { id: player1.id, elo_score: player1.elo_score },
-      player2: { id: player2.id, elo_score: player2.elo_score }
-    };
+      return {
+        matchId,
+        tournamentId,
+        player1: { id: player1.id, elo_score: player1.elo_score },
+        player2: { id: player2.id, elo_score: player2.elo_score }
+      };
     } catch (error) {
       console.error('Error creating tournament match:', error);
       throw error;
@@ -282,10 +282,10 @@ class TournamentService {
   }
 
   // Handle tournament match result and progress tournament
-  async updateTournamentMatchResult(matchId, winnerId) {
+  async updateTournamentMatchResult(matchId, winnerId, finalScore = null) {
     try {
       console.log(`Processing tournament match result: Match ${matchId}, Winner ${winnerId}`);
-    
+
       const matchWithPlayers = await this.getMatchWithPlayers(matchId);
       if (!matchWithPlayers) {
         throw new Error(`Match ${matchId} not found`);
@@ -296,20 +296,25 @@ class TournamentService {
         console.log(`Match ${matchId} already completed`);
         return { alreadyCompleted: true };
       }
-  
+
       if (match.match_type !== 'tournament') {
         throw new Error(`Match ${matchId} is not a tournament match`);
       }
 
       const winner = players.find(p => String(p.player_id) === String(winnerId));
       const loser = players.find(p => String(p.player_id) !== String(winnerId));
-  
+
       if (!winner || !loser) {
         throw new Error(`Invalid winner ID ${winnerId} for match ${matchId}`);
       }
 
       const winnerNewElo = EloService.calculateNewRatings(winner.elo_score, loser.elo_score, 1);
       const loserNewElo = EloService.calculateNewRatings(loser.elo_score, winner.elo_score, 0);
+
+      // Get goals from finalScore or use defaults
+      const winnerGoals = finalScore?.winner || 10;
+      const loserGoals = finalScore?.loser || 0;
+
       await new Promise((resolve, reject) => {
         db.run(
           `UPDATE matches SET status = 'completed', winner_id = ?, completed_at = CURRENT_TIMESTAMP WHERE id = ?`,
@@ -317,51 +322,51 @@ class TournamentService {
           (err) => err ? reject(err) : resolve()
         );
       });
-  
+
       await new Promise((resolve, reject) => {
         db.run(
           `UPDATE match_players SET 
-           elo_after = ?, 
-           goals = ?,
-           score = 1
-           WHERE match_id = ? AND player_id = ?`,
-          [winnerNewElo, finalScore?.winner || 10, matchId, winnerId],
+         elo_after = ?, 
+         goals = ?
+         WHERE match_id = ? AND player_id = ?`,
+          [winnerNewElo, winnerGoals, matchId, winnerId],
           (err) => err ? reject(err) : resolve()
         );
       });
-  
+
       await new Promise((resolve, reject) => {
         db.run(
           `UPDATE match_players SET 
-           elo_after = ?, 
-           goals = ?,
-           score = 0
-           WHERE match_id = ? AND player_id = ?`,
-          [loserNewElo, finalScore?.loser || 0, matchId, loser.player_id],
+         elo_after = ?, 
+         goals = ?
+         WHERE match_id = ? AND player_id = ?`,
+          [loserNewElo, loserGoals, matchId, loser.player_id],
           (err) => err ? reject(err) : resolve()
         );
       });
-  
+
       await this.updatePlayerStats(winnerId, winnerNewElo, true);
       await this.updatePlayerStats(loser.player_id, loserNewElo, false);
-  
+
       console.log(`Match ${matchId} completed. Winner: ${winnerId}`);
-  
+
       // Progress tournament to next round
       const tournamentId = match.tournament_id;
       const progressResult = await this.progressTournament(tournamentId);
-  
+
       return {
         matchId,
         tournamentId,
         winnerId,
+        winnerGoals,
+        loserGoals,
         winnerEloChange: winnerNewElo - winner.elo_score,
         loserEloChange: loserNewElo - loser.elo_score,
         tournamentStatus: progressResult.status,
         nextRoundMatches: progressResult.nextRoundMatches || null,
         champion: progressResult.champion || null
       };
-  
+
     } catch (error) {
       console.error('Error updating tournament match:', error);
       throw error;
@@ -379,14 +384,14 @@ class TournamentService {
           (err, row) => err ? reject(err) : resolve(row)
         );
       });
-  
+
       if (!tournament || tournament.status !== 'in_progress') {
         throw new Error('Tournament not found or not in progress');
       }
-  
+
       const allMatches = await new Promise((resolve, reject) => {
         db.all(
-          `SELECT m.*, mp.player_id, mp.score, mp.goals
+          `SELECT m.*, mp.player_id, mp.goals
            FROM matches m
            JOIN match_players mp ON m.id = mp.match_id
            WHERE m.tournament_id = ? AND m.match_type = 'tournament'
@@ -395,7 +400,7 @@ class TournamentService {
           (err, rows) => err ? reject(err) : resolve(rows)
         );
       });
-  
+
       // Group matches by match_id
       const matchesMap = new Map();
       allMatches.forEach(row => {
@@ -410,61 +415,60 @@ class TournamentService {
         }
         matchesMap.get(row.id).players.push({
           player_id: row.player_id,
-          score: row.score,
           goals: row.goals
         });
       });
-  
+
       const matches = Array.from(matchesMap.values());
       const completedMatches = matches.filter(m => m.status === 'completed');
       const pendingMatches = matches.filter(m => m.status === 'pending');
-  
+
       console.log(`Tournament ${tournamentId}: ${completedMatches.length} completed, ${pendingMatches.length} pending`);
-  
+
       // Calculate total matches needed
       const totalMatches = tournament.player_count - 1;
-  
+
       if (completedMatches.length === totalMatches) {
         // Tournament complete
         const finalMatch = completedMatches[completedMatches.length - 1];
         const champion = finalMatch.winner_id;
-        
+
         await this.completeTournament(tournamentId, champion);
         console.log(`Tournament ${tournamentId} completed. Champion: ${champion}`);
-        
-        return { 
-          status: 'completed', 
+
+        return {
+          status: 'completed',
           champion,
-          tournamentId 
+          tournamentId
         };
       }
-  
+
       // Check if next round can be created
       const winners = completedMatches.map(m => m.winner_id).filter(Boolean);
       const canCreateNextRound = this.canCreateNextRound(
-        tournament.player_count, 
-        completedMatches.length, 
+        tournament.player_count,
+        completedMatches.length,
         pendingMatches.length
       );
-  
+
       if (canCreateNextRound && winners.length >= 2) {
         const nextRoundMatches = await this.createNextRoundMatches(
-          tournamentId, 
-          winners, 
+          tournamentId,
+          winners,
           completedMatches.length
         );
         console.log(`Created ${nextRoundMatches.length} matches for next round`);
-        
-        return { 
-          status: 'in_progress', 
+
+        return {
+          status: 'in_progress',
           nextRoundMatches,
-          tournamentId 
+          tournamentId
         };
       }
-  
-      return { 
-        status: 'in_progress', 
-        tournamentId 
+
+      return {
+        status: 'in_progress',
+        tournamentId
       };
     } catch (error) {
       console.error('Error progressing tournament:', error);
@@ -483,7 +487,7 @@ class TournamentService {
     }
     return false;
   }
-  
+
   async createNextRoundMatches(tournamentId, winners, completedCount) {
     const nextRoundMatches = [];
     // Pair winners for next round
@@ -499,7 +503,7 @@ class TournamentService {
     }
     return nextRoundMatches;
   }
-  
+
   async updatePlayerStats(playerId, newElo, isWin) {
     await new Promise((resolve, reject) => {
       db.run(
@@ -609,7 +613,6 @@ class TournamentService {
         }
         groupedMatches[match.id].players.push({
           player_id: match.player_id,
-          score: match.score,
           elo_before: match.elo_before,
           elo_after: match.elo_after,
           goals: match.goals
@@ -677,9 +680,9 @@ class TournamentService {
           (err, row) => err ? reject(err) : resolve(row)
         );
       });
-  
+
       if (!match) return null;
-  
+
       const players = await new Promise((resolve, reject) => {
         db.all(
           `SELECT mp.*, p.elo_score
@@ -690,76 +693,11 @@ class TournamentService {
           (err, rows) => err ? reject(err) : resolve(rows)
         );
       });
-  
+
       return { match, players };
     } catch (error) {
       console.error('Error fetching tournament match with players:', error);
       throw error;
-    }
-  }
-
-  async notifyTournamentProgress(tournamentId, matchId, wsAdapter) {
-    try {
-      const tournamentDetails = await this.getTournamentDetails(tournamentId);
-
-      const matchDetails = tournamentDetails.matches.find(m => m.id === matchId);
-
-      if (!matchDetails) {
-        throw new Error(`Match ${matchId} not found in tournament ${tournamentId}`);
-      }
-
-      const playerIds = tournamentDetails.players.map(p => p.player_id);
-
-      playerIds.forEach(playerId => {
-        wsAdapter.sendToClient(playerId, 'tournament_match_completed', {
-          tournamentId,
-          matchId,
-          match: matchDetails,
-          tournament: tournamentDetails.tournament,
-          matches: tournamentDetails.matches
-        });
-      });
-
-      if (tournamentDetails.tournament.status === 'completed') {
-        const champion = tournamentDetails.players.find(p => p.placement === 1);
-
-        playerIds.forEach(playerId => {
-          wsAdapter.sendToClient(playerId, 'tournament_completed', {
-            tournamentId,
-            tournament: tournamentDetails.tournament,
-            champion: champion ? champion.player_id : null,
-            players: tournamentDetails.players
-          });
-        });
-      }
-      else {
-        const pendingMatches = tournamentDetails.matches.filter(m =>
-          m.status === 'pending' &&
-          m.players &&
-          m.players.length === 2
-        );
-
-        pendingMatches.forEach(match => {
-          match.players.forEach(player => {
-            const opponent = match.players.find(p => p.player_id !== player.player_id);
-
-            if (opponent) {
-              wsAdapter.sendToClient(player.player_id, 'tournament_match_notification', {
-                tournamentId,
-                matchId: match.id,
-                opponent: {
-                  id: opponent.player_id,
-                  username: opponent.nickname || `Player ${opponent.player_id}`,
-                  elo: opponent.elo_before
-                },
-                round: match.round || 0
-              });
-            }
-          });
-        });
-      }
-    } catch (error) {
-      console.error(`Error notifying tournament progress: ${error.message}`);
     }
   }
 
