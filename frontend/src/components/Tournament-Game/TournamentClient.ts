@@ -5,7 +5,7 @@ export class TournamentClient {
 	private userId: string;
 	private connectionPromise: Promise<boolean> | null = null;
 	private isConnecting: boolean = false;
-  
+
 	constructor(private serverUrl: string, userId: string) {
 		this.userId = userId;
 		const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -24,20 +24,20 @@ export class TournamentClient {
 		return new Promise((resolve, reject) => {
 			const wsUrl = `${this.serverUrl}?userId=${encodeURIComponent(this.userId)}`;
 			console.log(`Connecting to: ${wsUrl}`);
-			
+
 			this.ws = new WebSocket(wsUrl);
-	
+
 			this.ws.onopen = () => {
 				console.log('Connected to tournament server');
 				this.isConnecting = false;
 				this.triggerCallbacks('connection', { status: 'connected' });
 				resolve(true);
 			};
-	
+
 			this.ws.onmessage = (event) => {
 				try {
 					const message = JSON.parse(event.data);
-	
+
 					if (this.callbacks[message.type]) {
 						this.callbacks[message.type].forEach(callback => {
 							try {
@@ -51,20 +51,20 @@ export class TournamentClient {
 					console.error('Error processing message:', err);
 				}
 			};
-	
+
 			this.ws.onclose = () => {
 				console.log('Disconnected from tournament server');
 				this.connectionPromise = null;
 				this.isConnecting = false;
-	
+
 				if (this.reconnectTimer !== null) {
 					clearTimeout(this.reconnectTimer);
 				}
 				this.reconnectTimer = window.setTimeout(() => this.initialize(), 3000);
-				
+
 				reject(new Error('WebSocket connection closed'));
 			};
-	
+
 			this.ws.onerror = (error) => {
 				console.error('WebSocket error:', error);
 				this.isConnecting = false;
@@ -85,10 +85,10 @@ export class TournamentClient {
 			if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
 				await this.initialize();
 			}
-			
+
 			if (this.ws && this.ws.readyState === WebSocket.OPEN) {
 				console.log("[TOURNAMENT SEND]: ", type);
-				
+
 				this.ws.send(JSON.stringify({ type, payload }));
 			} else {
 				console.error('Cannot send message, WebSocket is not connected');
@@ -102,12 +102,12 @@ export class TournamentClient {
 
 	on(messageType: string, callback: (data: any) => void): void {
 		console.log("[TOURNAMENT EVENT RECEIVED]: ", messageType);
-		
+
 		if (!this.callbacks[messageType]) {
 			this.callbacks[messageType] = [];
 		}
 		this.callbacks[messageType].push(callback);
-		
+
 		if (messageType === 'connection' && this.ws && this.ws.readyState === WebSocket.OPEN) {
 			callback({ status: 'connected' });
 		}
@@ -136,7 +136,7 @@ export class TournamentClient {
 			clearTimeout(this.reconnectTimer);
 			this.reconnectTimer = null;
 		}
-		
+
 		this.connectionPromise = null;
 		this.isConnecting = false;
 	}
@@ -155,14 +155,14 @@ export class TournamentClient {
 
 	async leaveTournament(tournamentId: string): Promise<void> {
 		await this.send('leave_tournament', { tournamentId });
-	}	  
+	}
 
 	async startTournament(tournamentId: string): Promise<void> {
 		await this.send('start_tournament', { tournamentId });
 	}
 
-	async submitTournamentMatchResult(matchId: string, winnerId: string): Promise<void> {
-		await this.send('tournament_match_result', { matchId, winnerId });
+	async submitTournamentMatchResult(matchId: string, winnerId: string, finalScore?: any): Promise<void> {
+		await this.send('tournament_match_result', { matchId, winnerId, finalScore });
 	}
 
 	async getTournamentDetails(tournamentId: string): Promise<void> {
@@ -178,11 +178,12 @@ export class TournamentClient {
 	}
 
 	updatePaddlePosition(matchId: string, position: number): void {
-		this.send('paddle_move', { matchId, position }).catch(err => 
+		this.send('paddle_move', { matchId, position }).catch(err =>
 			console.error('Failed to send paddle position:', err)
 		);
 	}
 
+	// to be deleted
 	updateBall(matchId: string, position: any, velocity: any, scores: any): void {
 		this.send('ball_update', {
 			matchId,
@@ -192,6 +193,7 @@ export class TournamentClient {
 		}).catch(err => console.error('Failed to send ball update:', err));
 	}
 
+	// to be deleted
 	completeMatch(matchId: string, winner: string, finalScore: any): void {
 		this.send('game_end', {
 			matchId,
