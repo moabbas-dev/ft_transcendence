@@ -4,7 +4,34 @@ import { createFriendRequest, cancelFriendRequest, addFriend, getPendingFriendRe
 import { saveMessage, getMessages, getUnreadMessageCount, markMessagesAsRead } from "../services/chatService.js";
 
 import { getDatabase } from "../db/initDB.js";
+import axios from 'axios';
 
+// Add this helper function at the top of your webSocketController.js
+
+async function sendNotification(type, data) {
+  const NOTIFICATION_SERVICE_URL = 'http://127.0.0.1:3003/api/notifications';
+
+  try {
+    const response = await axios.post(`${NOTIFICATION_SERVICE_URL}/${type}`, data, {
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(`Failed to send ${type} notification:`, error.message);
+      if (error.response) {
+        console.error('Response data:', error.response.data);
+        console.error('Response status:', error.response.status);
+      }
+    } else {
+      console.error(`Unexpected error sending ${type} notification:`, error);
+    }
+    // Don't throw - notifications shouldn't break main functionality
+  }
+}
 
 export function setupWebSocketHandlers(wsAdapter, fastify) {
   // Track online users mapping username to clientId
@@ -72,22 +99,30 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       // Save friend request to database
       await createFriendRequest(from, to);
 
-      // // Notify the user if they're online
-      // const toClientId = onlineUsers.get(to);
-      // if (toClientId) {
-      //   const fromUser = await getUser(from);
-      //   if (fromUser) {
-      //     wsAdapter.sendTo(toClientId, "friend:request", {
-      //       username: fromUser.username,
-      //       firstname: fromUser.firstname,
-      //       lastname: fromUser.lastname,
-      //     });
-      //   }
-      // }
+      const senderUser = await getUser(from);
+      const recipientUser = await getUser(to);
+      if (senderUser && recipientUser) {
+        // Send FRIEND_REQUEST notification to recipient
+        await sendNotification('friend-request', {
+          senderId: parseInt(from),
+          recipientId: parseInt(recipientUser.id),
+          nickname: senderUser.nickname,
+        });
+      }
+      // ALSO send real-time WebSocket notification to Client2 if online
+      const recipientClientId = onlineUsers.get(recipientUser.id.toString());
+      if (recipientClientId) {
+        wsAdapter.sendTo(recipientClientId, "notification:new", {
+          type: 'FRIEND_REQUEST',
+          senderId: from,
+          senderName: senderUser.nickname,
+          content: `${senderUser.nickname} sent you a friend request`,
+        });
+      }
     } catch (error) {
       fastify.log.error("Error in friend:request handler", error);
       wsAdapter.sendTo(clientId, "error", {
-        message: "Failed to send friend request",
+        message: `Failed to send friend request, ${error.message}`,
       });
     }
   });
@@ -113,16 +148,29 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
         userId: from
       });
 
-      // Optionally, notify the sender that their request was declined
-      // wsAdapter.sendTo(from, "friend:request:declined", {
-      //   success: true,
-      //   userId: to
-      // });
+      const fromUser = await getUser(from);
+      const toUser = await getUser(to);
+      await sendNotification('friend-declined', {
+        senderId: parseInt(toUser.id),
+        recipientId: parseInt(fromUser.id),
+        nickname: toUser.nickname
+      });
+      // ALSO send real-time WebSocket notification to Client2 if online
+      const recipientClientId = onlineUsers.get(fromUser.id.toString());
+      if (recipientClientId) {
+        wsAdapter.sendTo(recipientClientId, "notification:new", {
+          type: 'FRIEND_DECLINED',
+          senderId: toUser.id,
+          recipientId: fromUser.id,
+          senderName: toUser.nickname,
+          content: `${toUser.nickname} Declined your friend request`
+        });
+      }
 
     } catch (error) {
       console.error("Error in friend:decline handler:", error);
       wsAdapter.sendTo(clientId, "error", {
-        message: "Failed to decline friend request",
+        message: `Failed to decline friend request, ${error.message}`,
         details: error.message
       });
     }
@@ -132,20 +180,20 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
   wsAdapter.on("friend:cancel_request", async ({ clientId, payload }) => {
     try {
       const { from, to } = payload;
-      
+
       console.log("friend request canceled:");
       console.log("from user:", from);
       console.log("to user:", to);
-      
+
       // Cancel the friend request in the database (using the same function as decline)
       await cancelFriendRequest(from, to);
-      
+
       // Send confirmation to the user who canceled their request
       wsAdapter.sendTo(clientId, "friend:request_cancelled", {
         success: true,
         targetId: to
       });
-      
+
       // Optionally notify the recipient that the request was canceled
       const recipientClientId = onlineUsers.get(to.toString());
       if (recipientClientId) {
@@ -153,7 +201,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
           fromId: from
         });
       }
-      
+
     } catch (error) {
       console.error("Error in friend:cancel_request handler:", error);
       wsAdapter.sendTo(clientId, "error", {
@@ -187,32 +235,26 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
         });
         return;
       }
-
-      // Notify both users
-      // const fromClientId = onlineUsers.get(from);
-      // const toClientId = onlineUsers.get(to);
-
-      // if (fromClientId) {
-      //   wsAdapter.sendTo(fromClientId, "friend:accepted", {
-      //     username: toUser.username,
-      //     firstname: toUser.firstname,
-      //     lastname: toUser.lastname,
-      //     isOnline: onlineUsers.has(to),
-      //   });
-      // }
-
-      // if (toClientId) {
-      //   wsAdapter.sendTo(toClientId, "friend:accepted", {
-      //     username: fromUser.username,
-      //     firstname: fromUser.firstname,
-      //     lastname: fromUser.lastname,
-      //     isOnline: onlineUsers.has(from),
-      //   });
-      // }
+      await sendNotification('friend-accepted', {
+        senderId: parseInt(fromUser.id),
+        recipientId: parseInt(toUser.id),
+        nickname: toUser.nickname
+      });
+      // ALSO send real-time WebSocket notification to Client2 if online
+      const recipientClientId = onlineUsers.get(toUser.id.toString());
+      if (recipientClientId) {
+        wsAdapter.sendTo(recipientClientId, "notification:new", {
+          type: 'FRIEND_ACCEPTED',
+          senderId: fromUser.id,
+          recipientId: toUser.id,
+          senderName: fromUser.nickname,
+          content: `${fromUser.nickname} Accepted your friend request`
+        });
+      }
     } catch (error) {
       fastify.log.error("Error in friend:accept handler", error);
       wsAdapter.sendTo(clientId, "error", {
-        message: "Failed to accept friend request",
+        message: `Failed to accept friend request, ${error.message}`,
       });
     }
   });
@@ -255,7 +297,6 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
     try {
       const { from, to, content, timestamp } = payload;
 
-
       // Check if either user has blocked the other
       const blockedUsers = await getBlockedUsers(from);
       const isBlocked = blockedUsers.some(user => user.id === parseInt(to));
@@ -263,7 +304,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       // Also check if recipient has blocked the sender
       const recipientBlockedUsers = await getBlockedUsers(to);
       const isBlockedByRecipient = recipientBlockedUsers.some(user => user.id === parseInt(from));
-      
+
       if (isBlocked || isBlockedByRecipient) {
         console.log(`Message blocked: User ${from} and ${to} have a block relationship`);
         wsAdapter.sendTo(clientId, "message:blocked", {
@@ -273,7 +314,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
         });
         return;
       }
-      
+
       // Create a room ID (combination of both usernames sorted alphabetically)
       const roomId = [from, to].sort().join("-");
 
@@ -295,12 +336,6 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       // Send the message to recipient if online
       let recipientClientId = onlineUsers.get(to.toString());
       console.log(`Sending message to user ${to}, client ID: ${recipientClientId}`);
-      // for (const [wsClientId, userId] of onlineUsers.entries()) {
-      //   if (userId === to.toString()) {
-      //     recipientClientId = wsClientId;
-      //     break;
-      //   }
-      // }
 
       // Send the message to recipient if online
       if (recipientClientId) {
@@ -309,7 +344,6 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
           message: newMessage,
         });
       }
-
 
       // Also send confirmation to sender
       wsAdapter.sendTo(clientId, "message:sent", {
@@ -450,7 +484,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
   wsAdapter.on("user:unblock", async ({ clientId, payload }) => {
     try {
       const { from, unblocked } = payload;
-      
+
       if (!from || !unblocked) {
         throw new Error("Missing user IDs");
       }
@@ -469,8 +503,8 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       console.log(blockerIdNum, "unblocked user", blockedIdNum);
 
       // Confirm unblock to user
-      wsAdapter.sendTo(clientId, "user:unblocked", { 
-        userId: blockedIdNum 
+      wsAdapter.sendTo(clientId, "user:unblocked", {
+        userId: blockedIdNum
       });
     } catch (error) {
       console.error("Unblock error details:", error.message, error.stack);
@@ -616,29 +650,29 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
   wsAdapter.on("user:check_blocked", async ({ clientId, payload }) => {
     try {
       const { userId, targetId } = payload;
-      
+
       if (!userId || !targetId) {
         wsAdapter.sendTo(clientId, "error", {
           message: "Both user ID and target ID are required"
         });
         return;
       }
-      
+
       // Get the list of users blocked by userId
       const blockedUsers = await getBlockedUsers(userId);
-      
+
       // Check if targetId is in the list of blocked users
       const isBlocked = blockedUsers.some(user => user.id === parseInt(targetId));
-      
+
       console.log(`Checking if user ${userId} has blocked user ${targetId}: ${isBlocked}`);
-      
+
       // Send the result back to the client
       wsAdapter.sendTo(clientId, "user:blocked_status", {
         userId,
         targetId,
         isBlocked
       });
-      
+
     } catch (error) {
       console.error("Error checking blocked status:", error);
       wsAdapter.sendTo(clientId, "error", {
