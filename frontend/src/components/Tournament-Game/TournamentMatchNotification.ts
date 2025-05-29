@@ -27,7 +27,7 @@ export const TournamentMatchNotification = createComponent((props: TournamentMat
     <div class="bg-gray-800 rounded-lg shadow-lg max-w-md w-full p-6 transform animate-bounce-in">
       <div class="text-center mb-4">
         <i class="fas fa-trophy text-pongcyan text-4xl"></i>
-        <h2 class="text-2xl font-bold text-white mt-2">${t('play.tournaments.matchNotification.title')}</h2>
+        <h2 class="text-2xl font-bold text-white drop-shadow-pongcyan mt-2">${t('play.tournaments.matchNotification.title')}</h2>
       </div>
       
       <div class="bg-gray-700 rounded-lg p-4 mb-4">

@@ -66,15 +66,15 @@ export default {
 
     container.className = "bg-ponghover w-full h-dvh flex flex-col items-center justify-center";
     container.innerHTML = `
-      <div class="size-full flex flex-col gap-3 p-4 bg-gray-800 rounded-lg shadow-lg">
+      <div class="size-full flex flex-col gap-3 p-4 bg-black rounded-lg shadow-lg">
         <div class="flex justify-between items-center gap-2">
-          <h1 id="tour-name" class="text-2xl font-bold text-white">Loading...</h1>
-          <button id="back-button" class="px-4 py-2 bg-pongcyan text-white rounded hover:bg-blue-700">
+          <h1 id="tour-name" class="text-2xl font-bold text-white drop-shadow-pongcyan">Loading...</h1>
+          <button id="back-button" class="px-4 py-2 bg-pongcyan text-white rounded drop-shadow-pongcyan transition-all hover:bg-cyan-700">
             ${t('play.tournaments.backToTournaments')}
           </button>
         </div>
         
-        <div id="tournament-content" class="flex-1 p-4 bg-gray-900 rounded-lg">
+        <div id="tournament-content" class="h-[calc(100%-20%)] flex-1 p-4 bg-gray-900 rounded-lg">
           <div class="text-center py-8">
             <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-pongcyan"></div>
             <p class="mt-2 text-gray-400">${t('play.tournaments.loading')}</p>
@@ -173,7 +173,7 @@ export default {
     client.on('tournament_match_accepted', (data) => {
       if (!data.tournamentId || String(data.tournamentId) === String(tournamentId)) {
         const notification = document.createElement('div');
-        notification.className = 'fixed top-4 right-4 bg-blue-600 text-white p-4 rounded-lg shadow-lg z-50';
+        notification.className = 'fixed top-4 right-4 bg-pongcyan text-white p-4 rounded-lg shadow-lg z-50';
         notification.innerHTML = `
           <div class="flex items-center gap-2">
             <i class="fas fa-clock"></i>
@@ -556,30 +556,30 @@ function showTournamentResults(container: HTMLElement, data: any, client: Tourna
 
   // Clear the current content and show results
   content.innerHTML = `
-    <div class="tournament-results-container w-full">
-      <div class="flex justify-between items-center mb-6">
+    <div class="tournament-results-container size-full flex flex-col gap-3">
+      <div class="flex justify-between items-center flex-wrap gap-1">
         <div>
           <div class="text-sm text-gray-400">
             ${data.tournament.player_count} ${t('play.tournaments.createTournament.players')} • 
             Tournament Completed
           </div>
         </div>
-        <div class="text-sm text-green-400">
+        <div class="text-sm text-green-400 drop-shadow-[0_0_5px_#4ade80]">
           <i class="fas fa-trophy text-yellow-400 mr-2"></i>
           Tournament Finished
         </div>
       </div>
       
-      <div id="results-content" class="w-full">
+      <div id="results-content" class="flex-1 size-full">
         <!-- Results will be rendered here -->
       </div>
       
-      <div class="mt-6 flex justify-center gap-4">
-        <button id="back-to-tournaments" class="px-6 py-3 bg-pongcyan text-white rounded-lg hover:bg-blue-700 transition-colors">
+      <div class="flex justify-center gap-4">
+        <button id="back-to-tournaments" class="hidden md:block px-6 py-3 bg-pongcyan text-white rounded-lg hover:bg-cyan-700 transition-colors">
           <i class="fas fa-arrow-left mr-2"></i>
           ${t('play.tournaments.backToTournaments')}
         </button>
-        <button id="view-brackets" class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+        <button id="view-brackets" class="px-6 py-2 sm:py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
           <i class="fas fa-bracket mr-2"></i>
           View Final Brackets
         </button>

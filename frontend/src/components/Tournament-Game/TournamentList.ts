@@ -70,14 +70,14 @@ export const TournamentList = createComponent((props: TournamentListProps) => {
     
       let statusBadge = '';
       if (tournament.status === 'registering') {
-        statusBadge = `<span class="inline-block bg-blue-600 text-white text-xs px-2 py-1 rounded">${t('play.tournaments.joinTournament.registering')}</span>`;
+        statusBadge = `<span class="inline-block bg-pongcyan text-white text-xs px-2 py-1 rounded">${t('play.tournaments.joinTournament.registering')}</span>`;
       } else if (tournament.status === 'in_progress') {
         statusBadge = `<span class="inline-block bg-green-600 text-white text-xs px-2 py-1 rounded">${t('play.tournaments.joinTournament.inProgress')}</span>`;
       }
       
       tournamentItem.innerHTML = `
         <div class="flex justify-between items-center mb-2">
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
             <h3 class="tournament-name text-lg font-semibold text-white">${tournament.name}</h3>
             ${statusBadge}
           </div>
@@ -92,7 +92,7 @@ export const TournamentList = createComponent((props: TournamentListProps) => {
           </div>
           ${canJoin ? 
             `<button 
-              class="join-btn px-4 py-1 bg-pongcyan text-white rounded hover:bg-blue-700 transition-colors"
+              class="join-btn px-4 py-1 bg-pongcyan text-white rounded hover:bg-cyan-700 transition-colors"
               data-id="${tournament.id}"
             >
               ${t('play.tournaments.joinTournament.join')}

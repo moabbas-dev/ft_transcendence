@@ -30,12 +30,12 @@ export default {
 		container.className = "bg-ponghover w-full h-dvh flex flex-col items-center justify-center";
 		container.innerHTML = `
 			<div class="container size-full p-4 bg-gray-800 rounded-lg shadow-lg flex flex-col items-center gap-4">
-				<h1 class="text-2xl font-bold text-white">${t('play.tournaments.title')}</h1>
+				<h1 class="text-2xl font-bold text-white drop-shadow-pongcyan">${t('play.tournaments.title')}</h1>
 				
-				<div class="tabs flex border-b border-gray-700">
-					<button id="tab-create" class="tab-btn py-2 px-4 text-white bg-blue-600 rounded-t-lg mr-2">${t('play.tournaments.createTab')}</button>
-					<button id="tab-join" class="tab-btn py-2 px-4 text-gray-300 hover:bg-gray-700 rounded-t-lg mr-2">${t('play.tournaments.joinTab')}</button>
-					<button id="tab-active" class="tab-btn py-2 px-4 text-gray-300 hover:bg-gray-700 rounded-t-lg">${t('play.tournaments.myTournamentsTab')}</button>
+				<div class="tabs flex justify-center gap-2 border-b w-full border-gray-700">
+					<button id="tab-create" class="tab-btn py-2 px-2 sm:px-4 text-white bg-pongcyan rounded-t-lg">${t('play.tournaments.createTab')}</button>
+					<button id="tab-join" class="tab-btn py-2 px-2 sm:px-4 text-gray-300 hover:bg-gray-700 rounded-t-lg">${t('play.tournaments.joinTab')}</button>
+					<button id="tab-active" class="tab-btn py-2 px-2 sm:px-4 text-gray-300 hover:bg-gray-700 rounded-t-lg">${t('play.tournaments.myTournamentsTab')}</button>
 				</div>
 				
 				<div id="main-content" class="w-full h-[calc(100%-20%)] flex-1 p-4 bg-gray-900 rounded-lg">
@@ -51,11 +51,11 @@ export default {
 		tabButtons.forEach(btn => {
 			btn.addEventListener('click', () => {
 				tabButtons.forEach(b => {
-					b.classList.remove('bg-blue-600', 'text-white');
+					b.classList.remove('bg-pongcyan', 'text-white');
 					b.classList.add('text-gray-300', 'hover:bg-gray-700');
 				});
 
-				btn.classList.add('bg-blue-600', 'text-white');
+				btn.classList.add('bg-pongcyan', 'text-white');
 				btn.classList.remove('text-gray-300', 'hover:bg-gray-700');
 
 				const tabId = btn.id.replace('tab-', '');

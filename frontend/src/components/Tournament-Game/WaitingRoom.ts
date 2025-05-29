@@ -32,24 +32,25 @@ export const WaitingRoom = createComponent((props: WaitingRoomProps) => {
   } = props;
 
   const container = document.createElement('div');
-  container.className = "flex flex-col gap-6";
+  container.className = "flex flex-col gap-6 h-full";
   container.innerHTML = `
-    <div class="text-2xl font-semibold">${t('play.tournaments.createTournament.waitingRoom')}</div>
-    <div class="flex flex-col gap-4 bg-[rgba(100,100,255,0.1)] rounded-lg p-4">
-      <div class="flex justify-between items-center">
-        <div class="sm:text-lg font-medium">${t('play.tournaments.createTournament.currentParticipants')}</div>
+    <div class="text-2xl font-semibold text-white drop-shadow-[0_0_5px_#ffffff]">${t('play.tournaments.createTournament.waitingRoom')}</div>
+    <div class="flex flex-col gap-4 bg-pongcyan/10 rounded-lg p-4 h-full">
+      <div class="flex justify-between items-center flex-wrap gap-1">
+        <div class="sm:text-lg text-white drop-shadow-[0_0_5px_#ffffff] font-medium">${t('play.tournaments.createTournament.currentParticipants')}</div>
         <div class="text-sm text-gray-300">${t('play.tournaments.createTournament.tournamentStart')} <span class="player-max-display">${playerCount}</span> ${t('play.tournaments.createTournament.tournamentStartContinue')}</div>
       </div>
-      <div id="waiting-players" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-        <!-- Player slots will be dynamically generated -->
+      <div class="flex-1 h-full">
+        <div id="waiting-players" class="h-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 max-h-64 overflow-auto">
+          <!-- Player slots will be dynamically generated -->
+        </div>
       </div>
-
-      <div class="flex justify-between">
+      </div>
+      <div class="max-sm:fixed bottom-8 right-12 flex justify-between justify-self-end">
         ${isCreator && players.length === playerCount ?
-      `<button id="start-tournament" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg">${t('play.tournaments.createTournament.startTournament')}</button>` : ''}
-        <button id="leave-tournament" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg">${t('play.tournaments.createTournament.leaveTournament')}</button>
+      `<button id="start-tournament" class="px-4 py-2 drop-shadow-[0_0_5px_#16a34a] text-white bg-green-600 hover:bg-green-700 rounded-lg">${t('play.tournaments.createTournament.startTournament')}</button>` : ''}
+        <button id="leave-tournament" class="px-4 py-2 drop-shadow-[0_0_5px_#dc2626] text-white bg-red-600 hover:bg-red-700 rounded-lg">${t('play.tournaments.createTournament.leaveTournament')}</button>
       </div>
-    </div>
   `;
 
   renderWaitingRoomSlots(container, playerCount ?? 0, players);
@@ -166,7 +167,7 @@ export function renderWaitingRoomSlots(container: HTMLElement, playerCount: numb
 
       if (playerData) {
         waitingPlayersContainer.innerHTML += `
-          <div class="bg-[rgba(100,100,255,0.2)] p-4 rounded-lg flex items-center justify-between">
+          <div class="bg-pongcyan/20 p-4 py-2 rounded-lg flex items-center justify-between drop-shadow-pongcyan">
             <div class="flex items-center gap-3">
               <div class="size-10 rounded-full bg-pongcyan">
                 ${playerData.avatar ?
@@ -183,7 +184,7 @@ export function renderWaitingRoomSlots(container: HTMLElement, playerCount: numb
         `;
       } else {
         waitingPlayersContainer.innerHTML += `
-          <div class="border-2 border-dashed border-[rgba(100,100,255,0.3)] p-4 rounded-lg flex items-center justify-center">
+          <div class="border-2 border-dashed border-pongcyan/30 p-4 rounded-lg flex items-center justify-center">
             <div class="text-[rgba(255,255,255,0.5)]">${t('play.tournaments.createTournament.waitingForPlayers')}</div>
           </div>
         `;
