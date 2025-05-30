@@ -1,3 +1,4 @@
+import { resolve } from 'path';
 import { z } from 'zod'
 
 const NotificationSchema = z.object({
@@ -6,6 +7,7 @@ const NotificationSchema = z.object({
 		'TOURNAMENT_ALERT',
 		'FRIEND_REQUEST',
 		'FRIEND_ACCEPTED',
+		'FRIEND_DECLINED',
 		'GAME_CHALLENGE',
 		'email'
 	]),
