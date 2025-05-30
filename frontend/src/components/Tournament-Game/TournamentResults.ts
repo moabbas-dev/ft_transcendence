@@ -17,9 +17,9 @@ const TournamentResults = (results: TournamentResult[] = []) => {
         .sort((a, b) => a.place - b.place);
 
     const podiumPositions = [
-        { place: 2, height: 'h-[50%]', color: 'bg-gray-400', label: '2nd' },
-        { place: 1, height: 'h-[60%]', color: 'bg-yellow-400', label: '1st' },
-        { place: 3, height: 'h-[40%]', color: 'bg-amber-700', label: '3rd' }
+        { place: 2, height: 'h-[50%]', color: 'bg-gray-400', label: t('play.tournaments.TournamentResults.second') },
+        { place: 1, height: 'h-[60%]', color: 'bg-yellow-400', label: t('play.tournaments.TournamentResults.first') },
+        { place: 3, height: 'h-[40%]', color: 'bg-amber-700', label: t('play.tournaments.TournamentResults.third') }
     ];
 
     let podiumHTML = '';
@@ -120,7 +120,7 @@ const TournamentResults = (results: TournamentResult[] = []) => {
     
     // Combine all HTML
     resultsElement.innerHTML = `
-        <h2 class="text-pongcyan drop-shadow-pongcyan text-2xl font-semibold">Tournament Results</h2>
+        <h2 class="text-pongcyan drop-shadow-pongcyan text-2xl font-semibold">${t("play.tournaments.TournamentResults.tournamentResults")}</h2>
         <div class="size-full relative flex flex-1 gap-4 items-end justify-center">
             ${podiumHTML}
         </div>

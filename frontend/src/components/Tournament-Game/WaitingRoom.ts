@@ -107,9 +107,9 @@ export const WaitingRoom = createComponent((props: WaitingRoomProps) => {
                   const userData = await response.json();
                   return {
                     userId: player.player_id,
-                    username: userData.nickname || `Player ${player.player_id}`,
+                    username: userData.nickname || `${t("play.player")} ${player.player_id}`,
                     avatar: userData.avatar_url,
-                    rank: player.placement || 'Unranked',
+                    rank: player.placement || t("play.unranked"),
                     joinedAt: player.joined_at || new Date().toISOString()
                   };
                 } else {
@@ -119,8 +119,8 @@ export const WaitingRoom = createComponent((props: WaitingRoomProps) => {
                 console.error(`Error fetching user data for player ${player.player_id}:`, error);
                 return {
                   userId: player.player_id,
-                  username: `Player ${player.player_id}`,
-                  rank: player.placement || 'Unranked',
+                  username: `${t("play.player")} ${player.player_id}`,
+                  rank: player.placement || t("play.unranked"),
                   joinedAt: player.joined_at || new Date().toISOString()
                 };
               }
@@ -132,7 +132,7 @@ export const WaitingRoom = createComponent((props: WaitingRoomProps) => {
           console.error('Error processing tournament_player_left event:', error);
             renderWaitingRoomSlots(container, playerCount ?? 0, data.players.map((p: { player_id: string; joined_at: string }) => ({
             userId: p.player_id,
-            username: `Player ${p.player_id}`,
+            username: `${t("play.player")} ${p.player_id}`,
             joinedAt: p.joined_at || new Date().toISOString()
             })));
         }
@@ -176,8 +176,8 @@ export function renderWaitingRoomSlots(container: HTMLElement, playerCount: numb
           }
               </div>
               <div>
-                <div class="font-medium">${playerData.username || 'Unknown Player'}</div>
-                <div class="text-sm text-gray-300">${t('play.tournaments.createTournament.rank')} ${playerData.rank || 'Unranked'}</div>
+                <div class="font-medium">${playerData.username || t("play.unknowPlayer")}</div>
+                <div class="text-sm text-gray-300">${t('play.tournaments.createTournament.rank')} ${playerData.rank || t("play.unranked")}</div>
               </div>
             </div>
           </div>

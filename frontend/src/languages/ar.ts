@@ -95,43 +95,92 @@ export default {
 			oponentFound: "تم العثور على خصم!",
 			cancel: "إلغاء",
 		},
-		tournaments: {
-			joinBtn: "انضم إلى البطولة",
-			createBtn: "إنشاء بطولة",
-			join: "ادخل الساحة",
-			create: "إطلاق المعركة",
-			createTournament: {
-				title: "بطولة نيون بونغ",
-				submitTitle: "إرسال",
-				nameTooshort: "الاسم قصير جداً",
-				nameToolong: "الاسم طويل جداً",
-				waiting: "بانتظار اللاعبين",
-				launch: "إطلاق البطولة",
-				players: "اللاعبين",
-				waitingRoom: "غرفة الانتظار",
-				currentParticipants: "اللاعبين الحاليين",
-				remove: "إزالة",
-				rank: "الترتيب:",
-				leaveTournament: "مغادرة البطولة",
-				tournamentStart: "تبدأ البطولة عندما",
-				tournamentStartContinue: "ينضم لاعبون",
-				waitingForPlayers: "بانتظار اللاعب...",
-				bracket: "التصنيف",
-				tournamentBracket: "تصنيف البطولة",
-				round: "الجولة",
-				final: "النهائي",
-				startSoon: "سيبدأ قريباً",
-				matchCompleted: "انتهت المباراة",
-				info: "مدة المباراة: 5 دقائق أو أول من يسجل 10 أهداف",
-				TBD: "لم يحدد بعد",
-				results: "النتائج",
-				tournamentResults: "نتائج البطولة",
-				pts: "نقاط",
-				first: "الأول",
-				second: "الثاني",
-				third: "الثالث",
+		"tournaments": {
+			"title": "البطولات",
+			"createTab": "إنشاء بطولة",
+			"joinTab": "الانضمام إلى بطولة",
+			"myTournamentsTab": "بطولاتي",
+			"backToTournaments": "العودة إلى البطولات",
+			"loading": "جارٍ تحميل تفاصيل البطولة...",
+
+			"createTournament": {
+				"title": "إنشاء بطولة جديدة",
+				"name": "اسم البطولة",
+				"namePlaceholder": "أدخل اسم البطولة",
+				"nameError": "يجب أن يكون اسم البطولة 3 أحرف على الأقل",
+				"playerCount": "عدد اللاعبين",
+				"players": "اللاعبون",
+				"createButton": "إنشاء البطولة",
+				"creating": "جارٍ الإنشاء...",
+				"waitingRoom": "غرفة الانتظار",
+				"currentParticipants": "المشاركون الحاليون",
+				"tournamentStart": "ستبدأ البطولة عند",
+				"tournamentStartContinue": "انضمام اللاعبين",
+				"startTournament": "بدء البطولة",
+				"leaveTournament": "مغادرة البطولة",
+				"leaveConfirmation": "هل أنت متأكد أنك تريد مغادرة هذه البطولة؟",
+				"leaveError": "فشل في مغادرة البطولة. حاول مرة أخرى.",
+				"waitingForPlayers": "في انتظار اللاعبين...",
+				"rank": "الترتيب",
+				"round": "الجولة",
+				"final": "النهائي",
+				"matchCompleted": "اكتملت المباراة",
+				"startSoon": "ستبدأ المباراة قريبًا",
+				"TBD": "لم يُحدد بعد",
+				"pts": "نقطة"
 			},
-		},		
+
+			"joinTournament": {
+				"loading": "جارٍ تحميل البطولات...",
+				"searchPlaceholder": "ابحث عن البطولات...",
+				"noTournaments": "لا توجد بطولات متاحة",
+				"registering": "جارٍ التسجيل",
+				"inProgress": "قيد التنفيذ",
+				"join": "انضمام",
+				"full": "ممتلئة"
+			},
+
+			"inTournament": {
+				"clickToViewMatch": "انقر على مباراة لعرض التفاصيل. ستصبح المباريات قابلة للعب عند دورك.",
+				"tournamentInProgress": "البطولة جارية",
+				"status": "الحالة",
+				"matchDetails": "تفاصيل المباراة",
+				"vs": "ضد",
+				"winner": "الفائز",
+				"tbd": "لم يُحدد بعد",
+				"viewFinalBrackets": "عرض الجدول النهائي"
+			},
+
+			"myTournaments": {
+				"loading": "جارٍ تحميل بطولاتك..."
+			},
+
+			"matchNotification": {
+				"title": "مباراة البطولة جاهزة!",
+				"message": "مباراة البطولة التالية جاهزة للبدء.",
+				"elo": "تقييم ELO",
+				"accept": "قبول المباراة"
+			},
+
+			"matchResult": {
+				"victory": "انتصار!",
+				"defeat": "هزيمة",
+				"you": "أنت",
+				"eloChange": "تغير التقييم",
+				"continue": "متابعة"
+			},
+			"TournamentResults": {
+				"tournamentResults": "نتائج البطولة",
+				"tournamentCompleted": "اكتملت البطولة",
+				"tournamentFinished": "انتهت البطولة",
+				"inProgress": "قيد التنفيذ",
+				"completed": "مكتملة",
+				"first": "الأول",
+				"second": "الثاني",
+				"third": "الثالث"
+			}
+		},
+
 		paused: "اللعبة متوقفة",
 		resultsPopup: {
 			title: "يفوز!",
@@ -139,7 +188,10 @@ export default {
 			playAgain: "العب مجددًا",
 		},
 		game: "اللعبة",
-		player: "اللاعب"
+		player: "اللاعب",
+		unranked: "غير مصنّف",
+		"unknownPlayer": "لاعب غير معروف",
+		"ai": "الذكاء الاصطناعي"
 	},
 	leaderBoard: {
 		title: "الأبطال",
@@ -156,7 +208,7 @@ export default {
 	profile: {
 		rank: "المرتبة: ",
 		message: "رسالة",
-		add: "إضافة", 
+		add: "إضافة",
 		block: "حظر",
 		infoTab: {
 			title: "المعلومات",

@@ -33,7 +33,7 @@ export default {
 				<h1 class="text-2xl font-bold text-white drop-shadow-pongcyan">${t('play.tournaments.title')}</h1>
 				
 				<div class="tabs flex justify-center gap-2 border-b w-full border-gray-700">
-					<button id="tab-create" class="tab-btn py-2 px-2 sm:px-4 text-white bg-pongcyan rounded-t-lg">${t('play.tournaments.createTab')}</button>
+					<button id="tab-create" class="tab-btn py-2 px-2 sm:px-4 text-white bg-pongcyan drop-shadow-pongcyan rounded-t-lg">${t('play.tournaments.createTab')}</button>
 					<button id="tab-join" class="tab-btn py-2 px-2 sm:px-4 text-gray-300 hover:bg-gray-700 rounded-t-lg">${t('play.tournaments.joinTab')}</button>
 					<button id="tab-active" class="tab-btn py-2 px-2 sm:px-4 text-gray-300 hover:bg-gray-700 rounded-t-lg">${t('play.tournaments.myTournamentsTab')}</button>
 				</div>
@@ -51,11 +51,11 @@ export default {
 		tabButtons.forEach(btn => {
 			btn.addEventListener('click', () => {
 				tabButtons.forEach(b => {
-					b.classList.remove('bg-pongcyan', 'text-white');
+					b.classList.remove('bg-pongcyan', 'text-white', 'drop-shadow-pongcyan');
 					b.classList.add('text-gray-300', 'hover:bg-gray-700');
 				});
 
-				btn.classList.add('bg-pongcyan', 'text-white');
+				btn.classList.add('bg-pongcyan', 'text-white', 'drop-shadow-pongcyan');
 				btn.classList.remove('text-gray-300', 'hover:bg-gray-700');
 
 				const tabId = btn.id.replace('tab-', '');

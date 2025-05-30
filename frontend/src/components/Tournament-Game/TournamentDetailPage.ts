@@ -96,7 +96,7 @@ export default {
             const userInfo = userDetails?.find((u: UserDetails) => u.id === player.player_id);
             return {
               ...player,
-              nickname: userInfo?.nickname || `Player ${player.player_id}`,
+              nickname: userInfo?.nickname || `${t("play.player")} ${player.player_id}`,
               avatar_url: userInfo?.avatar_url
             };
           });
@@ -260,7 +260,7 @@ function showWaitingRoom(container: HTMLElement, data: { tournament: { id: strin
     playerCount: data.tournament.player_count,
     players: data.players.map((p) => ({
       userId: p.player_id,
-      username: p.nickname || `Player ${p.player_id}`,
+      username: p.nickname || `${t("play.player")} ${p.player_id}`,
       avatar: p.avatar_url,
       joinedAt: p.joined_at
     })),
@@ -284,12 +284,12 @@ function showTournamentBrackets(container: HTMLElement, data: any, client: Tourn
         <div>
           <div class="text-sm text-gray-400">
             ${data.tournament.player_count} ${t('play.tournaments.createTournament.players')} • 
-            Status: ${data.tournament.status}
+            ${t("play.tournaments.inTournament.status")}: ${data.tournament.status === "in_progress" ? t("play.tournaments.inTournament.tournamentInProgress") : t("play.tournaments.inTournament.tournamentCompleted")}
           </div>
         </div>
         <div class="text-sm text-gray-300">
           <i class="fas fa-trophy text-pongcyan mr-2"></i>
-          Tournament in Progress
+          ${t("play.tournaments.inTournament.tournamentInProgress")}
         </div>
       </div>
       
@@ -300,7 +300,7 @@ function showTournamentBrackets(container: HTMLElement, data: any, client: Tourn
       <div class="p-4 bg-gray-800 rounded-lg">
         <div class="text-sm text-gray-300 text-center">
           <i class="fas fa-info-circle mr-2"></i>
-          Click on a match to view details. Matches will become playable when it's your turn.
+          ${t('play.tournaments.inTournament.clickToViewMatch')}
         </div>
       </div>
     </div>
@@ -353,7 +353,7 @@ function formatMatchesForBrackets(tournamentData: any) {
       if (winnerDetails) {
         winner = {
           id: winnerDetails.player_id || winnerDetails.id,
-          username: winnerDetails.nickname || `Player ${winnerDetails.player_id || winnerDetails.id}`
+          username: winnerDetails.nickname || `${t("play.player")} ${winnerDetails.player_id || winnerDetails.id}`
         };
       }
     }
@@ -368,12 +368,12 @@ function formatMatchesForBrackets(tournamentData: any) {
       position: position,
       player1: player1Details ? {
         id: player1Details.player_id || player1Details.id,
-        username: player1Details.nickname || `Player ${player1Details.player_id || player1Details.id}`,
+        username: player1Details.nickname || `${t("play.player")} ${player1Details.player_id || player1Details.id}`,
         avatar: player1Details.avatar_url
       } : undefined,
       player2: player2Details ? {
         id: player2Details.player_id || player2Details.id,
-        username: player2Details.nickname || `Player ${player2Details.player_id || player2Details.id}`,
+        username: player2Details.nickname || `${t("play.player")} ${player2Details.player_id || player2Details.id}`,
         avatar: player2Details.avatar_url
       } : undefined,
       winner: winner,
@@ -450,7 +450,7 @@ function handleMatchClick(matchId: string, tournamentData: any, client: Tourname
         matchId: match.id,
         opponent: {
           id: opponentDetails.player_id,
-          username: opponentDetails.nickname || `Player ${opponentDetails.player_id}`,
+          username: opponentDetails.nickname || `${t("play.player")} ${opponentDetails.player_id}`,
           elo: opponent?.elo_before || 1000,
           avatar: opponentDetails.avatar_url
         },
@@ -487,7 +487,7 @@ function showMatchDetails(match: any, tournamentData: any) {
   modal.innerHTML = `
     <div class="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-bold text-white">Match Details</h3>
+        <h3 class="text-xl font-bold text-white">${t("play.tournaments.inTournament.matchDetails")}</h3>
         <button class="close-modal text-gray-400 hover:text-white text-2xl">&times;</button>
       </div>
       
@@ -495,18 +495,18 @@ function showMatchDetails(match: any, tournamentData: any) {
         <div class="flex justify-between items-center">
           <div class="text-center flex-1">
             <div class="text-white font-medium">
-              ${player1Details?.nickname || `Player ${player1?.player_id || 'TBD'}`}
+              ${player1Details?.nickname || `${t("play.player")} ${player1?.player_id || t("play.tournaments.inTournament.tbd")}`}
             </div>
             <div class="text-2xl font-bold text-pongcyan">
               ${player1?.goals || 0}
             </div>
           </div>
           
-          <div class="px-4 text-gray-400">VS</div>
+          <div class="px-4 text-gray-400">${t("play.tournaments.inTournament.vs")}</div>
           
           <div class="text-center flex-1">
             <div class="text-white font-medium">
-              ${player2Details?.nickname || `Player ${player2?.player_id || 'TBD'}`}
+              ${player2Details?.nickname || `${t("play.player")} ${player2?.player_id || t("play.tournaments.inTournament.tbd")}`}
             </div>
             <div class="text-2xl font-bold text-pongcyan">
               ${player2?.goals || 0}
@@ -516,12 +516,12 @@ function showMatchDetails(match: any, tournamentData: any) {
         
         <div class="border-t border-gray-700 pt-4">
           <div class="text-sm text-gray-300">
-            <div>Status: <span class="text-white">${match.status}</span></div>
+            <div>${t("play.tournaments.inTournament.status")}: <span class="text-white">${match.status  === "in_progress" ? t("play.tournaments.inTournament.tournamentInProgress") : t("play.tournaments.inTournament.tournamentCompleted")}</span></div>
             ${match.status === 'completed' ? 
-              `<div>Winner: <span class="text-green-400">${
+              `<div>${t("play.tournaments.inTournament.winner")}: <span class="text-green-400">${
                 match.winner_id ? 
-                  (tournamentData.players.find((p: any) => String(p.player_id) === String(match.winner_id) || String(p.id) === String(match.winner_id))?.nickname || `Player ${match.winner_id}`) 
-                  : 'TBD'
+                  (tournamentData.players.find((p: any) => String(p.player_id) === String(match.winner_id) || String(p.id) === String(match.winner_id))?.nickname || `${t("play.player")} ${match.winner_id}`) 
+                  : t("play.tournaments.inTournament.tbd")
               }</span></div>` 
               : ''
             }
@@ -561,12 +561,12 @@ function showTournamentResults(container: HTMLElement, data: any, client: Tourna
         <div>
           <div class="text-sm text-gray-400">
             ${data.tournament.player_count} ${t('play.tournaments.createTournament.players')} • 
-            Tournament Completed
+            ${t("play.tournaments.TournamentResults.tournamentCompleted")}
           </div>
         </div>
         <div class="text-sm text-green-400 drop-shadow-[0_0_5px_#4ade80]">
           <i class="fas fa-trophy text-yellow-400 mr-2"></i>
-          Tournament Finished
+          ${t("play.tournaments.TournamentResults.tournamentFinished")}
         </div>
       </div>
       
@@ -581,7 +581,7 @@ function showTournamentResults(container: HTMLElement, data: any, client: Tourna
         </button>
         <button id="view-brackets" class="px-6 py-2 sm:py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
           <i class="fas fa-bracket mr-2"></i>
-          View Final Brackets
+          ${t('play.tournaments.inTournament.viewFinalBrackets')}
         </button>
       </div>
     </div>
@@ -676,7 +676,7 @@ function formatTournamentResults(tournamentData: any): TournamentResult[] {
     
     return {
       userId: player.player_id || player.id,
-      username: player.nickname || `Player ${player.player_id || player.id}`,
+      username: player.nickname || `${t("play.player")} ${player.player_id || player.id}`,
       avatarUrl: player.avatar_url,
       place: 0, // Will be assigned after sorting
       score: score

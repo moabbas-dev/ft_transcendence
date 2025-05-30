@@ -95,43 +95,91 @@ export default {
 			oponentFound: "Adversaire trouvé !",
 			cancel: "Annuler",
 		},
-		tournaments: {
-			joinBtn: "Rejoindre un tournoi",
-			createBtn: "Créer un tournoi",
-			join: "Entrer dans l'arène",
-			create: "Lancer la bataille",
-			createTournament: {
-				title: "Tournoi Neon Pong",
-				submitTitle: "Soumettre",
-				nameTooshort: "Le nom est trop court",
-				nameToolong: "Le nom est trop long",
-				waiting: "En attente des joueurs",
-				launch: "Lancer le tournoi",
-				players: "Joueurs",
-				waitingRoom: "Salle d'attente",
-				currentParticipants: "Joueurs actuels",
-				remove: "Supprimer",
-				rank: "Rang :",
-				leaveTournament: "Quitter le tournoi",
-				tournamentStart: "Le tournoi commence lorsque",
-				tournamentStartContinue: "les joueurs rejoignent",
-				waitingForPlayers: "En attente d'un joueur...",
-				bracket: "Tableau",
-				tournamentBracket: "Tableau du tournoi",
-				round: "Tour",
-				final: "Finale",
-				startSoon: "Commence bientôt",
-				matchCompleted: "Match terminé",
-				info: "Durée du match : 5 minutes ou le premier à 10 buts",
-				TBD: "À déterminer",
-				results: "Résultats",
-				tournamentResults: "Résultats du tournoi",
-				pts: "pts",
-				first: "1er",
-				second: "2ème",
-				third: "3ème",
+		"tournaments": {
+			"title": "Tournois",
+			"createTab": "Créer un tournoi",
+			"joinTab": "Rejoindre un tournoi",
+			"myTournamentsTab": "Mes tournois",
+			"backToTournaments": "Retour aux tournois",
+			"loading": "Chargement des détails du tournoi...",
+
+			"createTournament": {
+				"title": "Créer un nouveau tournoi",
+				"name": "Nom du tournoi",
+				"namePlaceholder": "Entrez le nom du tournoi",
+				"nameError": "Le nom du tournoi doit contenir au moins 3 caractères",
+				"playerCount": "Nombre de joueurs",
+				"players": "Joueurs",
+				"createButton": "Créer le tournoi",
+				"creating": "Création...",
+				"waitingRoom": "Salle d'attente",
+				"currentParticipants": "Participants actuels",
+				"tournamentStart": "Le tournoi commencera lorsque",
+				"tournamentStartContinue": "les joueurs auront rejoint",
+				"startTournament": "Démarrer le tournoi",
+				"leaveTournament": "Quitter le tournoi",
+				"leaveConfirmation": "Êtes-vous sûr de vouloir quitter ce tournoi ?",
+				"leaveError": "Échec de la sortie du tournoi. Veuillez réessayer.",
+				"waitingForPlayers": "En attente des joueurs...",
+				"rank": "Rang",
+				"round": "Manche",
+				"final": "Finale",
+				"matchCompleted": "Match terminé",
+				"startSoon": "Le match commencera bientôt",
+				"TBD": "À déterminer",
+				"pts": "pts"
 			},
-		},		
+
+			"joinTournament": {
+				"loading": "Chargement des tournois...",
+				"searchPlaceholder": "Rechercher des tournois...",
+				"noTournaments": "Aucun tournoi disponible",
+				"registering": "Inscription",
+				"inProgress": "En cours",
+				"join": "Rejoindre",
+				"full": "Complet"
+			},
+
+			"inTournament": {
+				"clickToViewMatch": "Cliquez sur un match pour voir les détails. Les matchs seront jouables lorsque ce sera votre tour.",
+				"tournamentInProgress": "Tournoi en cours",
+				"status": "Statut",
+				"matchDetails": "Détails du match",
+				"vs": "VS",
+				"winner": "Vainqueur",
+				"tbd": "À déterminer",
+				"viewFinalBrackets": "Voir le tableau final"
+			},
+
+			"myTournaments": {
+				"loading": "Chargement de vos tournois..."
+			},
+
+			"matchNotification": {
+				"title": "Match de tournoi prêt !",
+				"message": "Votre prochain match de tournoi est prêt à commencer.",
+				"elo": "ELO",
+				"accept": "Accepter le match"
+			},
+
+			"matchResult": {
+				"victory": "Victoire !",
+				"defeat": "Défaite",
+				"you": "Vous",
+				"eloChange": "Changement d'ELO",
+				"continue": "Continuer"
+			},
+			"TournamentResults": {
+				"tournamentResults": "Résultats du tournoi",
+				"tournamentCompleted": "Tournoi terminé",
+				"tournamentFinished": "Tournoi achevé",
+				"inProgress": "En cours",
+				"completed": "Terminé",
+				"first": "1er",
+				"second": "2e",
+				"third": "3e"
+			}
+		},
 		paused: "Jeu en pause",
 		resultsPopup: {
 			title: "Gagne !",
@@ -139,7 +187,10 @@ export default {
 			playAgain: "Rejouer"
 		},
 		game: "Partie",
-		player: "Joueur"
+		player: "Joueur",
+		unranked: "Non classé",
+		"unknownPlayer": "Joueur inconnu",
+		"ai": "IA"
 	},
 	leaderBoard: {
 		title: "Champions",

@@ -46,7 +46,7 @@ export const CreateTournamentForm = createComponent((props: CreateTournamentForm
         
         <button 
           type="submit" 
-          class="w-full py-3 bg-pongcyan text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+          class="w-full py-3 bg-pongcyan text-white font-medium rounded-lg hover:bg-pongcyan/80 drop-shadow-pongcyan transition-colors"
         >
           ${t('play.tournaments.createTournament.createButton')}
         </button>
@@ -60,12 +60,12 @@ export const CreateTournamentForm = createComponent((props: CreateTournamentForm
   playerCountOptions.forEach(option => {
     option.addEventListener('click', () => {
       playerCountOptions.forEach(opt => {
-        opt.classList.remove('border-pongcyan');
+        opt.classList.remove('border-pongcyan', 'drop-shadow-pongcyan');
         opt.classList.add('border-gray-600');
       });
       
       option.classList.remove('border-gray-600');
-      option.classList.add('border-pongcyan');
+      option.classList.add('border-pongcyan', "drop-shadow-pongcyan");
       
       const count = option.getAttribute('data-count');
       if (count && playerCountInput) {
@@ -75,7 +75,7 @@ export const CreateTournamentForm = createComponent((props: CreateTournamentForm
   });
   
   playerCountOptions[0].classList.remove('border-gray-600');
-  playerCountOptions[0].classList.add('border-pongcyan');
+  playerCountOptions[0].classList.add('border-pongcyan', 'drop-shadow-pongcyan');
   
   const form = container.querySelector('#create-tournament-form');
   form?.addEventListener('submit', async (e) => {

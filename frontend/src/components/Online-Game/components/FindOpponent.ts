@@ -34,7 +34,7 @@ export const FindOpponent = createComponent((props: FindOpponentProps) => {
 							<div class="absolute bottom-0 right-0 size-4 rounded-full bg-green-500 border-2 border-pongdark shadow-[0_0_5px_rgba(0,255,0,0.5)]"></div>
 						</div>
 						<div>
-							<p class="font-semibold text-xl text-white">Player #${opponent.id}</p>
+							<p class="font-semibold text-xl text-white">${t("play.player")} #${opponent.id}</p>
 							<p class="text-sm text-pongcyan drop-shadow-[0_0_5px_#00f7ff]">ELO: ${opponent.elo || 1000}</p>
 						</div>
 					</div>

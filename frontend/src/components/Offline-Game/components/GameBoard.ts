@@ -408,11 +408,11 @@ export class GameBoard {
 			resultsPopup.classList.toggle("hidden")
 			let text = ""
 			if (this.gameScore.player1 > this.gameScore.player2)
-				text = "Player 1"
+				text = `${t("play.player")} 1`
 			else if (this.gameType == "AI") {
-				text = "AI"
+				text = t("play.ai")
 			} else {
-				text = "Player 2"
+				text = `${t("play.player")} 2`
 			}
 			const winnerText = resultsPopup.querySelector('#winner-text')!
 			winnerText.textContent = `${text} ${t('play.resultsPopup.title')}`;

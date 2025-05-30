@@ -139,6 +139,17 @@ export default {
 			  "join": "Join",
 			  "full": "Full"
 			},
+
+			"inTournament": {
+				"clickToViewMatch": "Click on a match to view details. Matches will become playable when it's your turn.",
+				"tournamentInProgress": "Tournament in Progress",
+				"status": "Status",
+				"matchDetails": "Match Details",
+				"vs": "VS",
+				"winner": "Winner",
+				"tbd": "TBD",
+				"viewFinalBrackets": "View Final Brackets"
+			},
 			
 			"myTournaments": {
 			  "loading": "Loading your tournaments..."
@@ -157,6 +168,16 @@ export default {
 			  "you": "You", 
 			  "eloChange": "ELO Change",
 			  "continue": "Continue"
+			},
+			"TournamentResults": {
+				"tournamentResults": "Tournament Results",
+				"tournamentCompleted": "Tournament Completed",
+				"tournamentFinished": "Tournament Finished",
+				"inProgress": "In Progress",
+				"completed": "Completed",
+				"first": "1st",
+				"second": "2nd",
+				"third": "3rd"
 			}
 		  },
 		paused: "Game Paused",
@@ -166,7 +187,10 @@ export default {
 			playAgain: "Play Again",
 		},
 		game: "Game",
-		player: "Player"
+		player: "Player",
+		unranked: "Unranked",
+		"unknownPlayer": "Unknown Player",
+		"ai": "AI"
 	},
 	leaderBoard: {
 		title: "Champions",
