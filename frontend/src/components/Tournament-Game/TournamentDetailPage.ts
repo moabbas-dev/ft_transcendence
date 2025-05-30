@@ -87,7 +87,10 @@ export default {
     client.getTournamentDetails(tournamentId);
 
     client.on('tournament_details', async (data) => {
-      container.querySelector('#tour-name')!.textContent = data.tournament.name;
+      const tourNameElement = container.querySelector('#tour-name');
+      if (tourNameElement) {
+        tourNameElement.textContent = data.tournament.name;
+      }
       if ((data.tournament.id as string).toString() === tournamentId) {
         try {
           const userIds = data.players.map((p: any) => p.player_id);
@@ -222,14 +225,15 @@ export default {
             </div>
           </div>
         `;
-        document.getElementById("app")!.appendChild(notification);
+        const app = document.getElementById("app")!;
+        app.appendChild(notification);
         setTimeout(() => {
-          if (document.body.contains(notification)) {
+          if (app.contains(notification)) {
             notification.style.opacity = '0';
             notification.style.transform = 'translateX(100%)';
             setTimeout(() => {
-              if (document.body.contains(notification)) {
-                document.body.removeChild(notification);
+              if (app.contains(notification)) {
+                app.removeChild(notification);
               }
             }, 300);
           }
@@ -284,7 +288,7 @@ function showTournamentBrackets(container: HTMLElement, data: any, client: Tourn
         <div>
           <div class="text-sm text-gray-400">
             ${data.tournament.player_count} ${t('play.tournaments.createTournament.players')} • 
-            ${t("play.tournaments.inTournament.status")}: ${data.tournament.status === "in_progress" ? t("play.tournaments.inTournament.tournamentInProgress") : t("play.tournaments.inTournament.tournamentCompleted")}
+            ${t("play.tournaments.inTournament.status")}: ${data.tournament.status === "in_progress" ? t("play.tournaments.inTournament.tournamentInProgress") : t("play.tournaments.TournamentResults.tournamentCompleted")}
           </div>
         </div>
         <div class="text-sm text-gray-300">
@@ -334,7 +338,7 @@ function formatMatchesForBrackets(tournamentData: any) {
     // Get players for this match
     const matchPlayers = match.players || [];
     const player1Data = matchPlayers[0];
-    const player2Data = matchPlayers[1];
+    const player2Data = matchPlayers[1];    
 
     // Find player details from tournament players list
     const findPlayerDetails = (playerId: string) => {
@@ -516,7 +520,7 @@ function showMatchDetails(match: any, tournamentData: any) {
         
         <div class="border-t border-gray-700 pt-4">
           <div class="text-sm text-gray-300">
-            <div>${t("play.tournaments.inTournament.status")}: <span class="text-white">${match.status  === "in_progress" ? t("play.tournaments.inTournament.tournamentInProgress") : t("play.tournaments.inTournament.tournamentCompleted")}</span></div>
+            <div>${t("play.tournaments.inTournament.status")}: <span class="text-white">${match.status  === "in_progress" ? t("play.tournaments.inTournament.tournamentInProgress") : t("play.tournaments.TournamentResults.tournamentCompleted")}</span></div>
             ${match.status === 'completed' ? 
               `<div>${t("play.tournaments.inTournament.winner")}: <span class="text-green-400">${
                 match.winner_id ? 
