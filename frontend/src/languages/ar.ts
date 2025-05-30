@@ -15,7 +15,10 @@ export default {
 		footer: {
 			developed: "طور بواسطة",
 			rights: "جميع حقوق الملكية الفكرية محفوظة."
-		}
+		},
+		chatWithFriends: "الدردشة مع الأصدقاء",
+		playOnline: "اللعب عبر الإنترنت",
+		startTournament: "بدء بطولة"
 	},
 	register: {
 		signin: {
@@ -94,6 +97,7 @@ export default {
 			searchingForRivals: "جاري البحث عن خصوم...",
 			oponentFound: "تم العثور على خصم!",
 			cancel: "إلغاء",
+			invite: "دعوة"
 		},
 		"tournaments": {
 			"title": "البطولات",

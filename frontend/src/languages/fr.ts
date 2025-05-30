@@ -15,7 +15,10 @@ export default {
 		footer: {
 			developed: "Développé par",
 			rights: "Tous droits de propriété intellectuelle réservés."
-		}
+		},
+		chatWithFriends: "Discuter avec des amis",
+		playOnline: "Jouer en ligne",
+		startTournament: "Lancer un tournoi"
 	},
 	register: {
 		signin: {
@@ -94,6 +97,7 @@ export default {
 			searchingForRivals: "Recherche de rivaux...",
 			oponentFound: "Adversaire trouvé !",
 			cancel: "Annuler",
+			invite: "Inviter"
 		},
 		"tournaments": {
 			"title": "Tournois",

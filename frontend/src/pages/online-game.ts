@@ -30,7 +30,7 @@ export default {
 								<span class="group-hover:scale-110 text-2xl transition-transform duration-300 ease-in-out text-pongcyan drop-shadow-[0_0_10px_#00f7ff]">
 									<i class="fa-solid fa-users"></i>
 								</span>
-								<div class="flex flex-col gap-1">
+								<div class="flex flex-col gap-1 items-start">
 									<h2 class="text-xl font-bold text-pongcyan drop-shadow-[0_0_5px_#00f7ff] group-hover:text-white group-hover:drop-shadow-[0_0_10px_#00f7ff]">${t('play.onlineGame.friendBtn')}</h2>
 									<p class="text-sm opacity-90">${t('play.onlineGame.vsFriend')}</p>
 								</div>
@@ -40,7 +40,7 @@ export default {
 								<span class="group-hover:scale-110 text-2xl transition-transform duration-300 ease-in-out text-pongpink drop-shadow-[0_0_10px_#ff00e4]">
 									<i class="fa-solid fa-globe"></i>
 								</span>
-								<div class="flex flex-col gap-1">
+								<div class="flex flex-col gap-1 items-start">
 									<h2 class="text-xl font-bold text-pongpink drop-shadow-[0_0_5px_#ff00e4] group-hover:text-white group-hover:drop-shadow-[0_0_10px_#ff00e4]">${t('play.onlineGame.onlineShowdownBtn')}</h2>
 									<p class="text-sm opacity-90">${t('play.onlineGame.vsRivals')}</p>
 								</div>

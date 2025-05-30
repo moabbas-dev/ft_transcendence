@@ -42,21 +42,21 @@ export default {
                 hover:text-pongcyan hover:shadow-[0_0_15px_rgba(0,247,255,0.7)]
                 focus:outline-none
                 animate-fade-up animate-duration-700 animate-delay-1000 animate-ease-linear">
-                <span class="relative z-10 drop-shadow-[0_0_5px_#00f7ff]">Chat with Friends</span>
+                <span class="relative z-10 drop-shadow-[0_0_5px_#00f7ff]">${t("home.chatWithFriends")}</span>
               </button>
               <button id="play-online-btn" class="group relative text-base sm:text-lg rounded-lg text-white flex justify-center items-center bg-black border-2 border-pongpink px-4 sm:px-6 py-2 sm:py-3 
                 transition-all duration-300 ease-in-out
                 hover:text-pongpink hover:shadow-[0_0_15px_rgba(255,0,228,0.7)]
                 focus:outline-none
                 animate-fade-up animate-duration-700 animate-delay-[1200ms] animate-ease-linear">
-                <span class="relative z-10 drop-shadow-[0_0_5px_#ff00e4]">Play Online</span>
+                <span class="relative z-10 drop-shadow-[0_0_5px_#ff00e4]">${t("home.playOnline")}</span>
               </button>
               <button id="start-tournament-btn" class="group relative text-base sm:text-lg rounded-lg text-white flex justify-center items-center bg-black border-2 border-pongcyan px-4 sm:px-6 py-2 sm:py-3 
                 transition-all duration-300 ease-in-out
                 hover:text-pongcyan hover:shadow-[0_0_15px_rgba(0,247,255,0.7)]
                 focus:outline-none
                 animate-fade-up animate-duration-700 animate-delay-[1400ms] animate-ease-linear">
-                <span class="relative z-10 drop-shadow-[0_0_5px_#00f7ff]">Start a Tournament</span>
+                <span class="relative z-10 drop-shadow-[0_0_5px_#00f7ff]">${t("home.startTournament")}</span>
               </button>
               ` : `
               <button id="register-btn" class="group relative text-base sm:text-lg rounded-lg text-white flex justify-center items-center bg-black border-2 border-pongcyan px-4 sm:px-6 py-2 sm:py-3 

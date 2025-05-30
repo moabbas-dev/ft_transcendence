@@ -15,7 +15,10 @@ export default {
 		footer: {
 			developed: "Developed by",
 			rights :"All intellectual property rights reserved."
-		}
+		},
+		chatWithFriends: "Chat with Friends",
+		playOnline: "Play Online",
+		startTournament: "Start a Tournament"
 	},
 	register: {
 		signin: {
@@ -94,6 +97,7 @@ export default {
 			searchingForRivals: "Searching for Rivals...",
 			oponentFound: "Opponent Found!",
 			cancel: "Cancel",
+			invite: "Invite"
 		},
 		"tournaments": {
 			"title": "Tournaments",
