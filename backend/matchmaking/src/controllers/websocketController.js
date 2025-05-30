@@ -191,6 +191,7 @@ function registerMessageHandlers(wsAdapter) {
   // Friend match request handler
   wsAdapter.registerMessageHandler('friend_match_request', async (clientId, payload) => {
     const { friendId } = payload;
+    console.log(`Friend match request from ${clientId} to ${friendId}`);
     
     const inviteSent = wsAdapter.sendToClient(friendId, 'friend_match_invite', {
       fromId: clientId

@@ -7,13 +7,28 @@ import { emojis, emojisMap, emoticons, emoticonsMap, stickers, stickersMap } fro
 import { Profile } from "../profile/UserProfile.js";
 import { t } from "../../languages/LanguageController.js";
 import axios from "axios";
+import { GameInviteMessage } from "./GameInviteMessage.js";
 import { _isClickEvent } from "chart.js/helpers";
 
+// interface Message {
+//   id: number;
+//   senderId: string | null;
+//   content: string;
+//   timestamp: number;
+// }
+
 interface Message {
-  id: number;
-  senderId: string | null;
+  id: number | string;
+  senderId: number;
+  receiverId: number;
   content: string;
-  timestamp: number;
+  timestamp: number | string;
+  messageType?: string;
+  gameInviteData?: {
+    gameType: string;
+    status: 'pending' | 'accepted' | 'declined' | 'expired';
+    inviteId: string;
+  };
 }
 
 export const Chat = createComponent(
@@ -120,6 +135,7 @@ const renderChat = () => {
       // Add event listeners after the HTML is rendered
       if (activeUser) {
         setupEventListeners();
+        renderGameInvites();
       }
 
       const friend = document.querySelector('#friend_name');
@@ -147,6 +163,45 @@ const renderChat = () => {
         const chatContainer = document.querySelector(".chat")!;
         chatContainer.classList.add("animate-slideDown");
         chatContainer.classList.remove("animate-slideUp");
+      });
+    };
+
+    const renderGameInvites = () => {
+      const gameInviteContainers = container.querySelectorAll('.game-invite-container');
+      
+      gameInviteContainers.forEach(container => {
+        const messageId = container.getAttribute('data-message-id');
+        const from = container.getAttribute('data-from');
+        const to = container.getAttribute('data-to');
+        const gameType = container.getAttribute('data-game-type');
+        const timestamp = container.getAttribute('data-timestamp');
+        const status = container.getAttribute('data-status');
+        const inviteId = container.getAttribute('data-invite-id');
+        
+        if (messageId && from && to && timestamp && status && inviteId) {
+          console.log('Rendering game invite:', {
+            messageId,
+            from,
+            to,
+            gameType,
+            timestamp,
+            status,
+            inviteId
+          });
+          const gameInviteElement = GameInviteMessage({
+            messageId,
+            from,
+            to,
+            gameType: gameType || '1v1',
+            timestamp,
+            status: status as 'pending' | 'accepted' | 'declined' | 'expired',
+            inviteId
+          });
+          
+          // Clear the container and append the actual component
+          container.innerHTML = '';
+          container.appendChild(gameInviteElement);
+        }
       });
     };
 
@@ -185,6 +240,10 @@ const renderChat = () => {
 
       // Group messages by date
       const messagesByDate = messages.reduce((acc, message) => {
+  //         // Ensure timestamp is a number
+  // const timestamp = typeof message.timestamp === 'string' ? 
+  // Date.parse(message.timestamp) : message.timestamp;
+        
         const date = new Date(message.timestamp).toLocaleDateString("en-US", {
           month: "long",
           day: "numeric",
@@ -203,7 +262,38 @@ const renderChat = () => {
 
           ${dateMessages
               .map((message) => {
-                const isCurrentUser = message.senderId == currentUserId;
+                // console.log("message:", message);
+                // Check if this is a game invite message
+                if (message.messageType === 'game_invite') {
+                    // Ensure timestamp is a number
+                    // const timestamp = typeof message.timestamp === 'string' ? 
+                    // Date.parse(message.timestamp) : message.timestamp;
+
+                    console.log('Processing game invite message:', {
+                      id: message.id,
+                      senderId: message.senderId,
+                      receiverId: message.receiverId,
+                      messageType: message.messageType,
+                      fullMessage: message
+                    });
+                  
+                  // Create a container for the game invite message
+                  return `
+                    <div class="game-invite-container" data-message-id="${message.id}" data-from="${message.senderId}" data-to="${message.receiverId}" data-game-type="${message.gameInviteData?.gameType || '1v1'}" data-timestamp="${new Date(
+                      message.timestamp
+                    ).toLocaleTimeString([], {
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}" data-status="${message.gameInviteData?.status || 'pending'}" data-invite-id="${message.gameInviteData?.inviteId || message.id}">
+                      <!-- Game invite message will be rendered here by JavaScript -->
+                      <div class="game-invite-placeholder">${formatMessageContent(message.content)}</div>
+                    </div>
+                  `;
+                }
+                
+                // Handle regular messages as before
+                const isCurrentUser = message.senderId == parseInt(currentUserId || '');
 
                 const messageTime = new Date(
                   message.timestamp
@@ -214,8 +304,7 @@ const renderChat = () => {
                 });
 
                 return `
-                  <div class="flex w-full ${isCurrentUser ? "justify-end" : "justify-start"
-                  }">
+                  <div class="flex w-full ${isCurrentUser ? "justify-end" : "justify-start"}">
                       <div class="
                           flex flex-col justify-center pt-1 px-2 rounded-lg
                           max-w-[250px] md:max-w-sm break-words 2xl:max-w-xl
@@ -510,7 +599,8 @@ const renderChat = () => {
       // Create temporary message for optimistic update
       const tempMessage: Message = {
         id: Date.now(), // Temporary ID (replace with real ID from server later)
-        senderId: currentUser,
+        senderId: parseInt(currentUser),
+        receiverId: activeUser.id,
         content,
         timestamp: Date.now(),
       };
@@ -553,13 +643,12 @@ const renderChat = () => {
     }) => {
       activeUser = user;
       // console.log(activeUser);
-
       // Create room ID (combination of both usernames sorted alphabetically)
-      const currentUserId = store.userId;
+      const currentUserId = parseInt(store.userId || '');
       if (currentUserId) {
         // Use consistent userId format for roomId
         roomId = [currentUserId, user.id]
-          .sort((a: any, b: any) => a - b)
+          .sort((a: number, b: number) => a - b)
           .join("-");
 
         // Get message history for this room
@@ -582,7 +671,6 @@ const renderChat = () => {
           userId: store.userId,
           targetId: user.id
         });
-
 
         chatService.on("user:blocked_status", (data) => {
           console.log(data);
@@ -646,7 +734,36 @@ const renderChat = () => {
         }
       });
 
-      // Listen for sent message confirmations
+      // Add handler for direct private messages (including game invites)
+      chatService.on("message:private", (data: any) => {
+        console.log("Private message received:", data);
+        
+        if (!data) {
+          console.error("Invalid private message data received");
+          return;
+        }
+
+        const message: Message = data;
+        const msgRoomId = data.roomId;
+
+        // Only add message if it's for the current room
+        if (msgRoomId === roomId) {
+          // Add the new message to the messages array
+          messages = [message, ...messages];
+          renderChat();
+          scrollToBottom();
+          chatService.markMessagesAsRead(roomId);
+        }
+
+        
+
+          // Request updated unread counts
+          chatService.send("messages:unread:get", {
+            userId: store.userId
+          });
+        
+      });
+
       chatService.on("message:sent", (data: any) => {
         console.log("Message sent confirmation:", data);
 
@@ -677,8 +794,10 @@ const renderChat = () => {
           console.error("Invalid message history data received");
           return;
         }
-
+        console.log("data:", data);
         const { messages: historyMessages, roomId: msgRoomId } = data;
+        console.log("historyMessages:", historyMessages);
+
 
         // Only set messages if it's for the current room
         if (msgRoomId === roomId) {
@@ -770,3 +889,4 @@ const renderChat = () => {
     });
   }
 );
+

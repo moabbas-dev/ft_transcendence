@@ -12,17 +12,20 @@ export async function saveMessage(message, roomId) {
   try {
     await db.run('BEGIN TRANSACTION');
 
-    // Insert the message
+    // Insert the message with message_type and extra_data
     await db.run(
-      `INSERT INTO messages (id, room_id, sender_id, content, timestamp, read_status) 
-      VALUES (?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO messages (id, room_id, sender_id, receiver_id, content, timestamp, read_status, message_type, extra_data) 
+      VALUES (?, ?, ?, ?,?, ?, ?, ?, ?)`,
       [
         message.id,
         roomId,
-        message.from,
+        message.senderId,
+        message.receiverId,
         message.content,
         message.timestamp,
-        message.read_status || 0
+        message.read_status || 0,
+        message.messageType || null,
+        message.gameInviteData ? JSON.stringify(message.gameInviteData) : null
       ]
     );
 
@@ -50,9 +53,12 @@ export async function getMessages(roomId, limit = 1000) {
       `SELECT 
         id, 
         sender_id as senderId, 
+        receiver_id as receiverId,
         content, 
         timestamp,
         read_status,
+        message_type,
+        extra_data,
         created_at as createdAt 
        FROM messages 
        WHERE room_id = ? 
@@ -61,11 +67,13 @@ export async function getMessages(roomId, limit = 1000) {
       [roomId, limit]
     );
 
-    // Convert SQLite timestamp strings to JS timestamps
+    // Convert SQLite timestamp strings to JS timestamps and parse extra_data
     return messages.map(message => ({
       ...message,
       createdAt: new Date(message.createdAt).getTime(),
-      timestamp: parseInt(message.timestamp)
+      timestamp: parseInt(message.timestamp),
+      messageType: message.message_type,
+      gameInviteData: message.extra_data ? JSON.parse(message.extra_data) : undefined
     }));
 
   } catch (error) {
