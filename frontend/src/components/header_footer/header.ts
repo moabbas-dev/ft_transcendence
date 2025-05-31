@@ -5,7 +5,6 @@ import { DropDown } from "./DropDown.js";
 import store from "../../../store/store.js";
 import { displayResults } from "./searchFieldResults.js";
 import axios from "axios";
-import getValidAccessToken from "../../../refresh/RefreshToken.js";
 import { Notification } from "../Notifications/Notification.js";
 import { formatInTimeZone } from 'date-fns-tz';
 import { NotificationData } from "../../types/types.js";
@@ -119,15 +118,9 @@ export const Header = createComponent(() => {
 
     searchBar?.addEventListener('input', async () => {
         const searchQuery = searchBar.value.toLowerCase();
-        const token = await getValidAccessToken();
-        // console.log(`token: ${token}`);
-        if (!token)
-            return;
         await axios
             .get(`/authentication/auth/users`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+                withCredentials: true,
             })
             .then((response) => {
                 // Store or use the user data

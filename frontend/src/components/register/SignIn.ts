@@ -78,29 +78,30 @@ export const SignIn = createComponent((props: SignInProps) => {
 				email: emailData,
 				password: passwordData
 			};
-			const signIn = await axios.post("/authentication/auth/login", data);
+			const signIn = await axios.post("/authentication/auth/login", data, {withCredentials: true, headers: { 'Skip-Auth-Interceptor': 'true' }});
 			if (signIn.data.require2FA == false) {
 				if (signIn.data.accessToken) {
 					const decodedToken: any = jwtDecode(signIn.data.accessToken);
-					console.log(`User id: ${decodedToken.userId}`);
-					store.update("accessToken", signIn.data.accessToken);
-					store.update("refreshToken", signIn.data.refreshToken);
+					
+					store.setUserData({
+						userId: decodedToken.userId,
+						email: decodedToken.email,
+						nickname: decodedToken.nickname,
+						fullName: decodedToken.fullName,
+						age: decodedToken.age,
+						country: decodedToken.country,
+						createdAt: decodedToken.createdAt,
+						avatarUrl: decodedToken.avatarUrl,
+						is2faEnabled: decodedToken.is2fa,
+						accessToken: signIn.data.accessToken,
+					});
 					store.update("sessionUUID", signIn.data.sessUUID);
-					store.update("userId", decodedToken.userId);
-					store.update("email", decodedToken.email);
-					store.update("nickname", decodedToken.nickname);
-					store.update("fullName", decodedToken.fullName);
-					store.update("age", decodedToken.age);
-					store.update("country", decodedToken.country);
-					store.update("createdAt", decodedToken.createdAt);
-					store.update("avatarUrl", decodedToken.avatarUrl);
-					store.update("is2faEnabled", decodedToken.is2fa);
-					store.update("isLoggedIn", true);
+					
 					navigate("/");
 					Toast.show(`Login successful, Welcome ${decodedToken.fullName}!`, "success");
 				}
 			}
-			else {
+				else {
 				store.update("sessionUUID", signIn.data.sessUUID);
 				navigate("/register/twofactor");
 				Toast.show("First step is complete! Now moving to the 2fa code validation", "success");

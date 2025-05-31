@@ -41,6 +41,14 @@ const routes: { [key: string]: Page } = {
 let navigationState: any = null;
 
 export function refreshRouter() {
+	// if (!store.initialized) {
+	// 	console.log('Waiting for store initialization...');
+	// 	setTimeout(refreshRouter, 100);
+	// 	return;
+	// }
+	console.log('Router: Store initialized, isLoggedIn:', store.isLoggedIn);
+
+
 	const path = window.location.pathname;
 	let page: Page | null = null;
 	let params: { [key: string]: string } = {};
