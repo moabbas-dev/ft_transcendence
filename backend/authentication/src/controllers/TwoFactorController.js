@@ -28,7 +28,6 @@ class TwoFactorCodeController {
 				secret: secret,
 				encoding: 'base32',
 				token: code,
-				// window: 1 // Allow a 30-second window for time drift
 			});
 			if (!verified)
 				return reply.code(400).send({ key: "wrong", message: "Invalid code!" });
@@ -38,8 +37,17 @@ class TwoFactorCodeController {
 			await Session.updateAccessAndRefresh(session.id, { refreshToken, accessToken });
 			await User.updateUserStatus(userId, { status: "online" });
 
+			reply.setCookie('refreshToken', refreshToken, {
+				httpOnly: true,
+				secure: false,
+				sameSite: 'strict',
+				maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+				path: '/',
+				domain: undefined
+			});
+	
 			return reply.code(200).send({
-				accessToken, refreshToken,
+				accessToken
 			});
 		} catch (err) {
 			return reply.code(500).send({ message: "Error validating the code!", error: err.message });

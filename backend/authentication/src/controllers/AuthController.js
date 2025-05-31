@@ -302,7 +302,20 @@ class AuthController {
 				const sessId = await Session.create({ userId, accessToken, refreshToken });
 				const session = await Session.getById(sessId);
 				await User.updateUserStatus(userId, { status: "online" });
-				return reply.code(200).send({ require2FA: false, sessUUID: session.uuid, accessToken, refreshToken });
+				reply.setCookie('refreshToken', refreshToken, {
+					httpOnly: true,
+					secure: false,
+					sameSite: 'strict',
+					maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+					path: '/',
+					domain: undefined
+				});
+				
+				return reply.code(200).send({ 
+					require2FA: false, 
+					sessUUID: session.uuid, 
+					accessToken 
+				});
 			}
 			else {
 				const sessId = await Session.create({ userId, accessToken: null, refreshToken: null });
