@@ -4,7 +4,6 @@ import { navigate } from "../src/router";
 import { account } from "../src/appwriteConfig";
 
 class Store {
-    // In-memory storage only
     private _userId: string | null = null;
     private _nickname: string | null = null;
     private _email: string | null = null;
@@ -19,7 +18,6 @@ class Store {
     private _createdAt: string | null = null;
     private _initialized: boolean = false;
 
-    // Getters
     get userId() { return this._userId; }
     get nickname() { return this._nickname; }
     get email() { return this._email; }
@@ -40,7 +38,6 @@ class Store {
             (this as any)[privateKey] = value;
         }
         
-        // Only store session UUID for session persistence
         if (key === 'sessionUUID') {
             if (value) {
                 localStorage.setItem('sessionUUID', String(value));
@@ -50,7 +47,6 @@ class Store {
         }
     }
 
-    // Initialize store on app start
     async initialize(): Promise<void> {
         if (this._initialized) return;
         
@@ -65,7 +61,6 @@ class Store {
 
     private async restoreSession(): Promise<void> {
         try {
-            // Make request to restore session using cookies only
             const response = await axios.get('/authentication/auth/me', {
                 withCredentials: true,
                 headers: { 'Skip-Auth-Interceptor': 'true' }
@@ -107,7 +102,6 @@ class Store {
         localStorage.removeItem('sessionUUID');
     }
 
-    // Set user data after login
     setUserData(data: any): void {
         this._userId = data.userId;
         this._nickname = data.nickname;
@@ -142,7 +136,6 @@ class Store {
             }
             navigate('/register');
         } catch (error: any) {
-            // Handle errors but still clear local session
             this.clearSession();
             if (error.response) {
                 if (error.response.status === 404)

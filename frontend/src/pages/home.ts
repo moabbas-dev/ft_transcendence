@@ -181,7 +181,6 @@ export default {
             if (data.data.accessToken) {
               const decodedToken: any = jwtDecode(data.data.accessToken);
               store.update("accessToken", data.data.accessToken);
-              store.update("refreshToken", data.data.refreshToken);
               store.update("sessionUUID", data.data.sessUUID);
               store.update("userId", decodedToken.userId);
               store.update("email", decodedToken.email);
