@@ -2,7 +2,7 @@ import { t } from "../../../languages/LanguageController.js";
 import chatService from "../../../utils/chatUtils/chatWebSocketService.js";
 import store from "../../../../store/store.js";
 import { createComponent } from "../../../utils/StateManager.js";
-import { getMatchmakingClient } from "../../../pages/online-game.js";
+import { getMatchmakingClient } from "../../../main.js";
 
 export interface FriendProps {
   id: string;

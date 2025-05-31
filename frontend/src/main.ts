@@ -102,3 +102,53 @@ export const initializeTournamentClient = async () => {
 if (store.isLoggedIn && store.userId) {
   initializeTournamentClient();
 }
+
+/////////////////// pong client  //////////////////////////
+import { PongGameClient } from "./components/Online-Game/components/Game.js";
+
+export let pongClientInstance: PongGameClient | null = null;
+export function getMatchmakingClient(): PongGameClient {
+	const userId = store.userId || 'anonymousUser'; // Ensure there's a fallback or handle missing userId
+	if (!pongClientInstance || pongClientInstance['userId'] !== userId) { // Check if instance exists or if userId changed
+	  if (pongClientInstance) {
+		pongClientInstance.disconnect(); // Disconnect old instance if exists
+	  }
+	  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+	  // IMPORTANT: Ensure this port is correct for your matchmaking WebSocket server.
+	  // Using 3001 as a placeholder. Consider using environment variables for flexibility.
+	//   const wsPort = '3001'; // Or use import.meta.env.VITE_MATCHMAKING_WS_PORT
+	  const wsUrl = `${protocol}//${window.location.hostname}:/matchmaking/`;
+
+	  console.log(`Initializing PongGameClient for user: ${userId} with URL: ${wsUrl}`);
+	  pongClientInstance = new PongGameClient(wsUrl, userId);
+	  
+	  try {
+		pongClientInstance.connect();
+		console.log('pong client initialized successfully');
+	  } catch (error) {
+		console.error('Failed to initialize pong client:', error);
+	  }
+
+	  // Setup essential global listeners for the client here if needed,
+	  // or ensure they are re-attached if the client is re-initialized.
+	  // For example:
+	//   pongClientInstance.on('friend_match_invite', (data: any) => {
+	// 	console.log('Global listener: Friend match invite received', data);
+	// 	// This alert is just an example; you'll want a better UI notification
+	// 	const accept = confirm(`${data.fromId} has invited you to a match. Accept?`);
+	// 	if (accept && pongClientInstance) { // Check pongClientInstance again
+	// 	  pongClientInstance.acceptFriendMatch(data.fromId);
+	// 	}
+	//   });
+  
+	  pongClientInstance.on('friend_match_created', (data: any) => {
+		  console.log('Global listener: Friend match created', data);
+		  // Handle match creation, perhaps navigate to game screen
+		  // This logic might be similar to what's already in the render function,
+		  // ensure it's handled consistently.
+	  });
+	   // Add other critical global listeners here if they were previously inside render
+	   // and tied to the client instance.
+	}
+	return pongClientInstance;
+}

@@ -2,7 +2,7 @@ import { createComponent } from "../../utils/StateManager.js";
 import chatService from "../../utils/chatUtils/chatWebSocketService.js";
 import store from "../../../store/store.js";
 import { t } from "../../languages/LanguageController.js";
-import { getMatchmakingClient } from "../../pages/online-game.js";
+import { getMatchmakingClient } from "../../main.js";
 
 export interface GameInviteMessageProps {
   messageId: string;
@@ -20,16 +20,16 @@ export const GameInviteMessage = createComponent((props: GameInviteMessageProps)
   
   // const isReceived = props.to === (parseInt(store.userId || ''));
   const isReceived = Number(props.to) === parseInt(store.userId || '');
-  console.log(isReceived,props.to,store.userId);
+  // console.log(isReceived,props.to,store.userId);
   const isPending = props.status === 'pending';
   
-  console.log('Game invite message:', {
-    isReceived,
-    isPending,
-    to: props.to,
-    userId: store.userId,
-    status: props.status
-  });
+  // console.log('Game invite message:', {
+  //   isReceived,
+  //   isPending,
+  //   to: props.to,
+  //   userId: store.userId,
+  //   status: props.status
+  // });
   
   messageElement.innerHTML = `
     <div class="flex items-center justify-between">

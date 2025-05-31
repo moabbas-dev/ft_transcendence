@@ -179,15 +179,15 @@ const renderChat = () => {
         const inviteId = container.getAttribute('data-invite-id');
         
         if (messageId && from && to && timestamp && status && inviteId) {
-          console.log('Rendering game invite:', {
-            messageId,
-            from,
-            to,
-            gameType,
-            timestamp,
-            status,
-            inviteId
-          });
+          // console.log('Rendering game invite:', {
+          //   messageId,
+          //   from,
+          //   to,
+          //   gameType,
+          //   timestamp,
+          //   status,
+          //   inviteId
+          // });
           const gameInviteElement = GameInviteMessage({
             messageId,
             from,
@@ -269,13 +269,13 @@ const renderChat = () => {
                     // const timestamp = typeof message.timestamp === 'string' ? 
                     // Date.parse(message.timestamp) : message.timestamp;
 
-                    console.log('Processing game invite message:', {
-                      id: message.id,
-                      senderId: message.senderId,
-                      receiverId: message.receiverId,
-                      messageType: message.messageType,
-                      fullMessage: message
-                    });
+                    // console.log('Processing game invite message:', {
+                    //   id: message.id,
+                    //   senderId: message.senderId,
+                    //   receiverId: message.receiverId,
+                    //   messageType: message.messageType,
+                    //   fullMessage: message
+                    // });
                   
                   // Create a container for the game invite message
                   return `
@@ -663,7 +663,7 @@ const renderChat = () => {
             userId: store.userId
           });
         }
-        console.log(user.id);
+        // console.log(user.id);
 
         chatService.off("user:blocked_status");
 
@@ -673,7 +673,7 @@ const renderChat = () => {
         });
 
         chatService.on("user:blocked_status", (data) => {
-          console.log(data);
+          // console.log(data);
           if (user.id && user.id === data.targetId) {
             const messageContainer = container.querySelector("#message-container");
 
@@ -794,9 +794,9 @@ const renderChat = () => {
           console.error("Invalid message history data received");
           return;
         }
-        console.log("data:", data);
+        // console.log("data:", data);
         const { messages: historyMessages, roomId: msgRoomId } = data;
-        console.log("historyMessages:", historyMessages);
+        // console.log("historyMessages:", historyMessages);
 
 
         // Only set messages if it's for the current room
