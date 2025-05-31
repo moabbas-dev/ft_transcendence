@@ -6,6 +6,7 @@ import store from '../store/store.js';
 import Toast from './toast/Toast.js';
 import './utils/axiosConfig.js';
 import { TournamentClient } from './components/Tournament-Game/TournamentClient.js';
+import { refreshRouter } from './router.js';
 
 const initializeApp = async () => {
 	console.log('Initializing app...');
@@ -18,6 +19,7 @@ const initializeApp = async () => {
         if (store.isLoggedIn && store.userId) {
             await initializeTournamentClient();
         }
+		refreshRouter()
     } catch (error) {
         console.error('Failed to initialize app:', error);
     }

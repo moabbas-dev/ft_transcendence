@@ -7,6 +7,8 @@ const UserToken = require('../models/UserToken');
 const axios = require('axios');
 const { validatePassword, validateNickname, capitalizeFullName } = require('../utils/validationUtils');
 
+const SECRET_KEY = process.env.JWT_SECRET_KEY;
+
 const authenticateUser = async (email, password) => {
 	const query = `SELECT * FROM Users WHERE email = ?`;
 
