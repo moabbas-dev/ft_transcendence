@@ -1,5 +1,5 @@
 # dependencies
-/data
+/data/chat.db
 /node_modules
 /uploads
 

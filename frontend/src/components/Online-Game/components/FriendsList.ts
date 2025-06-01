@@ -2,6 +2,7 @@ import { t } from "../../../languages/LanguageController.js";
 import chatService from "../../../utils/chatUtils/chatWebSocketService.js";
 import store from "../../../../store/store.js";
 import { createComponent } from "../../../utils/StateManager.js";
+import { getMatchmakingClient } from "../../../main.js";
 
 export interface FriendProps {
   id: string;
@@ -53,12 +54,36 @@ const Friend = createComponent((props: FriendProps) => {
     const inviteButton = friendElement.querySelector('.invite-button');
     inviteButton?.addEventListener('click', (e) => {
       e.stopPropagation();
-      // Dispatch custom event with friend data
-      const event = new CustomEvent('friend-invite', {
-        bubbles: true,
-        detail: props.id
-      });
-      friendElement.dispatchEvent(event);
+      
+      // Send game invite via chat service instead of matchmaking
+      console.log("from: ", store.userId, "to: ", props.id);
+      if (chatService.isConnected()) {
+        chatService.send("game:invite", {
+          from: store.userId,
+          to: props.id,
+          gameType: "1v1"
+        });
+
+        // const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        // console.log(`${protocol}//${window.location.hostname}${window.location.port}/matchmaking/`);
+        // console.log(window.location.hostname);
+        // console.log(window.location.port);
+        // const client = new PongGameClient(`${protocol}//${window.location.hostname}${window.location.port}/matchmaking/`, store.userId?.toString() || "");
+
+        const matchmakingClient = getMatchmakingClient();
+        matchmakingClient.inviteFriend(props.id); // This is the 'friend_match_request' for matchmaking server
+        console.log("friend_match_request sent via matchmakingClient.");
+
+        chatService.send("messages:unread:get", {
+          userId: props.id,
+        });
+
+        // Update button state
+        inviteButton.textContent = 'Invite Sent';
+        inviteButton.classList.add('bg-gray-600');
+        inviteButton.classList.remove('bg-pongcyan', 'hover:bg-pongcyan/80');
+        (inviteButton as HTMLButtonElement).disabled = true;
+      }
     });
   }
   

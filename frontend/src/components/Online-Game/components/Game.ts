@@ -9,8 +9,8 @@ export class PongGameClient {
 	  this.connect();
 	}
 	
-	private connect(): void {
-	  const wsUrl = `${this.serverUrl}/?userId=${encodeURIComponent(this.userId)}`;
+	public connect(): void {
+	  const wsUrl = `${this.serverUrl}?userId=${encodeURIComponent(this.userId)}`;
 	  
 	  this.ws = new WebSocket(wsUrl);
 	  

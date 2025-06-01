@@ -2,13 +2,52 @@ import { blockUser, getBlockedUsers, unblockUser } from "../services/blockServic
 import { getUser, createOrUpdateUser, getUserByUsername, createChatRoom, getUsersFromAuth, getMessageRequests } from "../services/userService.js";
 import { createFriendRequest, cancelFriendRequest, addFriend, getPendingFriendRequests, removeFriend, getFriendshipStatus } from "../services/friendService.js"
 import { saveMessage, getMessages, getUnreadMessageCount, markMessagesAsRead } from "../services/chatService.js";
-
+import { expireOldGameInvites, updateGameInviteStatus, getGameInviteById } from "../services/gameInvitationService.js";
 import { getDatabase } from "../db/initDB.js";
+import axios from 'axios';
 
+// Add this helper function at the top of your webSocketController.js
+
+async function sendNotification(type, data) {
+  const NOTIFICATION_SERVICE_URL = 'http://127.0.0.1:3003/api/notifications';
+
+  try {
+    const response = await axios.post(`${NOTIFICATION_SERVICE_URL}/${type}`, data, {
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(`Failed to send ${type} notification:`, error.message);
+      if (error.response) {
+        console.error('Response data:', error.response.data);
+        console.error('Response status:', error.response.status);
+      }
+    } else {
+      console.error(`Unexpected error sending ${type} notification:`, error);
+    }
+    // Don't throw - notifications shouldn't break main functionality
+  }
+}
 
 export function setupWebSocketHandlers(wsAdapter, fastify) {
   // Track online users mapping username to clientId
   const onlineUsers = new Map();
+
+  // Store game invite timers
+  const gameInviteTimers = new Map();
+
+  // Set up periodic cleanup of expired invites (run every minute)
+  setInterval(async () => {
+    try {
+      await expireOldGameInvites();
+    } catch (error) {
+      console.error("Error in periodic invite cleanup:", error);
+    }
+  }, 60000);
 
   wsAdapter.on("user:connect", async ({ clientId, payload }) => {
     const { username, userId } = payload; // Destructure both fields
@@ -59,6 +98,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
     if (disconnectedUserId) {
       console.log(`User ${disconnectedUserId} disconnected`);
       onlineUsers.delete(disconnectedUserId);
+      gameInviteTimers.delete(disconnectedUserId);
     }
   });
 
@@ -72,22 +112,30 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       // Save friend request to database
       await createFriendRequest(from, to);
 
-      // // Notify the user if they're online
-      // const toClientId = onlineUsers.get(to);
-      // if (toClientId) {
-      //   const fromUser = await getUser(from);
-      //   if (fromUser) {
-      //     wsAdapter.sendTo(toClientId, "friend:request", {
-      //       username: fromUser.username,
-      //       firstname: fromUser.firstname,
-      //       lastname: fromUser.lastname,
-      //     });
-      //   }
-      // }
+      const senderUser = await getUser(from);
+      const recipientUser = await getUser(to);
+      if (senderUser && recipientUser) {
+        // Send FRIEND_REQUEST notification to recipient
+        await sendNotification('friend-request', {
+          senderId: parseInt(from),
+          recipientId: parseInt(recipientUser.id),
+          nickname: senderUser.nickname,
+        });
+      }
+      // ALSO send real-time WebSocket notification to Client2 if online
+      const recipientClientId = onlineUsers.get(recipientUser.id.toString());
+      if (recipientClientId) {
+        wsAdapter.sendTo(recipientClientId, "notification:new", {
+          type: 'FRIEND_REQUEST',
+          senderId: from,
+          senderName: senderUser.nickname,
+          content: `${senderUser.nickname} sent you a friend request`,
+        });
+      }
     } catch (error) {
       fastify.log.error("Error in friend:request handler", error);
       wsAdapter.sendTo(clientId, "error", {
-        message: "Failed to send friend request",
+        message: `Failed to send friend request, ${error.message}`,
       });
     }
   });
@@ -113,16 +161,29 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
         userId: from
       });
 
-      // Optionally, notify the sender that their request was declined
-      // wsAdapter.sendTo(from, "friend:request:declined", {
-      //   success: true,
-      //   userId: to
-      // });
+      const fromUser = await getUser(from);
+      const toUser = await getUser(to);
+      await sendNotification('friend-declined', {
+        senderId: parseInt(toUser.id),
+        recipientId: parseInt(fromUser.id),
+        nickname: toUser.nickname
+      });
+      // ALSO send real-time WebSocket notification to Client2 if online
+      const recipientClientId = onlineUsers.get(fromUser.id.toString());
+      if (recipientClientId) {
+        wsAdapter.sendTo(recipientClientId, "notification:new", {
+          type: 'FRIEND_DECLINED',
+          senderId: toUser.id,
+          recipientId: fromUser.id,
+          senderName: toUser.nickname,
+          content: `${toUser.nickname} Declined your friend request`
+        });
+      }
 
     } catch (error) {
       console.error("Error in friend:decline handler:", error);
       wsAdapter.sendTo(clientId, "error", {
-        message: "Failed to decline friend request",
+        message: `Failed to decline friend request, ${error.message}`,
         details: error.message
       });
     }
@@ -132,20 +193,20 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
   wsAdapter.on("friend:cancel_request", async ({ clientId, payload }) => {
     try {
       const { from, to } = payload;
-      
+
       console.log("friend request canceled:");
       console.log("from user:", from);
       console.log("to user:", to);
-      
+
       // Cancel the friend request in the database (using the same function as decline)
       await cancelFriendRequest(from, to);
-      
+
       // Send confirmation to the user who canceled their request
       wsAdapter.sendTo(clientId, "friend:request_cancelled", {
         success: true,
         targetId: to
       });
-      
+
       // Optionally notify the recipient that the request was canceled
       const recipientClientId = onlineUsers.get(to.toString());
       if (recipientClientId) {
@@ -153,7 +214,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
           fromId: from
         });
       }
-      
+
     } catch (error) {
       console.error("Error in friend:cancel_request handler:", error);
       wsAdapter.sendTo(clientId, "error", {
@@ -187,32 +248,26 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
         });
         return;
       }
-
-      // Notify both users
-      // const fromClientId = onlineUsers.get(from);
-      // const toClientId = onlineUsers.get(to);
-
-      // if (fromClientId) {
-      //   wsAdapter.sendTo(fromClientId, "friend:accepted", {
-      //     username: toUser.username,
-      //     firstname: toUser.firstname,
-      //     lastname: toUser.lastname,
-      //     isOnline: onlineUsers.has(to),
-      //   });
-      // }
-
-      // if (toClientId) {
-      //   wsAdapter.sendTo(toClientId, "friend:accepted", {
-      //     username: fromUser.username,
-      //     firstname: fromUser.firstname,
-      //     lastname: fromUser.lastname,
-      //     isOnline: onlineUsers.has(from),
-      //   });
-      // }
+      await sendNotification('friend-accepted', {
+        senderId: parseInt(fromUser.id),
+        recipientId: parseInt(toUser.id),
+        nickname: toUser.nickname
+      });
+      // ALSO send real-time WebSocket notification to Client2 if online
+      const recipientClientId = onlineUsers.get(toUser.id.toString());
+      if (recipientClientId) {
+        wsAdapter.sendTo(recipientClientId, "notification:new", {
+          type: 'FRIEND_ACCEPTED',
+          senderId: fromUser.id,
+          recipientId: toUser.id,
+          senderName: fromUser.nickname,
+          content: `${fromUser.nickname} Accepted your friend request`
+        });
+      }
     } catch (error) {
       fastify.log.error("Error in friend:accept handler", error);
       wsAdapter.sendTo(clientId, "error", {
-        message: "Failed to accept friend request",
+        message: `Failed to accept friend request, ${error.message}`,
       });
     }
   });
@@ -254,8 +309,17 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
   wsAdapter.on("message:private", async ({ clientId, payload }) => {
     try {
       const { from, to, content, timestamp } = payload;
+      console.log("payload:", payload);
 
+      const fromUser = await getUser(from);
+      const toUser = await getUser(to);
 
+      if (!fromUser || !toUser) {
+        wsAdapter.sendTo(clientId, "error", {
+          message: `Error retrieving user's data`
+        });
+        return ;
+      }
       // Check if either user has blocked the other
       const blockedUsers = await getBlockedUsers(from);
       const isBlocked = blockedUsers.some(user => user.id === parseInt(to));
@@ -263,7 +327,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       // Also check if recipient has blocked the sender
       const recipientBlockedUsers = await getBlockedUsers(to);
       const isBlockedByRecipient = recipientBlockedUsers.some(user => user.id === parseInt(from));
-      
+
       if (isBlocked || isBlockedByRecipient) {
         console.log(`Message blocked: User ${from} and ${to} have a block relationship`);
         wsAdapter.sendTo(clientId, "message:blocked", {
@@ -273,17 +337,17 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
         });
         return;
       }
-      
+
       // Create a room ID (combination of both usernames sorted alphabetically)
       const roomId = [from, to].sort().join("-");
 
       // Ensure chat room exists in database
       await createChatRoom(roomId, [from, to]);
-
       // Create message
       const newMessage = {
         id: Date.now().toString(),
-        from,
+        senderId: from,
+        receiverId: to,
         content,
         timestamp,
         read_status: 0
@@ -295,12 +359,6 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       // Send the message to recipient if online
       let recipientClientId = onlineUsers.get(to.toString());
       console.log(`Sending message to user ${to}, client ID: ${recipientClientId}`);
-      // for (const [wsClientId, userId] of onlineUsers.entries()) {
-      //   if (userId === to.toString()) {
-      //     recipientClientId = wsClientId;
-      //     break;
-      //   }
-      // }
 
       // Send the message to recipient if online
       if (recipientClientId) {
@@ -308,8 +366,14 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
           roomId,
           message: newMessage,
         });
+        wsAdapter.sendTo(recipientClientId, "notification:new", {
+          type: "USER_MESSAGE",
+          senderId: from,
+          recipientId: to,
+          senderName: fromUser.nickname,
+          content: `${fromUser.nickname}: ${newMessage.content}`
+        })
       }
-
 
       // Also send confirmation to sender
       wsAdapter.sendTo(clientId, "message:sent", {
@@ -324,6 +388,275 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       });
     }
   });
+
+  wsAdapter.on("game:invite", async ({ clientId, payload }) => {
+    try {
+      const { from, to, gameType = "1v1" } = payload;
+
+      // Check if users are friends
+      const friendship = await getFriendshipStatus(from, to);
+      if (friendship.status !== 'friends') {
+        wsAdapter.sendTo(clientId, "error", {
+          message: "You can only invite friends to games"
+        });
+        return;
+      }
+
+      // Check if recipient has blocked sender
+      const blockedUsers = await getBlockedUsers(to);
+      const isBlocked = blockedUsers.some(user => user.id === parseInt(from));
+
+      if (isBlocked) {
+        wsAdapter.sendTo(clientId, "error", {
+          message: "Cannot send game invite to this user"
+        });
+        return;
+      }
+
+      // Create game invite message
+      const inviteId = Date.now().toString();
+      const currentTime = Date.now();
+      const expirationTime = currentTime + (5 * 60 * 1000); // 5 minutes from now
+      const gameInviteMessage = {
+        id: inviteId,
+        senderId: from,
+        receiverId: to,
+        content: `🎮 Game Invite: ${gameType} Match`,
+        timestamp: Date.now(),
+        messageType: 'game_invite',
+        gameInviteData: {
+          inviteId,
+          gameType,
+          status: 'pending', // pending, accepted, declined, expired
+          expiresAt: expirationTime
+        },
+        read_status: 0
+      };
+      console.log("Game invite message:", gameInviteMessage); // Log the message t
+
+      // Create room ID and save message
+      const roomId = [from, to].sort().join("-");
+      await createChatRoom(roomId, [from, to]);
+      await saveMessage(gameInviteMessage, roomId);
+
+      // Set up expiration timer
+      const timer = setTimeout(async () => {
+        try {
+          await updateGameInviteStatus(inviteId, 'expired');
+          console.log(`Game invite ${inviteId} expired`);
+
+          // Notify both users if they're online
+          const senderClientId = onlineUsers.get(from.toString());
+          const recipientClientId = onlineUsers.get(to.toString());
+
+          // if (senderClientId) {
+          //   wsAdapter.sendTo(senderClientId, "game:invite_expired", {
+          //     inviteId,
+          //     to
+          //   });
+          // }
+
+          // if (recipientClientId) {
+          //   wsAdapter.sendTo(recipientClientId, "game:invite_expired", {
+          //     inviteId,
+          //     from
+          //   });
+          // }
+
+          // Clean up timer reference
+          gameInviteTimers.delete(inviteId);
+        } catch (error) {
+          console.error(`Error expiring game invite ${inviteId}:`, error);
+        }
+      }, 5 * 60 * 1000); // 5 minutes
+
+      // Store timer reference
+      gameInviteTimers.set(inviteId, timer);
+
+      // Send to recipient if online
+      const recipientClientId = onlineUsers.get(to.toString());
+      if (recipientClientId) {
+        wsAdapter.sendTo(recipientClientId, "message:private", {
+          ...gameInviteMessage,
+          roomId
+        });
+      }
+
+      // Confirm to sender
+      wsAdapter.sendTo(clientId, "game:invite_sent", {
+        inviteId,
+        to,
+        gameType
+      });
+
+    } catch (error) {
+      console.error("Error sending game invite:", error);
+      wsAdapter.sendTo(clientId, "error", {
+        message: "Failed to send game invite"
+      });
+    }
+  });
+
+  // Handle game invite response
+  wsAdapter.on("game:invite_response", async ({ clientId, payload }) => {
+    try {
+      const { inviteId, response, from, to } = payload; // response: 'accept' or 'decline'
+
+      // Update the message status in database
+      const roomId = [from, to].sort().join("-");
+
+      // First, check if the invite exists and is still pending
+      const existingInvite = await getGameInviteById(inviteId);
+      if (!existingInvite) {
+        wsAdapter.sendTo(clientId, "error", {
+          message: "Game invite not found"
+        });
+        return;
+      }
+
+      const inviteData = existingInvite.gameInviteData;
+      // Check if invite is still pending
+      if (inviteData.status !== 'pending') {
+        wsAdapter.sendTo(clientId, "error", {
+          message: `Game invite has already been ${inviteData.status}`
+        });
+        return;
+      }
+
+      // Check if invite has expired
+      if (Date.now() > inviteData.expiresAt) {
+        await updateGameInviteStatus(inviteId, 'expired');
+        wsAdapter.sendTo(clientId, "error", {
+          message: "Game invite has expired"
+        });
+        return;
+      }
+
+      // Clear the expiration timer since we're processing the response
+      if (gameInviteTimers.has(inviteId)) {
+        clearTimeout(gameInviteTimers.get(inviteId));
+        gameInviteTimers.delete(inviteId);
+      }
+
+      // Update the original invite status
+      const newStatus = response === 'accept' ? 'accepted' : 'declined';
+      await updateGameInviteStatus(inviteId, newStatus);
+
+
+      // Create response message
+      const responseMessage = {
+        id: Date.now().toString(),
+        senderId: to,
+        receiverId: from,
+        content: response === 'accept' ?
+          '✅ Game invite accepted! Starting match...' :
+          '❌ Game invite declined',
+        timestamp: Date.now(),
+        messageType: 'game_invite_response',
+        gameInviteData: {
+          originalInviteId: inviteId,
+          response,
+          status: 'completed'
+        },
+        read_status: 0
+      };
+
+      await saveMessage(responseMessage, roomId);
+
+      // Send response to original sender
+      const senderClientId = onlineUsers.get(from.toString());
+      
+      if (senderClientId) {
+        wsAdapter.sendTo(senderClientId, "message:private", {
+          ...responseMessage,
+          roomId
+        });
+
+        wsAdapter.sendTo(senderClientId, "game:invite_response", {
+          inviteId,
+          response,
+          from: to
+        });
+      }
+
+      // Confirm to responder
+      wsAdapter.sendTo(clientId, "game:response_sent", {
+        inviteId,
+        response,
+        status: newStatus
+      });
+
+      // If accepted, create match in matchmaking service
+      // if (response === 'accept') {
+      //   // Forward to matchmaking service to create friend match
+      //   // You'll need to implement communication between services
+      //   // or use a shared message queue/database
+
+      //   wsAdapter.sendTo(clientId, "game:match_creating", {
+      //     opponent: from
+      //   });
+      // }
+      // If accepted, create match in matchmaking service
+      if (response === 'accept') {
+        // Forward to matchmaking service to create friend match
+        // wsAdapter.sendTo(clientId, "game:match_creating", {
+        //   opponent: from,
+        //   inviteId
+        // });
+
+        // // Also notify the sender
+        // if (senderClientId) {
+        //   wsAdapter.sendTo(senderClientId, "game:match_creating", {
+        //     opponent: to,
+        //     inviteId
+        //   });
+        // }
+      }
+
+    } catch (error) {
+      console.error("Error handling game invite response:", error);
+      wsAdapter.sendTo(clientId, "error", {
+        message: "Failed to process game invite response"
+      });
+    }
+  });
+
+  // Add handler to check invite status
+  wsAdapter.on("game:invite_status", async ({ clientId, payload }) => {
+    try {
+      const { inviteId } = payload;
+
+      const invite = await getGameInviteById(inviteId);
+      if (!invite) {
+        wsAdapter.sendTo(clientId, "error", {
+          message: "Game invite not found"
+        });
+        return;
+      }
+
+      const inviteData = JSON.parse(invite.gameInviteData);
+
+      // Check if expired
+      if (inviteData.status === 'pending' && Date.now() > inviteData.expiresAt) {
+        await updateGameInviteStatus(inviteId, 'expired');
+        inviteData.status = 'expired';
+      }
+
+      wsAdapter.sendTo(clientId, "game:invite_status", {
+        inviteId,
+        status: inviteData.status,
+        expiresAt: inviteData.expiresAt,
+        gameType: inviteData.gameType
+      });
+
+    } catch (error) {
+      console.error("Error checking game invite status:", error);
+      wsAdapter.sendTo(clientId, "error", {
+        message: "Failed to check game invite status"
+      });
+    }
+  });
+
 
 
   wsAdapter.on("messages:unread:get", async ({ clientId, payload }) => {
@@ -450,7 +783,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
   wsAdapter.on("user:unblock", async ({ clientId, payload }) => {
     try {
       const { from, unblocked } = payload;
-      
+
       if (!from || !unblocked) {
         throw new Error("Missing user IDs");
       }
@@ -469,8 +802,8 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       console.log(blockerIdNum, "unblocked user", blockedIdNum);
 
       // Confirm unblock to user
-      wsAdapter.sendTo(clientId, "user:unblocked", { 
-        userId: blockedIdNum 
+      wsAdapter.sendTo(clientId, "user:unblocked", {
+        userId: blockedIdNum
       });
     } catch (error) {
       console.error("Unblock error details:", error.message, error.stack);
@@ -616,29 +949,29 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
   wsAdapter.on("user:check_blocked", async ({ clientId, payload }) => {
     try {
       const { userId, targetId } = payload;
-      
+
       if (!userId || !targetId) {
         wsAdapter.sendTo(clientId, "error", {
           message: "Both user ID and target ID are required"
         });
         return;
       }
-      
+
       // Get the list of users blocked by userId
       const blockedUsers = await getBlockedUsers(userId);
-      
+
       // Check if targetId is in the list of blocked users
       const isBlocked = blockedUsers.some(user => user.id === parseInt(targetId));
-      
+
       console.log(`Checking if user ${userId} has blocked user ${targetId}: ${isBlocked}`);
-      
+
       // Send the result back to the client
       wsAdapter.sendTo(clientId, "user:blocked_status", {
         userId,
         targetId,
         isBlocked
       });
-      
+
     } catch (error) {
       console.error("Error checking blocked status:", error);
       wsAdapter.sendTo(clientId, "error", {

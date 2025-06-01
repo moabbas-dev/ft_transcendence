@@ -42,6 +42,15 @@ class NotificationController {
 		});
 	}
 
+	async sendFriendDeclinedNotification(senderId, recipientId, username) {
+		return this.notificationModel.create({
+			type: 'FRIEND_DECLINED',
+			senderId,
+			recipientId,
+			content: `${username} declined your friend invitation`
+		});
+	}
+
 	async sendGameChallenge(senderId, recipientId) {
 		return this.notificationModel.create({
 		  type: 'GAME_CHALLENGE',

@@ -9,6 +9,8 @@ import { Notification } from "../Notifications/Notification.js";
 import { formatInTimeZone } from 'date-fns-tz';
 import { NotificationData } from "../../types/types.js";
 import defaultImage from "../../assets/guests.png";
+import chatService from "../../utils/chatUtils/chatWebSocketService.js";
+import audioManager from "../../utils/audioUtils.js";
 
 export const Header = createComponent(() => {
     const container = document.createElement("header");
@@ -169,9 +171,10 @@ export const Header = createComponent(() => {
 
     // *************************TO BE REVIEWED**********************************
 
-    async function fetchUserNotifications(userId: number): Promise<NotificationData[] | null> {
+    async function fetchUserNotifications(userId: string | null): Promise<NotificationData[] | null> {
         try {
             const response = await axios.get(`/notifications/api/notifications/user/${userId}`);
+            console.log(`data : ${response.data}`);
             return response.data;
         } catch (error: unknown) {
             if (axios.isAxiosError(error)) {
@@ -189,7 +192,7 @@ export const Header = createComponent(() => {
         }
     }
 
-    const userId = 2;
+    const userId = store.userId;
     async function markAllNotificationsAsRead() {
         try {
             await axios.patch(`/notifications/api/notifications/read/all/${userId}`, undefined);
@@ -340,6 +343,53 @@ export const Header = createComponent(() => {
             }, 100);
         }
     });
+
+    // Add real-time notification listeners
+    function setupRealTimeNotifications() {
+        // Listen for new notifications
+        chatService.on("error", (data) => {
+            console.error(`Error!, ${data.message}`);
+        })
+        chatService.on('notification:new', (data) => {
+
+            audioManager.playNotificationSound();
+
+            // Add new notification to UI without full refresh
+            addNewNotificationToUI(data);
+
+            // Update count
+            const currentCount = parseInt(notificationCount.textContent || '0');
+            updateNotificationCount(currentCount + 1);
+
+            // Show brief animation or toast
+            notificationBell.classList.add('animate-bounce');
+            setTimeout(() => notificationBell.classList.remove('animate-bounce'), 1000);
+        });
+
+        // Listen for when notifications are marked as read elsewhere
+        chatService.on('notifications:marked_read', () => {
+            updateNotificationCount(0);
+        });
+    }
+
+    function addNewNotificationToUI(notificationData: any) {
+        if (notificationContainer) {
+            const newNotification = Notification({
+                senderId: notificationData.senderId,
+                recipientId: notificationData.recipientId,
+                type: notificationData.type,
+                content: notificationData.content,
+                is_read: false,
+                created_at: new Date().toISOString()
+            });
+
+            // Add to top of notification list
+            notificationContainer.insertBefore(newNotification, notificationContainer.firstChild);
+        }
+    }
+
+    // Call this function after the existing notification setup
+    setupRealTimeNotifications();
 
     return container;
 });
