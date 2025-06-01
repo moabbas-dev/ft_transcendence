@@ -338,6 +338,45 @@ class DatabaseConnection {
     }
   }
 
+  async getTopPlayers(limit = 20) {
+    try {
+      const rows = await this.query(
+        `SELECT id, wins, elo_score 
+       FROM players 
+       ORDER BY elo_score DESC, wins DESC 
+       LIMIT ?`,
+        [limit]
+      );
+
+      return rows;
+    } catch (error) {
+      console.error('Error getting top players:', error);
+      throw error;
+    }
+  }
+
+  // Alternative version with additional ranking information
+  async getTopPlayersWithRank(limit = 20) {
+    try {
+      const rows = await this.query(
+        `SELECT 
+         ROW_NUMBER() OVER (ORDER BY elo_score DESC, wins DESC) as rank,
+         id, 
+         wins, 
+         elo_score 
+       FROM players 
+       ORDER BY elo_score DESC, wins DESC 
+       LIMIT ?`,
+        [limit]
+      );
+
+      return rows;
+    } catch (error) {
+      console.error('Error getting top players with rank:', error);
+      throw error;
+    }
+  }
+
   closeDatabase() {
     try {
       if (this.db) {
