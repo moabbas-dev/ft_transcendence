@@ -12,6 +12,9 @@ export default {
 		register: "S'inscrire maintenant !",
 		playAI: "Jouer contre l'IA",
 		playLocaly: "Jouer en local",
+		startTournament: "Créer un tournoi",
+		playOnline: "Jouer en ligne",
+		chatWithFriends: "Chat avec des amis",
 		footer: {
 			developed: "Développé par",
 			rights: "Tous droits de propriété intellectuelle réservés."
@@ -142,7 +145,7 @@ export default {
 		player: "Joueur"
 	},
 	leaderBoard: {
-		title: "Champions",
+		title: "Champions",	
 		rank: "Rang",
 		player: "Joueur",
 		wins: "Victoires",
@@ -151,7 +154,14 @@ export default {
 	chat: {
 		nochat: "Sélectionnez un chat",
 		friends: "Amis",
-		loadingFriends: "Chargement des amis..."
+		messageRequests: "Demandes de messages",
+		loadingFriends: "Chargement des amis...",
+		loadingRequests: "Chargement des demandes...",
+		noFriends: "Aucun ami",
+		noRequests: "Aucune demande",
+		searchFriends: "Rechercher des amis...",
+		searchRequests: "Rechercher des demandes...",
+		on: "En ligne",
 	},
 	profile: {
 		rank: "Rang : ",

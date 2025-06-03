@@ -12,6 +12,9 @@ export default {
 		register: "Register now!",
 		playAI: "Play vs AI",
 		playLocaly: "Play Localy",
+		startTournament: "Start a Tournament",
+		playOnline: "Play Online",
+		chatWithFriends: "Chat with Friends",
 		footer: {
 			developed: "Developed by",
 			rights :"All intellectual property rights reserved."

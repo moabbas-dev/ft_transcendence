@@ -12,6 +12,9 @@ export default {
 		register: "سجل الآن!",
 		playAI: "العب ضد الذكاء الاصطناعي",
 		playLocaly: "العب محليًا",
+		startTournament: "إنشاء بطولة",
+		playOnline: "العب عبر الإنترنت",
+		chatWithFriends: "الدردشة مع الأصدقاء",
 		footer: {
 			developed: "طور بواسطة",
 			rights: "جميع حقوق الملكية الفكرية محفوظة."
@@ -145,13 +148,21 @@ export default {
 		title: "الأبطال",
 		rank: "المرتبة",
 		player: "اللاعب",
-		wins: "الانتصارات",
+		wins: "مرّات الفوز",
 		score: "النقاط"
 	},
 	chat: {
 		nochat: "اختر محادثة",
 		friends: "الأصدقاء",
+		messageRequests: "طلبات الرسائل",
 		loadingFriends: "جاري تحميل الأصدقاء...",
+		loadingRequests: "جاري تحميل المحادثات...",
+		noFriends: "لا يوجد أصدقاء بعد",
+		noRequests: "لا يوجد طلبات للدردشة",
+		searchFriends: "ابحث عن أصدقاء...",
+		searchRequests: "ابحث عن طلبات الدردشة...",
+		on: "متصل",
+		off: "غير متصل",
 	},
 	profile: {
 		rank: "المرتبة: ",
