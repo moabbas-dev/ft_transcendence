@@ -100,4 +100,21 @@ export default async function (fastify, options) {
       return reply.code(500).send({ error: error.message });
     }
   });
+
+  fastify.get('/api/tournaments/user/:userId', async (request, reply) => {
+    try {
+      const { userId } = request.params;
+      const { limit = 10, offset = 0 } = request.query;
+      
+      if (!userId) {
+        return reply.code(400).send({ error: 'User ID is required' });
+      }
+      
+      const tournaments = await TournamentService.getUserTournaments(userId, limit, offset);
+      return { tournaments };
+    } catch (error) {
+      fastify.log.error(`Error fetching user tournaments: ${error.message}`);
+      return reply.code(500).send({ error: 'Failed to fetch user tournaments' });
+    }
+  });
 }

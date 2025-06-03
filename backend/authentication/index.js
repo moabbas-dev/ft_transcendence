@@ -41,7 +41,10 @@ fastify.register(cors, {
 createTables();
 
 // Register cookie plugin
-fastify.register(fastifyCookie);
+fastify.register(fastifyCookie, {
+	secret: process.env.COOKIE_SECRET,
+	parseOptions: {}
+});
 
 // Register session plugin (must be before oauth2)
 fastify.register(fastifySession, {

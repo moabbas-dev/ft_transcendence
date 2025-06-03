@@ -31,7 +31,7 @@ class DatabaseConnection {
         winner_id INTEGER,
         tournament_id INTEGER,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        started_at DATETIME,
+        started_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         completed_at DATETIME,
         FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE SET NULL
       );
@@ -334,6 +334,45 @@ class DatabaseConnection {
       console.log(`Match ${matchId} started_at updated to current time`);
     } catch (error) {
       console.error('Error updating match start time:', error);
+      throw error;
+    }
+  }
+
+  async getTopPlayers(limit = 20) {
+    try {
+      const rows = await this.query(
+        `SELECT id, wins, elo_score 
+       FROM players 
+       ORDER BY elo_score DESC, wins DESC 
+       LIMIT ?`,
+        [limit]
+      );
+
+      return rows;
+    } catch (error) {
+      console.error('Error getting top players:', error);
+      throw error;
+    }
+  }
+
+  // Alternative version with additional ranking information
+  async getTopPlayersWithRank(limit = 20) {
+    try {
+      const rows = await this.query(
+        `SELECT 
+         ROW_NUMBER() OVER (ORDER BY elo_score DESC, wins DESC) as rank,
+         id, 
+         wins, 
+         elo_score 
+       FROM players 
+       ORDER BY elo_score DESC, wins DESC 
+       LIMIT ?`,
+        [limit]
+      );
+
+      return rows;
+    } catch (error) {
+      console.error('Error getting top players with rank:', error);
       throw error;
     }
   }
