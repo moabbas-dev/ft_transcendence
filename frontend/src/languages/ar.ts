@@ -97,7 +97,8 @@ export default {
 			searchingForRivals: "جاري البحث عن خصوم...",
 			oponentFound: "تم العثور على خصم!",
 			cancel: "إلغاء",
-			invite: "دعوة"
+			invite: "دعوة",
+			positionInQueue: "الموقع في الصف"
 		},
 		"tournaments": {
 			"title": "البطولات",
@@ -216,6 +217,10 @@ export default {
 		searchRequests: "ابحث عن طلبات الدردشة...",
 		on: "متصل",
 		off: "غير متصل",
+		errorLoadingFriends: "خطأ في تحميل الأصدقاء",
+		errorLoadingRequests: "خطأ في تحميل المحادثات",
+		retry: "إعادة تحميل",
+		typeMessage: "اكتب رسالتك هنا...",
 	},
 	profile: {
 		rank: "المرتبة: ",

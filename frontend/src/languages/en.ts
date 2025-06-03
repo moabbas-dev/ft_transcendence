@@ -97,7 +97,8 @@ export default {
 			searchingForRivals: "Searching for Rivals...",
 			oponentFound: "Opponent Found!",
 			cancel: "Cancel",
-			invite: "Invite"
+			invite: "Invite",
+			positionInQueue: "Position in Queue"
 		},
 		"tournaments": {
 			"title": "Tournaments",
@@ -215,6 +216,10 @@ export default {
 		searchRequests: "Search requests...",
 		on: "Online",
 		off: "Offline",
+		errorLoadingFriends: "Error loading friends",
+		errorLoadingRequests: "Error loading requests",
+		retry: "Retry",
+		typeMessage: "Type your message...",
 	},
 	profile: {
 		rank: "Rank: ",

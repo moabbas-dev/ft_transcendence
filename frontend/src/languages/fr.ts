@@ -14,7 +14,7 @@ export default {
 		playLocaly: "Jouer en local",
 		startTournament: "Créer un tournoi",
 		playOnline: "Jouer en ligne",
-		chatWithFriends: "Chat avec des amis",
+		chatWithFriends: "Discuter avec des amis",
 		footer: {
 			developed: "Développé par",
 			rights: "Tous droits de propriété intellectuelle réservés."
@@ -97,7 +97,8 @@ export default {
 			searchingForRivals: "Recherche de rivaux...",
 			oponentFound: "Adversaire trouvé !",
 			cancel: "Annuler",
-			invite: "Inviter"
+			invite: "Inviter",
+			positionInQueue: "Position dans la file d'attente"
 		},
 		"tournaments": {
 			"title": "Tournois",
@@ -214,6 +215,11 @@ export default {
 		searchFriends: "Rechercher des amis...",
 		searchRequests: "Rechercher des demandes...",
 		on: "En ligne",
+		off: "Hors ligne",
+		errorLoadingFriends: "Erreur lors du chargement des amis",
+		errorLoadingRequests: "Erreur lors du chargement des demandes",
+		retry: "Réessayer",
+		typeMessage: "Taper votre message ici...",
 	},
 	profile: {
 		rank: "Rang : ",
