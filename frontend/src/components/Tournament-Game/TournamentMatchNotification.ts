@@ -2,7 +2,6 @@ import { createComponent } from "../../utils/StateManager.js";
 import { t } from "../../languages/LanguageController.js";
 
 export interface TournamentMatchNotificationProps {
-  tournamentId: string;
   matchId: string;
   opponent: {
     id: string;
@@ -15,7 +14,6 @@ export interface TournamentMatchNotificationProps {
 
 export const TournamentMatchNotification = createComponent((props: TournamentMatchNotificationProps) => {
   const {
-    tournamentId,
     matchId,
     opponent,
     onAccept
@@ -29,7 +27,7 @@ export const TournamentMatchNotification = createComponent((props: TournamentMat
     <div class="bg-gray-800 rounded-lg shadow-lg max-w-md w-full p-6 transform animate-bounce-in">
       <div class="text-center mb-4">
         <i class="fas fa-trophy text-pongcyan text-4xl"></i>
-        <h2 class="text-2xl font-bold text-white mt-2">${t('play.tournaments.matchNotification.title')}</h2>
+        <h2 class="text-2xl font-bold text-white drop-shadow-pongcyan mt-2">${t('play.tournaments.matchNotification.title')}</h2>
       </div>
       
       <div class="bg-gray-700 rounded-lg p-4 mb-4">
@@ -65,6 +63,13 @@ export const TournamentMatchNotification = createComponent((props: TournamentMat
   const acceptBtn = container.querySelector('#accept-match-btn');
   if (acceptBtn) {
     acceptBtn.addEventListener('click', () => {
+      (acceptBtn as HTMLButtonElement).disabled = true;
+      acceptBtn.innerHTML = `
+        <div class="flex items-center justify-center">
+          <div class="animate-spin rounded-full h-5 w-5 border-t-2 border-white mr-2"></div>
+          Accepting...
+        </div>
+      `;
       if (container.parentNode) {
         container.parentNode.removeChild(container);
       }

@@ -1,7 +1,6 @@
 import { createComponent } from "../../utils/StateManager.js";
 import axios from "axios";
 import Chart from 'chart.js/auto';
-import getValidAccessToken from "../../../refresh/RefreshToken.js";
 import Toast from "../../toast/Toast.js";
 import store from "../../../store/store.js";
 
@@ -260,11 +259,8 @@ export const UserStatistics = createComponent((props: { userId: number }) => {
   async function fetchStats() {
     try {
       showLoading();
-      const token = await getValidAccessToken();
       const response = await axios.get<StatsResponse>(`/matchmaking/api/player/stats/${store.userId}/${props.userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        }
+        withCredentials: true,
       });
       const statsData = response.data.player.stats;
 

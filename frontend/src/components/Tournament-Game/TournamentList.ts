@@ -27,26 +27,22 @@ export const TournamentList = createComponent((props: TournamentListProps) => {
   } = props;
   
   const container = document.createElement('div');
-  container.className = "w-full flex flex-col gap-4";
-  
+  container.className = "w-full h-full flex flex-col gap-4";
+  container.innerHTML = `
+    <div>
+      <input
+        type="text"
+        id="tournament-search"
+        class="w-full p-3 bg-gray-700 text-white rounded border border-gray-600 focus:border-pongcyan outline-none"
+        placeholder="${t('play.tournaments.joinTournament.searchPlaceholder')}"
+      >
+    </div>
 
-  const searchContainer = document.createElement('div');
-  searchContainer.className = "mb-4";
-  searchContainer.innerHTML = `
-    <input
-      type="text"
-      id="tournament-search"
-      class="w-full p-3 bg-gray-700 text-white rounded border border-gray-600 focus:border-pongcyan outline-none"
-      placeholder="${t('play.tournaments.joinTournament.searchPlaceholder')}"
-    >
-  `;
-  container.appendChild(searchContainer);
-  
-
-  const tournamentsContainer = document.createElement('div');
-  tournamentsContainer.className = "flex flex-col gap-3 h-64 overflow-auto";
-  container.appendChild(tournamentsContainer);
-  
+    <div id="tournament-container" class="flex flex-col gap-3 flex-grow overflow-auto">
+    
+    </div>
+  `
+  const tournamentsContainer = container.querySelector('#tournament-container') as HTMLDivElement;
 
   if (tournaments.length === 0) {
     tournamentsContainer.innerHTML = `
@@ -56,7 +52,6 @@ export const TournamentList = createComponent((props: TournamentListProps) => {
       </div>
     `;
   } else {
-
     const sortedTournaments = [...tournaments].sort((a, b) => {
       if (a.status === 'registering' && b.status !== 'registering') return -1;
       if (a.status !== 'registering' && b.status === 'registering') return 1;
@@ -75,14 +70,14 @@ export const TournamentList = createComponent((props: TournamentListProps) => {
     
       let statusBadge = '';
       if (tournament.status === 'registering') {
-        statusBadge = `<span class="inline-block bg-blue-600 text-white text-xs px-2 py-1 rounded">${t('play.tournaments.joinTournament.registering')}</span>`;
+        statusBadge = `<span class="inline-block bg-pongcyan text-white text-xs px-2 py-1 rounded">${t('play.tournaments.joinTournament.registering')}</span>`;
       } else if (tournament.status === 'in_progress') {
         statusBadge = `<span class="inline-block bg-green-600 text-white text-xs px-2 py-1 rounded">${t('play.tournaments.joinTournament.inProgress')}</span>`;
       }
       
       tournamentItem.innerHTML = `
         <div class="flex justify-between items-center mb-2">
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
             <h3 class="tournament-name text-lg font-semibold text-white">${tournament.name}</h3>
             ${statusBadge}
           </div>
@@ -97,7 +92,7 @@ export const TournamentList = createComponent((props: TournamentListProps) => {
           </div>
           ${canJoin ? 
             `<button 
-              class="join-btn px-4 py-1 bg-pongcyan text-white rounded hover:bg-blue-700 transition-colors"
+              class="join-btn px-4 py-1 bg-pongcyan text-white rounded hover:bg-cyan-700 transition-colors"
               data-id="${tournament.id}"
             >
               ${t('play.tournaments.joinTournament.join')}

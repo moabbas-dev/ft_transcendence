@@ -14,6 +14,7 @@ import {
 } from "./HeaderAnimations_utils.js";
 import { GameType } from "../../../types/types.js";
 import axios from "axios";
+import { t } from "../../../languages/LanguageController.js";
 
 interface OfflineGameHeader {
 	gameMode: GameType;
@@ -46,8 +47,8 @@ export const OfflineGameHeader = createComponent((props: OfflineGameHeader) => {
 
 	let player1Image = playerPic;
 	let player2Image = props.gameMode === "AI" ? aiPic : player2Pic;
-	let player1Name = props.gameMode === "AI" ? "Player" : "Player 1";
-	let player2Name = props.gameMode === "AI" ? "AI" : "Player 2";
+	let player1Name = props.gameMode === "AI" ? t("play.player") : `${t("play.player")} 1`;
+	let player2Name = props.gameMode === "AI" ? t("play.ai") : `${t("play.player")} 2`;
 
 	const fetchUserData = async (userId: string) => {
 		try {
@@ -127,7 +128,7 @@ export const OfflineGameHeader = createComponent((props: OfflineGameHeader) => {
 				const avatarImg = avatarContainer.querySelector('img');
 				if (avatarImg) {
 					avatarImg.src = userData.avatar_url;
-					avatarImg.alt = userData.nickname || `Player ${playerNumber}`;
+					avatarImg.alt = userData.nickname || `${t("play.player")} ${playerNumber}`;
 				}
 			}
 		};

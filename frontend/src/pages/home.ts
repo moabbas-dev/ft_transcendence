@@ -143,13 +143,14 @@ export default {
         // Get current session and access token
         const session = await account.getSession('current');
         const accessToken = session.providerAccessToken;
-    
+        
+        
         if (!accessToken) {
           throw new Error('No Google access token available');
         }
     
         // Fetch user profile from Google People API
-        const response = await axios.get(
+        const response = await fetch(
           'https://people.googleapis.com/v1/people/me?personFields=photos',
           {
             headers: {
@@ -158,8 +159,8 @@ export default {
           }
         );
     
-        // Extract profile photo URL
-        const [profilePhoto] = response.data.photos || [];
+        const data = await response.json();
+        const [profilePhoto] = data.photos || [];
         return profilePhoto?.url || null;
       } catch (error) {
         console.error('Error fetching Google profile photo:', error);
@@ -181,7 +182,6 @@ export default {
             if (data.data.accessToken) {
               const decodedToken: any = jwtDecode(data.data.accessToken);
               store.update("accessToken", data.data.accessToken);
-              store.update("refreshToken", data.data.refreshToken);
               store.update("sessionUUID", data.data.sessUUID);
               store.update("userId", decodedToken.userId);
               store.update("email", decodedToken.email);

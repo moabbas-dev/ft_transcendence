@@ -51,7 +51,7 @@ export default {
                   <div class="absolute inset-0 rounded-full border-2 border-pongcyan opacity-50 animate-ping"></div>
                 </div>
                 <h3 class="text-lg sm:text-2xl font-bold text-pongcyan drop-shadow-[0_0_5px_#00f7ff] mb-1">Moabbas</h3>
-                <p class="text-pongpink font-medium mb-2 sm:mb-3 text-sm sm:text-base">Frontend ${t('about.developer')}</p>
+                <p class="text-pongpink font-medium mb-2 sm:mb-3 text-sm sm:text-base"><bdi>Frontend ${t('about.developer')}</bdi></p>
                 <p class="text-white text-center text-xs sm:text-base">
                   ${t('about.moabbasInfo')}
                 </p>
@@ -68,7 +68,7 @@ export default {
                   <div class="absolute inset-0 rounded-full border-2 border-pongcyan opacity-50 animate-ping"></div>
                 </div>
                 <h3 class="text-lg sm:text-2xl font-bold text-pongcyan drop-shadow-[0_0_5px_#00f7ff] mb-1">Afarachi</h3>
-                <p class="text-pongpink font-medium mb-2 sm:mb-3 text-sm sm:text-base">Fullstack ${t('about.developer')}</p>
+                <p class="text-pongpink font-medium mb-2 sm:mb-3 text-sm sm:text-base"><bdi>Fullstack ${t('about.developer')}</bdi></p>
                 <p class="text-white text-center text-xs sm:text-base">
                   ${t('about.afarachiInfo')}
                 </p>
@@ -85,7 +85,7 @@ export default {
                   <div class="absolute inset-0 rounded-full border-2 border-pongcyan opacity-50 animate-ping"></div>
                 </div>
                 <h3 class="text-lg sm:text-2xl font-bold text-pongcyan drop-shadow-[0_0_5px_#00f7ff] mb-1">Jfatfat</h3>
-                <p class="text-pongpink font-medium mb-2 sm:mb-3 text-sm sm:text-base">Backend ${t('about.developer')}</p>
+                <p class="text-pongpink font-medium mb-2 sm:mb-3 text-sm sm:text-base"><bdi>Backend ${t('about.developer')}</bdi></p>
                 <p class="text-white text-center text-xs sm:text-base">
                   ${t('about.jfatfatInfo')}
                 </p>

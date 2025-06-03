@@ -12,9 +12,9 @@ export const CreateTournamentForm = createComponent((props: CreateTournamentForm
   const { onTournamentCreated, client } = props;
   
   const container = document.createElement('div');
-  container.className = "w-full max-w-md mx-auto";
+  container.className = "w-full";
   container.innerHTML = `
-    <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+    <div class="w-full bg-gray-800 p-6 rounded-lg shadow-lg">
       <h2 class="text-xl font-bold text-white mb-4">${t('play.tournaments.createTournament.title')}</h2>
       
       <form id="create-tournament-form" class="space-y-4">
@@ -46,7 +46,7 @@ export const CreateTournamentForm = createComponent((props: CreateTournamentForm
         
         <button 
           type="submit" 
-          class="w-full py-3 bg-pongcyan text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+          class="w-full py-3 bg-pongcyan text-white font-medium rounded-lg hover:bg-pongcyan/80 drop-shadow-pongcyan transition-colors"
         >
           ${t('play.tournaments.createTournament.createButton')}
         </button>
@@ -60,12 +60,12 @@ export const CreateTournamentForm = createComponent((props: CreateTournamentForm
   playerCountOptions.forEach(option => {
     option.addEventListener('click', () => {
       playerCountOptions.forEach(opt => {
-        opt.classList.remove('border-pongcyan');
+        opt.classList.remove('border-pongcyan', 'drop-shadow-pongcyan');
         opt.classList.add('border-gray-600');
       });
       
       option.classList.remove('border-gray-600');
-      option.classList.add('border-pongcyan');
+      option.classList.add('border-pongcyan', "drop-shadow-pongcyan");
       
       const count = option.getAttribute('data-count');
       if (count && playerCountInput) {
@@ -75,7 +75,7 @@ export const CreateTournamentForm = createComponent((props: CreateTournamentForm
   });
   
   playerCountOptions[0].classList.remove('border-gray-600');
-  playerCountOptions[0].classList.add('border-pongcyan');
+  playerCountOptions[0].classList.add('border-pongcyan', 'drop-shadow-pongcyan');
   
   const form = container.querySelector('#create-tournament-form');
   form?.addEventListener('submit', async (e) => {

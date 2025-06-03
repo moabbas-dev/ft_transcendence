@@ -20,6 +20,23 @@ interface UserDetails {
   avatar_url?: string;
 }
 
+interface WaitingRoomPlayer {
+  userId: string;
+  username: string;
+  avatar?: string;
+  joinedAt?: string;
+}
+
+interface WaitingRoomData {
+  tournamentId: string;
+  playerCount: number;
+  players: WaitingRoomPlayer[];
+  isCreator: boolean;
+  client: TournamentClient;
+  onTournamentStart: () => void;
+}
+
+
 export default {
   render: async (container: HTMLElement, params?: { [key: string]: string }) => {
 
@@ -32,6 +49,12 @@ export default {
     const tournamentId = params.tournamentId;
     const userId = store.userId;
 
+    if (!/^\d+$/.test(tournamentId)) {
+      console.error("Invalid tournament ID format");
+      navigate("/404");
+      return;
+    }
+    
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const client = tournamentClient || new TournamentClient(`${protocol}//${window.location.hostname}:${window.location.port}/matchmaking/`, userId as string);
 
@@ -43,15 +66,15 @@ export default {
 
     container.className = "bg-ponghover w-full h-dvh flex flex-col items-center justify-center";
     container.innerHTML = `
-      <div class="size-full flex flex-col gap-3 p-4 bg-gray-800 rounded-lg shadow-lg">
+      <div class="size-full flex flex-col gap-3 p-4 bg-black rounded-lg shadow-lg">
         <div class="flex justify-between items-center gap-2">
-          <h1 id="tour-name" class="text-2xl font-bold text-white">Loading...</h1>
-          <button id="back-button" class="px-4 py-2 bg-pongcyan text-white rounded hover:bg-blue-700">
+          <h1 id="tour-name" class="text-2xl font-bold text-white drop-shadow-pongcyan">Loading...</h1>
+          <button id="back-button" class="px-4 py-2 bg-pongcyan text-white rounded drop-shadow-pongcyan transition-all hover:bg-cyan-700">
             ${t('play.tournaments.backToTournaments')}
           </button>
         </div>
         
-        <div id="tournament-content" class="flex-1 p-4 bg-gray-900 rounded-lg">
+        <div id="tournament-content" class="h-[calc(100%-20%)] flex-1 p-4 bg-gray-900 rounded-lg">
           <div class="text-center py-8">
             <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-pongcyan"></div>
             <p class="mt-2 text-gray-400">${t('play.tournaments.loading')}</p>
@@ -60,17 +83,14 @@ export default {
       </div>
     `;
 
-    const backButton = container.querySelector('#back-button');
-    if (backButton) {
-      backButton.addEventListener('click', () => {
-        navigate('/play/tournaments');
-      });
-    }
-
+    container.querySelector('#back-button')?.addEventListener('click', () => navigate('/play/tournaments'));
     client.getTournamentDetails(tournamentId);
 
     client.on('tournament_details', async (data) => {
-      container.querySelector('#tour-name')!.textContent = data.tournament.name;
+      const tourNameElement = container.querySelector('#tour-name');
+      if (tourNameElement) {
+        tourNameElement.textContent = data.tournament.name;
+      }
       if ((data.tournament.id as string).toString() === tournamentId) {
         try {
           const userIds = data.players.map((p: any) => p.player_id);
@@ -79,7 +99,7 @@ export default {
             const userInfo = userDetails?.find((u: UserDetails) => u.id === player.player_id);
             return {
               ...player,
-              nickname: userInfo?.nickname || `Player ${player.player_id}`,
+              nickname: userInfo?.nickname || `${t("play.player")} ${player.player_id}`,
               avatar_url: userInfo?.avatar_url
             };
           });
@@ -114,117 +134,126 @@ export default {
       }
     });
 
-    client.on('tournament_match_starting', (data) => {
-      if (String(data.tournamentId) === String(tournamentId)) {
-        startTournamentMatch(container, data.matchId, {
-          players: [
-            {
-              userId: userId,
-              username: 'You',
-              elo: 1000,
-              avatar: undefined
-            },
-            {
-              userId: data.opponent.id,
-              username: data.opponent.username,
-              elo: data.opponent.elo,
-              avatar: data.opponent.avatar
-            }
-          ],
-          tournamentName: container.querySelector('#tour-name')?.textContent || 'Tournament',
-          round: 1
-        }, userId as string, client);
-      } else {
-        console.error("[tournament_match_starting]: Ids don't match");
-      }
-    });
-
-    client.on('tournament_match_completed', (data) => {
-      if (String(data.tournamentId) === String(tournamentId)) {
-        showTournamentBrackets(container, data, client, userId as string);
-      } else {
-        console.error("Ids don't match");
-      }
-    });
-
-    client.on('tournament_completed', (data) => {
-      if (String(data.tournamentId) === String(tournamentId)) {
-        showTournamentResults(container, data, client, userId as string);
-      } else {
-        console.error("Ids don't match");
-      }
-    });
-
     client.on('tournament_match_notification', (data) => {
       if (String(data.tournamentId) === String(tournamentId)) {
         showTournamentMatchNotification({
-          tournamentId: data.tournamentId,
           matchId: data.matchId,
           opponent: data.opponent,
-          onAccept: (matchId) => {
-            startTournamentMatch(container, matchId, {
-              players: data.matchPlayers,
-              tournamentName: "Tournament Match",
-              round: data.round || 1
-            }, userId as string, client);
+          onAccept: (matchId) => client.send('tournament_match_accept', { matchId })
+        });
+      }
+    });
+
+    client.on('tournament_opponent_accepted', (data) => {
+      console.log('Opponent accepted event received:', data);
+      if (!data.tournamentId || String(data.tournamentId) === String(tournamentId)) {
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-4 right-4 bg-green-600 text-white p-4 rounded-lg shadow-lg z-50 animate-fade-in';
+        notification.innerHTML = `
+          <div class="flex items-center gap-3">
+            <i class="fas fa-check-circle text-xl"></i>
+            <div>
+              <div class="font-semibold">Opponent Ready!</div>
+              <div class="text-sm opacity-90">Your opponent accepted the match</div>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(notification);
+        setTimeout(() => {
+          if (document.body.contains(notification)) {
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+              if (document.body.contains(notification)) {
+                document.body.removeChild(notification);
+              }
+            }, 300);
+          }
+        }, 4000);
+      }
+    });
+    
+    client.on('tournament_match_accepted', (data) => {
+      if (!data.tournamentId || String(data.tournamentId) === String(tournamentId)) {
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-4 right-4 bg-pongcyan text-white p-4 rounded-lg shadow-lg z-50';
+        notification.innerHTML = `
+          <div class="flex items-center gap-2">
+            <i class="fas fa-clock"></i>
+            <span>Match accepted! Waiting for opponent...</span>
+          </div>
+        `;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+          if (document.body.contains(notification)) {
+            document.body.removeChild(notification);
+          }
+        }, 3000);
+      }
+    });
+
+    client.on('tournament_match_starting', (data) => {
+      console.log('Tournament match starting event received:', data);
+      if (String(data.tournamentId) === String(tournamentId)) {
+        document.querySelectorAll('.fixed.top-4.right-4').forEach(el => el.remove());
+        navigate(`/tournaments/${tournamentId}/match/${data.matchId}`, {
+          state: {
+            matchId: data.matchId,
+            tournamentId: data.tournamentId,
+            opponent: data.opponent,
+            isPlayer1: data.isPlayer1,
+            client: client
           }
         });
       }
     });
 
-    client.on('tournament_match_accepted', (data) => {
-      console.log('Match accepted:', data);
-    });
-
-    client.on('tournament_opponent_accepted', (data) => {
-      console.log('Opponent accepted:', data);
-    });
-
-    client.on('tournament_match_starting', (data) => {
+    client.on('tournament_match_completed', (data) => {
       if (String(data.tournamentId) === String(tournamentId)) {
-        console.log('Match starting:', data);
+        console.log('Tournament match completed, refreshing details...');
+        client.getTournamentDetails(tournamentId);
         
-        startTournamentMatch(container, data.matchId, {
-          players: [
-            {
-              userId: userId,
-              username: 'You',
-              elo: 1000,
-              avatar: undefined
-            },
-            {
-              userId: data.opponent.id,
-              username: data.opponent.username,
-              elo: data.opponent.elo,
-              avatar: data.opponent.avatar
-            }
-          ],
-          tournamentName: container.querySelector('#tour-name')?.textContent || 'Tournament',
-          tournamentId: data.tournamentId,
-          round: 1
-        }, userId as string, client);
-      } else {
-        console.error("[tournament_match_starting 2]: Ids don't match");
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-4 right-4 bg-green-600 text-white p-4 rounded-lg shadow-lg z-50 animate-fade-in';
+        notification.innerHTML = `
+          <div class="flex items-center gap-3">
+            <i class="fas fa-check-circle text-xl"></i>
+            <div>
+              <div class="font-semibold">Match Completed!</div>
+              <div class="text-sm opacity-90">Brackets updated</div>
+            </div>
+          </div>
+        `;
+        const app = document.getElementById("app")!;
+        app.appendChild(notification);
+        setTimeout(() => {
+          if (app.contains(notification)) {
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+              if (app.contains(notification)) {
+                app.removeChild(notification);
+              }
+            }, 300);
+          }
+        }, 4000);
+      }
+    });
+
+    client.on('tournament_not_found', (error) => {
+      console.error('Tournament error received:', error);
+      
+      if (error.message && (
+        error.message.includes('Tournament not found') || 
+        error.message.includes('Error getting tournament details')
+      )) {
+        navigate('/play/tournaments');
+        Toast.show("Tournament not found", "error");
       }
     });
   }
 };
-
-interface WaitingRoomPlayer {
-  userId: string;
-  username: string;
-  avatar?: string;
-  joinedAt?: string;
-}
-
-interface WaitingRoomData {
-  tournamentId: string;
-  playerCount: number;
-  players: WaitingRoomPlayer[];
-  isCreator: boolean;
-  client: TournamentClient;
-  onTournamentStart: () => void;
-}
 
 function showWaitingRoom(container: HTMLElement, data: { tournament: { id: string; player_count: number; creator_id: string }; players: Player[] }, client: TournamentClient, userId: string): void {
   const content = container.querySelector('#tournament-content');
@@ -235,7 +264,7 @@ function showWaitingRoom(container: HTMLElement, data: { tournament: { id: strin
     playerCount: data.tournament.player_count,
     players: data.players.map((p) => ({
       userId: p.player_id,
-      username: p.nickname || `Player ${p.player_id}`,
+      username: p.nickname || `${t("play.player")} ${p.player_id}`,
       avatar: p.avatar_url,
       joinedAt: p.joined_at
     })),
@@ -259,12 +288,12 @@ function showTournamentBrackets(container: HTMLElement, data: any, client: Tourn
         <div>
           <div class="text-sm text-gray-400">
             ${data.tournament.player_count} ${t('play.tournaments.createTournament.players')} • 
-            Status: ${data.tournament.status}
+            ${t("play.tournaments.inTournament.status")}: ${data.tournament.status === "in_progress" ? t("play.tournaments.inTournament.tournamentInProgress") : t("play.tournaments.TournamentResults.tournamentCompleted")}
           </div>
         </div>
         <div class="text-sm text-gray-300">
           <i class="fas fa-trophy text-pongcyan mr-2"></i>
-          Tournament in Progress
+          ${t("play.tournaments.inTournament.tournamentInProgress")}
         </div>
       </div>
       
@@ -275,7 +304,7 @@ function showTournamentBrackets(container: HTMLElement, data: any, client: Tourn
       <div class="p-4 bg-gray-800 rounded-lg">
         <div class="text-sm text-gray-300 text-center">
           <i class="fas fa-info-circle mr-2"></i>
-          Click on a match to view details. Matches will become playable when it's your turn.
+          ${t('play.tournaments.inTournament.clickToViewMatch')}
         </div>
       </div>
     </div>
@@ -309,7 +338,7 @@ function formatMatchesForBrackets(tournamentData: any) {
     // Get players for this match
     const matchPlayers = match.players || [];
     const player1Data = matchPlayers[0];
-    const player2Data = matchPlayers[1];
+    const player2Data = matchPlayers[1];    
 
     // Find player details from tournament players list
     const findPlayerDetails = (playerId: string) => {
@@ -328,7 +357,7 @@ function formatMatchesForBrackets(tournamentData: any) {
       if (winnerDetails) {
         winner = {
           id: winnerDetails.player_id || winnerDetails.id,
-          username: winnerDetails.nickname || `Player ${winnerDetails.player_id || winnerDetails.id}`
+          username: winnerDetails.nickname || `${t("play.player")} ${winnerDetails.player_id || winnerDetails.id}`
         };
       }
     }
@@ -343,12 +372,12 @@ function formatMatchesForBrackets(tournamentData: any) {
       position: position,
       player1: player1Details ? {
         id: player1Details.player_id || player1Details.id,
-        username: player1Details.nickname || `Player ${player1Details.player_id || player1Details.id}`,
+        username: player1Details.nickname || `${t("play.player")} ${player1Details.player_id || player1Details.id}`,
         avatar: player1Details.avatar_url
       } : undefined,
       player2: player2Details ? {
         id: player2Details.player_id || player2Details.id,
-        username: player2Details.nickname || `Player ${player2Details.player_id || player2Details.id}`,
+        username: player2Details.nickname || `${t("play.player")} ${player2Details.player_id || player2Details.id}`,
         avatar: player2Details.avatar_url
       } : undefined,
       winner: winner,
@@ -422,16 +451,22 @@ function handleMatchClick(matchId: string, tournamentData: any, client: Tourname
 
     if (opponentDetails) {
       showTournamentMatchNotification({
-        tournamentId: tournamentData.tournament.id,
         matchId: match.id,
         opponent: {
           id: opponentDetails.player_id,
-          username: opponentDetails.nickname || `Player ${opponentDetails.player_id}`,
+          username: opponentDetails.nickname || `${t("play.player")} ${opponentDetails.player_id}`,
           elo: opponent?.elo_before || 1000,
           avatar: opponentDetails.avatar_url
         },
         onAccept: (acceptedMatchId) => {
-          client.send('tournament_match_accept', { matchId: acceptedMatchId });
+          console.log("Sending tournament_match_accept for match:", acceptedMatchId);
+          client.send('tournament_match_accept', { matchId })
+            .then(() => {
+              console.log("Successfully sent tournament_match_accept");
+            })
+            .catch((error) => {
+              console.error("Failed to send tournament_match_accept:", error);
+            });
         }
       });
     }
@@ -456,7 +491,7 @@ function showMatchDetails(match: any, tournamentData: any) {
   modal.innerHTML = `
     <div class="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-bold text-white">Match Details</h3>
+        <h3 class="text-xl font-bold text-white">${t("play.tournaments.inTournament.matchDetails")}</h3>
         <button class="close-modal text-gray-400 hover:text-white text-2xl">&times;</button>
       </div>
       
@@ -464,18 +499,18 @@ function showMatchDetails(match: any, tournamentData: any) {
         <div class="flex justify-between items-center">
           <div class="text-center flex-1">
             <div class="text-white font-medium">
-              ${player1Details?.nickname || `Player ${player1?.player_id || 'TBD'}`}
+              ${player1Details?.nickname || `${t("play.player")} ${player1?.player_id || t("play.tournaments.inTournament.tbd")}`}
             </div>
             <div class="text-2xl font-bold text-pongcyan">
               ${player1?.goals || 0}
             </div>
           </div>
           
-          <div class="px-4 text-gray-400">VS</div>
+          <div class="px-4 text-gray-400">${t("play.tournaments.inTournament.vs")}</div>
           
           <div class="text-center flex-1">
             <div class="text-white font-medium">
-              ${player2Details?.nickname || `Player ${player2?.player_id || 'TBD'}`}
+              ${player2Details?.nickname || `${t("play.player")} ${player2?.player_id || t("play.tournaments.inTournament.tbd")}`}
             </div>
             <div class="text-2xl font-bold text-pongcyan">
               ${player2?.goals || 0}
@@ -485,12 +520,12 @@ function showMatchDetails(match: any, tournamentData: any) {
         
         <div class="border-t border-gray-700 pt-4">
           <div class="text-sm text-gray-300">
-            <div>Status: <span class="text-white">${match.status}</span></div>
+            <div>${t("play.tournaments.inTournament.status")}: <span class="text-white">${match.status  === "in_progress" ? t("play.tournaments.inTournament.tournamentInProgress") : t("play.tournaments.TournamentResults.tournamentCompleted")}</span></div>
             ${match.status === 'completed' ? 
-              `<div>Winner: <span class="text-green-400">${
+              `<div>${t("play.tournaments.inTournament.winner")}: <span class="text-green-400">${
                 match.winner_id ? 
-                  (tournamentData.players.find((p: any) => String(p.player_id) === String(match.winner_id) || String(p.id) === String(match.winner_id))?.nickname || `Player ${match.winner_id}`) 
-                  : 'TBD'
+                  (tournamentData.players.find((p: any) => String(p.player_id) === String(match.winner_id) || String(p.id) === String(match.winner_id))?.nickname || `${t("play.player")} ${match.winner_id}`) 
+                  : t("play.tournaments.inTournament.tbd")
               }</span></div>` 
               : ''
             }
@@ -515,10 +550,8 @@ function showMatchDetails(match: any, tournamentData: any) {
   document.body.appendChild(modal);
 }
 
-// Add these imports at the top of TournamentDetailPage.ts
-import { OnlineGameBoard } from "../Online-Game/components/OnlineGameBoard.js";
 import { TournamentResult, renderResultsTab } from "./TournamentResults.js";
-import { showTournamentMatchResult } from "./TournamentMatchResult.js";
+import Toast from "../../toast/Toast.js";
 
 // Implement showTournamentResults function
 function showTournamentResults(container: HTMLElement, data: any, client: TournamentClient, userId: string) {
@@ -527,32 +560,32 @@ function showTournamentResults(container: HTMLElement, data: any, client: Tourna
 
   // Clear the current content and show results
   content.innerHTML = `
-    <div class="tournament-results-container w-full">
-      <div class="flex justify-between items-center mb-6">
+    <div class="tournament-results-container size-full flex flex-col gap-3">
+      <div class="flex justify-between items-center flex-wrap gap-1">
         <div>
           <div class="text-sm text-gray-400">
             ${data.tournament.player_count} ${t('play.tournaments.createTournament.players')} • 
-            Tournament Completed
+            ${t("play.tournaments.TournamentResults.tournamentCompleted")}
           </div>
         </div>
-        <div class="text-sm text-green-400">
+        <div class="text-sm text-green-400 drop-shadow-[0_0_5px_#4ade80]">
           <i class="fas fa-trophy text-yellow-400 mr-2"></i>
-          Tournament Finished
+          ${t("play.tournaments.TournamentResults.tournamentFinished")}
         </div>
       </div>
       
-      <div id="results-content" class="w-full">
+      <div id="results-content" class="flex-1 size-full">
         <!-- Results will be rendered here -->
       </div>
       
-      <div class="mt-6 flex justify-center gap-4">
-        <button id="back-to-tournaments" class="px-6 py-3 bg-pongcyan text-white rounded-lg hover:bg-blue-700 transition-colors">
+      <div class="flex justify-center gap-4">
+        <button id="back-to-tournaments" class="hidden md:block px-6 py-3 bg-pongcyan text-white rounded-lg hover:bg-cyan-700 transition-colors">
           <i class="fas fa-arrow-left mr-2"></i>
           ${t('play.tournaments.backToTournaments')}
         </button>
-        <button id="view-brackets" class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+        <button id="view-brackets" class="px-6 py-2 sm:py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
           <i class="fas fa-bracket mr-2"></i>
-          View Final Brackets
+          ${t('play.tournaments.inTournament.viewFinalBrackets')}
         </button>
       </div>
     </div>
@@ -647,7 +680,7 @@ function formatTournamentResults(tournamentData: any): TournamentResult[] {
     
     return {
       userId: player.player_id || player.id,
-      username: player.nickname || `Player ${player.player_id || player.id}`,
+      username: player.nickname || `${t("play.player")} ${player.player_id || player.id}`,
       avatarUrl: player.avatar_url,
       place: 0, // Will be assigned after sorting
       score: score
@@ -667,203 +700,4 @@ function formatTournamentResults(tournamentData: any): TournamentResult[] {
   });
 
   return results;
-}
-
-function startTournamentMatch(container: HTMLElement, matchId: string, matchData: any, userId: string, client: TournamentClient) {
-  const content = container.querySelector('#tournament-content');
-  if (!content) {
-    console.log("Tournament DOM Content not found");
-    return;
-  }
-
-  // Get opponent info
-  const currentPlayer = matchData.players.find((p: any) => String(p.userId) === String(userId));
-  const opponent = matchData.players.find((p: any) => String(p.userId) !== String(userId));
-  
-  if (!opponent) {
-    console.error('Could not find opponent for match');
-    return;
-  }
-
-  const isPlayer1 = matchData.players.indexOf(currentPlayer) === 0;
-
-  // Store original tournament view to restore later
-  const originalContent = content.innerHTML;
-
-  // Clear content and create match interface
-  content.innerHTML = `
-    <div class="tournament-match-container w-full h-full flex flex-col">
-      <div class="match-header flex justify-between items-center p-4 bg-gray-800 mb-4 rounded-lg">
-        <div class="flex items-center gap-4">
-          <button id="back-to-tournament" class="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors">
-            <i class="fas fa-arrow-left mr-2"></i>
-            Back to Tournament
-          </button>
-          <div class="text-xl text-white font-bold">
-            <i class="fas fa-trophy text-yellow-400 mr-2"></i>
-            Tournament Match
-          </div>
-          <div class="text-pongcyan">
-            ${matchData.tournamentName || 'Tournament'} • Round ${matchData.round || 1}
-          </div>
-        </div>
-        <div class="flex items-center gap-4">
-          <div class="flex flex-col items-end">
-            <div class="text-lg text-white">
-              <span id="player-score1">0</span> - <span id="player-score2">0</span>
-            </div>
-            <div class="text-sm text-gray-300">
-              vs ${opponent.username}
-            </div>
-          </div>
-          ${opponent.avatar ? 
-            `<div class="size-12 rounded-full overflow-hidden border-2 border-pongcyan">
-               <img src="${opponent.avatar}" alt="${opponent.username}" class="size-full object-cover">
-             </div>` :
-            `<div class="size-12 rounded-full bg-pongcyan flex items-center justify-center text-white font-bold text-lg border-2 border-pongcyan">
-               ${opponent.username.charAt(0).toUpperCase()}
-             </div>`
-          }
-        </div>
-      </div>
-      
-      <div class="game-container flex-1 flex items-center justify-center bg-gray-900 rounded-lg p-4">
-        <canvas id="tournament-game-canvas" class="bg-black rounded-lg shadow-lg"></canvas>
-      </div>
-      
-      <div class="match-footer p-4 bg-gray-800 rounded-lg mt-4">
-        <div class="flex justify-between items-center">
-          <div class="text-sm text-gray-300">
-            <i class="fas fa-info-circle mr-2"></i>
-            Use W/S keys or touch controls to move your paddle
-          </div>
-          <button id="forfeit-match" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors">
-            <i class="fas fa-flag mr-2"></i>
-            Forfeit Match
-          </button>
-        </div>
-      </div>
-    </div>
-  `;
-
-  // Back to tournament button
-  const backButton = content.querySelector('#back-to-tournament');
-  if (backButton) {
-    backButton.addEventListener('click', () => {
-      if (confirm('Are you sure you want to leave the match? This will count as a forfeit.')) {
-        // Send forfeit and return to tournament view
-        client.completeMatch(matchId, opponent.userId, {
-          player1: 0,
-          player2: 10
-        });
-        
-        // Restore tournament view
-        client.getTournamentDetails(matchData.tournamentId);
-      }
-    });
-  }
-
-  // Set up canvas and game
-  const canvas = content.querySelector('#tournament-game-canvas') as HTMLCanvasElement;
-  const matchHeader = content.querySelector('.match-header') as HTMLElement;
-  
-  if (!canvas || !matchHeader) {
-    console.error('Could not find canvas or match header');
-    return;
-  }
-
-  // Set canvas size
-  canvas.width = 800;
-  canvas.height = 600;
-  
-  // Responsive canvas
-  const resizeCanvas = () => {
-    const gameContainer = content.querySelector('.game-container') as HTMLElement;
-    if (!gameContainer) return;
-    
-    const containerWidth = gameContainer.clientWidth - 32;
-    const containerHeight = gameContainer.clientHeight - 32;
-    const aspectRatio = 600 / 800;
-    
-    let width = Math.min(800, containerWidth);
-    let height = width * aspectRatio;
-    
-    // Make sure it fits in height too
-    if (height > containerHeight) {
-      height = containerHeight;
-      width = height / aspectRatio;
-    }
-    
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
-  };
-  
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
-
-  // Set up forfeit button
-  const forfeitButton = content.querySelector('#forfeit-match');
-  if (forfeitButton) {
-    forfeitButton.addEventListener('click', () => {
-      if (confirm('Are you sure you want to forfeit this match? This will count as a loss.')) {
-        client.completeMatch(matchId, opponent.userId, {
-          player1: 0,
-          player2: 10
-        });
-      }
-    });
-  }
-
-  // Initialize the OnlineGameBoard
-  const gameBoard = new OnlineGameBoard(
-    canvas,
-    matchHeader,
-    client,
-    matchId,
-    userId,
-    opponent.userId,
-    isPlayer1
-  );
-
-  // Handle game end event
-  const handleGameResult = (data: any) => {
-    if (String(data.matchId) === String(matchId)) {
-      // Clean up
-      client.off('game_result', handleGameResult);
-      window.removeEventListener('resize', resizeCanvas);
-      
-      // Show match result
-      showTournamentMatchResult({
-        matchId: matchId,
-        tournamentId: matchData.tournamentId || '',
-        isWinner: String(data.winner) === String(userId),
-        playerScore: isPlayer1 ? data.finalScore.player1 : data.finalScore.player2,
-        opponentScore: isPlayer1 ? data.finalScore.player2 : data.finalScore.player1,
-        eloChange: data.eloChanges[userId] || 0,
-        opponent: {
-          id: opponent.userId,
-          username: opponent.username,
-          avatar: opponent.avatar
-        },
-        onContinue: () => {
-          // Return to tournament brackets view
-          client.getTournamentDetails(matchData.tournamentId);
-        }
-      });
-    }
-  };
-
-  client.on('game_result', handleGameResult);
-
-  // Start the game
-  gameBoard.startGame();
-}
-
-function calculateRoundFromMatchId(matchId: string, tournamentData: any): number {
-  if (!tournamentData?.matches) return 1;
-  
-  const matchIndex = tournamentData.matches.findIndex((m: any) => String(m.id) === String(matchId));
-  if (matchIndex === -1) return 1;
-  
-  return calculateRound(matchIndex, tournamentData.tournament?.player_count || 4) + 1;
 }

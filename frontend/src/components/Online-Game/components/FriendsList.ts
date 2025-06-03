@@ -25,7 +25,7 @@ const Friend = createComponent((props: FriendProps) => {
   const isAvailable = props.status === 'online';
   
   friendElement.innerHTML = `
-    <div class="flex items-center space-x-3">
+    <div class="flex items-center gap-3">
       <div class="avatar-container relative">
         <img 
           src="${props.avatar_url}" 
@@ -45,7 +45,7 @@ const Friend = createComponent((props: FriendProps) => {
         : 'bg-gray-700 text-gray-400 cursor-not-allowed'}"
       ${!isAvailable ? 'disabled' : ''}
     >
-      ${'invite'}
+      ${t('play.onlineGame.invite')}
     </button>
   `;
   

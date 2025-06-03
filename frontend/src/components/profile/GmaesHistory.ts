@@ -2,7 +2,6 @@ import axios from "axios";
 import { t } from "../../languages/LanguageController.js";
 import { createComponent } from "../../utils/StateManager.js";
 import { HistorySection } from "./HistorySection.js";
-import getValidAccessToken from "../../../refresh/RefreshToken.js";
 import Toast from "../../toast/Toast.js";
 import store from "../../../store/store.js";
 
@@ -211,11 +210,8 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
       const url = `/matchmaking/api/player/history/${activeTab}/${store.userId}/${props.userId}?limit=${pageSize}&offset=${offset}`;
       console.log('Making request to:', url);
       
-      const token = await getValidAccessToken();
       const response = await axios.get<HistoryResponse>(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        }
+        withCredentials: true,
       });
       
       console.log('API Response:', response.data);

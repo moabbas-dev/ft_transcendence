@@ -1,4 +1,3 @@
-import getValidAccessToken from "../../../refresh/RefreshToken";
 import store from "../../../store/store";
 
 class ChatWebSocketService {

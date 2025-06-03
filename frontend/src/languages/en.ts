@@ -18,7 +18,7 @@ export default {
 		footer: {
 			developed: "Developed by",
 			rights :"All intellectual property rights reserved."
-		}
+		},
 	},
 	register: {
 		signin: {
@@ -97,44 +97,93 @@ export default {
 			searchingForRivals: "Searching for Rivals...",
 			oponentFound: "Opponent Found!",
 			cancel: "Cancel",
+			invite: "Invite"
 		},
-		tournaments: {
-			joinBtn: "Join to a tournament",
-			createBtn: "Create a tournament",
-			join: "Enter the arena",
-			create: "Launch the battle",
-			createTournament: {
-				title: "Neon Pong Tournament",
-				submitTitle: "Submit",
-				nameTooshort: "Name is too short",
-				nameToolong: "Name is too long",
-				waiting: "Waiting for Players",
-				launch: "Launch Tournament",
-				players: "Players",
-				waitingRoom: "Waiting Room",
-				currentParticipants: "Current Players",
-				remove: "remove",
-				rank: "Rank:",
-				leaveTournament: "Leave Tournament",
-				tournamentStart: "Tournament starts when",
-				tournamentStartContinue: "players join",
-				waitingForPlayers: "Waiting for player...",
-				bracket: "Bracket", 
-				tournamentBracket: "Tournament Bracket",
-				round: "Round",
-				final: "Final",
-				startSoon: "Starts soon",
-				matchCompleted: "Match Completed",
-				info: "Match duration: 5 minutes or first to 10 goals",
-				TBD: "TBD",
-				results: "Results",
-				tournamentResults: "Tournament Results",
-				pts: "pts",
-				first: "1st",
-				second: "2nd",
-				third: "3rd",
+		"tournaments": {
+			"title": "Tournaments",
+			"createTab": "Create Tournament",
+			"joinTab": "Join Tournament", 
+			"myTournamentsTab": "My Tournaments",
+			"backToTournaments": "Back to Tournaments",
+			"loading": "Loading tournament details...",
+			
+			"createTournament": {
+			  "title": "Create New Tournament",
+			  "name": "Tournament Name",
+			  "namePlaceholder": "Enter tournament name",
+			  "nameError": "Tournament name must be at least 3 characters",
+			  "playerCount": "Number of Players",
+			  "players": "Players",
+			  "createButton": "Create Tournament",
+			  "creating": "Creating...",
+			  "waitingRoom": "Waiting Room",
+			  "currentParticipants": "Current Participants",
+			  "tournamentStart": "Tournament will start when",
+			  "tournamentStartContinue": "players join",
+			  "startTournament": "Start Tournament",
+			  "leaveTournament": "Leave Tournament",
+			  "leaveConfirmation": "Are you sure you want to leave this tournament?",
+			  "leaveError": "Failed to leave tournament. Please try again.",
+			  "waitingForPlayers": "Waiting for players...",
+			  "rank": "Rank",
+			  "round": "Round",
+			  "final": "Final",
+			  "matchCompleted": "Match Completed",
+			  "startSoon": "Match will start soon",
+			  "TBD": "TBD",
+			  "pts": "pts"
+			},
+			
+			"joinTournament": {
+			  "loading": "Loading tournaments...",
+			  "searchPlaceholder": "Search tournaments...",
+			  "noTournaments": "No tournaments available",
+			  "registering": "Registering",
+			  "inProgress": "In Progress", 
+			  "join": "Join",
+			  "full": "Full"
+			},
+
+			"inTournament": {
+				"clickToViewMatch": "Click on a match to view details. Matches will become playable when it's your turn.",
+				"tournamentInProgress": "Tournament in Progress",
+				"status": "Status",
+				"matchDetails": "Match Details",
+				"vs": "VS",
+				"winner": "Winner",
+				"tbd": "TBD",
+				"viewFinalBrackets": "View Final Brackets"
+			},
+			
+			"myTournaments": {
+			  "loading": "Loading your tournaments..."
+			},
+			
+			"matchNotification": {
+			  "title": "Tournament Match Ready!",
+			  "message": "Your next tournament match is ready to begin.",
+			  "elo": "ELO",
+			  "accept": "Accept Match"
+			},
+			
+			"matchResult": {
+			  "victory": "Victory!",
+			  "defeat": "Defeat",
+			  "you": "You", 
+			  "eloChange": "ELO Change",
+			  "continue": "Continue"
+			},
+			"TournamentResults": {
+				"tournamentResults": "Tournament Results",
+				"tournamentCompleted": "Tournament Completed",
+				"tournamentFinished": "Tournament Finished",
+				"inProgress": "In Progress",
+				"completed": "Completed",
+				"first": "1st",
+				"second": "2nd",
+				"third": "3rd"
 			}
-		},
+		  },
 		paused: "Game Paused",
 		resultsPopup: {
 			title: "Wins!",
@@ -142,7 +191,10 @@ export default {
 			playAgain: "Play Again",
 		},
 		game: "Game",
-		player: "Player"
+		player: "Player",
+		unranked: "Unranked",
+		"unknownPlayer": "Unknown Player",
+		"ai": "AI"
 	},
 	leaderBoard: {
 		title: "Champions",

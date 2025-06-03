@@ -12,7 +12,8 @@ module.exports = {
         silver: '#C0C0C0',
         bronze: '#CD7F32',
       },
-      boxShadow: {
+      dropShadow: {
+        pongcyan: '0 0 5px #00f7ff',
       },
       fontFamily: {
         flux: ["Flux", "sans-serif"],

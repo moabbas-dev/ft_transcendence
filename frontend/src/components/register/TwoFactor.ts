@@ -110,7 +110,6 @@ export const TwoFactorSend = createComponent(() => {
 			const userData = await axios.post(`/authentication/auth/twoFactor/login/${store.sessionUUID}`, body);
 			const decodedToken: any = jwtDecode(userData.data.accessToken);
 			store.update("accessToken", userData.data.accessToken);
-			store.update("refreshToken", userData.data.refreshToken);
 			store.update("userId", decodedToken.userId);
 			store.update("email", decodedToken.email);
 			store.update("nickname", decodedToken.nickname);

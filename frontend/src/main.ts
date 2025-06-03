@@ -4,7 +4,28 @@ import { account } from './appwriteConfig.js';
 import axios from 'axios';
 import store from '../store/store.js';
 import Toast from './toast/Toast.js';
+import './utils/axiosConfig.js';
 import { TournamentClient } from './components/Tournament-Game/TournamentClient.js';
+import { refreshRouter } from './router.js';
+
+const initializeApp = async () => {
+	console.log('Initializing app...');
+    try {
+        await store.initialize();
+        console.log('Store initialized, user logged in:', store.isLoggedIn);
+		localStorage.setItem("isLoggedIn", store.isLoggedIn ? "true" : "false");
+        
+        // Initialize other components after store is ready
+        if (store.isLoggedIn && store.userId) {
+            await initializeTournamentClient();
+        }
+		refreshRouter()
+    } catch (error) {
+        console.error('Failed to initialize app:', error);
+    }
+};
+initializeApp();
+
 
 // window.addEventListener("contextmenu", (e) => e.preventDefault());
 // window.addEventListener("keydown", (e) => {
@@ -45,23 +66,23 @@ export const handleLoginWithGoogle = (container: HTMLElement) => {
 }
 
 export const refreshUserData = async () => {
-	if (store.userId === null)
-		return
-	try {
-		const response = await axios.get(`/authentication/auth/users/id/${store.userId}`)
-		const data = response.data
+    if (!store.userId || !store.isLoggedIn) return;
+    
+    try {
+        const response = await axios.get(`/authentication/auth/users/id/${store.userId}`);
+        const data = response.data;
 
-		if (data) {
-			store.update('age', data.age)
-			store.update('avatarUrl', data.avatar_url)
-			store.update('country', data.country)
-			store.update('email', data.email)
-			store.update('fullName', data.fullName)
-			store.update('nickname', data.nickname)
-		}
-	} catch (error) {
-		console.log(error);
-	}
+        if (data) {
+            store.update('age', data.age);
+            store.update('avatarUrl', data.avatar_url);
+            store.update('country', data.country);
+            store.update('email', data.email);
+            store.update('fullName', data.fullName);
+            store.update('nickname', data.nickname);
+        }
+    } catch (error) {
+        console.log('Error refreshing user data:', error);
+    }
 }
 refreshUserData()
 

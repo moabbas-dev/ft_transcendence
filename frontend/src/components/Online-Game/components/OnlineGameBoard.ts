@@ -1,4 +1,3 @@
-import { t } from "../../../languages/LanguageController.js";
 import { navigate } from "../../../router.js";
 import { GameBoard, gameState } from "../../Offline-Game/components/GameBoard.js";
 import { BallController, Controller, HumanPlayerController } from "../../Offline-Game/components/GameControllers.js";
@@ -244,7 +243,7 @@ export class OnlineGameBoard extends GameBoard {
 				this.state.ballY = denormalizedPosition.y;
 				this.state.ballSpeedX = denormalizedVelocity.x;
 				this.state.ballSpeedY = denormalizedVelocity.y;
-				
+
 				// FIXED: Update scores (backend sends original scores)
 				const player1Score = typeof data.scores.player1 === 'number' ? data.scores.player1 : -1;
 				const player2Score = typeof data.scores.player2 === 'number' ? data.scores.player2 : -1;
@@ -260,9 +259,61 @@ export class OnlineGameBoard extends GameBoard {
 			this.state.scores.player1 = data.player1Score;
 			this.state.scores.player2 = data.player2Score;
 		});
+
+		// ADDED: Game end handler for tournament matches
+		if (this.client instanceof TournamentClient) {
+			this.client.on('tournament_match_completed', (data: any) => {
+				if (String(data.matchId) === String(this.matchId)) {
+					console.log('Tournament match completed:', data);
+					this.showTournamentMatchResult(data);
+				}
+			});
+
+			this.client.on('tournament_completed', (data: any) => {
+				console.log('Tournament completed:', data);
+				setTimeout(() => {
+					navigate(`/tournaments/${data.tournamentId}`);
+				}, 5000);
+			});
+		}
 	}
 
-	// UPDATED: Override update method with mirrored game logic
+	// ADDED: Show tournament match result overlay
+	private showTournamentMatchResult(data: any): void {
+		const isWinner = String(data.winnerId) === String(this.playerId);
+		const eloChange = isWinner ? data.winnerEloChange : data.loserEloChange;
+
+		const overlay = document.createElement('div');
+		overlay.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+		overlay.innerHTML = `
+		  <div class="bg-gray-800 rounded-lg p-8 text-center max-w-md">
+			<div class="text-4xl mb-4">
+			  ${isWinner ? '🏆 Victory!' : '😔 Defeat'}
+			</div>
+			<div class="text-xl mb-4 ${isWinner ? 'text-green-400' : 'text-red-400'}">
+			  ${isWinner ? 'You Won!' : 'You Lost'}
+			</div>
+			<div class="text-lg mb-2">
+			  ELO Change: 
+			  <span class="${eloChange >= 0 ? 'text-green-400' : 'text-red-400'}">
+				${eloChange >= 0 ? '+' : ''}${eloChange}
+			  </span>
+			</div>
+			<div class="text-sm text-gray-400">
+			  Returning to tournament bracket...
+			</div>
+		  </div>
+		`;
+
+		document.body.appendChild(overlay);
+
+		setTimeout(() => {
+			if (document.body.contains(overlay)) {
+				document.body.removeChild(overlay);
+			}
+		}, 3000);
+	}
+
 	update() {
 		// UPDATED: Local player always controls left paddle (player1Y)
 		this.player1Controller.update(this.canvas, this.state);
@@ -290,20 +341,30 @@ export class OnlineGameBoard extends GameBoard {
 		if (Math.max(this.state.scores.player1, this.state.scores.player2) >= 10) {
 			this.state.gameEnded = true;
 
-			// FIXED: Determine winner based on actual game scores
 			const winnerId = this.state.scores.player1 > this.state.scores.player2
 				? (this.isPlayer1 ? this.playerId : this.opponentId)
 				: (this.isPlayer1 ? this.opponentId : this.playerId);
 
-			// Send game_end message with actual game scores
-			console.log("Sending game_end message");
-			this.client.send('game_end', {
-				matchId: this.matchId,
-				winner: winnerId,
-				player1Goals: this.state.scores.player1, // Use state.scores instead of gameScore
-				player2Goals: this.state.scores.player2  // Use state.scores instead of gameScore
-			});
-
+			if (this.client instanceof TournamentClient) {
+				console.log("Sending tournament_match_result");
+				this.client.send('tournament_match_result', {
+					matchId: this.matchId,
+					winnerId: winnerId,
+					finalScore: {
+						winner: Math.max(this.state.scores.player1, this.state.scores.player2),
+						loser: Math.min(this.state.scores.player1, this.state.scores.player2)
+					}
+				});
+			}
+			else {
+				console.log("Sending game_end message");
+				this.client.send('game_end', {
+					matchId: this.matchId,
+					winner: winnerId,
+					player1Goals: this.state.scores.player1,
+					player2Goals: this.state.scores.player2
+				});
+			}
 			this.updateScoreDisplay();
 		}
 	}

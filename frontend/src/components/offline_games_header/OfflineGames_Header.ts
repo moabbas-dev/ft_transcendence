@@ -14,6 +14,7 @@ import aiPic2 from "/src/assets/ai/pic2.jpg";
 import aiPic3 from "/src/assets/ai/pic3.jpg";
 import aiPic4 from "/src/assets/ai/pic4.jpg";
 import aiPic5 from "/src/assets/ai/pic5.jpg";
+import { t } from "../../languages/LanguageController.js";
 
 interface GameHraderProps {
   gameMode: string;
@@ -55,7 +56,7 @@ export const PlayerHeader = createComponent((props: GameHraderProps) => {
         <img src="${playerPic}" alt="Player 1" class="w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 rounded-full border border-blue-300 md:border-2">
       </div>
       <div>
-        <p class="font-bold text-sm sm:text-base md:text-xl text-blue-200">${props.gameMode === "ai" ? "Player" : "Player 1"}</p>
+        <p class="font-bold text-sm sm:text-base md:text-xl text-blue-200">${props.gameMode === "ai" ? t("play.player") : `${t("play.player")} 1`}</p>
         <div class="flex items-center">
           <p id="player-score1" class="text-lg sm:text-xl md:text-2xl font-bold relative">
             <span class="relative z-10 text-white">0</span>
@@ -83,7 +84,7 @@ export const PlayerHeader = createComponent((props: GameHraderProps) => {
     <!-- Player 2 Info -->
     <div class="flex items-center gap-1 sm:gap-2 md:gap-4 justify-self-end">
       <div class="text-right">
-        <p class="font-bold text-sm sm:text-base md:text-xl text-red-200">${props.gameMode === "ai" ? "AI" : "Player 2"}</p>
+        <p class="font-bold text-sm sm:text-base md:text-xl text-red-200">${props.gameMode === "ai" ? t("play.ai") : `${t("play.player")} 2`}</p>
         <div class="flex items-center justify-end">
           <p id="player-score2" class="text-lg sm:text-xl md:text-2xl font-bold relative">
             <span class="relative z-10 text-white">0</span>
