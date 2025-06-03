@@ -25,12 +25,9 @@ export default async function historyRoutes(fastify, options) {
                 return reply.code(401).send({ message: 'Unauthorized: No token provided' });
             const accessToken = authHeader.split(' ')[1];
 
-            // Fixed authentication error handling
-            try {
-                await axios.post(`http://127.0.0.1:8001/auth/jwt/verify/${userId}`, {
-                    accessToken
-                });
-            } catch (err) {
+            await axios.post(`http://127.0.0.1:8001/auth/jwt/verify/${userId}`, {
+                accessToken
+            }).catch(err => {
                 if (err.response) {
                     const { status, data } = err.response;
                     return reply.code(status).send({ message: data.message });
@@ -72,12 +69,9 @@ export default async function historyRoutes(fastify, options) {
                 return reply.code(401).send({ message: 'Unauthorized: No token provided' });
             const accessToken = authHeader.split(' ')[1];
 
-            // Fixed: Use try-catch instead of .catch() for consistency
-            try {
-                await axios.post(`http://127.0.0.1:8001/auth/jwt/verify/${userId}`, {
-                    accessToken
-                });
-            } catch (err) {
+            await axios.post(`http://127.0.0.1:8001/auth/jwt/verify/${userId}`, {
+                accessToken
+            }).catch(err => {
                 if (err.response) {
                     const { status, data } = err.response;
                     return reply.code(status).send({ message: data.message });
