@@ -319,7 +319,6 @@ import playerFrame2 from "../assets/g5.webp";
 import { Footer } from "../components/header_footer/footer.js";
 import { t } from "../languages/LanguageController.js";
 import axios from 'axios';
-import getValidAccessToken from "../../refresh/RefreshToken.js";
 import store from "../../store/store.js";
 
 // Updated interface to match backend response
@@ -459,7 +458,7 @@ export default {
 async function fetchAndDisplayLeaderboard() {
   try {
     // Get authentication data
-    const token = await getValidAccessToken();
+    const token = store.accessToken;
     const userId = store.userId;
 
     if (!token || !userId) {
