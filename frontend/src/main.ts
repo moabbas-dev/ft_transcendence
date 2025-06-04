@@ -15,7 +15,6 @@ const initializeApp = async () => {
         console.log('Store initialized, user logged in:', store.isLoggedIn);
         localStorage.setItem("isLoggedIn", store.isLoggedIn ? "true" : "false");
         
-        await ConnectionManager.testConnection();
         
         if (store.isLoggedIn && store.userId) {
             await initializeTournamentClient();
@@ -25,15 +24,6 @@ const initializeApp = async () => {
         console.error('Failed to initialize app:', error);
     }
 };
-
-ConnectionManager.onStatusChange((status) => {
-    console.log('Connection status changed:', status);
-    if (status.isOnline) {
-        console.log('✅ Connection restored');
-    } else {
-        console.log('❌ Connection lost:', status.lastError);
-    }
-});
 
 initializeApp();
 
@@ -137,7 +127,6 @@ if (store.isLoggedIn && store.userId) {
 
 /////////////////// pong client  //////////////////////////
 import { PongGameClient } from "./components/Online-Game/components/Game.js";
-import ConnectionManager from './utils/ConnectionManager.js';
 
 export let pongClientInstance: PongGameClient | null = null;
 export function getMatchmakingClient(): PongGameClient {
