@@ -9,21 +9,32 @@ import { TournamentClient } from './components/Tournament-Game/TournamentClient.
 import { refreshRouter } from './router.js';
 
 const initializeApp = async () => {
-	console.log('Initializing app...');
+    console.log('Initializing app...');
     try {
         await store.initialize();
         console.log('Store initialized, user logged in:', store.isLoggedIn);
-		localStorage.setItem("isLoggedIn", store.isLoggedIn ? "true" : "false");
+        localStorage.setItem("isLoggedIn", store.isLoggedIn ? "true" : "false");
         
-        // Initialize other components after store is ready
+        await ConnectionManager.testConnection();
+        
         if (store.isLoggedIn && store.userId) {
             await initializeTournamentClient();
         }
-		refreshRouter()
+        refreshRouter();
     } catch (error) {
         console.error('Failed to initialize app:', error);
     }
 };
+
+ConnectionManager.onStatusChange((status) => {
+    console.log('Connection status changed:', status);
+    if (status.isOnline) {
+        console.log('✅ Connection restored');
+    } else {
+        console.log('❌ Connection lost:', status.lastError);
+    }
+});
+
 initializeApp();
 
 
@@ -126,6 +137,7 @@ if (store.isLoggedIn && store.userId) {
 
 /////////////////// pong client  //////////////////////////
 import { PongGameClient } from "./components/Online-Game/components/Game.js";
+import ConnectionManager from './utils/ConnectionManager.js';
 
 export let pongClientInstance: PongGameClient | null = null;
 export function getMatchmakingClient(): PongGameClient {
