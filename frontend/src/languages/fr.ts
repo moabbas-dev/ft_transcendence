@@ -226,6 +226,7 @@ export default {
 		message: "Message",
 		add: "Ajouter",
 		block: "Bloquer",
+		unblock: "Débloquer",
 		infoTab: {
 			title: "Infos",
 			fullname: "Nom complet :",

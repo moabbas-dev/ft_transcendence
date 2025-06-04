@@ -50,9 +50,10 @@ export const Chat = createComponent(
             <div class="flex flex-col bg-black bg-custom-gradient justify-between h-[100svh] w-full z-20 gap-1 md:gap-2 bg-cover bg-center" style="background-image: ${activeUser ? `url(${bgImage})` : `url(${bgImage2})`}">
                 <header class="flex h-fit w-full items-center justify-between py-2 md:py-3 px-1 md:px-2 bg-[#202c33] shadow-[0_0_15px_rgba(0,247,255,0.3)]">
                     <div class="flex w-full">
+                      <!--
                         <div class="back_arrow block md:hidden text-pongcyan text-2xl md:text-3xl flex items-center justify-center hover:cursor-pointer hover:opacity-80 mr-1">
                             <i class='bx bx-left-arrow-alt'></i>
-                        </div>
+                        </div> -->
                         <div class="flex items-center z-10 justify-center gap-1 sm:gap-2"  id="friend_name">
                                     
                             <div class="avatar h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 rounded-full bg-black border-2 ${activeUser ? 'border-pongcyan' : 'border-pongpink'} flex items-center justify-center text-base sm:text-lg md:text-xl font-semibold ${activeUser ? 'text-pongcyan' : 'text-pongpink'} ${activeUser ? 'shadow-[0_0_10px_rgba(0,247,255,0.4)]' : 'shadow-[0_0_10px_rgba(255,0,228,0.4)]'}">

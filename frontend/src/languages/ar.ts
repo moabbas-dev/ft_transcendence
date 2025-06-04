@@ -227,6 +227,7 @@ export default {
 		message: "رسالة",
 		add: "إضافة",
 		block: "حظر",
+		unblock: "الغاء الحظر",
 		infoTab: {
 			title: "المعلومات",
 			fullname: "الاسم الكامل:",
