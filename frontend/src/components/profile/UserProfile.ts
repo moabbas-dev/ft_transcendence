@@ -135,11 +135,15 @@ export const Profile = createComponent((props: ProfileProps) => {
               blockButton.classList.remove("bg-red-500", "hover:bg-red-600");
               blockButton.classList.add("bg-gray-500", "hover:bg-gray-600");
               blockButton.id = "unblock-user";
-
+              addFriendButton.classList.add("hidden");
+              messageUserButton.classList.add("hidden");
               // Update event listeners
               blockButton.removeEventListener("click", blockUserHandler);
               blockButton.addEventListener("click", unblockUserHandler);
             }
+          } else {
+            addFriendButton.classList.remove("hidden");
+            messageUserButton.classList.remove("hidden");
           }
         });
 
@@ -164,6 +168,8 @@ export const Profile = createComponent((props: ProfileProps) => {
         function blockUserHandler() {
           const fromUserId = store.userId;
 
+
+
           if (!fromUserId || !userData) {
             console.error("Missing user information for blocking user");
             return;
@@ -176,13 +182,20 @@ export const Profile = createComponent((props: ProfileProps) => {
           // });
           chatService.blockUser(userData.id);
 
+          chatService.send("user:check_blocked", {
+            userId: store.userId,
+            targetId: userData.id
+          });
+
           // Update UI immediately
           const blockButton = container.querySelector("#block-user");
           if (blockButton) {
+           
             blockButton.textContent = t("profile.unblock");
             blockButton.classList.remove("bg-red-500", "hover:bg-red-600");
             blockButton.classList.add("bg-gray-500", "hover:bg-gray-600");
-
+            addFriendButton.classList.add("hidden");
+            messageUserButton.classList.add("hidden");
             // Change the button ID to indicate it's now an unblock button
             blockButton.id = "unblock-user";
 
@@ -209,6 +222,10 @@ export const Profile = createComponent((props: ProfileProps) => {
           // });
 
           chatService.unblockUser(userData.id);
+          chatService.send("user:check_blocked", {
+            userId: store.userId,
+            targetId: userData.id
+          });
 
           // Update UI immediately
           const unblockButton = container.querySelector("#unblock-user");
@@ -216,6 +233,8 @@ export const Profile = createComponent((props: ProfileProps) => {
             unblockButton.textContent = t("profile.block");
             unblockButton.classList.remove("bg-gray-500", "hover:bg-gray-600");
             unblockButton.classList.add("bg-red-500", "hover:bg-red-600");
+            addFriendButton.classList.remove("hidden");
+            messageUserButton.classList.remove("hidden");
 
             // Change the button ID back to block-user
             unblockButton.id = "block-user";

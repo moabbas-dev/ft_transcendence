@@ -783,6 +783,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
   wsAdapter.on("user:unblock", async ({ clientId, payload }) => {
     try {
       const { from, unblocked } = payload;
+      console.log("unblock payload:", payload);
 
       if (!from || !unblocked) {
         throw new Error("Missing user IDs");

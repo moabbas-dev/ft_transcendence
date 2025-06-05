@@ -76,7 +76,7 @@ export const FindOpponent = createComponent((props: FindOpponentProps) => {
 			const queuePosition = data.position;
 			const positionText = container.querySelector("p.text-xl");
 			if (positionText) {
-				positionText.textContent = `${'Position in Queue'}: ${queuePosition}`;
+				positionText.textContent = `${t('play.onlineGame.positionInQueue')}: ${queuePosition}`;
 			}
 		});
 		

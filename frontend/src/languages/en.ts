@@ -12,13 +12,13 @@ export default {
 		register: "Register now!",
 		playAI: "Play vs AI",
 		playLocaly: "Play Localy",
+		startTournament: "Start a Tournament",
+		playOnline: "Play Online",
+		chatWithFriends: "Chat with Friends",
 		footer: {
 			developed: "Developed by",
 			rights :"All intellectual property rights reserved."
 		},
-		chatWithFriends: "Chat with Friends",
-		playOnline: "Play Online",
-		startTournament: "Start a Tournament"
 	},
 	register: {
 		signin: {
@@ -97,7 +97,8 @@ export default {
 			searchingForRivals: "Searching for Rivals...",
 			oponentFound: "Opponent Found!",
 			cancel: "Cancel",
-			invite: "Invite"
+			invite: "Invite",
+			positionInQueue: "Position in Queue"
 		},
 		"tournaments": {
 			"title": "Tournaments",
@@ -215,12 +216,17 @@ export default {
 		searchRequests: "Search requests...",
 		on: "Online",
 		off: "Offline",
+		errorLoadingFriends: "Error loading friends",
+		errorLoadingRequests: "Error loading requests",
+		retry: "Retry",
+		typeMessage: "Type your message...",
 	},
 	profile: {
 		rank: "Rank: ",
 		message: "Message",
 		add: "Add", 
 		block: "Block",
+		unblock: "Unblock",
 		infoTab: {
 			title: "Info",
 			fullname: "Full Name:",

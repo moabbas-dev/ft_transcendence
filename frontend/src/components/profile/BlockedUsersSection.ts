@@ -14,7 +14,7 @@ interface BlockedUserResponse {
 	id: number;
 	nickname: string;
 	blocked_at?: string;
-	avatar?: string;
+	avatar_url?: string;
   }
 
 
@@ -42,7 +42,7 @@ const BlockedUser = createComponent((props: BlockedUserProps) => {
   const unblockBtn = blockedUsersItem.querySelector(`#unblock-${props.id}`)!;
   unblockBtn.addEventListener('click', () => {
     // Get current user ID from local storage or state
-    const currentUserId = parseInt(localStorage.getItem('userId') || '0');
+    const currentUserId = store.userId;
     
     // Send unblock request via WebSocket
     chatService.send('user:unblock', {
@@ -82,6 +82,8 @@ export const BlockedUsersSection = createComponent(() => {
 	// Listen for blocked users list response
 	chatService.on('users:blocked_list', (data: BlockedUsersListResponse) => {
 	  const { blockedUsers } = data;
+
+	  console.log(blockedUsers);
 	  
 	  if (blockedUsers && blockedUsers.length > 0) {
 		blockedUsers.forEach((user: BlockedUserResponse) => {
@@ -92,7 +94,7 @@ export const BlockedUsersSection = createComponent(() => {
 			id: user.id,
 			username: user.nickname,
 			blockedOn: blockedDate,
-			avatar: user.avatar || 'http://placehold.co/40x40'
+			avatar: user.avatar_url || 'http://placehold.co/40x40'
 		  }));
 		});
 	  } else {

@@ -39,7 +39,7 @@ export default {
         </div>
 
         <!-- Friends List Container -->
-        <div id="friends-container" class="friends-list-container flex flex-col">
+        <div id="friends-container" class="friends-list-container flex flex-col overflow-y-auto">
           <div class="text-white px-4 pb-2 flex justify-between items-center">
             <div class="loading-indicator hidden">
               <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-pongcyan shadow-[0_0_10px_rgba(0,247,255,0.5)]"></div>
@@ -49,7 +49,7 @@ export default {
         </div>
 
           <!-- Message Requests Container (Hidden by default) -->
-          <div id="requests-container" class="message-requests-container flex-col hidden">
+          <div id="requests-container" class="message-requests-container flex-col hidden overflow-y-auto">
             <div class="text-white px-4 pb-2 flex justify-between items-center">
               <div class="requests-loading-indicator hidden">
                 <div class="animate-spin rounded-full h-5 w-5 border-b-2  border-pongpink shadow-[0_0_10px_rgba(255,0,228,0.5)]"></div>
