@@ -17,6 +17,8 @@ const initializeApp = async () => {
 		localStorage.setItem("isLoggedIn", store.isLoggedIn ? "true" : "false");
 
 
+		console.log("TTTTT, ", store.isLoggedIn && store.userId);
+		
 		if (store.isLoggedIn && store.userId) {
 			await initializeTournamentClient();
 			await initializeChatClient();

@@ -428,7 +428,7 @@ const client = getMatchmakingClient();
 			document.getElementById('play-again-btn')?.addEventListener('click', () => {
 				document.body.removeChild(resultsOverlay);
 				gameBoard = null;
-				async () => await refreshRouter()
+				refreshRouter()
 				navigate("/play/online-game");
 			});
 		}

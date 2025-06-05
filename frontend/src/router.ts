@@ -118,8 +118,8 @@ export function navigate(path: string, options?: { state?: any }) {
 	}
 	
 	window.history.pushState({}, "", path);
-	async () => await refreshRouter();
+	refreshRouter();
 }
 
-window.addEventListener("popstate", async () => await refreshRouter());
-document.addEventListener("DOMContentLoaded", async () => await refreshRouter());
+window.addEventListener("popstate", refreshRouter);
+document.addEventListener("DOMContentLoaded", refreshRouter);

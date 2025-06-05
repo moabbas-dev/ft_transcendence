@@ -250,7 +250,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
           store.update('email', emailInput.value);
           store.update('country', countryInput.value);
 
-          async () => await refreshRouter()
+          refreshRouter()
           Toast.show("Your data are updated sucessfuly", "success");
         } catch (err: any) {
           if (err.response) {
