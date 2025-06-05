@@ -21,7 +21,7 @@ const initializeApp = async () => {
 			await initializeTournamentClient();
 			await initializeChatClient();
 		}
-		refreshRouter();
+		await refreshRouter();
 	} catch (error) {
 		console.error('Failed to initialize app:', error);
 	}

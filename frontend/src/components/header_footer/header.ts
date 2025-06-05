@@ -170,7 +170,7 @@ export const Header = createComponent(() => {
         const selectedLanguage = this.value;
         localStorage.setItem("selectedLanguage", selectedLanguage);
         setLanguage(selectedLanguage as Lang);
-        refreshRouter();
+        async () => await refreshRouter()
     });
 
     // *************************TO BE REVIEWED**********************************

@@ -40,8 +40,14 @@ const routes: { [key: string]: Page } = {
 
 let navigationState: any = null;
 
-export function refreshRouter() {
-	async () => await store.initialize();
+export async function refreshRouter() {
+	const app = document.getElementById("app")!;
+	app.className = "h-dvh bg-gradient-to-br from-pongdark to-ponghover flex items-center justify-center";
+	app.innerHTML = `
+	  <div class="w-16 h-16 border-4 border-gray-600 border-t-pongcyan rounded-full animate-spin"></div>
+	`;
+
+	await store.initialize();
 	localStorage.setItem("isLoggedIn", store.isLoggedIn ? "true" : "false");
 	console.log('Router: Store initialized, isLoggedIn:', store.isLoggedIn);
 
@@ -112,8 +118,8 @@ export function navigate(path: string, options?: { state?: any }) {
 	}
 	
 	window.history.pushState({}, "", path);
-	refreshRouter();
+	async () => await refreshRouter();
 }
 
-window.addEventListener("popstate", refreshRouter);
-document.addEventListener("DOMContentLoaded", refreshRouter);
+window.addEventListener("popstate", async () => await refreshRouter());
+document.addEventListener("DOMContentLoaded", async () => await refreshRouter());

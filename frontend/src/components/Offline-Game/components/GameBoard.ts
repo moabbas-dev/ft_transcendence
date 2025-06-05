@@ -423,7 +423,7 @@ export class GameBoard {
 			const restartButton = resultsPopup.querySelector("#restart-btn")
 			restartButton?.addEventListener('click', () => {
 				// this.restartGame();
-				refreshRouter()
+				async () => await refreshRouter()
 			}, { once: true });
 		}
 	}
