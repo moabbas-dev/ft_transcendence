@@ -18,7 +18,7 @@ export const Header = createComponent(() => {
     container.innerHTML = `
         <div class="flex items-center justify-start w-1/2 gap-2 sm:gap-8">
             <div class="logo hidden sm:flex flex-col items-center text-center font-bold text-white text-xl transition-all duration-300 hover:animate-pulse">
-                <span class="text-pongcyan drop-shadow-[0_0_10px_#00f7ff] transition-all duration-300 hover:drop-shadow-[0_0_20px_#00f7ff] hover:text-white">
+                <span class="home-btn cursor-pointer text-pongcyan drop-shadow-[0_0_10px_#00f7ff] transition-all duration-300 hover:drop-shadow-[0_0_20px_#00f7ff] hover:text-white">
                     ft_transcendence
                 </span>
                 <span class="text-pongpink text-xs transition-all duration-300 hover:text-white drop-shadow-[0_0_5px_#ff00e4]">
@@ -105,6 +105,10 @@ export const Header = createComponent(() => {
     const playPage = container.querySelector('.playPage')
     const leaderBoardPage = container.querySelector('.leaderBoard-page')
     const searchResult = container.querySelector('#search-result-container')!
+
+    container.querySelector(".home-btn")?.addEventListener("click", () => {
+        navigate("/");
+    });
 
     navChat?.addEventListener('click', () => {
         navigate('/chat');

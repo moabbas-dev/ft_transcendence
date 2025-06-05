@@ -29,7 +29,7 @@ const routes: { [key: string]: Page } = {
   "/play/tournaments": TournamentPage,
   "/tournaments/create": CreateTournamentPage,
   "/tournaments/:tournamentId": TournamentDetailPage,
-  "/tournaments/:tournamentId/match/:matchId": TournamentMatchPage, // Add this new route
+  "/tournaments/:tournamentId/match/:matchId": TournamentMatchPage,
   "/chat": ChatPage,
   "/chat/:uName": ChatPage,
   "/leader-board": LeaderBoardPage,
@@ -41,11 +41,8 @@ const routes: { [key: string]: Page } = {
 let navigationState: any = null;
 
 export function refreshRouter() {
-	// if (!store.initialized) {
-	// 	console.log('Waiting for store initialization...');
-	// 	setTimeout(refreshRouter, 100);
-	// 	return;
-	// }
+	async () => await store.initialize();
+	localStorage.setItem("isLoggedIn", store.isLoggedIn ? "true" : "false");
 	console.log('Router: Store initialized, isLoggedIn:', store.isLoggedIn);
 
 
