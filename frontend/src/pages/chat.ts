@@ -293,7 +293,6 @@ export default {
     
         // Make sure we're connected before attempting to send
         if (!chatService.isConnected()) {
-          // console.log("WebSocket not connected, attempting to reconnect...");
           await initializeWebSocket();
         }
     
