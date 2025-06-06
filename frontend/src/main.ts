@@ -55,6 +55,7 @@ export const handleLoginWithGoogle = (container: HTMLElement) => {
 		try {
 			localStorage.setItem("googleAuth", "true");
 			localStorage.setItem("googleAuthClicked", "true");
+			localStorage.setItem("isLoggedIn", "true");
 			const origin = window.location.origin;
 			const successURL = origin;
 			const failureURL = `${origin}/register`;

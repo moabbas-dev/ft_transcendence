@@ -20,6 +20,7 @@ const createTables = () => {
 					full_name TEXT NOT NULL,
 					age INT,
 					country TEXT,
+					language TEXT DEFAULT 'en' CHECK (language IN ('en', 'fr', 'ar')),
 					status TEXT NOT NULL DEFAULT 'offline' CHECK (status IN ('offline', 'online', 'in_game')),
 					elo INTEGER NOT NULL DEFAULT 1000,
 					wins INTEGER DEFAULT 0,

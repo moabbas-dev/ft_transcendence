@@ -89,6 +89,7 @@ export const SignIn = createComponent((props: SignInProps) => {
 						nickname: decodedToken.nickname,
 						fullName: decodedToken.fullName,
 						age: decodedToken.age,
+						language: decodedToken.language || 'en',
 						country: decodedToken.country,
 						createdAt: decodedToken.createdAt,
 						avatarUrl: decodedToken.avatarUrl,

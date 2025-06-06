@@ -2,6 +2,7 @@ import axios from "axios";
 import Toast from "../src/toast/Toast";
 import { navigate } from "../src/router";
 import { account } from "../src/appwriteConfig";
+import { Lang } from "../src/languages/LanguageController";
 
 class Store {
     private _userId: string | null = null;
@@ -10,6 +11,7 @@ class Store {
     private _fullName: string | null = null;
     private _age: string | null = null;
     private _country: string | null = null;
+    private _language: Lang = 'en';
     private _avatarUrl: string | null = null;
     private _isLoggedIn: boolean = false;
     private _is2faEnabled: boolean = false;
@@ -24,6 +26,7 @@ class Store {
     get fullName() { return this._fullName; }
     get age() { return this._age; }
     get country() { return this._country; }
+    get language() { return this._language; }
     get avatarUrl() { return this._avatarUrl; }
     get isLoggedIn() { return this._isLoggedIn; }
     get is2faEnabled() { return this._is2faEnabled; }
@@ -73,6 +76,7 @@ class Store {
             this._fullName = userData.fullName;
             this._age = userData.age;
             this._country = userData.country;
+            this._language = userData.language || 'en';
             this._avatarUrl = userData.avatarUrl;
             this._is2faEnabled = userData.is2faEnabled;
             this._createdAt = userData.createdAt;
@@ -93,6 +97,7 @@ class Store {
         this._fullName = null;
         this._age = null;
         this._country = null;
+        this._language = 'en';
         this._avatarUrl = null;
         this._isLoggedIn = false;
         this._is2faEnabled = false;
@@ -109,6 +114,7 @@ class Store {
         this._fullName = data.fullName;
         this._age = data.age;
         this._country = data.country;
+        this._language = data.language || 'en';
         this._avatarUrl = data.avatarUrl;
         this._is2faEnabled = data.is2faEnabled;
         this._createdAt = data.createdAt;
@@ -134,6 +140,7 @@ class Store {
                 await account.deleteSessions();
                 localStorage.removeItem("googleAuth");
             }
+            localStorage.setItem("isLoggedIn", "false");
             navigate('/register');
         } catch (error: any) {
             this.clearSession();

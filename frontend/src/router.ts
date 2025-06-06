@@ -8,7 +8,7 @@ import LeaderBoardPage from "./pages/leaderBoard.js"
 import AboutPage from "./pages/about.js";
 import { Page } from "./types/types.js";
 import PlayVsAI from "./pages/PlayVsAI.js"
-import { Lang, setLanguage } from "./languages/LanguageController.js";
+import { initializeLanguage, Lang, setLanguage } from "./languages/LanguageController.js";
 import TournamentPage from "./components/Tournament-Game/TournamentPage.js";
 import OnlineGame from './pages/online-game.js';
 import CreateTournamentPage from './pages/create-tournament.js';
@@ -51,7 +51,7 @@ export async function refreshRouter() {
 	localStorage.setItem("isLoggedIn", store.isLoggedIn ? "true" : "false");
 	console.log('Router: Store initialized, isLoggedIn:', store.isLoggedIn);
 
-
+	initializeLanguage();
 	const path = window.location.pathname;
 	let page: Page | null = null;
 	let params: { [key: string]: string } = {};
@@ -101,11 +101,6 @@ export async function refreshRouter() {
 	const appContainer = document.getElementById("app")!;
 	appContainer.className = "";
 	appContainer.innerHTML = "";
-
-	const savedLanguage = localStorage.getItem("selectedLanguage");
-	if (savedLanguage) {
-		setLanguage(savedLanguage as Lang);
-	}
 
 	page.render(appContainer, params, navigationState);
 	

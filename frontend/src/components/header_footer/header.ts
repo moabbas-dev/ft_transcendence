@@ -166,12 +166,20 @@ export const Header = createComponent(() => {
         setLanguage(languageSelect.value as Lang);
     }
 
-    languageSelect.addEventListener("change", function () {
-        const selectedLanguage = this.value;
-        localStorage.setItem("selectedLanguage", selectedLanguage);
-        setLanguage(selectedLanguage as Lang);
-        refreshRouter()
+    languageSelect.addEventListener("change", async function () {
+        const selectedLanguage = this.value as Lang;
+        await setLanguage(selectedLanguage, store.isLoggedIn);
+        refreshRouter();
     });
+
+    if (store.isLoggedIn) {
+        languageSelect.value = store.language;
+        setLanguage(store.language as Lang);
+    } else {
+        const savedLanguage = localStorage.getItem("selectedLanguage") || 'en';
+        languageSelect.value = savedLanguage;
+        setLanguage(savedLanguage as Lang);
+    }
 
     // *************************TO BE REVIEWED**********************************
 
