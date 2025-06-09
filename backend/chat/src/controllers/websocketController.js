@@ -9,7 +9,7 @@ import axios from 'axios';
 // Add this helper function at the top of your webSocketController.js
 
 async function sendNotification(type, data) {
-  const NOTIFICATION_SERVICE_URL = 'http://127.0.0.1:3003/api/notifications';
+  const NOTIFICATION_SERVICE_URL = '/notifications/api/notifications';
 
   try {
     const response = await axios.post(`${NOTIFICATION_SERVICE_URL}/${type}`, data, {

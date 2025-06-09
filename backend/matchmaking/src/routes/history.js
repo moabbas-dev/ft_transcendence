@@ -27,7 +27,7 @@ export default async function historyRoutes(fastify, options) {
 
             // Fixed authentication error handling
             try {
-                await axios.post(`http://127.0.0.1:8001/auth/jwt/verify/${userId}`, {
+                await axios.post(`http://authentication:8001/auth/jwt/verify/${userId}`, {
                     accessToken
                 });
             } catch (err) {
@@ -74,7 +74,7 @@ export default async function historyRoutes(fastify, options) {
 
             // Fixed: Use try-catch instead of .catch() for consistency
             try {
-                await axios.post(`http://127.0.0.1:8001/auth/jwt/verify/${userId}`, {
+                await axios.post(`http://authentication:8001/auth/jwt/verify/${userId}`, {
                     accessToken
                 });
             } catch (err) {
@@ -114,7 +114,7 @@ export default async function historyRoutes(fastify, options) {
 
             // Verify JWT token
             try {
-                await axios.post(`http://127.0.0.1:8001/auth/jwt/verify/${userId}`, {
+                await axios.post(`http://authentication:8001/auth/jwt/verify/${userId}`, {
                     accessToken
                 });
             } catch (err) {
@@ -133,7 +133,7 @@ export default async function historyRoutes(fastify, options) {
             const playersWithUserData = await Promise.all(
                 topPlayers.map(async (player) => {
                     try {
-                        const userResponse = await axios.get(`http://localhost:8001/auth/users/id/${player.id}`);
+                        const userResponse = await axios.get(`http://authentication:8001/auth/users/id/${player.id}`);
 
                         return {
                             rank: player.rank,

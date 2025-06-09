@@ -5,8 +5,8 @@ services:
     build: ./backend/notifications
     container_name: ft_notifications
     restart: always
-    # ports:
-    #   - "3003:3003"
+    ports:
+      - "3003:3003"
     networks:
       - ft_network
     volumes:
@@ -18,8 +18,8 @@ services:
     build: ./backend/authentication
     container_name: ft_authentication
     restart: always
-    # ports:
-    #   - "8001"
+    ports:
+      - "8001:8001"
     networks:
       - ft_network
     env_file:
@@ -35,8 +35,8 @@ services:
     build: ./backend/chat
     container_name: ft_chat
     restart: always
-    # ports:
-    #   - "3002:3002"
+    ports:
+      - "3002:3002"
     networks:
       - ft_network
     env_file:
@@ -53,12 +53,12 @@ services:
     build: ./backend/matchmaking
     container_name: ft_matchmaking
     restart: always
-    # ports:
-    #   - "3001:3001"
+    ports:
+      - "3001:3001"
     networks:
       - ft_network
-    env_file:
-      - ./backend/matchmaking/.env
+    # env_file:
+    #   - ./backend/matchmaking/.env
     volumes:
       - ./backend/matchmaking:/app
       - matchmaking_node_modules:/app/node_modules
@@ -72,8 +72,8 @@ services:
     build: ./frontend
     container_name: ft_frontend
     restart: always
-    # ports:
-    #   - "5173"
+    ports:
+      - "5173:5173"
     networks:
       - ft_network
     volumes:
@@ -90,7 +90,7 @@ services:
     container_name: ft_nginx
     restart: always
     ports:
-      - "443:443"
+      - "4443:4443"
     networks:
       - ft_network
     volumes:
