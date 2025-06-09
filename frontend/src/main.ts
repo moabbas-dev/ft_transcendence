@@ -9,7 +9,7 @@ import { TournamentClient } from './components/Tournament-Game/TournamentClient.
 import { refreshRouter } from './router.js';
 import chatService from "./utils/chatUtils/chatWebSocketService.js";
 
-const initializeApp = async () => {
+export const initializeApp = async () => {
 	console.log('Initializing app...');
 	try {
 		await store.initialize();

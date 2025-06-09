@@ -18,7 +18,7 @@ export async function getUserFromAuth(userId) {
 
 export async function getUserByUsername(username) {
   try {
-    const response = await axios.get(`/authentication/auth/users/nickname/${username}`);
+    const response = await axios.get(`http://authentication:8001/auth/users/nickname/${username}`);
     return response.data;
   } catch (error) {
     console.error(`Error fetching user ${username}:`, error.message);
@@ -83,7 +83,7 @@ export async function getUser(userId) {
 
 export async function getAllUsers() {
   try {
-    const response = await axios.get(`/authentication/auth/users`);
+    const response = await axios.get(`http://authentication:8001/auth/users`);
     return response.data;
   } catch (error) {
     console.error("Error fetching all users from auth service:", error.message);
