@@ -53,3 +53,15 @@
 2025/05/22 10:45:01 [error] 30#30: *546 connect() failed (111: Connection refused) while connecting to upstream, client: 172.18.0.1, server: _, request: "GET / HTTP/1.1", upstream: "http://172.18.0.6:5173/", host: "192.168.1.11"
 2025/05/22 10:47:13 [error] 30#30: *712 connect() failed (111: Connection refused) while connecting to upstream, client: 172.18.0.1, server: _, request: "GET / HTTP/1.1", upstream: "http://172.18.0.6:5173/", host: "192.168.1.11"
 2025/05/22 10:49:25 [error] 30#30: *884 connect() failed (111: Connection refused) while connecting to upstream, client: 172.18.0.1, server: _, request: "GET / HTTP/1.1", upstream: "http://172.18.0.6:5173/", host: "192.168.1.11"
+2025/06/09 16:11:45 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/06/09 16:11:52 [emerg] 1#1: host not found in upstream "notifications" in /etc/nginx/nginx.conf:61
+2025/06/09 16:11:59 [emerg] 1#1: host not found in upstream "notifications" in /etc/nginx/nginx.conf:61
+2025/06/09 16:12:06 [emerg] 1#1: host not found in upstream "notifications" in /etc/nginx/nginx.conf:61
+2025/06/09 16:12:13 [emerg] 1#1: host not found in upstream "notifications" in /etc/nginx/nginx.conf:61
+2025/06/09 16:12:19 [emerg] 1#1: host not found in upstream "notifications" in /etc/nginx/nginx.conf:61
+2025/06/09 16:12:26 [emerg] 1#1: host not found in upstream "notifications" in /etc/nginx/nginx.conf:61
+2025/06/09 16:12:36 [emerg] 1#1: host not found in upstream "notifications" in /etc/nginx/nginx.conf:61
+2025/06/09 16:12:53 [emerg] 1#1: host not found in upstream "notifications" in /etc/nginx/nginx.conf:61
+2025/06/09 17:29:09 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/06/09 17:36:17 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87
+2025/06/09 17:36:24 [emerg] 1#1: host not found in upstream "matchmaking" in /etc/nginx/nginx.conf:87

@@ -5,7 +5,7 @@ import axios from "axios";
 // Helper function to get user from auth service API
 export async function getUserFromAuth(userId) {
   try {
-    const response = await axios.get(`http://localhost:8001/auth/users/id/${userId}`);
+    const response = await axios.get(`http://authentication:8001/auth/users/id/${userId}`);
     return response.data;
   } catch (error) {
     console.error(
@@ -33,7 +33,7 @@ export async function getUsersFromAuth(userIds) {
   try {
     // Get all users and filter locally - this could be optimized with a
     // custom endpoint in the auth service that accepts multiple IDs
-    const response = await axios.get(`http://localhost:8001/auth/users`);
+    const response = await axios.get(`http://authentication:8001/auth/users`);
     const allUsers = response.data;
     return allUsers.filter((user) => userIds.includes(user.id));
   } catch (error) {

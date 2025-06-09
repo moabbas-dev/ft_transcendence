@@ -156,7 +156,7 @@ function formatDuration(durationInSeconds) {
 // method to get user's info
 async function getUserInfo(userId) {
     try {
-        const user = await axios.get(`http://localhost:8001/auth/users/id/${userId}`);
+        const user = await axios.get(`http://authentication:8001/auth/users/id/${userId}`);
         return user.data;
     }
     catch (error) {

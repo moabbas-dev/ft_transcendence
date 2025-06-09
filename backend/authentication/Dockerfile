@@ -18,7 +18,7 @@ RUN mkdir -p uploads
 
 # Copy default avatar (if not already included in COPY . .)
 # Make sure binary.png exists in your local uploads directory
-COPY ./uploads/binary.png ./uploads/
+COPY ./uploads/binary.jpg ./uploads/
 
 # Expose the port
 EXPOSE 8001
