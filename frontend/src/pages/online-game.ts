@@ -4,53 +4,11 @@ import { FetchFriendsList } from "../components/Online-Game/components/FriendsLi
 import { FindOpponent } from "../components/Online-Game/components/FindOpponent.js";
 import { t } from "../languages/LanguageController.js";
 import { Footer } from "../components/header_footer/footer.js";
-import { getMatchmakingClient } from "../main.js";
+import { pongGameClient } from "../main.js";
 import { OnlineGameBoard } from "../components/Online-Game/components/OnlineGameBoard.js";
 import { navigate, refreshRouter } from "../router.js";
 import store from "../../store/store.js";
 import { OfflineGameHeader } from "../components/Offline-Game/components/GameHeader.js";
-
-
-// let pongClientInstance: PongGameClient | null = null;
-// export function getMatchmakingClient(): PongGameClient {
-// 	const userId = store.userId || 'anonymousUser'; // Ensure there's a fallback or handle missing userId
-// 	if (!pongClientInstance || pongClientInstance['userId'] !== userId) { // Check if instance exists or if userId changed
-// 	  if (pongClientInstance) {
-// 		pongClientInstance.disconnect(); // Disconnect old instance if exists
-// 	  }
-// 	  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-// 	  // IMPORTANT: Ensure this port is correct for your matchmaking WebSocket server.
-// 	  // Using 3001 as a placeholder. Consider using environment variables for flexibility.
-// 	//   const wsPort = '3001'; // Or use import.meta.env.VITE_MATCHMAKING_WS_PORT
-// 	  const wsUrl = `${protocol}//${window.location.hostname}:/matchmaking/`;
-
-// 	  console.log(`Initializing PongGameClient for user: ${userId} with URL: ${wsUrl}`);
-// 	  pongClientInstance = new PongGameClient(wsUrl, userId);
-  
-// 	  // Setup essential global listeners for the client here if needed,
-// 	  // or ensure they are re-attached if the client is re-initialized.
-// 	  // For example:
-// 	//   pongClientInstance.on('friend_match_invite', (data: any) => {
-// 	// 	console.log('Global listener: Friend match invite received', data);
-// 	// 	// This alert is just an example; you'll want a better UI notification
-// 	// 	const accept = confirm(`${data.fromId} has invited you to a match. Accept?`);
-// 	// 	if (accept && pongClientInstance) { // Check pongClientInstance again
-// 	// 	  pongClientInstance.acceptFriendMatch(data.fromId);
-// 	// 	}
-// 	//   });
-  
-// 	  pongClientInstance.on('friend_match_created', (data: any) => {
-// 		  console.log('Global listener: Friend match created', data);
-// 		  // Handle match creation, perhaps navigate to game screen
-// 		  // This logic might be similar to what's already in the render function,
-// 		  // ensure it's handled consistently.
-// 	  });
-// 	   // Add other critical global listeners here if they were previously inside render
-// 	   // and tied to the client instance.
-// 	}
-// 	return pongClientInstance;
-// }
-
 
 export default {
 	render: (container: HTMLElement) => {
@@ -148,7 +106,7 @@ export default {
 		// Connect to your matchmaking backend
 		// const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
 		// const client = new PongGameClient(`${protocol}//${window.location.hostname}:${window.location.port}/matchmaking/`, userId);
-const client = getMatchmakingClient();
+const client = pongGameClient!;
 
 		// State for tracking current match
 		let currentMatchId: string | null = null;
@@ -260,45 +218,6 @@ const client = getMatchmakingClient();
 				});
 			}
 		});
-		
-		// Helper functions for UI transitions
-		
-		// function showMainMenu() {
-		// 	heading.textContent = t('play.title');
-		// 	heading.className = "text-4xl md:text-6xl font-bold text-center text-pongcyan drop-shadow-[0_0_15px_#00f7ff] animate-fade-down animate-once animate-duration-700";
-			
-		// 	const gameModeDetails = document.getElementById("game-mode-details");
-		// 	if (gameModeDetails) {
-		// 		gameModeDetails.innerHTML = `
-		// 			<div class="relative w-full flex items-center justify-center">
-		// 				<div class="animation-container relative w-full max-w-md aspect-square">
-		// 					<i id="icon-friends" class="fa-solid fa-users text-7xl md:text-8xl absolute top-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-100 bg-gradient-to-r from-pongcyan via-[rgba(100,100,255,0.8)] to-pongcyan text-transparent bg-clip-text"></i>
-		// 					<span id="text-friends" class="text-3xl md:text-4xl text-center font-bold absolute top-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-0">${t('play.onlineGame.vsFriend')}</span>
-							
-		// 					<div id="loading-pong" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-125"></div>
-							
-		// 					<i id="icon-online" class="fa-solid fa-globe text-7xl md:text-8xl absolute bottom-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-100 bg-gradient-to-b from-pongpink via-[rgba(255,0,228,0.8)] to-pongpink text-transparent bg-clip-text"></i>
-		// 					<span id="text-online" class="text-3xl md:text-4xl text-center font-bold absolute bottom-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-0">${t('play.onlineGame.vsRivals')}</span>
-		// 				</div>
-		// 			</div>
-		// 		`;
-				
-		// 		// Restart animation
-		// 		toggleInterval = setInterval(() => {
-		// 			isIconVisible = !isIconVisible;
-		// 			document.getElementById("icon-friends")?.classList.toggle("opacity-0", !isIconVisible);
-		// 			document.getElementById("icon-friends")?.classList.toggle("opacity-100");
-		// 			document.getElementById("text-friends")?.classList.toggle("opacity-0", isIconVisible);
-		// 			document.getElementById("icon-online")?.classList.toggle("opacity-0", !isIconVisible);
-		// 			document.getElementById("icon-online")?.classList.toggle("opacity-100");
-		// 			document.getElementById("text-online")?.classList.toggle("opacity-0", isIconVisible);
-		// 		}, 3000);
-				
-		// 		// Add loading animation
-		// 		const loadingPong = document.getElementById('loading-pong');
-		// 		loadingPong?.appendChild(PongLoading({text: t('play.onlineGame.or')}));
-		// 	}
-		// }
 		
 		function showWaitingForFriend(friendId:string) {
 			const gameModeDetails = document.getElementById("game-mode-details");
