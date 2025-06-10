@@ -19,7 +19,7 @@ class UserController {
 				<div>
 					<h1>Welcome ${full_name} to our website!</h1>
 					<p>Please click on the link below to activate your account</p>
-					${protocol}://${host}/authentication/auth/activate/${activationToken}
+					${protocol}://${host}:4443/authentication/auth/activate/${activationToken}
 					<p>Have a nice day!</p>
 				</div>
 			`;
@@ -196,7 +196,7 @@ class UserController {
 				<div>
 					<h1>Welcome ${full_name} to our website!</h1>
 					<p>After updating your email to ${email}, please click on the link below to activate your account</p>
-					${protocol}://${host}/authentication/auth/activate/${activationToken}
+					${protocol}://${host}:4443/authentication/auth/activate/${activationToken}
 					<p>Have a nice day!</p>
 				</div>
 			`;

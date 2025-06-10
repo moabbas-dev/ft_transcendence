@@ -169,7 +169,7 @@ class AuthController {
 				<div>
 					<p>Dear ${fullName}, </p>
 					<p>Please follow the below link to reset your password. </p>
-					<p>${protocol}://${host}/reset_password/${uuid} </p>
+					<p>${protocol}://${host}:4443/reset_password/${uuid} </p>
 					<p>Have a nice day! </p>
 				</div>
 			`;
