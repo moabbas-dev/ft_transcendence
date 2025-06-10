@@ -1,8 +1,7 @@
 import { createComponent } from "../../utils/StateManager.js";
 import chatService from "../../utils/chatUtils/chatWebSocketService.js";
 import store from "../../../store/store.js";
-import { t } from "../../languages/LanguageController.js";
-import { getMatchmakingClient } from "../../main.js";
+import { pongGameClient } from "../../main.js";
 
 export interface GameInviteMessageProps {
   messageId: string;
@@ -112,7 +111,7 @@ export const GameInviteMessage = createComponent((props: GameInviteMessageProps)
         userId: props.from,
       });
 
-      const matchmakingClient = getMatchmakingClient();
+      const matchmakingClient = pongGameClient!;
       matchmakingClient.acceptFriendMatch(props.from.toString());
 
       buttons?.classList.add('hidden');

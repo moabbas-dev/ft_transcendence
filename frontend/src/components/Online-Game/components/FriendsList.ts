@@ -2,7 +2,7 @@ import { t } from "../../../languages/LanguageController.js";
 import chatService from "../../../utils/chatUtils/chatWebSocketService.js";
 import store from "../../../../store/store.js";
 import { createComponent } from "../../../utils/StateManager.js";
-import { getMatchmakingClient } from "../../../main.js";
+import { pongGameClient } from "../../../main.js";
 
 export interface FriendProps {
   id: string;
@@ -70,7 +70,7 @@ const Friend = createComponent((props: FriendProps) => {
         // console.log(window.location.port);
         // const client = new PongGameClient(`${protocol}//${window.location.hostname}${window.location.port}/matchmaking/`, store.userId?.toString() || "");
 
-        const matchmakingClient = getMatchmakingClient();
+        const matchmakingClient = pongGameClient!        
         matchmakingClient.inviteFriend(props.id); // This is the 'friend_match_request' for matchmaking server
         console.log("friend_match_request sent via matchmakingClient.");
 
