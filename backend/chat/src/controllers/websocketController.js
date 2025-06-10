@@ -318,7 +318,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
         wsAdapter.sendTo(clientId, "error", {
           message: `Error retrieving user's data`
         });
-        return ;
+        return;
       }
       // Check if either user has blocked the other
       const blockedUsers = await getBlockedUsers(from);
@@ -565,7 +565,6 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
 
       // Send response to original sender
       const senderClientId = onlineUsers.get(from.toString());
-      
       if (senderClientId) {
         wsAdapter.sendTo(senderClientId, "message:private", {
           ...responseMessage,

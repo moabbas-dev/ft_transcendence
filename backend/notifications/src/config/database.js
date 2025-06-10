@@ -9,7 +9,7 @@ const { Database } = sqlite3;
 
 class DatabaseConnection {
   constructor() {
-    const dbPath = path.resolve(__dirname, '../db/notifications.sqlite');
+    const dbPath = path.resolve(__dirname, '../../data/notifications.sqlite');
     this.db = new Database(dbPath, (err) => {
       if (err) {
         console.error('Database connection error:', err.message);
