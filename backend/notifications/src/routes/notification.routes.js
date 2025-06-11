@@ -49,6 +49,18 @@ async function NotificationRoutes(fastify, options) {
 		}
 	});
 
+	fastify.post('/friend-declined', async(request, reply) => {
+		const { senderId, recipientId, nickname } = request.body;
+		try {
+			const notification = await notificationController.sendFriendDeclinedNotification(
+				senderId, recipientId, nickname
+			);
+			return reply.code(201).send(notification);
+		} catch (error) {
+			return reply.code(400).send({ error: error.message });
+		}
+	});
+
 	fastify.post('/game-challenge', async (request, reply) => {
 		const { senderId, recipientId } = request.body;
 		try {

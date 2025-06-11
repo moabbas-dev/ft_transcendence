@@ -164,7 +164,7 @@ export const RequestsSection = createComponent(() => {
 		requests = data.pending.map((req: any) => ({
 			nickname: req.nickname,
 			timeSent: formatTimeSent(req.created_at || Date.now()),
-			avatar: req.avatar || "http://placehold.co/40x40",
+			avatar: req.avatar_url || "http://placehold.co/40x40",
 			userId: store.userId,
 			fromUser: req.from_user || req.id
 		}));

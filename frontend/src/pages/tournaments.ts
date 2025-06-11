@@ -45,7 +45,7 @@ export default {
 					
 					<div id="game-mode-details" class="flex flex-col items-center justify-center gap-10 w-full sm:w-1/2 py-8">
 						<div class="relative w-full flex items-center justify-center">
-							<div class="animation-container relative w-full max-w-md aspect-square">
+							<div class="animation-container relative w-full max-w-md">
 								<i id="icon-join" class="fa-solid fa-door-open text-7xl md:text-8xl absolute top-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-100 bg-gradient-to-r from-pongcyan via-[rgba(100,100,255,0.8)] to-pongcyan text-transparent bg-clip-text"></i>
 								<span id="text-join" class="text-3xl md:text-4xl text-center font-bold absolute top-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-0">${t('play.tournaments.join')}</span>
 								

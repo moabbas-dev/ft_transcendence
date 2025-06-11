@@ -18,7 +18,7 @@ export default {
         </button>
         
         <div class="logo flex flex-col items-center text-center font-bold text-white text-sm sm:text-xl transition-all duration-300 hover:animate-pulse">
-          <span class="text-pongcyan drop-shadow-[0_0_10px_#00f7ff] transition-all duration-300 hover:drop-shadow-[0_0_20px_#00f7ff] hover:text-white">
+          <span class="home-btn cursor-pointer text-pongcyan drop-shadow-[0_0_10px_#00f7ff] transition-all duration-300 hover:drop-shadow-[0_0_20px_#00f7ff] hover:text-white">
             ft_transcendence
           </span>
           <span class="text-pongpink text-[10px] sm:text-xs transition-all duration-300 hover:text-white drop-shadow-[0_0_5px_#ff00e4]">
@@ -103,7 +103,10 @@ export default {
       </section>
     `;
 
-    // Add event listener for home button
+    container.querySelector(".home-btn")?.addEventListener("click", () => {
+      navigate("/");
+    });
+
     const homeButton = container.querySelector("#home-btn");
     homeButton?.addEventListener("click", () => {
       navigate("/");

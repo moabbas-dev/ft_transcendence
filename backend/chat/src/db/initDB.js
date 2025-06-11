@@ -56,9 +56,12 @@ export async function initDatabase() {
       id TEXT PRIMARY KEY,
       room_id TEXT NOT NULL,
       sender_id INTEGER NOT NULL,
+      receiver_id INTEGER NOT NULL,
       content TEXT NOT NULL,
       timestamp INTEGER NOT NULL,
       read_status BOOLEAN DEFAULT FALSE,
+      message_type TEXT,
+      extra_data TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (room_id) REFERENCES chat_rooms (id)
     );

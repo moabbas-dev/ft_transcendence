@@ -12,13 +12,13 @@ export default {
 		register: "S'inscrire maintenant !",
 		playAI: "Jouer contre l'IA",
 		playLocaly: "Jouer en local",
+		startTournament: "Créer un tournoi",
+		playOnline: "Jouer en ligne",
+		chatWithFriends: "Discuter avec des amis",
 		footer: {
 			developed: "Développé par",
 			rights: "Tous droits de propriété intellectuelle réservés."
 		},
-		chatWithFriends: "Discuter avec des amis",
-		playOnline: "Jouer en ligne",
-		startTournament: "Lancer un tournoi"
 	},
 	register: {
 		signin: {
@@ -97,7 +97,8 @@ export default {
 			searchingForRivals: "Recherche de rivaux...",
 			oponentFound: "Adversaire trouvé !",
 			cancel: "Annuler",
-			invite: "Inviter"
+			invite: "Inviter",
+			positionInQueue: "Position dans la file d'attente"
 		},
 		"tournaments": {
 			"title": "Tournois",
@@ -197,7 +198,7 @@ export default {
 		"ai": "IA"
 	},
 	leaderBoard: {
-		title: "Champions",
+		title: "Champions",	
 		rank: "Rang",
 		player: "Joueur",
 		wins: "Victoires",
@@ -206,13 +207,26 @@ export default {
 	chat: {
 		nochat: "Sélectionnez un chat",
 		friends: "Amis",
-		loadingFriends: "Chargement des amis..."
+		messageRequests: "Demandes de messages",
+		loadingFriends: "Chargement des amis...",
+		loadingRequests: "Chargement des demandes...",
+		noFriends: "Aucun ami",
+		noRequests: "Aucune demande",
+		searchFriends: "Rechercher des amis...",
+		searchRequests: "Rechercher des demandes...",
+		on: "En ligne",
+		off: "Hors ligne",
+		errorLoadingFriends: "Erreur lors du chargement des amis",
+		errorLoadingRequests: "Erreur lors du chargement des demandes",
+		retry: "Réessayer",
+		typeMessage: "Taper votre message ici...",
 	},
 	profile: {
 		rank: "Rang : ",
 		message: "Message",
 		add: "Ajouter",
 		block: "Bloquer",
+		unblock: "Débloquer",
 		infoTab: {
 			title: "Infos",
 			fullname: "Nom complet :",

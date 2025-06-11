@@ -8,7 +8,7 @@ import LeaderBoardPage from "./pages/leaderBoard.js"
 import AboutPage from "./pages/about.js";
 import { Page } from "./types/types.js";
 import PlayVsAI from "./pages/PlayVsAI.js"
-import { Lang, setLanguage } from "./languages/LanguageController.js";
+import { initializeLanguage } from "./languages/LanguageController.js";
 import TournamentPage from "./components/Tournament-Game/TournamentPage.js";
 import OnlineGame from './pages/online-game.js';
 import CreateTournamentPage from './pages/create-tournament.js';
@@ -29,7 +29,7 @@ const routes: { [key: string]: Page } = {
   "/play/tournaments": TournamentPage,
   "/tournaments/create": CreateTournamentPage,
   "/tournaments/:tournamentId": TournamentDetailPage,
-  "/tournaments/:tournamentId/match/:matchId": TournamentMatchPage, // Add this new route
+  "/tournaments/:tournamentId/match/:matchId": TournamentMatchPage,
   "/chat": ChatPage,
   "/chat/:uName": ChatPage,
   "/leader-board": LeaderBoardPage,
@@ -40,15 +40,18 @@ const routes: { [key: string]: Page } = {
 
 let navigationState: any = null;
 
-export function refreshRouter() {
-	// if (!store.initialized) {
-	// 	console.log('Waiting for store initialization...');
-	// 	setTimeout(refreshRouter, 100);
-	// 	return;
-	// }
+export async function refreshRouter() {
+	const app = document.getElementById("app")!;
+	app.className = "h-dvh bg-gradient-to-br from-pongdark to-ponghover flex items-center justify-center";
+	app.innerHTML = `
+	  <div class="w-16 h-16 border-4 border-gray-600 border-t-pongcyan rounded-full animate-spin"></div>
+	`;
+
+	await store.initialize();
+	localStorage.setItem("isLoggedIn", store.isLoggedIn ? "true" : "false");
 	console.log('Router: Store initialized, isLoggedIn:', store.isLoggedIn);
 
-
+	initializeLanguage();
 	const path = window.location.pathname;
 	let page: Page | null = null;
 	let params: { [key: string]: string } = {};
@@ -57,7 +60,9 @@ export function refreshRouter() {
 		"/register",
 		"/register/twofactor",
 		"/reset_password/:uuid",
-		"/account-verified"
+		"/account-verified",
+		"/play/local-multi",
+		"/play/local-ai"
 	];
 
 	function matchesRestrictedPattern(currentPath: string): boolean {
@@ -98,11 +103,6 @@ export function refreshRouter() {
 	const appContainer = document.getElementById("app")!;
 	appContainer.className = "";
 	appContainer.innerHTML = "";
-
-	const savedLanguage = localStorage.getItem("selectedLanguage");
-	if (savedLanguage) {
-		setLanguage(savedLanguage as Lang);
-	}
 
 	page.render(appContainer, params, navigationState);
 	

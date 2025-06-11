@@ -6,7 +6,7 @@ import { navigate } from '../../router.js';
 import store from '../../../store/store.js';
 import { jwtDecode } from "jwt-decode";
 import Toast from '../../toast/Toast.js';
-import { handleLoginWithGoogle } from '../../main.js';
+import { handleLoginWithGoogle, initializeApp } from '../../main.js';
 
 interface SignInProps {
 	styles: string,
@@ -89,6 +89,7 @@ export const SignIn = createComponent((props: SignInProps) => {
 						nickname: decodedToken.nickname,
 						fullName: decodedToken.fullName,
 						age: decodedToken.age,
+						language: decodedToken.language || 'en',
 						country: decodedToken.country,
 						createdAt: decodedToken.createdAt,
 						avatarUrl: decodedToken.avatarUrl,
@@ -98,6 +99,7 @@ export const SignIn = createComponent((props: SignInProps) => {
 					store.update("sessionUUID", signIn.data.sessUUID);
 					
 					navigate("/");
+					initializeApp();
 					Toast.show(`Login successful, Welcome ${decodedToken.fullName}!`, "success");
 				}
 			}

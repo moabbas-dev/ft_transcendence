@@ -2,6 +2,7 @@ import { t } from "../../../languages/LanguageController.js";
 import chatService from "../../../utils/chatUtils/chatWebSocketService.js";
 import store from "../../../../store/store.js";
 import { createComponent } from "../../../utils/StateManager.js";
+import { pongGameClient } from "../../../main.js";
 
 export interface FriendProps {
   id: string;
@@ -14,15 +15,15 @@ export interface FriendProps {
 const Friend = createComponent((props: FriendProps) => {
   const friendElement = document.createElement('div');
   friendElement.className = 'friend-item flex items-center justify-between bg-black/40 p-4 rounded-lg mb-3 border border-gray-800 hover:border-pongcyan transition-all duration-300';
-  
+
   // Status color
   let statusColor = 'bg-gray-500'; // offline by default
   if (props.status === 'online') statusColor = 'bg-green-500';
   if (props.status === 'in-game') statusColor = 'bg-blue-500';
-  
+
   // Determine if friend is available for invite
   const isAvailable = props.status === 'online';
-  
+
   friendElement.innerHTML = `
     <div class="flex items-center gap-3">
       <div class="avatar-container relative">
@@ -39,59 +40,92 @@ const Friend = createComponent((props: FriendProps) => {
       </div>
     </div>
     <button 
-      class="invite-button px-4 py-2 rounded-md text-sm ${isAvailable 
-        ? 'bg-pongcyan hover:bg-pongcyan/80 text-white' 
-        : 'bg-gray-700 text-gray-400 cursor-not-allowed'}"
+      class="invite-button px-4 py-2 rounded-md text-sm ${isAvailable
+      ? 'bg-pongcyan hover:bg-pongcyan/80 text-white'
+      : 'bg-gray-700 text-gray-400 cursor-not-allowed'}"
       ${!isAvailable ? 'disabled' : ''}
     >
       ${t('play.onlineGame.invite')}
     </button>
   `;
-  
+
   // Add event listener to the invite button if friend is available
   if (isAvailable) {
     const inviteButton = friendElement.querySelector('.invite-button');
     inviteButton?.addEventListener('click', (e) => {
       e.stopPropagation();
-      // Dispatch custom event with friend data
-      const event = new CustomEvent('friend-invite', {
-        bubbles: true,
-        detail: props.id
-      });
-      friendElement.dispatchEvent(event);
+
+      // Send game invite via chat service instead of matchmaking
+      console.log("from: ", store.userId, "to: ", props.id);
+      if (chatService.isConnected()) {
+        chatService.send("game:invite", {
+          from: store.userId,
+          to: props.id,
+          gameType: "1v1"
+        });
+
+        // const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        // console.log(`${protocol}//${window.location.hostname}${window.location.port}/matchmaking/`);
+        // console.log(window.location.hostname);
+        // console.log(window.location.port);
+        // const client = new PongGameClient(`${protocol}//${window.location.hostname}${window.location.port}/matchmaking/`, store.userId?.toString() || "");
+
+        const matchmakingClient = pongGameClient!        
+        matchmakingClient.inviteFriend(props.id); // This is the 'friend_match_request' for matchmaking server
+        console.log("friend_match_request sent via matchmakingClient.");
+
+        chatService.send("messages:unread:get", {
+          userId: props.id,
+        });
+
+        // Update button state
+        inviteButton.textContent = 'Invite Sent';
+        inviteButton.classList.add('bg-gray-600');
+        inviteButton.classList.remove('bg-pongcyan', 'hover:bg-pongcyan/80');
+        (inviteButton as HTMLButtonElement).disabled = true;
+      }
     });
   }
-  
+
   return friendElement;
 });
 
 export function FetchFriendsList() {
   const friendsListContainer = document.createElement('div');
   friendsListContainer.className = 'friends-list w-full max-w-md mx-auto max-h-96 overflow-y-auto px-2 py-4';
-  
-  // Search input
+
+  const isRTL = document.documentElement.dir === 'rtl' ||
+    document.documentElement.lang === 'ar' ||
+    getComputedStyle(document.documentElement).direction === 'rtl';
+
   const searchContainer = document.createElement('div');
   searchContainer.className = 'search-container mb-4';
+
+  // Dynamically set classes based on language direction
+  const inputClasses = `w-full bg-black/40 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-pongcyan ${isRTL ? 'text-right' : 'text-left'}`;
+  const iconClasses = `absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 transform -translate-y-1/2 text-gray-400`;
+
   searchContainer.innerHTML = `
-    <div class="relative">
-      <input 
-        type="text" 
-        placeholder="${t('play.onlineGame.searchFriends')}" 
-        class="w-full bg-black/40 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-pongcyan"
-      >
-      <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-        <i class="fa-solid fa-search"></i>
-      </span>
-    </div>
-  `;
-  
+<div class="relative flex justify-between">
+<input 
+type="text" 
+placeholder="${t('play.onlineGame.searchFriends')}" 
+class="${inputClasses}"
+dir="${isRTL ? 'rtl' : 'ltr'}"
+>
+<span class="${iconClasses}">
+<i class="fa-solid fa-search"></i>
+</span>
+</div>
+`;
+
   friendsListContainer.appendChild(searchContainer);
-  
+
   // Friends list wrapper
   const friendsList = document.createElement('div');
   friendsList.className = 'friends-list-wrapper';
   friendsListContainer.appendChild(friendsList);
-  
+
   // Loading state
   friendsList.innerHTML = `
     <div class="loading flex flex-col items-center justify-center py-6">
@@ -99,13 +133,13 @@ export function FetchFriendsList() {
       <div class="text-gray-400">${t('chat.loadingFriends')}</div>
     </div>
   `;
-  
+
   // Handle search functionality
   const searchInput = searchContainer.querySelector('input');
   searchInput?.addEventListener('input', (e) => {
     const target = e.target as HTMLInputElement;
     const searchValue = target.value.toLowerCase();
-    
+
     // Filter friends based on search value
     const friendElements = friendsList.querySelectorAll('.friend-item');
     friendElements.forEach(el => {
@@ -117,10 +151,10 @@ export function FetchFriendsList() {
       }
     });
   });
-  
+
   // Fetch friends list
   loadFriendsList();
-  
+
   async function loadFriendsList() {
     try {
       // Request friends list from server
@@ -142,18 +176,18 @@ export function FetchFriendsList() {
           </button>
         </div>
       `;
-      
+
       const retryButton = friendsList.querySelector('.retry-button');
       retryButton?.addEventListener('click', () => {
         loadFriendsList();
       });
     }
   }
-  
+
   // Handle friend invite
   friendsListContainer.addEventListener('friend-invite', (e: any) => {
     const friendId = e.detail;
-    
+
     // Dispatch event to parent component
     const event = new CustomEvent('friend-selected', {
       bubbles: true,
@@ -161,11 +195,11 @@ export function FetchFriendsList() {
     });
     friendsListContainer.dispatchEvent(event);
   });
-  
+
   function handleFriendsReceived(friendsData: FriendProps[]) {
     // Clear the loading state
     friendsList.innerHTML = '';
-    
+
     if (friendsData && friendsData.length > 0) {
       // Render each friend
       friendsData.forEach(friend => {
@@ -181,11 +215,11 @@ export function FetchFriendsList() {
       `;
     }
   }
-  
+
   // Set up event listener for friends data
   chatService.on("friends:list", (data) => {
     handleFriendsReceived(data.friends);
   });
-  
+
   return friendsListContainer;
 }

@@ -204,7 +204,7 @@ class UserController {
 		try {
 			const { id } = request.params;
 			const updates = Object.keys(request.body);
-			const allowedUpdates = ['nickname', 'full_name', 'age', 'country', 'email'];
+			const allowedUpdates = ['nickname', 'full_name', 'age', 'country', 'email', 'language'];
 			const isValidOperation = updates.every((update) => allowedUpdates.includes(update));
 			const authHeader = request.headers.authorization;
 			if (!authHeader || !authHeader.startsWith('Bearer '))
@@ -226,7 +226,9 @@ class UserController {
 			const user = await User.findById(id);
 			if (!user)
 				return reply.code(404).send({ message: "User not found!" });
-			const { email, nickname, full_name, age, country } = request.body;
+			const { email, nickname, full_name, age, country, language } = request.body;
+			if (typeof language !== 'undefined' && !['en', 'fr', 'ar'].includes(language))
+				return reply.code(400).send({ message: "Invalid language! Must be 'en', 'fr', or 'ar'" });		
 			if (typeof email !== 'undefined' && !validateEmail(email))
 				return reply.code(400).send({ message: "Invalid email address!" });
 			if (typeof nickname !== 'undefined' && !validateNickname(nickname))
@@ -244,6 +246,7 @@ class UserController {
 			if (full_name !== undefined) updateData.full_name = capitalizeFullName(full_name);
 			if (age !== undefined) updateData.age = age;
 			if (country !== undefined) updateData.country = country;
+			if (language !== undefined) updateData.language = language;
 			if (updateData.email !== undefined) {
 				const activationToken = crypto.randomUUID();
 				await UserToken.create({ userId: id, activationToken, tokenType: "account_activation" });

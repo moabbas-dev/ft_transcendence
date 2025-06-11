@@ -85,6 +85,7 @@ class AuthController {
 				fullName: user.full_name,
 				age: user.age,
 				country: user.country,
+				language: user.language || 'en',
 				avatarUrl: user.avatar_url,
 				is2faEnabled: user.is_2fa_enabled,
 				createdAt: user.created_at,

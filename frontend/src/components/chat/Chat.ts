@@ -7,13 +7,28 @@ import { emojis, emojisMap, emoticons, emoticonsMap, stickers, stickersMap } fro
 import { Profile } from "../profile/UserProfile.js";
 import { t } from "../../languages/LanguageController.js";
 import axios from "axios";
-import { _isClickEvent } from "chart.js/helpers";
+import { GameInviteMessage } from "./GameInviteMessage.js";
+// import { _isClickEvent } from "chart.js/helpers";
+
+// interface Message {
+//   id: number;
+//   senderId: string | null;
+//   content: string;
+//   timestamp: number;
+// }
 
 interface Message {
-  id: number;
-  senderId: string | null;
+  id: number | string;
+  senderId: number;
+  receiverId: number;
   content: string;
-  timestamp: number;
+  timestamp: number | string;
+  messageType?: string;
+  gameInviteData?: {
+    gameType: string;
+    status: 'pending' | 'accepted' | 'declined' | 'expired';
+    inviteId: string;
+  };
 }
 
 export const Chat = createComponent(
@@ -25,15 +40,20 @@ export const Chat = createComponent(
     let messages: Message[] = [];
     let roomId: string | null = null;
 
+    const isRTL = document.documentElement.dir === 'rtl' ||
+      document.documentElement.lang === 'ar' ||
+      getComputedStyle(document.documentElement).direction === 'rtl';
+
     // Create the chat UI
-const renderChat = () => {
+    const renderChat = () => {
       container.innerHTML = `
             <div class="flex flex-col bg-black bg-custom-gradient justify-between h-[100svh] w-full z-20 gap-1 md:gap-2 bg-cover bg-center" style="background-image: ${activeUser ? `url(${bgImage})` : `url(${bgImage2})`}">
                 <header class="flex h-fit w-full items-center justify-between py-2 md:py-3 px-1 md:px-2 bg-[#202c33] shadow-[0_0_15px_rgba(0,247,255,0.3)]">
                     <div class="flex w-full">
+                      <!--
                         <div class="back_arrow block md:hidden text-pongcyan text-2xl md:text-3xl flex items-center justify-center hover:cursor-pointer hover:opacity-80 mr-1">
                             <i class='bx bx-left-arrow-alt'></i>
-                        </div>
+                        </div> -->
                         <div class="flex items-center z-10 justify-center gap-1 sm:gap-2"  id="friend_name">
                                     
                             <div class="avatar h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 rounded-full bg-black border-2 ${activeUser ? 'border-pongcyan' : 'border-pongpink'} flex items-center justify-center text-base sm:text-lg md:text-xl font-semibold ${activeUser ? 'text-pongcyan' : 'text-pongpink'} ${activeUser ? 'shadow-[0_0_10px_rgba(0,247,255,0.4)]' : 'shadow-[0_0_10px_rgba(255,0,228,0.4)]'}">
@@ -59,18 +79,19 @@ const renderChat = () => {
                     ${renderMessages()}
                 </section>
                 ${activeUser
-          ? `<div id="message-input-container" class="message-input-container flex items-center h-fit bg-[#202c33] border-t-2 border-pongcyan shadow-[0_0_15px_rgba(0,247,255,0.3)] gap-1 md:gap-2 w-full px-2 md:px-3 pb-safe">
+          ? `<div id="message-input-container" class="message-input-container flex items-center h-fit bg-[#202c33]   gap-1 md:gap-2 w-full px-2 md:px-3 pb-safe">
                     <div class="flex items-center w-full px-1 md:px-2 py-2">
                         <div 
                             id="message-input" 
                             contenteditable="true"
                             role="textbox"
-                            class="border border-pongcyan rounded-full py-1 md:py-2 pl-3 md:pl-4 [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-[#a0aec0] [&:empty]:before:pointer-events-none focus:outline-none bg-black text-base md:text-lg text-pongcyan flex-1 max-h-[3rem] md:max-h-[4.75rem] overflow-y-auto whitespace-pre-wrap [&::-webkit-scrollbar]:w-1 md:[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-pongdark [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:my-1 md:[&::-webkit-scrollbar-track]:my-2 shadow-[0_0_5px_rgba(0,247,255,0.2)]"
+                            class="border border-pongcyan rounded-full py-1 md:py-2 px-2 md:px-3 [&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-[#a0aec0] [&:empty]:before:pointer-events-none focus:outline-none bg-black text-base md:text-lg text-pongcyan flex-1 max-h-[3rem] md:max-h-[4.75rem] overflow-y-auto whitespace-pre-wrap [&::-webkit-scrollbar]:w-1 md:[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-pongdark [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:my-1 md:[&::-webkit-scrollbar-track]:my-2 shadow-[0_0_5px_rgba(0,247,255,0.2)]"
                             autocorrect="off"
                             autocapitalize="off"
                             spellcheck="false"
-                            data-placeholder="Type your message..."
+                            data-placeholder="${t('chat.typeMessage')}"
                         ></div>
+                        <div class="flex items-center justify-center gap-1">
                         <div 
                             id="emoticon-button" 
                             class="flex items-center justify-center hover:cursor-pointer hover:opacity-80 bg-black hover:bg-ponghover rounded-full w-8 h-8 md:w-10 md:h-10 text-xl md:text-2xl text-pongpink transition-all duration-300 mx-1 border border-pongpink shadow-[0_0_5px_rgba(255,0,228,0.3)]"
@@ -79,9 +100,10 @@ const renderChat = () => {
                         </div>
                         <div 
                             id="send-button" 
-                            class="flex items-center justify-center hover:cursor-pointer hover:opacity-80 bg-black hover:bg-ponghover rounded-full w-8 h-8 md:w-10 md:h-10 text-xl md:text-2xl text-pongcyan transition-all duration-300 -mr-1 md:-mr-2 border border-pongcyan shadow-[0_0_5px_rgba(0,247,255,0.3)]"
+                            class="flex items-center justify-center hover:cursor-pointer hover:opacity-80 bg-black hover:bg-ponghover rounded-full w-8 h-8 md:w-10 md:h-10 text-xl md:text-2xl text-pongcyan transition-all duration-300 border border-pongcyan shadow-[0_0_5px_rgba(0,247,255,0.3)]"
                         >
-                            <i class='bx bx-send'></i>
+                            <i class='bx bx-up-arrow-alt'></i>  
+                        </div>
                         </div>
                     </div>
                 </div>
@@ -120,6 +142,7 @@ const renderChat = () => {
       // Add event listeners after the HTML is rendered
       if (activeUser) {
         setupEventListeners();
+        renderGameInvites();
       }
 
       const friend = document.querySelector('#friend_name');
@@ -147,6 +170,45 @@ const renderChat = () => {
         const chatContainer = document.querySelector(".chat")!;
         chatContainer.classList.add("animate-slideDown");
         chatContainer.classList.remove("animate-slideUp");
+      });
+    };
+
+    const renderGameInvites = () => {
+      const gameInviteContainers = container.querySelectorAll('.game-invite-container');
+
+      gameInviteContainers.forEach(container => {
+        const messageId = container.getAttribute('data-message-id');
+        const from = container.getAttribute('data-from');
+        const to = container.getAttribute('data-to');
+        const gameType = container.getAttribute('data-game-type');
+        const timestamp = container.getAttribute('data-timestamp');
+        const status = container.getAttribute('data-status');
+        const inviteId = container.getAttribute('data-invite-id');
+
+        if (messageId && from && to && timestamp && status && inviteId) {
+          // console.log('Rendering game invite:', {
+          //   messageId,
+          //   from,
+          //   to,
+          //   gameType,
+          //   timestamp,
+          //   status,
+          //   inviteId
+          // });
+          const gameInviteElement = GameInviteMessage({
+            messageId,
+            from,
+            to,
+            gameType: gameType || '1v1',
+            timestamp,
+            status: status as 'pending' | 'accepted' | 'declined' | 'expired',
+            inviteId
+          });
+
+          // Clear the container and append the actual component
+          container.innerHTML = '';
+          container.appendChild(gameInviteElement);
+        }
       });
     };
 
@@ -185,6 +247,10 @@ const renderChat = () => {
 
       // Group messages by date
       const messagesByDate = messages.reduce((acc, message) => {
+        //         // Ensure timestamp is a number
+        // const timestamp = typeof message.timestamp === 'string' ? 
+        // Date.parse(message.timestamp) : message.timestamp;
+
         const date = new Date(message.timestamp).toLocaleDateString("en-US", {
           month: "long",
           day: "numeric",
@@ -203,7 +269,38 @@ const renderChat = () => {
 
           ${dateMessages
               .map((message) => {
-                const isCurrentUser = message.senderId == currentUserId;
+                // console.log("message:", message);
+                // Check if this is a game invite message
+                if (message.messageType === 'game_invite') {
+                  // Ensure timestamp is a number
+                  // const timestamp = typeof message.timestamp === 'string' ? 
+                  // Date.parse(message.timestamp) : message.timestamp;
+
+                  // console.log('Processing game invite message:', {
+                  //   id: message.id,
+                  //   senderId: message.senderId,
+                  //   receiverId: message.receiverId,
+                  //   messageType: message.messageType,
+                  //   fullMessage: message
+                  // });
+
+                  // Create a container for the game invite message
+                  return `
+                    <div class="game-invite-container" data-message-id="${message.id}" data-from="${message.senderId}" data-to="${message.receiverId}" data-game-type="${message.gameInviteData?.gameType || '1v1'}" data-timestamp="${new Date(
+                    message.timestamp
+                  ).toLocaleTimeString([], {
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: true,
+                  })}" data-status="${message.gameInviteData?.status || 'pending'}" data-invite-id="${message.gameInviteData?.inviteId || message.id}">
+                      <!-- Game invite message will be rendered here by JavaScript -->
+                      <div class="game-invite-placeholder">${formatMessageContent(message.content)}</div>
+                    </div>
+                  `;
+                }
+
+                // Handle regular messages as before
+                const isCurrentUser = message.senderId == parseInt(currentUserId || '');
 
                 const messageTime = new Date(
                   message.timestamp
@@ -214,8 +311,7 @@ const renderChat = () => {
                 });
 
                 return `
-                  <div class="flex w-full ${isCurrentUser ? "justify-end" : "justify-start"
-                  }">
+                  <div class="flex w-full ${isCurrentUser ? "justify-end" : "justify-start"}">
                       <div class="
                           flex flex-col justify-center pt-1 px-2 rounded-lg
                           max-w-[250px] md:max-w-sm break-words 2xl:max-w-xl
@@ -510,7 +606,8 @@ const renderChat = () => {
       // Create temporary message for optimistic update
       const tempMessage: Message = {
         id: Date.now(), // Temporary ID (replace with real ID from server later)
-        senderId: currentUser,
+        senderId: parseInt(currentUser),
+        receiverId: activeUser.id,
         content,
         timestamp: Date.now(),
       };
@@ -553,13 +650,12 @@ const renderChat = () => {
     }) => {
       activeUser = user;
       // console.log(activeUser);
-
       // Create room ID (combination of both usernames sorted alphabetically)
-      const currentUserId = store.userId;
+      const currentUserId = parseInt(store.userId || '');
       if (currentUserId) {
         // Use consistent userId format for roomId
         roomId = [currentUserId, user.id]
-          .sort((a: any, b: any) => a - b)
+          .sort((a: number, b: number) => a - b)
           .join("-");
 
         // Get message history for this room
@@ -574,7 +670,7 @@ const renderChat = () => {
             userId: store.userId
           });
         }
-        console.log(user.id);
+        // console.log(user.id);
 
         chatService.off("user:blocked_status");
 
@@ -583,9 +679,8 @@ const renderChat = () => {
           targetId: user.id
         });
 
-
         chatService.on("user:blocked_status", (data) => {
-          console.log(data);
+          // console.log(data);
           if (user.id && user.id === data.targetId) {
             const messageContainer = container.querySelector("#message-container");
 
@@ -646,7 +741,36 @@ const renderChat = () => {
         }
       });
 
-      // Listen for sent message confirmations
+      // Add handler for direct private messages (including game invites)
+      chatService.on("message:private", (data: any) => {
+        console.log("Private message received:", data);
+
+        if (!data) {
+          console.error("Invalid private message data received");
+          return;
+        }
+
+        const message: Message = data;
+        const msgRoomId = data.roomId;
+
+        // Only add message if it's for the current room
+        if (msgRoomId === roomId) {
+          // Add the new message to the messages array
+          messages = [message, ...messages];
+          renderChat();
+          scrollToBottom();
+          chatService.markMessagesAsRead(roomId);
+        }
+
+
+
+        // Request updated unread counts
+        chatService.send("messages:unread:get", {
+          userId: store.userId
+        });
+
+      });
+
       chatService.on("message:sent", (data: any) => {
         console.log("Message sent confirmation:", data);
 
@@ -677,8 +801,10 @@ const renderChat = () => {
           console.error("Invalid message history data received");
           return;
         }
-
+        // console.log("data:", data);
         const { messages: historyMessages, roomId: msgRoomId } = data;
+        // console.log("historyMessages:", historyMessages);
+
 
         // Only set messages if it's for the current room
         if (msgRoomId === roomId) {
@@ -770,3 +896,4 @@ const renderChat = () => {
     });
   }
 );
+

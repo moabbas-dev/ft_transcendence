@@ -4,7 +4,7 @@ import { FetchFriendsList } from "../components/Online-Game/components/FriendsLi
 import { FindOpponent } from "../components/Online-Game/components/FindOpponent.js";
 import { t } from "../languages/LanguageController.js";
 import { Footer } from "../components/header_footer/footer.js";
-import { PongGameClient } from "../components/Online-Game/components/Game.js";
+import { pongGameClient } from "../main.js";
 import { OnlineGameBoard } from "../components/Online-Game/components/OnlineGameBoard.js";
 import { navigate, refreshRouter } from "../router.js";
 import store from "../../store/store.js";
@@ -20,7 +20,7 @@ export default {
 				<!-- Neon glow effects -->
 				<div class="absolute inset-0 bg-gradient-to-br from-transparent via-pongcyan/5 to-transparent opacity-20 z-5 pointer-events-none"></div>
 				
-				<div id="content" class="flex max-sm:flex-col max-sm:items-center max-sm:justify-around max-sm:py-4 flex-1 container mx-auto px-4 w-full text-white z-10 relative">
+				<div id="content" class="flex max-sm:flex-col max-sm:items-center max-sm:justify-around max-sm:py-4 flex-1 container mx-auto px-4 w-full text-white z-10 relative h-full">
 					<div class="flex flex-col items-center justify-center gap-5 sm:gap-10 w-full sm:w-1/2 py-8">
 						<h1 class="text-4xl md:text-5xl font-bold text-center text-pongcyan drop-shadow-[0_0_15px_#00f7ff] animate-fade-down animate-once animate-duration-700">
 							${t('play.title')}
@@ -50,7 +50,7 @@ export default {
 					
 					<div id="game-mode-details" class="flex flex-col items-center justify-center gap-10 w-full sm:w-1/2 py-8">
 						<div class="relative w-full flex items-center justify-center">
-							<div class="animation-container relative w-full max-w-md aspect-square">
+							<div class="animation-container relative w-full max-w-md">
 								<i id="icon-friends" class="fa-solid fa-users text-7xl md:text-8xl absolute top-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-100 bg-gradient-to-r from-pongcyan via-[rgba(100,100,255,0.8)] to-pongcyan text-transparent bg-clip-text"></i>
 								<span id="text-friends" class="text-3xl md:text-4xl text-center font-bold absolute top-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-0">${t('play.onlineGame.vsFriend')}</span>
 								
@@ -104,9 +104,10 @@ export default {
 		const userId = store.userId?? '0';
 		
 		// Connect to your matchmaking backend
-		const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-		const client = new PongGameClient(`${protocol}//${window.location.hostname}:${window.location.port}/matchmaking/`, userId);
-		
+		// const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+		// const client = new PongGameClient(`${protocol}//${window.location.hostname}:${window.location.port}/matchmaking/`, userId);
+const client = pongGameClient;
+
 		// State for tracking current match
 		let currentMatchId: string | null = null;
 		let currentOpponentId: string | null = null;
@@ -114,7 +115,7 @@ export default {
 		let gameBoard:any | null = null;
 		
 		// Set up event handlers for matchmaking events
-		client.on('waiting_for_match', (data) => {
+		client?.on('waiting_for_match', (data) => {
 			// Update queue position display if we have one
 			const queuePositionElement = document.getElementById('queue-position');
 			if (queuePositionElement) {
@@ -122,7 +123,7 @@ export default {
 			}
 		});
 
-		client.on('match_found', (data) => {
+		client?.on('match_found', (data) => {
 			currentMatchId = data.matchId;
 			currentOpponentId = data.opponent.id;
 			isPlayer1 = data.isPlayer1; // We're player 1 if we initiated
@@ -132,7 +133,7 @@ export default {
 			showMatchFound(data.opponent);
 		});
 
-		client.on('game_start', (data) => {
+		client?.on('game_start', (data) => {
 			console.log(`Game started with match ID: ${data.matchId}`);
 			console.log("ISPLAYER 1: ", isPlayer1);
 			
@@ -141,24 +142,24 @@ export default {
 			}
 		});
 		
-		client.on('friend_match_invite', (data:any) => {
+		client?.on('friend_match_invite', (data:any) => {
 			// Show friend invite notification
-			const accept = confirm(`${data.fromId} has invited you to a match. Accept?`);
-			if (accept) {
-				client.acceptFriendMatch(data.fromId);
-			}
+			// const accept = confirm(`${data.fromId} has invited you to a match. Accept?`);
+			// if (accept) {
+			// 	client.acceptFriendMatch(data.fromId);
+			// }
 		});
 		
-		client.on('friend_match_created', (data:any) => {
+		client?.on('friend_match_created', (data:any) => {
 			currentMatchId = data.matchId;
 			currentOpponentId = data.opponent.id;
-			isPlayer1 = false; // We're player 2 if we accepted
+			isPlayer1 = data.isPlayer1; 
 			
 			// Show match found UI
 			showMatchFound(data.opponent);
 		});
 		
-		client.on('match_results', (data:any) => {
+		client?.on('match_results', (data:any) => {
 			if (gameBoard) {
 				// Game ended, show results
 				showGameResults(data);
@@ -183,7 +184,7 @@ export default {
 				// Add event handler for friend invitation
 				friendsList.addEventListener('friend-selected', (e:any) => {
 					const friendId = e.detail;
-					client.inviteFriend(friendId);
+					client?.inviteFriend(friendId);
 					
 					// Show waiting for response UI
 					showWaitingForFriend(friendId);
@@ -212,50 +213,11 @@ export default {
 				
 				// Add cancel button event handler
 				findOpponent.querySelector('#cancel-matchmaking')?.addEventListener('click', () => {
-					client.cancelMatchmaking();
+					client?.cancelMatchmaking();
 					// showMainMenu();
 				});
 			}
 		});
-		
-		// Helper functions for UI transitions
-		
-		// function showMainMenu() {
-		// 	heading.textContent = t('play.title');
-		// 	heading.className = "text-4xl md:text-6xl font-bold text-center text-pongcyan drop-shadow-[0_0_15px_#00f7ff] animate-fade-down animate-once animate-duration-700";
-			
-		// 	const gameModeDetails = document.getElementById("game-mode-details");
-		// 	if (gameModeDetails) {
-		// 		gameModeDetails.innerHTML = `
-		// 			<div class="relative w-full flex items-center justify-center">
-		// 				<div class="animation-container relative w-full max-w-md aspect-square">
-		// 					<i id="icon-friends" class="fa-solid fa-users text-7xl md:text-8xl absolute top-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-100 bg-gradient-to-r from-pongcyan via-[rgba(100,100,255,0.8)] to-pongcyan text-transparent bg-clip-text"></i>
-		// 					<span id="text-friends" class="text-3xl md:text-4xl text-center font-bold absolute top-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-0">${t('play.onlineGame.vsFriend')}</span>
-							
-		// 					<div id="loading-pong" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-125"></div>
-							
-		// 					<i id="icon-online" class="fa-solid fa-globe text-7xl md:text-8xl absolute bottom-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-100 bg-gradient-to-b from-pongpink via-[rgba(255,0,228,0.8)] to-pongpink text-transparent bg-clip-text"></i>
-		// 					<span id="text-online" class="text-3xl md:text-4xl text-center font-bold absolute bottom-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-0">${t('play.onlineGame.vsRivals')}</span>
-		// 				</div>
-		// 			</div>
-		// 		`;
-				
-		// 		// Restart animation
-		// 		toggleInterval = setInterval(() => {
-		// 			isIconVisible = !isIconVisible;
-		// 			document.getElementById("icon-friends")?.classList.toggle("opacity-0", !isIconVisible);
-		// 			document.getElementById("icon-friends")?.classList.toggle("opacity-100");
-		// 			document.getElementById("text-friends")?.classList.toggle("opacity-0", isIconVisible);
-		// 			document.getElementById("icon-online")?.classList.toggle("opacity-0", !isIconVisible);
-		// 			document.getElementById("icon-online")?.classList.toggle("opacity-100");
-		// 			document.getElementById("text-online")?.classList.toggle("opacity-0", isIconVisible);
-		// 		}, 3000);
-				
-		// 		// Add loading animation
-		// 		const loadingPong = document.getElementById('loading-pong');
-		// 		loadingPong?.appendChild(PongLoading({text: t('play.onlineGame.or')}));
-		// 	}
-		// }
 		
 		function showWaitingForFriend(friendId:string) {
 			const gameModeDetails = document.getElementById("game-mode-details");
@@ -337,7 +299,7 @@ export default {
 				gameBoard = new OnlineGameBoard(
 					canvas,
 					gameHeader,
-					client,
+					client!,
 					matchId,
 					userId,
 					opponentId,
@@ -385,13 +347,13 @@ export default {
 			document.getElementById('play-again-btn')?.addEventListener('click', () => {
 				document.body.removeChild(resultsOverlay);
 				gameBoard = null;
-				refreshRouter();
+				refreshRouter()
 				navigate("/play/online-game");
 			});
 		}
 
 		return () => {
-			client.disconnect();
+			client?.disconnect();
 			clearInterval(toggleInterval);
 		};
 	}

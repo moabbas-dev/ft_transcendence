@@ -7,23 +7,30 @@ import Toast from './toast/Toast.js';
 import './utils/axiosConfig.js';
 import { TournamentClient } from './components/Tournament-Game/TournamentClient.js';
 import { refreshRouter } from './router.js';
+import chatService from "./utils/chatUtils/chatWebSocketService.js";
+import { PongGameClient } from './components/Online-Game/components/Game.js';
 
-const initializeApp = async () => {
+export const initializeApp = async () => {
 	console.log('Initializing app...');
-    try {
-        await store.initialize();
-        console.log('Store initialized, user logged in:', store.isLoggedIn);
+	try {
+		await store.initialize();
+		console.log('Store initialized, user logged in:', store.isLoggedIn);
 		localStorage.setItem("isLoggedIn", store.isLoggedIn ? "true" : "false");
-        
-        // Initialize other components after store is ready
-        if (store.isLoggedIn && store.userId) {
-            await initializeTournamentClient();
-        }
-		refreshRouter()
-    } catch (error) {
-        console.error('Failed to initialize app:', error);
-    }
+
+
+		console.log("TTTTT, ", store.isLoggedIn && store.userId);
+		
+		if (store.isLoggedIn && store.userId) {
+			await initializeTournamentClient();
+			await initializeChatClient();
+			await initializePongGameClient();
+		}
+		await refreshRouter();
+	} catch (error) {
+		console.error('Failed to initialize app:', error);
+	}
 };
+
 initializeApp();
 
 
@@ -50,6 +57,7 @@ export const handleLoginWithGoogle = (container: HTMLElement) => {
 		try {
 			localStorage.setItem("googleAuth", "true");
 			localStorage.setItem("googleAuthClicked", "true");
+			localStorage.setItem("isLoggedIn", "true");
 			const origin = window.location.origin;
 			const successURL = origin;
 			const failureURL = `${origin}/register`;
@@ -66,23 +74,23 @@ export const handleLoginWithGoogle = (container: HTMLElement) => {
 }
 
 export const refreshUserData = async () => {
-    if (!store.userId || !store.isLoggedIn) return;
-    
-    try {
-        const response = await axios.get(`/authentication/auth/users/id/${store.userId}`);
-        const data = response.data;
+	if (!store.userId || !store.isLoggedIn) return;
 
-        if (data) {
-            store.update('age', data.age);
-            store.update('avatarUrl', data.avatar_url);
-            store.update('country', data.country);
-            store.update('email', data.email);
-            store.update('fullName', data.fullName);
-            store.update('nickname', data.nickname);
-        }
-    } catch (error) {
-        console.log('Error refreshing user data:', error);
-    }
+	try {
+		const response = await axios.get(`/authentication/auth/users/id/${store.userId}`);
+		const data = response.data;
+
+		if (data) {
+			store.update('age', data.age);
+			store.update('avatarUrl', data.avatar_url);
+			store.update('country', data.country);
+			store.update('email', data.email);
+			store.update('fullName', data.fullName);
+			store.update('nickname', data.nickname);
+		}
+	} catch (error) {
+		console.log('Error refreshing user data:', error);
+	}
 }
 refreshUserData()
 
@@ -106,20 +114,43 @@ export async function fetchUserDetails(userIds: string[]) {
 export let tournamentClient: TournamentClient | null = null;
 
 export const initializeTournamentClient = async () => {
-  if (store.isLoggedIn && store.userId && !tournamentClient) {
-	const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.hostname}:${window.location.port}/matchmaking/`;
-    tournamentClient = new TournamentClient(wsUrl, store.userId);
-    
-    try {
-      await tournamentClient.initialize();
-      console.log('Tournament client initialized successfully');
-    } catch (error) {
-      console.error('Failed to initialize tournament client:', error);
-    }
-  }
+	if (store.isLoggedIn && store.userId && !tournamentClient) {
+		const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+		const wsUrl = `${protocol}//${window.location.hostname}:${window.location.port}/matchmaking/`;
+		tournamentClient = new TournamentClient(wsUrl, store.userId);
+
+		try {
+			await tournamentClient.initialize();
+			console.log('Tournament client initialized successfully');
+		} catch (error) {
+			console.error('Failed to initialize tournament client:', error);
+		}
+	}
 };
 
-if (store.isLoggedIn && store.userId) {
-  initializeTournamentClient();
+async function initializeChatClient() {
+	try {
+		// Connect to WebSocket server
+		await chatService.connect();
+
+		console.log("Connected to chat service from home");
+	} catch (error) {
+		console.error("Failed to connect to chat service:", error);
+	}
+}
+
+export let pongGameClient: PongGameClient | null = null;
+
+async function initializePongGameClient() {
+	try {
+		if (store.isLoggedIn && store.userId && !pongGameClient) {
+			const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+			const wsUrl = `${protocol}//${window.location.hostname}:${window.location.port}/matchmaking/`;
+			pongGameClient = new PongGameClient(wsUrl, store.userId);
+			await pongGameClient.connect();
+			console.log('Pong Game client initialized successfully');
+		}
+	} catch (error) {
+		console.error("Failed to connect to game service:", error);
+	}
 }

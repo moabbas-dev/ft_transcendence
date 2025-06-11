@@ -411,6 +411,4 @@ public markMessagesAsRead(roomId: string | null): void {
   }
 }
 
-// Create a singleton instance
-export const chatService = new ChatWebSocketService();
-export default chatService;
+export default new ChatWebSocketService();

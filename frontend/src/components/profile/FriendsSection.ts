@@ -52,7 +52,7 @@ export const FriendsSection = createComponent(() => {
         id="friends-search"
         type="text"
         placeholder="Search friends..."
-        class="w-full flex-1 p-2 rounded-lg bg-gray-200 focus:bg-gray-100"
+        class="w-full flex-1 p-2 rounded-lg bg-gray-200 focus:bg-gray-100 focus:outline-none"
       />
     </div>
     <div id="friends-list" class="flex flex-col gap-2"></div>

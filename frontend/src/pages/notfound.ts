@@ -8,7 +8,7 @@ export default {
     container.innerHTML = `
       <div class="bg-black w-full h-fit p-4 z-10 flex items-center justify-between border-b-2 border-pongcyan shadow-[0_5px_15px_#00f7ff]">     
         <div class="logo flex flex-col items-center text-center font-bold text-white text-xl transition-all duration-300 hover:animate-pulse">
-          <span class="text-pongcyan drop-shadow-[0_0_10px_#00f7ff] transition-all duration-300 hover:drop-shadow-[0_0_20px_#00f7ff] hover:text-white">
+          <span class="home-btn cursor-pointer text-pongcyan drop-shadow-[0_0_10px_#00f7ff] transition-all duration-300 hover:drop-shadow-[0_0_20px_#00f7ff] hover:text-white">
             ft_transcendence
           </span>
           <span class="text-pongpink text-xs transition-all duration-300 hover:text-white drop-shadow-[0_0_5px_#ff00e4]">
@@ -67,6 +67,14 @@ export default {
     
     
     container.querySelector("#home-btn")?.addEventListener("click", () => {
+      navigate("/");
+    });
+
+    container.querySelector(".home-btn")?.addEventListener("click", () => {
+      navigate("/");
+    });
+
+    container.querySelector(".home-btn")?.addEventListener("click", () => {
       navigate("/");
     });
   },

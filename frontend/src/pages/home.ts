@@ -237,28 +237,3 @@ export default {
       await checkUserAfterAuth();
   },
 };
-
-window.addEventListener("DOMContentLoaded", async () => {
-  await initializeWebSocket();
-});
-
-// Initialize WebSocket connection
-async function initializeWebSocket() {
-  try {
-    const username = store.nickname;
-    const userId = store.userId;
-
-    if (!username || !userId) {
-      // console.error("User information not found in sessionStorage");
-      return;
-    }
-
-    // Connect to WebSocket server
-    await chatService.connect();
-
-    console.log("Connected to chat service from home");
-  } catch (error) {
-    console.error("Failed to connect to chat service:", error);
-  } finally {
-  }
-}

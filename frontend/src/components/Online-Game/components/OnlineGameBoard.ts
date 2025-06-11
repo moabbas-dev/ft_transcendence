@@ -48,7 +48,7 @@ export class OnlineGameBoard extends GameBoard {
 		this.opponentId = opponentId;
 		this.isPlayer1 = isPlayer1;
 
-		// Initialize the game
+		// Initialize the gamestartGame
 		this.resize();
 		window.addEventListener('resize', () => this.resize());
 		this.state = this.createInitialState();
@@ -106,6 +106,10 @@ export class OnlineGameBoard extends GameBoard {
 
 			// Send initial ball state to Player 2 (will be automatically mirrored)
 			this.sendBallUpdate();
+		}else {
+			// Player 2 should initialize with zero velocity and wait for updates
+			this.state.ballSpeedX = 0;
+			this.state.ballSpeedY = 0;
 		}
 
 		// Start the game loop

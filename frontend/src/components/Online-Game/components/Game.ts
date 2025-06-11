@@ -6,52 +6,56 @@ export class PongGameClient {
 	
 	constructor(private serverUrl: string, userId: string) {
 	  this.userId = userId;
-	  this.connect();
+	//   this.connect();
 	}
 	
-	private connect(): void {
-	  const wsUrl = `${this.serverUrl}/?userId=${encodeURIComponent(this.userId)}`;
-	  
-	  this.ws = new WebSocket(wsUrl);
-	  
-	  this.ws.onopen = () => {
-		console.log('Connected to matchmaking server');
-		this.triggerCallbacks('connection', { status: 'connected' });
-	  };
-	  
-	  this.ws.onmessage = (event) => {
-		try {
-		  const message = JSON.parse(event.data);
-		//   console.log('Received:', message);
-		  
-		// Trigger all callbacks for this message type
-		if (this.callbacks[message.type]) {
-			this.callbacks[message.type].forEach(callback => {
-				try {
-					callback(message.payload);
-				} catch (err) {
-					console.error(`Error in callback for message type ${message.type}:`, err);
-				}
-			});
-		}
-		} catch (err) {
-		  console.error('Error processing message:', err);
-		}
-	  };
-	  
-	  this.ws.onclose = () => {
-		console.log('Disconnected from game server');
-		
-		// Try to reconnect after a delay
-		if (this.reconnectTimer !== null) {
-		  clearTimeout(this.reconnectTimer);
-		}
-		this.reconnectTimer = window.setTimeout(() => this.connect(), 3000);
-	  };
-	  
-	  this.ws.onerror = (error) => {
-		console.error('WebSocket errorrrr:', error);
-	  };
+	public connect(): Promise<boolean> {
+		return new Promise((resolve, reject) => {
+			const wsUrl = `${this.serverUrl}?userId=${encodeURIComponent(this.userId)}`;
+			
+			this.ws = new WebSocket(wsUrl);
+			
+			this.ws.onopen = () => {
+			  console.log('Connected to matchmaking server');
+			  this.triggerCallbacks('connection', { status: 'connected' });
+			  resolve(true);
+			};
+			
+			this.ws.onmessage = (event) => {
+			  try {
+				const message = JSON.parse(event.data);
+			  //   console.log('Received:', message);
+				
+			  // Trigger all callbacks for this message type
+			  if (this.callbacks[message.type]) {
+				  this.callbacks[message.type].forEach(callback => {
+					  try {
+						  callback(message.payload);
+					  } catch (err) {
+						  console.error(`Error in callback for message type ${message.type}:`, err);
+					  }
+				  });
+			  }
+			  } catch (err) {
+				console.error('Error processing message:', err);
+			  }
+			};
+			
+			this.ws.onclose = () => {
+			  console.log('Disconnected from game server');
+			  
+			  // Try to reconnect after a delay
+			  if (this.reconnectTimer !== null) {
+				clearTimeout(this.reconnectTimer);
+			  }
+			  this.reconnectTimer = window.setTimeout(() => this.connect(), 3000);
+			};
+			
+			this.ws.onerror = (error) => {
+			  console.error('WebSocket errorrrr:', error);
+			  reject(new Error('Game WebSocket connection closed'));
+			};
+		})
 	}
 	
 	private triggerCallbacks(type: string, payload: any): void {
