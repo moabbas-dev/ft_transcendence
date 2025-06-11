@@ -57,8 +57,6 @@ services:
     #   - "3001:3001"
     networks:
       - ft_network
-    env_file:
-      - ./backend/matchmaking/.env
     volumes:
       - ./backend/matchmaking:/app
       - matchmaking_node_modules:/app/node_modules
@@ -90,7 +88,7 @@ services:
     container_name: ft_nginx
     restart: always
     ports:
-      - "443:443"
+      - "9001:9001"
     networks:
       - ft_network
     volumes:

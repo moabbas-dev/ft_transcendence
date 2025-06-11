@@ -64,7 +64,7 @@ export default async function historyRoutes(fastify, options) {
 
             // Fixed authentication error handling
             try {
-                await axios.post(`http://127.0.0.1:8001/auth/jwt/verify/${userId}`, {
+                await axios.post(`http://authentication:8001/auth/jwt/verify/${userId}`, {
                     accessToken
                 });
             } catch (err) {
@@ -111,7 +111,7 @@ export default async function historyRoutes(fastify, options) {
 
             // Fixed: Use try-catch instead of .catch() for consistency
             try {
-                await axios.post(`http://127.0.0.1:8001/auth/jwt/verify/${userId}`, {
+                await axios.post(`http://authentication:8001/auth/jwt/verify/${userId}`, {
                     accessToken
                 });
             } catch (err) {
