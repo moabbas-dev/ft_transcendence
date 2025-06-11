@@ -8,7 +8,7 @@ import LeaderBoardPage from "./pages/leaderBoard.js"
 import AboutPage from "./pages/about.js";
 import { Page } from "./types/types.js";
 import PlayVsAI from "./pages/PlayVsAI.js"
-import { initializeLanguage, Lang, setLanguage } from "./languages/LanguageController.js";
+import { initializeLanguage } from "./languages/LanguageController.js";
 import TournamentPage from "./components/Tournament-Game/TournamentPage.js";
 import OnlineGame from './pages/online-game.js';
 import CreateTournamentPage from './pages/create-tournament.js';
@@ -60,7 +60,9 @@ export async function refreshRouter() {
 		"/register",
 		"/register/twofactor",
 		"/reset_password/:uuid",
-		"/account-verified"
+		"/account-verified",
+		"/play/local-multi",
+		"/play/local-ai"
 	];
 
 	function matchesRestrictedPattern(currentPath: string): boolean {

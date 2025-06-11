@@ -7,7 +7,6 @@ const fastifyCookie = require('@fastify/cookie');
 const fastifySession = require('@fastify/session');
 const path = require('path');
 const fs = require('fs');
-const { auth } = require('./src/middlewares/auth')
 const fastifyMultipart = require('@fastify/multipart');
 
 // const fastify = Fastify({
