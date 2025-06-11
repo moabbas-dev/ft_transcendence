@@ -128,6 +128,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
         wsAdapter.sendTo(recipientClientId, "notification:new", {
           type: 'FRIEND_REQUEST',
           senderId: from,
+          recipientId: to,
           senderName: senderUser.nickname,
           content: `${senderUser.nickname} sent you a friend request`,
         });
@@ -473,12 +474,28 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       // Store timer reference
       gameInviteTimers.set(inviteId, timer);
 
+      const fromUser = await getUser(from);
+
+      await sendNotification('user-message', {
+        senderId: from,
+        recipientId: to,
+        content: `${fromUser.nickname} invited you to a 1v1 friendly match`
+      });
+
       // Send to recipient if online
       const recipientClientId = onlineUsers.get(to.toString());
       if (recipientClientId) {
         wsAdapter.sendTo(recipientClientId, "message:private", {
           ...gameInviteMessage,
           roomId
+        });
+
+        wsAdapter.sendTo(recipientClientId, "notification:new", {
+          type: "USER_MESSAGE",
+          senderId: from,
+          recipientId: to,
+          senderName: fromUser.nickname,
+          content: `${fromUser.nickname} invited you to a 1v1 friendly match`
         });
       }
 
