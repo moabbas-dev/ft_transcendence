@@ -20,7 +20,7 @@ export default {
 				<!-- Neon glow effects -->
 				<div class="absolute inset-0 bg-gradient-to-br from-transparent via-pongcyan/5 to-transparent opacity-20 z-5 pointer-events-none"></div>
 				
-				<div id="content" class="flex max-sm:flex-col max-sm:items-center max-sm:justify-around max-sm:py-4 flex-1 container mx-auto px-4 w-full text-white z-10 relative">
+				<div id="content" class="flex max-sm:flex-col max-sm:items-center max-sm:justify-around max-sm:py-4 flex-1 container mx-auto px-4 w-full text-white z-10 relative h-full">
 					<div class="flex flex-col items-center justify-center gap-5 sm:gap-10 w-full sm:w-1/2 py-8">
 						<h1 class="text-4xl md:text-5xl font-bold text-center text-pongcyan drop-shadow-[0_0_15px_#00f7ff] animate-fade-down animate-once animate-duration-700">
 							${t('play.title')}
@@ -50,7 +50,7 @@ export default {
 					
 					<div id="game-mode-details" class="flex flex-col items-center justify-center gap-10 w-full sm:w-1/2 py-8">
 						<div class="relative w-full flex items-center justify-center">
-							<div class="animation-container relative w-full max-w-md aspect-square">
+							<div class="animation-container relative w-full max-w-md">
 								<i id="icon-friends" class="fa-solid fa-users text-7xl md:text-8xl absolute top-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-100 bg-gradient-to-r from-pongcyan via-[rgba(100,100,255,0.8)] to-pongcyan text-transparent bg-clip-text"></i>
 								<span id="text-friends" class="text-3xl md:text-4xl text-center font-bold absolute top-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-0">${t('play.onlineGame.vsFriend')}</span>
 								
@@ -106,7 +106,7 @@ export default {
 		// Connect to your matchmaking backend
 		// const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
 		// const client = new PongGameClient(`${protocol}//${window.location.hostname}:${window.location.port}/matchmaking/`, userId);
-const client = pongGameClient!;
+const client = pongGameClient;
 
 		// State for tracking current match
 		let currentMatchId: string | null = null;
@@ -115,7 +115,7 @@ const client = pongGameClient!;
 		let gameBoard:any | null = null;
 		
 		// Set up event handlers for matchmaking events
-		client.on('waiting_for_match', (data) => {
+		client?.on('waiting_for_match', (data) => {
 			// Update queue position display if we have one
 			const queuePositionElement = document.getElementById('queue-position');
 			if (queuePositionElement) {
@@ -123,7 +123,7 @@ const client = pongGameClient!;
 			}
 		});
 
-		client.on('match_found', (data) => {
+		client?.on('match_found', (data) => {
 			currentMatchId = data.matchId;
 			currentOpponentId = data.opponent.id;
 			isPlayer1 = data.isPlayer1; // We're player 1 if we initiated
@@ -133,7 +133,7 @@ const client = pongGameClient!;
 			showMatchFound(data.opponent);
 		});
 
-		client.on('game_start', (data) => {
+		client?.on('game_start', (data) => {
 			console.log(`Game started with match ID: ${data.matchId}`);
 			console.log("ISPLAYER 1: ", isPlayer1);
 			
@@ -142,7 +142,7 @@ const client = pongGameClient!;
 			}
 		});
 		
-		client.on('friend_match_invite', (data:any) => {
+		client?.on('friend_match_invite', (data:any) => {
 			// Show friend invite notification
 			// const accept = confirm(`${data.fromId} has invited you to a match. Accept?`);
 			// if (accept) {
@@ -150,7 +150,7 @@ const client = pongGameClient!;
 			// }
 		});
 		
-		client.on('friend_match_created', (data:any) => {
+		client?.on('friend_match_created', (data:any) => {
 			currentMatchId = data.matchId;
 			currentOpponentId = data.opponent.id;
 			isPlayer1 = data.isPlayer1; 
@@ -159,7 +159,7 @@ const client = pongGameClient!;
 			showMatchFound(data.opponent);
 		});
 		
-		client.on('match_results', (data:any) => {
+		client?.on('match_results', (data:any) => {
 			if (gameBoard) {
 				// Game ended, show results
 				showGameResults(data);
@@ -184,7 +184,7 @@ const client = pongGameClient!;
 				// Add event handler for friend invitation
 				friendsList.addEventListener('friend-selected', (e:any) => {
 					const friendId = e.detail;
-					client.inviteFriend(friendId);
+					client?.inviteFriend(friendId);
 					
 					// Show waiting for response UI
 					showWaitingForFriend(friendId);
@@ -213,7 +213,7 @@ const client = pongGameClient!;
 				
 				// Add cancel button event handler
 				findOpponent.querySelector('#cancel-matchmaking')?.addEventListener('click', () => {
-					client.cancelMatchmaking();
+					client?.cancelMatchmaking();
 					// showMainMenu();
 				});
 			}
@@ -299,7 +299,7 @@ const client = pongGameClient!;
 				gameBoard = new OnlineGameBoard(
 					canvas,
 					gameHeader,
-					client,
+					client!,
 					matchId,
 					userId,
 					opponentId,
@@ -353,7 +353,7 @@ const client = pongGameClient!;
 		}
 
 		return () => {
-			client.disconnect();
+			client?.disconnect();
 			clearInterval(toggleInterval);
 		};
 	}
