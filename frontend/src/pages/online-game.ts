@@ -159,12 +159,17 @@ const client = pongGameClient;
 			showMatchFound(data.opponent);
 		});
 		
-		client?.on('match_results', (data:any) => {
+		const matchResultsHandler = (data: any) => {
 			if (gameBoard) {
 				// Game ended, show results
 				showGameResults(data);
+				gameBoard.cleanup();
 				gameBoard = null;
 			}
+		}
+		client?.on('match_results', (data:any) => {
+			matchResultsHandler(data);
+			client.off('match_results', matchResultsHandler);
 		});
 		
 		// Play with Friend functionality
@@ -273,6 +278,10 @@ const client = pongGameClient;
 		}
 		
 		function startGame(matchId:string, opponentId:string, isPlayer1:boolean) {
+			if (gameBoard) {
+				gameBoard.cleanup();
+				gameBoard = null;
+			}
 			// Create game container
 			container.innerHTML = `
 				<div class="content relative flex flex-col items-center sm:justify-around h-screen max-sm:p-2 sm:border-8 bg-pongcyan border-pongdark border-solid">
@@ -312,8 +321,9 @@ const client = pongGameClient;
 		}
 		
 		function showGameResults(results: any) {
-			// Create results overlay
 			const resultsOverlay = document.createElement('div');
+			if (document.body.contains(resultsOverlay))
+				return;
 			resultsOverlay.className = 'game-results fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50';
 			console.log(results);
 			// Determine if player won
@@ -350,6 +360,7 @@ const client = pongGameClient;
 				refreshRouter()
 				navigate("/play/online-game");
 			});
+			return resultsOverlay;
 		}
 
 		return () => {
