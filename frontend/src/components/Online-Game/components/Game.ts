@@ -81,21 +81,23 @@ export class PongGameClient {
 	  this.callbacks[messageType].push(callback);
 	}
 	
-	// Remove a callback
 	off(messageType: string, callback?: (data: any) => void): void {
-	  if (!this.callbacks[messageType]) return;
-	  
-	  if (callback) {
-		const index = this.callbacks[messageType].indexOf(callback);
-		if (index !== -1) {
-		  this.callbacks[messageType].splice(index, 1);
+		if (!this.callbacks[messageType]) return;
+		
+		if (callback) {
+			const index = this.callbacks[messageType].indexOf(callback);
+			if (index !== -1) {
+				this.callbacks[messageType].splice(index, 1);
+			}
+		} else {
+			delete this.callbacks[messageType];
 		}
-	  } else {
-		// Remove all callbacks for this message type
-		delete this.callbacks[messageType];
-	  }
 	}
-	
+
+	clearAllHandlers(): void {
+		this.callbacks = {};
+	}
+
 	// Close the connection
 	disconnect(): void {
 	  if (this.ws) {

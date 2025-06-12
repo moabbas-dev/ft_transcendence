@@ -18,6 +18,15 @@ export class OnlineGameBoard extends GameBoard {
 	private lastInputTime: number = 0;
 	private inputDelay: number = 30; // Delay in ms to prevent sending too many updates
 	private lastSentPaddlePosition: number = 0;
+	private eventListeners: Array<{
+        target: EventTarget;
+        type: string;
+        listener: any;
+    }> = [];
+	private websocketHandlers: Array<{
+        event: string;
+        handler: (data: any) => void;
+    }> = [];
 
 	constructor(
 		canvas: HTMLCanvasElement,
@@ -28,10 +37,7 @@ export class OnlineGameBoard extends GameBoard {
 		opponentId: string,
 		isPlayer1: boolean
 	) {
-		// Call parent constructor with no game type to use the overloaded empty constructor
 		super("online", canvas, gameHeader);
-
-		// Reassign the properties that would normally be set in the parent constructor
 		this.canvas = canvas;
 		this.gameHeader = gameHeader;
 
@@ -41,22 +47,18 @@ export class OnlineGameBoard extends GameBoard {
 		}
 		this.ctx = ctx;
 
-		// Online game specific properties
 		this.client = client;
 		this.matchId = matchId;
 		this.playerId = playerId;
 		this.opponentId = opponentId;
 		this.isPlayer1 = isPlayer1;
 
-		// Initialize the gamestartGame
 		this.resize();
 		window.addEventListener('resize', () => this.resize());
 		this.state = this.createInitialState();
 		this.initializeOnlineControllers();
 		// this.ballController = new BallController();
 		this.initOnlineEventListeners();
-
-		// Set up websocket handlers for game events
 		this.setupWebSocketHandlers();
 	}
 
@@ -68,22 +70,27 @@ export class OnlineGameBoard extends GameBoard {
 	}
 
 	private initOnlineEventListeners(): void {
-		// UPDATED: Only send paddle updates for the left paddle (player controls)
-		window.addEventListener('keydown', (e) => {
-			this.state.keys[e.key] = true;
-			// Send paddle position when local player moves
-			this.sendPaddlePosition();
-		});
+        const keydownHandler = (e: KeyboardEvent) => {
+            this.state.keys[e.key] = true;
+            this.sendPaddlePosition();
+        };
 
-		window.addEventListener('keyup', (e) => {
-			this.state.keys[e.key] = false;
-			// Send updated paddle position when key is released
-			this.sendPaddlePosition();
-		});
+        const keyupHandler = (e: KeyboardEvent) => {
+            this.state.keys[e.key] = false;
+            this.sendPaddlePosition();
+        };
 
-		this.canvas.addEventListener('touchstart', this.handleTouchStart.bind(this));
-		this.canvas.addEventListener('touchmove', this.handleTouchMove.bind(this));
-		this.canvas.addEventListener('touchend', this.handleTouchEnd.bind(this));
+        this.eventListeners.push(
+            { target: window, type: 'keydown', listener: keydownHandler },
+            { target: window, type: 'keyup', listener: keyupHandler },
+            { target: this.canvas, type: 'touchstart', listener: this.handleTouchStart.bind(this) },
+            { target: this.canvas, type: 'touchmove', listener: this.handleTouchMove.bind(this) },
+            { target: this.canvas, type: 'touchend', listener: this.handleTouchEnd.bind(this) }
+        );
+
+        this.eventListeners.forEach(({ target, type, listener }) => {
+            target.addEventListener(type, listener);
+        });
 	}
 
 	startGame() {
@@ -150,6 +157,11 @@ export class OnlineGameBoard extends GameBoard {
 	}
 
 	gameLoop = () => {
+		if (this.state.gameEnded) {
+            this.cleanup();
+			console.log("CLEANUP DONE");
+            return;
+        }
 		if (this.isDestroyed) return;
 		this.draw();
 		this.update();
@@ -253,20 +265,13 @@ export class OnlineGameBoard extends GameBoard {
 		}
 	}
 
-	// UPDATED: Setup WebSocket handlers with mirrored coordinate system
 	private setupWebSocketHandlers(): void {
-		// UPDATED: Opponent paddle movement maps to right paddle (player2Y)
-		this.client.on('opponent_paddle_move', (data: any) => {
-			// Opponent's paddle movement goes to the right side (player2Y)
-			const paddleY = data.position * this.canvas.height;
-			this.state.player2Y = paddleY;
-		});
-
-		// UPDATED: Ball update handling with coordinate transformation
-		this.client.on('ball_update', (data: any) => {
-			// UPDATED: Only Player 2 receives ball updates (Player 1 is authoritative)
+		const paddleMoveHandler = (data: any) => {
+            const paddleY = data.position * this.canvas.height;
+            this.state.player2Y = paddleY;
+        };
+		const ballUpdateHandler = (data: any) => {
 			if (!this.isPlayer1) {
-				// Backend already mirrors the coordinates, so we use them directly
 				const denormalizedPosition = this.denormalizePosition(data.position.x, data.position.y);
 				const denormalizedVelocity = {
 					x: data.velocity.x * this.canvas.width,
@@ -278,7 +283,6 @@ export class OnlineGameBoard extends GameBoard {
 				this.state.ballSpeedX = denormalizedVelocity.x;
 				this.state.ballSpeedY = denormalizedVelocity.y;
 
-				// FIXED: Update scores (backend sends original scores)
 				const player1Score = typeof data.scores.player1 === 'number' ? data.scores.player1 : -1;
 				const player2Score = typeof data.scores.player2 === 'number' ? data.scores.player2 : -1;
 				this.state.scores = {
@@ -286,31 +290,66 @@ export class OnlineGameBoard extends GameBoard {
 					player2: player2Score
 				};
 			}
-		});
-
-		// FIXED: Score update handler (backend sends original scores)
-		this.client.on('score_update', (data: any) => {
+        };
+		const scoreUpdateHandler = (data: any) => {
 			this.state.scores.player1 = data.player1Score;
 			this.state.scores.player2 = data.player2Score;
-		});
-
-		// ADDED: Game end handler for tournament matches
-		if (this.client instanceof TournamentClient) {
-			this.client.on('tournament_match_completed', (data: any) => {
-				if (String(data.matchId) === String(this.matchId)) {
-					console.log('Tournament match completed:', data);
-					this.showTournamentMatchResult(data);
-				}
-			});
-
-			this.client.on('tournament_completed', (data: any) => {
-				console.log('Tournament completed:', data);
-				setTimeout(() => {
-					navigate(`/tournaments/${data.tournamentId}`);
-				}, 5000);
-			});
+			if (Math.max(this.state.scores.player1, this.state.scores.player2) >= 10)
+				this.state.gameEnded = true;
 		}
+		const tournamentMatchCompletedHandler = (data: any) => {
+			if (String(data.matchId) === String(this.matchId)) {
+				this.state.gameEnded = true;
+				console.log('Tournament match completed:', data);
+				this.showTournamentMatchResult(data);
+			}
+		}
+		const tournamentCompletedHandler = (data: any) => {
+			console.log('Tournament completed:', data);
+			setTimeout(() => {
+				navigate(`/tournaments/${data.tournamentId}`);
+			}, 5000);
+		}
+		const mathResultsHandler = (data: any) => {
+			this.state.gameEnded = true;
+		}
+
+        this.websocketHandlers.push(
+            { event: 'opponent_paddle_move', handler: paddleMoveHandler },
+            { event: 'ball_update', handler: ballUpdateHandler },
+            { event: 'score_update', handler: scoreUpdateHandler},
+			{ event: 'match_results', handler: mathResultsHandler}
+        );
+		if (this.client instanceof TournamentClient) {
+			this.websocketHandlers.push(
+				{ event: 'tournament_match_completed', handler: tournamentMatchCompletedHandler},
+				{ event: 'tournament_completed', handler: tournamentCompletedHandler}
+			)
+		}
+
+        this.websocketHandlers.forEach(({ event, handler }) => {
+            this.client.on(event, handler);
+        });
 	}
+
+	public cleanup(): void {
+        console.log('Cleaning up OnlineGameBoard resources...');
+        this.state.gameEnded = true;
+        
+        this.eventListeners.forEach(({ target, type, listener }) => {
+            target.removeEventListener(type, listener);
+        });
+        this.eventListeners = [];
+
+        this.websocketHandlers.forEach(({ event, handler }) => {
+            this.client.off(event, handler);
+        });
+        this.websocketHandlers = [];
+
+        if (this.lastInputTime) {
+            this.lastInputTime = 0;
+        }
+    }
 
 	// ADDED: Show tournament match result overlay
 	private showTournamentMatchResult(data: any): void {
@@ -350,8 +389,8 @@ export class OnlineGameBoard extends GameBoard {
 
 	update() {
 		if (this.state.gameEnded) {
-			this.destroy();
-			console.log("LLLLLLLLLLLLL: ", this.state.gameEnded);
+			this.cleanup();
+			console.log("CLEANUP DONE");
 			return;
 		}
 		// UPDATED: Local player always controls left paddle (player1Y)
@@ -403,6 +442,7 @@ export class OnlineGameBoard extends GameBoard {
 					player1Goals: this.state.scores.player1,
 					player2Goals: this.state.scores.player2
 				});
+				this.cleanup();
 			}
 			this.updateScoreDisplay();
 		}

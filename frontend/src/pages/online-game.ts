@@ -163,6 +163,7 @@ const client = pongGameClient;
 			if (gameBoard) {
 				// Game ended, show results
 				showGameResults(data);
+				gameBoard = null;
 			}
 		});
 		

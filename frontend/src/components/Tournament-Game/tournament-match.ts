@@ -56,16 +56,27 @@ const TournamentMatchPage: Page = {
 
     // Get canvas and initialize game
     const canvas = container.querySelector('#tournament-game-canvas') as HTMLCanvasElement;
-    const gameBoard = new OnlineGameBoard(
-      canvas,
-      gameHeader,
-      client as TournamentClient,
-      matchId,
-      userId,
-      opponent.id,
-      isPlayer1
-    );
-    gameBoard.startGame();
+    let gameBoard: OnlineGameBoard | null = null;
+
+    function startNewGame() {
+        if (gameBoard) {
+            gameBoard.cleanup();
+            gameBoard = null;
+        }
+        
+        gameBoard = new OnlineGameBoard(
+            canvas,
+            gameHeader,
+            client,
+            matchId,
+            userId,
+            opponent.id,
+            isPlayer1
+        );
+        gameBoard.startGame();
+    }
+    startNewGame();
+
 
     // Handle forfeit button
     const leaveButton = container.querySelector('#leave-match-btn');
