@@ -3,10 +3,12 @@ export class PongGameClient {
 	private callbacks: { [key: string]: ((data: any) => void)[] } = {};
 	private reconnectTimer: number | null = null;
 	private userId: string;
+	private count: number;
 	
 	constructor(private serverUrl: string, userId: string) {
 	  this.userId = userId;
 	//   this.connect();
+	  this.count = 0;
 	}
 	
 	public connect(): Promise<boolean> {
@@ -75,7 +77,8 @@ export class PongGameClient {
 	
 	// Register a callback for a specific message type
 	on(messageType: string, callback: (data: any) => void): void {
-		console.log('listen for ', messageType, ': ', callback);
+		this.count++;
+		console.log(this.count, '. Listen for ', messageType, ': ', callback);
 	  if (!this.callbacks[messageType]) {
 		this.callbacks[messageType] = [];
 	  }
@@ -84,7 +87,8 @@ export class PongGameClient {
 	
 	off(messageType: string, callback?: (data: any) => void): void {
 		if (!this.callbacks[messageType]) return;
-		console.log('disable ', messageType, ': ', callback);
+		this.count++;
+		console.log(this.count, '. disable ', messageType, ': ', callback);
 		if (callback) {
 			const index = this.callbacks[messageType].indexOf(callback);
 			if (index !== -1) {

@@ -146,22 +146,22 @@ const client = pongGameClient;
 		}
 		client?.on('game_start', gameStartHandler);
 		
-		client?.on('friend_match_invite', (data:any) => {
+		// client?.on('friend_match_invite', (data:any) => {
 			// Show friend invite notification
 			// const accept = confirm(`${data.fromId} has invited you to a match. Accept?`);
 			// if (accept) {
 			// 	client.acceptFriendMatch(data.fromId);
 			// }
-		});
+		// });
 		
-		client?.on('friend_match_created', (data:any) => {
-			currentMatchId = data.matchId;
-			currentOpponentId = data.opponent.id;
-			isPlayer1 = data.isPlayer1; 
+		// client?.on('friend_match_created', (data:any) => {
+		// 	currentMatchId = data.matchId;
+		// 	currentOpponentId = data.opponent.id;
+		// 	isPlayer1 = data.isPlayer1; 
 			
-			// Show match found UI
-			showMatchFound(data.opponent);
-		});
+		// 	// Show match found UI
+		// 	showMatchFound(data.opponent);
+		// });
 		
 		const matchResultsHandler = (data: any) => {
 			if (gameBoard) {
@@ -176,7 +176,7 @@ const client = pongGameClient;
 			client.off('match_results', matchResultsHandler);
 			client.off('game_start', gameStartHandler)
 		});
-		
+
 		// Play with Friend functionality
 		const playWithFriendBtn = document.getElementById("play-with-friend");
 		playWithFriendBtn?.addEventListener("click", () => {
@@ -365,10 +365,11 @@ const client = pongGameClient;
 				refreshRouter()
 				navigate("/play/online-game");
 			});
-			return resultsOverlay;
 		}
 
 		return () => {
+			gameBoard.cleanup();
+			gameBoard = null;
 			client?.disconnect();
 			clearInterval(toggleInterval);
 		};
