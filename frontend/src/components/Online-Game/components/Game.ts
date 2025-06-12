@@ -75,6 +75,7 @@ export class PongGameClient {
 	
 	// Register a callback for a specific message type
 	on(messageType: string, callback: (data: any) => void): void {
+		console.log('listen for ', messageType, ': ', callback);
 	  if (!this.callbacks[messageType]) {
 		this.callbacks[messageType] = [];
 	  }
@@ -83,7 +84,7 @@ export class PongGameClient {
 	
 	off(messageType: string, callback?: (data: any) => void): void {
 		if (!this.callbacks[messageType]) return;
-		
+		console.log('disable ', messageType, ': ', callback);
 		if (callback) {
 			const index = this.callbacks[messageType].indexOf(callback);
 			if (index !== -1) {

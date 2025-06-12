@@ -114,16 +114,16 @@ const client = pongGameClient;
 		let isPlayer1 = false;
 		let gameBoard:any | null = null;
 		
-		// Set up event handlers for matchmaking events
-		client?.on('waiting_for_match', (data) => {
+		const waitingForMatchHandler = (data:any) => {
 			// Update queue position display if we have one
 			const queuePositionElement = document.getElementById('queue-position');
 			if (queuePositionElement) {
 				queuePositionElement.textContent = `Position: ${data.position}`;
 			}
-		});
+		}
+		client?.on('waiting_for_match', waitingForMatchHandler);
 
-		client?.on('match_found', (data) => {
+		const matchFoundHandler = (data: any) => {
 			currentMatchId = data.matchId;
 			currentOpponentId = data.opponent.id;
 			isPlayer1 = data.isPlayer1; // We're player 1 if we initiated
@@ -131,16 +131,20 @@ const client = pongGameClient;
 			
 			// Show match found UI
 			showMatchFound(data.opponent);
-		});
+			client?.off('waiting_for_match', waitingForMatchHandler);
+		}
+		client?.on('match_found', matchFoundHandler);
 
-		client?.on('game_start', (data) => {
+		const gameStartHandler = (data: any) => {
 			console.log(`Game started with match ID: ${data.matchId}`);
 			console.log("ISPLAYER 1: ", isPlayer1);
 			
 			if (currentMatchId && currentOpponentId && currentMatchId === data.matchId) {
 				startGame(currentMatchId, currentOpponentId, isPlayer1);
 			}
-		});
+			client?.off('match_found', matchFoundHandler)
+		}
+		client?.on('game_start', gameStartHandler);
 		
 		client?.on('friend_match_invite', (data:any) => {
 			// Show friend invite notification
@@ -170,6 +174,7 @@ const client = pongGameClient;
 		client?.on('match_results', (data:any) => {
 			matchResultsHandler(data);
 			client.off('match_results', matchResultsHandler);
+			client.off('game_start', gameStartHandler)
 		});
 		
 		// Play with Friend functionality
