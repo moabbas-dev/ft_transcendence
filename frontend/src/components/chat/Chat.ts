@@ -599,6 +599,22 @@ export const Chat = createComponent(
         recipientId: activeUser.id,
         content,
       }
+
+      chatService.send("user:check_blocked", {
+        userId: store.userId,
+        targetId: activeUser.id
+      });
+
+      chatService.on("user:blocked_status", async (data) => {
+        console.log(data.isBlocked, data);
+        if (!data.isBlocked) {
+          await axios.post('/notifications/api/notifications/user-message', body).catch(err => {
+            console.error("Error sending message:", err);
+          });
+        }
+      });
+
+      // Send message to the user
       await axios.post('/notifications/api/notifications/user-message', body).catch(err => {
         console.error("Error sending message:", err);
       })
