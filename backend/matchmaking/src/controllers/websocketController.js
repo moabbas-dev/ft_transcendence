@@ -310,8 +310,6 @@ function registerMessageHandlers(wsAdapter) {
         throw new Error(`Match with ID ${matchId} not found`);
       }
 
-
-
       // Check if match is already completed to prevent duplicate processing
       if (match.status === 'completed') {
         console.log(`Match ${matchId} already completed, ignoring duplicate game_end message`);
@@ -383,31 +381,9 @@ function registerMessageHandlers(wsAdapter) {
       let player1EloChange = 0;
       let player2EloChange = 0;
       if (match.match_type !== 'friendly') {
-        // Calculate ELO changes
         player1EloChange = player1NewElo - player1OldElo;
         player2EloChange = player2NewElo - player2OldElo;
       }
-
-      // FIXED: Only call updateMatchResult - it handles both player ELO updates and match_players updates
-      // REMOVED: await matchmakingService.updateUserElo(player1Id, player1NewElo);
-      // REMOVED: await matchmakingService.updateUserElo(player2Id, player2NewElo);
-
-      // Update match result in database with ELO information
-      // This method handles updating both players table ELO and match_players table
-      const result = await matchmakingService.updateMatchResult(
-        matchId,
-        winnerId,
-        player1Id,
-        player2Id,
-        player1Goals,
-        player2Goals,
-        {
-          player1OldElo,
-          player1NewElo,
-          player2OldElo,
-          player2NewElo
-        }
-      );
 
       // Add ELO changes to the result object
       const eloChanges = {
