@@ -1,4 +1,4 @@
-import { navigate } from "../../../router.js";
+import { navigate, refreshRouter } from "../../../router.js";
 import { GameBoard, gameState } from "../../Offline-Game/components/GameBoard.js";
 import { BallController, Controller, HumanPlayerController } from "../../Offline-Game/components/GameControllers.js";
 import { updateBackgrounds } from "../../Offline-Game/components/HeaderAnimations_utils.js";
@@ -53,7 +53,7 @@ export class OnlineGameBoard extends GameBoard {
 		window.addEventListener('resize', () => this.resize());
 		this.state = this.createInitialState();
 		this.initializeOnlineControllers();
-		this.ballController = new BallController();
+		// this.ballController = new BallController();
 		this.initOnlineEventListeners();
 
 		// Set up websocket handlers for game events
@@ -81,22 +81,21 @@ export class OnlineGameBoard extends GameBoard {
 			this.sendPaddlePosition();
 		});
 
-		// Add touch event listeners
 		this.canvas.addEventListener('touchstart', this.handleTouchStart.bind(this));
 		this.canvas.addEventListener('touchmove', this.handleTouchMove.bind(this));
 		this.canvas.addEventListener('touchend', this.handleTouchEnd.bind(this));
 	}
 
-	// UPDATED: Override the startGame method with mirrored ball initialization
 	startGame() {
+		console.log("KKKKKKKKK: ", this.state.gameEnded);
+		console.log("MMMMMMMMM: ", this.isPlayer1);
+		
 		this.state.gameStarted = true;
 		this.state.gameEnded = false;
 
-		// UPDATED: Initialize ball position at center for both players
 		this.state.ballX = this.canvas.width / 2;
 		this.state.ballY = this.canvas.height / 2;
 
-		// UPDATED: Only Player 1 (game authority) initializes ball velocity
 		if (this.isPlayer1) {
 			this.state.servingPlayer = 1;
 			const angle = (Math.random() * Math.PI / 2) - Math.PI / 4; // Random angle between -45 and 45 degrees
@@ -104,19 +103,54 @@ export class OnlineGameBoard extends GameBoard {
 			this.state.ballSpeedX = Math.cos(angle) * speed;
 			this.state.ballSpeedY = Math.sin(angle) * speed;
 
-			// Send initial ball state to Player 2 (will be automatically mirrored)
 			this.sendBallUpdate();
 		}else {
-			// Player 2 should initialize with zero velocity and wait for updates
 			this.state.ballSpeedX = 0;
 			this.state.ballSpeedY = 0;
 		}
 
-		// Start the game loop
 		this.gameLoop();
 	}
 
+	private isDestroyed: boolean = false;
+	private gameLoopId: number | null = null;
+
+	public destroy(): void {
+		if (this.isDestroyed) return;
+		
+		console.log(`Destroying OnlineGameBoard instance for match ${this.matchId}`);
+		this.isDestroyed = true;
+
+		// Cancel game loop
+		if (this.gameLoopId !== null) {
+			cancelAnimationFrame(this.gameLoopId);
+			this.gameLoopId = null;
+		}
+
+		// Remove WebSocket handlers
+		this.client.off('opponent_paddle_move');
+		this.client.off('ball_update');
+		this.client.off('score_update');
+		
+		if (this.client instanceof TournamentClient) {
+			this.client.off('tournament_match_completed');
+			this.client.off('tournament_completed');
+		}
+
+		if (this.ctx) {
+			this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+		}
+
+		this.state.gameEnded = true;
+		this.state.gameStarted = false;
+	}
+
+	public isValid(): boolean {
+		return !this.isDestroyed;
+	}
+
 	gameLoop = () => {
+		if (this.isDestroyed) return;
 		this.draw();
 		this.update();
 		if (!this.state.gameEnded) {
@@ -315,6 +349,11 @@ export class OnlineGameBoard extends GameBoard {
 	}
 
 	update() {
+		if (this.state.gameEnded) {
+			this.destroy();
+			console.log("LLLLLLLLLLLLL: ", this.state.gameEnded);
+			return;
+		}
 		// UPDATED: Local player always controls left paddle (player1Y)
 		this.player1Controller.update(this.canvas, this.state);
 		this.sendPaddlePosition();
@@ -371,6 +410,8 @@ export class OnlineGameBoard extends GameBoard {
 
 	// UPDATED: Send ball updates with local coordinate system
 	private sendBallUpdate(): void {
+		console.log("LALALALALA");
+		
 		const now = Date.now();
 		if (now - this.lastSentBallUpdate < this.ballUpdateInterval) return;
 
@@ -449,6 +490,10 @@ export class OnlineGameBoard extends GameBoard {
 
 	get getState(): gameState {
 		return this.state;
+	}
+
+	get isEnded(): boolean {
+		return this.state.gameEnded;
 	}
 }
 

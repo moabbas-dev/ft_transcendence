@@ -305,8 +305,7 @@ const client = pongGameClient;
 					opponentId,
 					isPlayer1
 				);
-				
-				// Start the game
+
 				gameBoard.startGame();
 			}
 		}
