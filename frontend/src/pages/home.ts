@@ -173,14 +173,15 @@ export default {
         // localStorage.removeItem("googleAuth");
         const appwiteUser = await account.get();
         console.log(appwiteUser.$id);
-        const photoUrl = await getGoogleProfilePhoto();
+        let photoUrl = await getGoogleProfilePhoto();
         console.log(photoUrl); // this works 100%
         const session = await account.getSession('current');
         try {
-          const data = await axios.post("/authentication/auth/google/signIn", { email: appwiteUser.email, name: appwiteUser.name, country: session.countryName});
+          const data = await axios.post("/authentication/auth/google/signIn", { email: appwiteUser.email, name: appwiteUser.name, country: session.countryName, image_url: photoUrl});
           if (!data.data.require2FA) {
             if (data.data.accessToken) {
               const decodedToken: any = jwtDecode(data.data.accessToken);
+              photoUrl = decodedToken.avatarUrl || photoUrl;
               store.update("accessToken", data.data.accessToken);
               store.update("sessionUUID", data.data.sessUUID);
               store.update("userId", decodedToken.userId);
@@ -207,7 +208,8 @@ export default {
                 Authorization: `Bearer ${store.accessToken}`,
               }
             })
-            store.update("avatarUrl", photoUrl as string);
+            if (!store.avatarUrl)
+              store.update("avatarUrl", photoUrl as string);
           } catch(err) {
             console.log(err);
           }
