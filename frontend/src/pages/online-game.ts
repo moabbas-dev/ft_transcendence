@@ -362,7 +362,6 @@ const client = pongGameClient;
 			document.getElementById('play-again-btn')?.addEventListener('click', () => {
 				document.body.removeChild(resultsOverlay);
 				gameBoard = null;
-				refreshRouter()
 				navigate("/play/online-game");
 			});
 		}

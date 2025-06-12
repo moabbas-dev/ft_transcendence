@@ -159,14 +159,15 @@ export class OnlineGameBoard extends GameBoard {
 	gameLoop = () => {
 		if (this.state.gameEnded) {
             this.cleanup();
+			this.destroy();
 			console.log("CLEANUP DONE");
             return;
         }
 		if (this.isDestroyed) return;
-		this.draw();
-		this.update();
 		if (!this.state.gameEnded) {
-			requestAnimationFrame(this.gameLoop);
+			this.draw();
+			this.update();
+			this.gameLoopId = requestAnimationFrame(this.gameLoop);
 		} else {
 			// UPDATED: Update backgrounds based on player perspective
 			if (this.isPlayer1) {

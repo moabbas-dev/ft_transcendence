@@ -18,7 +18,6 @@ class MatchmakingService {
         this.eloService = EloService;
         this.waitingPlayers = [];
         this.rangeIncrement = 50;
-        this.activeGames = new Map();
     }
 
     async updateMatchStartTime(matchId) {
@@ -251,83 +250,6 @@ class MatchmakingService {
         }
     }
 
-    async createGameInstance(matchId, player1Id, player2Id) {
-        // Initialize game state
-        const gameState = {
-            ballX: 400, // Center X
-            ballY: 300, // Center Y
-            ballSpeedX: 5 * (Math.random() > 0.5 ? 1 : -1),
-            ballSpeedY: 5 * (Math.random() * 2 - 1),
-            player1Y: 250,
-            player2Y: 250,
-            scores: { player1: 0, player2: 0 },
-            paddleHeight: 120,
-            paddleWidth: 20,
-            ballSize: 12,
-            paddleOffset: 30,
-            canvasWidth: 800,
-            canvasHeight: 600
-        };
-
-        this.activeGames.set(String(matchId), {
-            gameState,
-            player1Id,
-            player2Id,
-            lastUpdateTime: Date.now()
-        });
-
-        // Start game loop for this match
-        this.runGameLoop(matchId);
-    }
-
-    // Game loop runs physics on server
-    runGameLoop(matchId) {
-        const game = this.activeGames.get(matchId);
-        if (!game) return;
-
-        const gameLoop = setInterval(() => {
-            if (!this.activeGames.has(matchId)) {
-                clearInterval(gameLoop);
-                return;
-            }
-
-            const currentGame = this.activeGames.get(matchId);
-            const state = currentGame.gameState;
-
-            // Update ball position
-            state.ballX += state.ballSpeedX;
-            state.ballY += state.ballSpeedY;
-
-            // Check for wall collisions
-            if (state.ballY <= state.ballSize || state.ballY >= state.canvasHeight - state.ballSize) {
-                state.ballSpeedY *= -1;
-            }
-
-            // Check for paddle collisions
-            this.checkPaddleCollisions(state);
-
-            // Check for scoring
-            if (state.ballX <= 0) {
-                // Player 2 scores
-                state.scores.player2++;
-                this.resetBall(state, 1);
-            } else if (state.ballX >= state.canvasWidth) {
-                // Player 1 scores
-                state.scores.player1++;
-                this.resetBall(state, 2);
-            }
-
-            // Send updated state to both players
-            wsAdapter.sendToClient(currentGame.player1Id, 'game_state', state);
-            wsAdapter.sendToClient(currentGame.player2Id, 'game_state', state);
-
-            // Check for game end
-            if (state.scores.player1 >= 10 || state.scores.player2 >= 10) {
-                this.endGame(matchId);
-            }
-        }, 16); // 60fps
-    }
-
     /**
  * Get the opponent ID for a player in a match
  * @param {string} playerId - ID of the player
@@ -419,160 +341,160 @@ class MatchmakingService {
      * @param {number} results[].goals - Goals scored by the player
      * @returns {Promise<void>}
      */
-    async updatePlayerResults(matchId, results) {
-        try {
-            // Update each player's result in the match_players table
-            for (const result of results) {
-                await db.run(
-                    `UPDATE match_players 
-                    SET score = ?, elo_after = ?, goals = ? 
-                    WHERE match_id = ? AND player_id = ?`,
-                    [result.score, result.newElo, result.goals, matchId, result.playerId]
-                );
-            }
-        } catch (error) {
-            console.error(`Error updating player results for match ${matchId}:`, error);
-            throw error;
-        }
-    }
+    // async updatePlayerResults(matchId, results) {
+    //     try {
+    //         // Update each player's result in the match_players table
+    //         for (const result of results) {
+    //             await db.run(
+    //                 `UPDATE match_players 
+    //                 SET score = ?, elo_after = ?, goals = ? 
+    //                 WHERE match_id = ? AND player_id = ?`,
+    //                 [result.score, result.newElo, result.goals, matchId, result.playerId]
+    //             );
+    //         }
+    //     } catch (error) {
+    //         console.error(`Error updating player results for match ${matchId}:`, error);
+    //         throw error;
+    //     }
+    // }
 
-    /**
-     * Update match result with ELO information
-     * @param {number} matchId - Match ID
-     * @param {number} winnerId - Winner user ID
-     * @param {number} player1Id - Player 1 ID
-     * @param {number} player2Id - Player 2 ID
-     * @param {number} player1Goals - Player 1 goals
-     * @param {number} player2Goals - Player 2 goals
-     * @param {Object} eloData - ELO data object
-     * @returns {Object} - Result object
-     */
-    async updateMatchResult(matchId, winnerId, player1Id, player2Id, player1Goals, player2Goals, eloData = null) {
-        try {
-            console.log("11111111winnerId:", winnerId);
-            // Update match status
-            await new Promise((resolve, reject) => {
-                db.run(
-                    `UPDATE matches 
-                     SET status = 'completed', 
-                         winner_id = ?, 
-                         completed_at = DATETIME('now') 
-                     WHERE id = ?`,
-                    [winnerId, matchId],
-                    (err) => {
-                        if (err) reject(err);
-                        else resolve();
-                    }
-                );
-            });
+    // /**
+    //  * Update match result with ELO information
+    //  * @param {number} matchId - Match ID
+    //  * @param {number} winnerId - Winner user ID
+    //  * @param {number} player1Id - Player 1 ID
+    //  * @param {number} player2Id - Player 2 ID
+    //  * @param {number} player1Goals - Player 1 goals
+    //  * @param {number} player2Goals - Player 2 goals
+    //  * @param {Object} eloData - ELO data object
+    //  * @returns {Object} - Result object
+    //  */
+    // async updateMatchResult(matchId, winnerId, player1Id, player2Id, player1Goals, player2Goals, eloData = null) {
+    //     try {
+    //         console.log("11111111winnerId:", winnerId);
+    //         // Update match status
+    //         await new Promise((resolve, reject) => {
+    //             db.run(
+    //                 `UPDATE matches 
+    //                  SET status = 'completed', 
+    //                      winner_id = ?, 
+    //                      completed_at = DATETIME('now') 
+    //                  WHERE id = ?`,
+    //                 [winnerId, matchId],
+    //                 (err) => {
+    //                     if (err) reject(err);
+    //                     else resolve();
+    //                 }
+    //             );
+    //         });
 
-            // Update player 1 stats
-            await new Promise((resolve, reject) => {
-                db.run(
-                    `UPDATE match_players 
-                     SET goals = ?, 
-                         elo_before = ?, 
-                         elo_after = ? 
-                     WHERE match_id = ? AND player_id = ?`,
-                    [
-                        player1Goals,
-                        eloData.player1OldElo,
-                        eloData.player1NewElo,
-                        matchId,
-                        player1Id
-                    ],
-                    (err) => {
-                        if (err) reject(err);
-                        else resolve();
-                    }
-                );
-            });
+    //         // Update player 1 stats
+    //         await new Promise((resolve, reject) => {
+    //             db.run(
+    //                 `UPDATE match_players 
+    //                  SET goals = ?, 
+    //                      elo_before = ?, 
+    //                      elo_after = ? 
+    //                  WHERE match_id = ? AND player_id = ?`,
+    //                 [
+    //                     player1Goals,
+    //                     eloData.player1OldElo,
+    //                     eloData.player1NewElo,
+    //                     matchId,
+    //                     player1Id
+    //                 ],
+    //                 (err) => {
+    //                     if (err) reject(err);
+    //                     else resolve();
+    //                 }
+    //             );
+    //         });
 
-            // Update player 2 stats
-            await new Promise((resolve, reject) => {
-                db.run(
-                    `UPDATE match_players 
-                     SET goals = ?, 
-                         elo_before = ?, 
-                         elo_after = ? 
-                     WHERE match_id = ? AND player_id = ?`,
-                    [
-                        player2Goals,
-                        eloData.player2OldElo,
-                        eloData.player2NewElo,
-                        matchId,
-                        player2Id
-                    ],
-                    (err) => {
-                        if (err) reject(err);
-                        else resolve();
-                    }
-                );
-            });
+    //         // Update player 2 stats
+    //         await new Promise((resolve, reject) => {
+    //             db.run(
+    //                 `UPDATE match_players 
+    //                  SET goals = ?, 
+    //                      elo_before = ?, 
+    //                      elo_after = ? 
+    //                  WHERE match_id = ? AND player_id = ?`,
+    //                 [
+    //                     player2Goals,
+    //                     eloData.player2OldElo,
+    //                     eloData.player2NewElo,
+    //                     matchId,
+    //                     player2Id
+    //                 ],
+    //                 (err) => {
+    //                     if (err) reject(err);
+    //                     else resolve();
+    //                 }
+    //             );
+    //         });
 
-            // Update player 1 overall stats
-            const isPlayer1Winner = winnerId === player1Id;
-            await new Promise((resolve, reject) => {
-                db.run(
-                    `UPDATE players 
-                     SET elo_score = ?, 
-                         wins = wins + ?, 
-                         losses = losses + ?, 
-                         total_matches = total_matches + 1, 
-                         total_goals = total_goals + ? 
-                     WHERE id = ?`,
-                    [
-                        eloData.player1NewElo,
-                        isPlayer1Winner ? 1 : 0,
-                        isPlayer1Winner ? 0 : 1,
-                        player1Goals,
-                        player1Id
-                    ],
-                    (err) => {
-                        if (err) reject(err);
-                        else resolve();
-                    }
-                );
-            });
+    //         // Update player 1 overall stats
+    //         const isPlayer1Winner = winnerId === player1Id;
+    //         await new Promise((resolve, reject) => {
+    //             db.run(
+    //                 `UPDATE players 
+    //                  SET elo_score = ?, 
+    //                      wins = wins + ?, 
+    //                      losses = losses + ?, 
+    //                      total_matches = total_matches + 1, 
+    //                      total_goals = total_goals + ? 
+    //                  WHERE id = ?`,
+    //                 [
+    //                     eloData.player1NewElo,
+    //                     isPlayer1Winner ? 1 : 0,
+    //                     isPlayer1Winner ? 0 : 1,
+    //                     player1Goals,
+    //                     player1Id
+    //                 ],
+    //                 (err) => {
+    //                     if (err) reject(err);
+    //                     else resolve();
+    //                 }
+    //             );
+    //         });
 
-            // Update player 2 overall stats
-            const isPlayer2Winner = winnerId === player2Id;
-            await new Promise((resolve, reject) => {
-                db.run(
-                    `UPDATE players 
-                     SET elo_score = ?, 
-                         wins = wins + ?, 
-                         losses = losses + ?, 
-                         total_matches = total_matches + 1, 
-                         total_goals = total_goals + ? 
-                     WHERE id = ?`,
-                    [
-                        eloData.player2NewElo,
-                        isPlayer2Winner ? 1 : 0,
-                        isPlayer2Winner ? 0 : 1,
-                        player2Goals,
-                        player2Id
-                    ],
-                    (err) => {
-                        if (err) reject(err);
-                        else resolve();
-                    }
-                );
-            });
+    //         // Update player 2 overall stats
+    //         const isPlayer2Winner = winnerId === player2Id;
+    //         await new Promise((resolve, reject) => {
+    //             db.run(
+    //                 `UPDATE players 
+    //                  SET elo_score = ?, 
+    //                      wins = wins + ?, 
+    //                      losses = losses + ?, 
+    //                      total_matches = total_matches + 1, 
+    //                      total_goals = total_goals + ? 
+    //                  WHERE id = ?`,
+    //                 [
+    //                     eloData.player2NewElo,
+    //                     isPlayer2Winner ? 1 : 0,
+    //                     isPlayer2Winner ? 0 : 1,
+    //                     player2Goals,
+    //                     player2Id
+    //                 ],
+    //                 (err) => {
+    //                     if (err) reject(err);
+    //                     else resolve();
+    //                 }
+    //             );
+    //         });
 
-            return {
-                matchId,
-                winner: winnerId,
-                finalScore: {
-                    player1: player1Goals,
-                    player2: player2Goals
-                }
-            };
-        } catch (error) {
-            console.error('Error updating match result:', error);
-            throw error;
-        }
-    }
+    //         return {
+    //             matchId,
+    //             winner: winnerId,
+    //             finalScore: {
+    //                 player1: player1Goals,
+    //                 player2: player2Goals
+    //             }
+    //         };
+    //     } catch (error) {
+    //         console.error('Error updating match result:', error);
+    //         throw error;
+    //     }
+    // }
 
     /**
  * Calculate new ELO rating
