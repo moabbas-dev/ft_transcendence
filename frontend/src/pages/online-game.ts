@@ -99,14 +99,8 @@ export default {
 		const loadingPong = container.querySelector('#loading-pong');
 		loadingPong?.appendChild(PongLoading({text: t('play.onlineGame.or')}));
 		
-		// Create matchmaking client
-		// In a real app, you would get the userId from your auth system
 		const userId = store.userId?? '0';
-		
-		// Connect to your matchmaking backend
-		// const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-		// const client = new PongGameClient(`${protocol}//${window.location.hostname}:${window.location.port}/matchmaking/`, userId);
-const client = pongGameClient;
+		const client = pongGameClient;
 
 		// State for tracking current match
 		let currentMatchId: string | null = null;
@@ -146,22 +140,22 @@ const client = pongGameClient;
 		}
 		client?.on('game_start', gameStartHandler);
 		
-		// client?.on('friend_match_invite', (data:any) => {
+		client?.on('friend_match_invite', (data:any) => {
 			// Show friend invite notification
-			// const accept = confirm(`${data.fromId} has invited you to a match. Accept?`);
-			// if (accept) {
-			// 	client.acceptFriendMatch(data.fromId);
-			// }
-		// });
+			const accept = confirm(`${data.fromId} has invited you to a match. Accept?`);
+			if (accept) {
+				client.acceptFriendMatch(data.fromId);
+			}
+		});
 		
-		// client?.on('friend_match_created', (data:any) => {
-		// 	currentMatchId = data.matchId;
-		// 	currentOpponentId = data.opponent.id;
-		// 	isPlayer1 = data.isPlayer1; 
+		client?.on('friend_match_created', (data:any) => {
+			currentMatchId = data.matchId;
+			currentOpponentId = data.opponent.id;
+			isPlayer1 = data.isPlayer1; 
 			
-		// 	// Show match found UI
-		// 	showMatchFound(data.opponent);
-		// });
+			// Show match found UI
+			showMatchFound(data.opponent);
+		});
 		
 		const matchResultsHandler = (data: any) => {
 			if (gameBoard) {

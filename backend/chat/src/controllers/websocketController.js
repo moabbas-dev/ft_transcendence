@@ -615,18 +615,18 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       // If accepted, create match in matchmaking service
       if (response === 'accept') {
         // Forward to matchmaking service to create friend match
-        // wsAdapter.sendTo(clientId, "game:match_creating", {
-        //   opponent: from,
-        //   inviteId
-        // });
+        wsAdapter.sendTo(clientId, "game:match_creating", {
+          opponent: from,
+          inviteId
+        });
 
-        // // Also notify the sender
-        // if (senderClientId) {
-        //   wsAdapter.sendTo(senderClientId, "game:match_creating", {
-        //     opponent: to,
-        //     inviteId
-        //   });
-        // }
+        // Also notify the sender
+        if (senderClientId) {
+          wsAdapter.sendTo(senderClientId, "game:match_creating", {
+            opponent: to,
+            inviteId
+          });
+        }
       }
 
     } catch (error) {
