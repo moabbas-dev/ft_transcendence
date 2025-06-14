@@ -1,3 +1,4 @@
+import { t } from "../../languages/LanguageController.js";
 import { createComponent } from "../../utils/StateManager.js";
 import { BlockedUsersSection } from "./BlockedUsersSection.js";
 import { FriendsSection } from "./FriendsSection.js";
@@ -9,9 +10,9 @@ export const UserFriends = createComponent(() => {
   container.className = "size-full flex flex-col gap-2 sm:gap-4";
   container.innerHTML = `
 	<div id="tab-nav" class="flex border-b gap-4 justify-center border-gray-200">
-		<button id="friends" class="px-2 sm:px-4 py-2 font-medium max-sm:text-sm focus:outline-none">Friends</button>
-		<button id="requests" class="px-2 sm:px-4 py-2 font-medium max-sm:text-sm focus:outline-none">Friend Requests</button>
-		<button id="blocked" class="px-2 sm:px-4 py-2 font-medium max-sm:text-sm focus:outline-none">Blocked Users</button>
+		<button id="friends" class="px-2 sm:px-4 py-2 font-medium max-sm:text-sm focus:outline-none">${t("profile.socialTab.friends")}</button>
+		<button id="requests" class="px-2 sm:px-4 py-2 font-medium max-sm:text-sm focus:outline-none">${t("profile.socialTab.friendRequests")}</button>
+		<button id="blocked" class="px-2 sm:px-4 py-2 font-medium max-sm:text-sm focus:outline-none">${t("profile.socialTab.blockedUsers")}</button>
 	</div>
 	<div id="main-content" class="flex-1 overflow-y-auto"></div>
   `

@@ -1,4 +1,5 @@
 import store from "../../../store/store.js";
+import { t } from "../../languages/LanguageController.js";
 import { createComponent } from "../../utils/StateManager.js";
 import chatService from "../../utils/chatUtils/chatWebSocketService.js";
 
@@ -29,11 +30,11 @@ const BlockedUser = createComponent((props: BlockedUserProps) => {
     <img alt="${props.username}" src="${props.avatar || 'http://placehold.co/40x40'}" class="size-10 rounded-full"/>
     <div>
       <p class="font-medium">${props.username}</p>
-      <span class="text-sm text-gray-500">Blocked on ${props.blockedOn}</span>
+      <span class="text-sm text-gray-500">${t("profile.socialTab.blockedOn")} ${props.blockedOn}</span>
     </div>
     <div class="flex flex-1 justify-end gap-2">
       <button id="unblock-${props.id}" class="px-3 py-1 bg-pongcyan text-white text-sm rounded hover:bg-opacity-80">
-        Unblock
+        ${t("profile.socialTab.unblock")}
       </button>
     </div>
   `;
@@ -61,7 +62,6 @@ export const BlockedUsersSection = createComponent(() => {
 	const section = document.createElement('div');
 	section.className = "flex flex-col gap-4";
 	section.innerHTML = `
-	  <h3 class="font-medium text-lg">Blocked Users</h3>
 	  <div id="blocked-users-list" class="flex flex-col gap-2"></div>
 	`;
 	
@@ -99,7 +99,7 @@ export const BlockedUsersSection = createComponent(() => {
 		});
 	  } else {
 		// Show a message when no blocked users
-		blockedUsersList.innerHTML = '<p class="text-gray-500 p-3">You haven\'t blocked any users.</p>';
+		blockedUsersList.innerHTML = `<p class="text-gray-500 p-3">${t("profile.socialTab.noBlocks")}</p>`;
 	  }
 	});
 	

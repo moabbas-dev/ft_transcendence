@@ -3,6 +3,7 @@ import axios from "axios";
 import Chart from 'chart.js/auto';
 import Toast from "../../toast/Toast.js";
 import store from "../../../store/store.js";
+import { t } from "../../languages/LanguageController.js";
 
 interface ChartData {
   barChart: Array<{ month: string; wins: number; losses: number }>;
@@ -46,21 +47,21 @@ export const UserStatistics = createComponent((props: { userId: number }) => {
       
       <div id="charts-container" class="hidden flex flex-col gap-4 justify-center">
         <div class="bg-white p-4 rounded-lg shadow">
-          <h3 class="text-lg font-semibold mb-2 text-center">ELO Rating Progression</h3>
+          <h3 class="text-lg font-semibold mb-2 text-center">${t("profile.statisticsTab.EloProgression")}</h3>
           <div class="h-64">
             <canvas id="statsChart" class="w-full h-full"></canvas>
           </div>
         </div>
         
         <div class="bg-white p-4 rounded-lg shadow">
-          <h3 class="text-lg font-semibold mb-2 text-center">Monthly Wins vs Losses</h3>
+          <h3 class="text-lg font-semibold mb-2 text-center">${t("profile.statisticsTab.monthly")}</h3>
           <div class="h-64">
             <canvas id="barChart" class="w-full h-full"></canvas>
           </div>
         </div>
         
         <div class="bg-white p-4 rounded-lg shadow">
-          <h3 class="text-lg font-semibold mb-2 text-center">Overall Win Rate</h3>
+          <h3 class="text-lg font-semibold mb-2 text-center">${t("profile.statisticsTab.overall")}</h3>
           <div class="h-64 flex justify-center">
             <canvas id="pieChart" class="w-64 h-64"></canvas>
           </div>

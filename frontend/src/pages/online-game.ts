@@ -14,6 +14,7 @@ export default {
 	render: (container: HTMLElement) => {
 		container.className = "flex flex-col h-dvh";
 		container.innerHTML = `
+			<div class="profile"></div>
 			<div class="header z-50 w-full bg-black"></div>
 			
 			<div class="content flex-1 relative overflow-hidden bg-black">
@@ -124,6 +125,7 @@ const client = pongGameClient;
 		client?.on('waiting_for_match', waitingForMatchHandler);
 
 		const matchFoundHandler = (data: any) => {
+			console.log(data);
 			currentMatchId = data.matchId;
 			currentOpponentId = data.opponent.id;
 			isPlayer1 = data.isPlayer1; // We're player 1 if we initiated
@@ -133,12 +135,24 @@ const client = pongGameClient;
 			showMatchFound(data.opponent);
 			client?.off('waiting_for_match', waitingForMatchHandler);
 		}
+
+		const matchFoundHandler2 = (data: any) => {
+			console.log("friend_match_created", data);
+			currentMatchId = data.matchId;
+			currentOpponentId = data.opponent.id;
+			isPlayer1 = data.isPlayer1;
+			console.log(currentMatchId, currentOpponentId, data.matchId);
+			console.log(`This is player 1: ${isPlayer1}`);
+		}
+
 		client?.on('match_found', matchFoundHandler);
+		client?.on('friend_match_created', matchFoundHandler2);
 
 		const gameStartHandler = (data: any) => {
 			console.log(`Game started with match ID: ${data.matchId}`);
 			console.log("ISPLAYER 1: ", isPlayer1);
-			
+
+			console.log(currentMatchId, currentOpponentId, data.matchId);
 			if (currentMatchId && currentOpponentId && currentMatchId === data.matchId) {
 				startGame(currentMatchId, currentOpponentId, isPlayer1);
 			}

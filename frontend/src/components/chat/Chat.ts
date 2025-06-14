@@ -615,9 +615,9 @@ export const Chat = createComponent(
       });
 
       // Send message to the user
-      await axios.post('/notifications/api/notifications/user-message', body).catch(err => {
-        console.error("Error sending message:", err);
-      })
+      // await axios.post('/notifications/api/notifications/user-message', body).catch(err => {
+      //   console.error("Error sending message:", err);
+      // })
 
       // Create temporary message for optimistic update
       const tempMessage: Message = {

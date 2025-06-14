@@ -1,4 +1,8 @@
 export default {
+	statusOn: "online",
+	statusOf: "offline",
+	viewProfile: "View Profile",
+	logout: "Logout",
 	home: {
 		header: {
 			play: "Play",
@@ -75,6 +79,7 @@ export default {
 		tournamentInfo: "Compete in a knockout tournament",
 		online: "Online Multiplayer",
 		onlineInfo: "Challenge players worldwide",
+		tapToSelect: "Tap to select",
 		localAI: {
 			difficultyPopup: {
 				title: "CHOOSE DIFFICULTY",
@@ -98,7 +103,15 @@ export default {
 			oponentFound: "Opponent Found!",
 			cancel: "Cancel",
 			invite: "Invite",
-			positionInQueue: "Position in Queue"
+			positionInQueue: "Position in Queue",
+			playAgain: "Play Again",
+			youWon: "You Won!",
+			youLost: "You Lost!",
+			finalScore: "Final Score",
+			eloChange: "ELO Change",
+			opponent: "Opponent",
+			opponentElo: "Opponent ELO",
+			startingIn: "Starting in",
 		},
 		"tournaments": {
 			"title": "Tournaments",
@@ -225,9 +238,12 @@ export default {
 		rank: "Rank: ",
 		message: "Message",
 		add: "Add", 
+		removeFriend: "Remove friend",
 		block: "Block",
 		unblock: "Unblock",
+		requestSent: "request sent",
 		infoTab: {
+			nickname: "Nickname:",
 			title: "Info",
 			fullname: "Full Name:",
 			age: "Age:",
@@ -240,6 +256,9 @@ export default {
 			saveBtn: "Save",
 		},
 		statisticsTab: {
+			EloProgression: "ELO Rating Progression",
+			monthly: "Monthly Wins vs Losses",
+			overall: "Overall Win Rate ",
 			title: "Statistics",
 		},
 		historyTab: {
@@ -253,7 +272,35 @@ export default {
 			win: "Win",
 			lose: "Lose",
 			draw: "Draw",
+			showing: "Showing",
+			of: "of",
+			matches: "matches",
+			oneVsOne: "1v1",
+			friendly: "Friendly",
+			tournament: "Tournament"
 		},
+		socialTab :
+		{
+			title: "Social",
+			friends: "Friends",
+			friendRequests: "Friend Requests",
+			blockedUsers: "Blocked Users",
+			loadingFriendReq: "Loading friend requests...",
+			noPendingReq: "No pending friend requests",
+			noBlocks: "You haven't blocked any users.",
+			failedToLoad: "Failed to load friends",
+			noFriends: "No friends found",
+			friendRemoved: "Friend removed successfully",
+			search: "Search friends...",
+			confirmRemoveFriend: "Remove from your friends list?",
+			accept: "Accept",
+			decline: "Decline",
+			unblock: "Unblock",
+			blockedOn: "Blocked on",
+			oneVoneMatches: "1v1 Matches",
+			friendlyMatches: "Friendly Matches",
+			tournamentsMatches: "Tournament Matches",
+		}
 	},
 	about: {
 		title: "Development Team",
@@ -272,5 +319,22 @@ export default {
 		online: "Online",
 		offline: "Offline",
 		inGame: "In Game",
-	}
+	},
+	time: {
+		ago: "{number} {unit} ago",
+		second: "second",
+		seconds: "seconds",
+		minute: "minute", 
+		minutes: "minutes",
+		hour: "hour",
+		hours: "hours",
+		day: "day",
+		days: "days", 
+		week: "week",
+		weeks: "weeks",
+		month: "month",
+		months: "months",
+		year: "year",
+		years: "years"
+	},
 };

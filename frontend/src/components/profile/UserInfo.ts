@@ -41,7 +41,7 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
                  rounded-md focus:shadow-[0_0_5px] focus:shadow-pongcyan focus:outline-none focus:ring-1 focus:ring-pongcyan focus:border-pongcyan" placeholder="Full name" id="fullName" value="Loading...">
               </div>
               <div class="flex-1 min-w-[250px]">
-                <label class="block font-semibold">Nickname</label>
+                <label class="block font-semibold">${t('profile.infoTab.nickname')}</label>
                 <input id="nickname-value" type="text" class="border border-gray-300 p-1 w-full
                 rounded-md focus:shadow-[0_0_5px] focus:shadow-pongcyan focus:outline-none focus:ring-1 focus:ring-pongcyan focus:border-pongcyan" value="Loading...">
               </div>

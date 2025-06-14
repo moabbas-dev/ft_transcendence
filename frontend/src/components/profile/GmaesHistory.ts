@@ -55,19 +55,19 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
           data-type="1v1" 
           class="match-tab flex-1 py-2 px-4 text-sm font-medium text-center rounded-md transition-all bg-white text-blue-600 shadow-sm"
         >
-          1v1 Matches
+          ${t("profile.socialTab.oneVoneMatches")}
         </button>
         <button 
           data-type="friendly" 
           class="match-tab flex-1 py-2 px-4 text-sm font-medium text-center rounded-md transition-all text-gray-600 hover:text-gray-900"
         >
-          Friendly Matches
+          ${t("profile.socialTab.friendlyMatches")}
         </button>
         <button 
           data-type="tournament" 
           class="match-tab flex-1 py-2 px-4 text-sm font-medium text-center rounded-md transition-all text-gray-600 hover:text-gray-900"
         >
-          Tournament Matches
+          ${t("profile.socialTab.tournamentsMatches")}
         </button>
       </div>
 
@@ -278,10 +278,41 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
     // Update pagination info
     const start = ((currentState.currentPage - 1) * pageSize) + 1;
     const end = Math.min(currentState.currentPage * pageSize, currentState.totalMatches);
+
+    switch (activeTab) {
+      case '1v1':
+        {
+          if (currentState.totalMatches > 0) {
+            paginationInfo.innerHTML = `${t('profile.historyTab.showing')} ${start}-${end} ${t('profile.historyTab.of')} ${currentState.totalMatches} ${t('profile.historyTab.oneVsOne')} ${t('profile.historyTab.matches')}`;
+          } else {
+            paginationInfo.innerHTML = '';
+          }
+          break;
+        }
+      case 'friendly':
+        {
+          if (currentState.totalMatches > 0) {
+            paginationInfo.innerHTML = `${t('profile.historyTab.showing')} ${start}-${end} ${t('profile.historyTab.of')} ${currentState.totalMatches} ${t('profile.historyTab.friendly')} ${t('profile.historyTab.matches')}`;
+          } else {
+            paginationInfo.innerHTML = '';
+          }
+        break;
+        }
+      case 'tournament':
+        {
+          if (currentState.totalMatches > 0) {
+          paginationInfo.innerHTML = `${t('profile.historyTab.showing')} ${start}-${end} ${t('profile.historyTab.of')} ${currentState.totalMatches} ${t('profile.historyTab.tournament')} ${t('profile.historyTab.matches')}`;
+          } else {
+            paginationInfo.innerHTML = '';
+          }
+          break;
+        }
+    }
+
     
-    paginationInfo.innerHTML = currentState.totalMatches > 0 
-      ? `Showing ${start}-${end} of ${currentState.totalMatches} ${activeTab} matches`
-      : '';
+    // paginationInfo.innerHTML = currentState.totalMatches > 0 
+    //   ? `${t('profile.historyTab.showing')} ${start}-${end} ${t('profile.historyTab.of')} ${currentState.totalMatches} ${activeTab} ${t('profile.historyTab.matches')}`
+    //   : '';
 
     // Clear pagination controls
     paginationControls.innerHTML = '';
