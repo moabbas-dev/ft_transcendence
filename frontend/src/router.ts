@@ -61,8 +61,6 @@ export async function refreshRouter() {
 		"/register/twofactor",
 		"/reset_password/:uuid",
 		"/account-verified",
-		"/play/local-multi",
-		"/play/local-ai"
 	];
 
 	function matchesRestrictedPattern(currentPath: string): boolean {
