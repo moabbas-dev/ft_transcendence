@@ -1,4 +1,8 @@
 export default {
+	statusOn: "en ligne",
+	statusOf: "hors ligne",
+	viewProfile: "Voir le profil",
+	logout: "Déconnexion",
 	home: {
 		header: {
 			play: "Jouer",
@@ -75,6 +79,7 @@ export default {
 		tournamentInfo: "Participez à un tournoi à élimination directe",
 		online: "Multijoueur en ligne",
 		onlineInfo: "Affrontez des joueurs du monde entier",
+		tapToSelect: "Appuyez pour sélectionner",
 		localAI: {
 			difficultyPopup: {
 				title: "CHOISIR LA DIFFICULTÉ",
@@ -98,7 +103,15 @@ export default {
 			oponentFound: "Adversaire trouvé !",
 			cancel: "Annuler",
 			invite: "Inviter",
-			positionInQueue: "Position dans la file d'attente"
+			positionInQueue: "Position dans la file d'attente",
+			playAgain: "Rejouer",
+			youWon: "Vous avez gagné !",
+			youLost: "Vous avez perdu !",
+			finalScore: "Score final",
+			eloChange: "Changement d'ELO",
+			opponent: "Adversaire",
+			opponentElo: "ELO de l'adversaire",
+			startingIn: "Démarrage dans",
 		},
 		"tournaments": {
 			"title": "Tournois",
@@ -225,14 +238,17 @@ export default {
 		rank: "Rang : ",
 		message: "Message",
 		add: "Ajouter",
+		removeFriend: "Supprimer l'ami",
 		block: "Bloquer",
 		unblock: "Débloquer",
+		requestSent: "demande envoyée",
 		infoTab: {
+			nickname: "Surnom:",
 			title: "Infos",
-			fullname: "Nom complet :",
+			fullname: "Nom complet:",
 			age: "Âge :",
-			country: "Pays :",
-			memberSince: "Membre depuis :",
+			country: "Pays:",
+			memberSince: "Membre depuis:",
 			enable2fa: "Activer 2FA",
 			qrcodeScan: "Scannez ce code QR avec votre application d'authentification",
 			generating: "Génération en cours...",
@@ -240,6 +256,9 @@ export default {
 			saveBtn: "Sauvegarder"
 		},
 		statisticsTab: {
+			EloProgression: "Progression du classement ELO",
+			monthly: "Victoires vs Défaites mensuelles",
+			overall: "Taux de victoire global",
 			title: "Statistiques"
 		},
 		historyTab: {
@@ -251,7 +270,36 @@ export default {
 			duration: "DURÉE",
 			win: "Victoire",
 			lose: "Défaite",
-			draw: "Match nul"
+			draw: "Match nul",
+			trophies: "TROPHÉES",
+			showing: "Afficher",
+			of: "de",
+			matches: "matches",
+			oneVsOne: "1v1",
+			friendly: "Amical",
+			tournament: "Tournoi"
+		},
+		socialTab:
+		{
+			title: "sociale",
+			friends: "amis",
+			friendRequests: "Demandes d'amis",
+			blockedUsers: "utilisateurs bloqués",
+			loadingFriendReq: "Chargement des demandes d'ami...",
+			noPendingReq: "Aucune demande d'ami en attente",
+			noBlocks: "Vous n'avez bloqué aucun utilisateur.",
+			failedToLoad: "Échec du chargement des amis",
+			noFriends: "Aucun ami trouvé",
+			friendRemoved: "Ami supprimé avec succès",
+			search: "Rechercher des amis...",
+			confirmRemoveFriend: "Le retirer de votre liste d'amis ?",
+			accept: "Accepter",
+			decline: "Refuser",
+			unblock: "Débloquer",
+			blockedOn: "Bloqué le",
+			oneVoneMatches: "Matchs 1 contre 1",
+			friendlyMatches: "Matchs amicaux",
+			tournamentsMatches: "Matchs de tournoi",
 		}
 	},
 	about: {
@@ -271,5 +319,22 @@ export default {
 		online: "En ligne",
 		offline: "Hors ligne",
 		inGame: "En jeu",
+	},
+	time: {
+		ago: "il y a {number} {unit}",
+		second: "seconde",
+		seconds: "secondes",
+		minute: "minute",
+		minutes: "minutes",
+		hour: "heure",
+		hours: "heures",
+		day: "jour",
+		days: "jours",
+		week: "semaine",
+		weeks: "semaines",
+		month: "mois",
+		months: "mois",
+		year: "année",
+		years: "années"
 	}
 };  

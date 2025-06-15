@@ -34,7 +34,7 @@ export const Friend = createComponent((props: FriendProps) => {
     e.stopPropagation();
     
     // Confirm before removing
-    if (confirm(t('chat.confirmRemoveFriend') || `Remove ${props.nickname} from your friends list?`)) {
+    if (confirm(t('profile.socialTab.confirmRemoveFriend'))) {
       chatService.removeFriend(props.id);
     }
   });
@@ -51,7 +51,7 @@ export const FriendsSection = createComponent(() => {
       <input 
         id="friends-search"
         type="text"
-        placeholder="Search friends..."
+        placeholder="${t('profile.socialTab.search')}"
         class="w-full flex-1 p-2 rounded-lg bg-gray-200 focus:bg-gray-100 focus:outline-none"
       />
     </div>
@@ -77,7 +77,7 @@ export const FriendsSection = createComponent(() => {
     } catch (error) {
       console.error("Error loading friends list:", error);
       friendsList.innerHTML = 
-        '<div class="text-red-500 text-center py-4">Failed to load friends</div>';
+        `<div class="text-red-500 text-center py-4">${"profile.socialTab.failedToLoad"}</div>`;
     }
   }
   
@@ -89,9 +89,24 @@ export const FriendsSection = createComponent(() => {
     if (friendsData && friendsData.length > 0) {
       // Render each friend
       friendsData.forEach(friend => {
+        var status;
+        switch (friend.status) {
+          case 'online':
+          {
+              status = t("statusOn");
+              break;
+          }
+          case 'offline':
+          {
+              status = t("statusOf");
+              break;
+          }
+          default:
+              break;
+        }
         friendsList.appendChild(Friend({
           nickname: friend.nickname,
-          status: friend.status,
+          status: status,
           avatar_url: friend.avatar_url,
           id: friend.id
         }));
@@ -99,7 +114,7 @@ export const FriendsSection = createComponent(() => {
     } else {
       // No friends found
       friendsList.innerHTML = 
-        `<div class="text-gray-500 text-center py-4">${t('chat.noFriendsFound') || 'No friends found'}</div>`;
+        `<div class="text-gray-500 text-center py-4">${t('profile.socialTab.noFriends')}</div>`;
     }
   }
   
@@ -120,7 +135,7 @@ export const FriendsSection = createComponent(() => {
       // Display a success message (optional)
       const successMessage = document.createElement('div');
       successMessage.className = "bg-green-100 text-green-800 p-2 rounded text-center";
-      successMessage.textContent = t('chat.friendRemoved') || 'Friend removed successfully';
+      successMessage.textContent = t('profile.socialTab.friendRemoved');
       
       // Insert the message at the top of the friends list
       if (friendsList.firstChild) {
@@ -136,7 +151,7 @@ export const FriendsSection = createComponent(() => {
         // Check if there are no friends left
         if (friendsList.children.length === 0) {
           friendsList.innerHTML = 
-            `<div class="text-gray-500 text-center py-4">${t('chat.noFriendsFound') || 'No friends found'}</div>`;
+            `<div class="text-gray-500 text-center py-4">${t('profile.socialTab.noFriends')}</div>`;
         }
       }, 3000);
     }

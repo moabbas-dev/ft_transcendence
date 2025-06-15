@@ -1,6 +1,5 @@
 import { createComponent } from "../../utils/StateManager.js";
 import logoUrl from "../../assets/guests.png";
-import goldRank from "/src/assets/gold-medal.png";
 import { GamesHistory } from "./GmaesHistory.js";
 import { UserInfo } from "./UserInfo.js";
 import { UserStatistics } from "./UserStatistics.js";
@@ -95,7 +94,7 @@ export const Profile = createComponent((props: ProfileProps) => {
                 });
 
                 // Update UI immediately
-                addFriendButton.textContent = t("✖️Remove friend");
+                addFriendButton.textContent = t("profile.removeFriend");
                 addFriendButton.classList.remove("bg-yellow-500", "hover:bg-yellow-600");
                 addFriendButton.classList.add("bg-red-500", "hover:bg-red-600");
                 currentFriendshipStatus = 'friends';
@@ -356,13 +355,7 @@ export const Profile = createComponent((props: ProfileProps) => {
         ` : ""}  
         
         <div class="flex">
-          <div>
-              <p id="name" class="font-bold text-lg">${props.uName}</p>
-              <div class="flex items-center gap-1">
-                  <p>${t('profile.rank')}</p>
-                  <img src="${goldRank}" class="w-6">
-              </div>
-          </div>
+          <p id="name" class="font-bold text-lg">${props.uName}</p>
           <div class="relative">
             <img 
                 alt="profile picture" 
@@ -405,7 +398,7 @@ export const Profile = createComponent((props: ProfileProps) => {
             id="friends-tab" 
             class="flex-1 py-2 text-center transition-all focus:outline-none"
           >
-            Friends
+            ${t("profile.socialTab.title")}
           </button>` : ""}
 
         </div>
@@ -671,7 +664,7 @@ export const Profile = createComponent((props: ProfileProps) => {
       case 'friends':
         console.log("✅ User is a friend");
         if (addFriendButton) {
-          addFriendButton.textContent = t("✖️Remove friend");
+          addFriendButton.textContent = t("profile.removeFriend");
           addFriendButton.disabled = false; // Enable button for removing friend
           addFriendButton.classList.remove("bg-green-500", "hover:bg-green-600", "bg-gray-400", "bg-yellow-500", "hover:bg-yellow-600");
           addFriendButton.classList.add("bg-red-500", "hover:bg-red-600");

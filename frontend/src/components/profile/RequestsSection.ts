@@ -64,6 +64,7 @@
 import { createComponent } from "../../utils/StateManager.js";
 import chatService from "../../utils/chatUtils/chatWebSocketService.js";
 import store from "../../../store/store.js";
+import { t } from "../../languages/LanguageController.js";
 
 // We'll replace the hardcoded requests with an empty array initially
 let requests: RequestProps[] = [];
@@ -89,10 +90,10 @@ const Request = createComponent((props: RequestProps) => {
 		</div>
 		<div class="flex flex-1 justify-end gap-2">
 			<button id="accept" class="px-3 py-1 bg-pongcyan text-white text-sm rounded hover:opacity-80">
-				Accept
+				${t("profile.socialTab.accept")}
 			</button>
 			<button id="decline" class="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300">
-				Decline
+				${t("profile.socialTab.decline")}
 			</button>
 		</div>
 	`;
@@ -116,7 +117,7 @@ const Request = createComponent((props: RequestProps) => {
 		const requestsSection = document.querySelector('.requests-section');
 		const requestsList = document.querySelector('#requests-list');
 		if (requestsList && requests.length === 0) {
-			requestsList.innerHTML = '<p class="text-gray-500 text-sm">No pending friend requests</p>';
+			requestsList.innerHTML = `<p class="text-gray-500 text-sm">${t("profile.socialTab.noPendingReq")}</p>`;
 		}
 	});
 
@@ -138,7 +139,7 @@ const Request = createComponent((props: RequestProps) => {
 		const requestsSection = document.querySelector('.requests-section');
 		const requestsList = document.querySelector('#requests-list');
 		if (requestsList && requests.length === 0) {
-			requestsList.innerHTML = '<p class="text-gray-500 text-sm">No pending friend requests</p>';
+			requestsList.innerHTML = `<p class="text-gray-500 text-sm">${t("profile.socialTab.noPendingReq")}</p>`;
 		}
 	});
 
@@ -149,9 +150,8 @@ export const RequestsSection = createComponent(() => {
 	const section = document.createElement('div');
 	section.className = "flex flex-col gap-4 requests-section";
 	section.innerHTML = `
-		<h3 class="font-medium text-lg">Incoming Friend Requests</h3>
 		<div id="requests-list" class="flex flex-col gap-2">
-			<div class="loading text-gray-500 text-sm">Loading friend requests...</div>
+			<div class="loading text-gray-500 text-sm">${t("profile.socialTab.loadingFriendReq")}</div>
 		</div>
 	`;
 	
@@ -178,7 +178,7 @@ export const RequestsSection = createComponent(() => {
 		requestsList.innerHTML = '';
 		
 		if (requests.length === 0) {
-			requestsList.innerHTML = '<p class="text-gray-500 text-sm">No pending friend requests</p>';
+			requestsList.innerHTML = `<p class="text-gray-500 text-sm">${t("profile.socialTab.noPendingReq")}</p>`;
 			return;
 		}
 

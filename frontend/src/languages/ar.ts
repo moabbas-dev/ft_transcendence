@@ -1,4 +1,8 @@
 export default {
+	statusOn: "متصل",
+	statusOf: "غير متصل",
+	viewProfile: "عرض الملف",
+	logout: "تسجيل الخروج",
 	home: {
 		header: {
 			play: "العب",
@@ -75,6 +79,7 @@ export default {
 		tournamentInfo: "تنافس في بطولة إقصائية",
 		online: "العب عبر الإنترنت",
 		onlineInfo: "تحدى اللاعبين حول العالم",
+		tapToSelect: "اضغط للاختيار",
 		localAI: {
 			difficultyPopup: {
 				title: "اختر الصعوبة",
@@ -98,7 +103,15 @@ export default {
 			oponentFound: "تم العثور على خصم!",
 			cancel: "إلغاء",
 			invite: "دعوة",
-			positionInQueue: "الموقع في الصف"
+			positionInQueue: "الموقع في الصف",
+			playAgain: "العب مجددًا",
+			youWon: "انتصرت!",
+			youLost: "خسرت!",
+			finalScore: "النتيجة النهائية",
+			eloChange: "تغير التقييم",
+			opponent: "الخصم",
+			opponentElo: "تقييم الخصم",
+			startingIn: "سيبدأ في",
 		},
 		"tournaments": {
 			"title": "البطولات",
@@ -226,9 +239,12 @@ export default {
 		rank: "المرتبة: ",
 		message: "رسالة",
 		add: "إضافة",
+		removeFriend: "إزالة الصديق",
 		block: "حظر",
 		unblock: "الغاء الحظر",
+		requestSent: "تم إرسال الطلب",
 		infoTab: {
+			nickname: "الاسم المستعار:",
 			title: "المعلومات",
 			fullname: "الاسم الكامل:",
 			age: "العمر:",
@@ -241,6 +257,9 @@ export default {
 			saveBtn: "حفظ",
 		},
 		statisticsTab: {
+			EloProgression: "تطوّر التقييم",
+			monthly: "الانتصارات مقابل الهزائم الشهرية",
+			overall: "معدل الفوز الإجمالي",
 			title: "الإحصائيات",
 		},
 		historyTab: {
@@ -253,7 +272,37 @@ export default {
 			win: "فوز",
 			lose: "خسارة",
 			draw: "تعادل",
+			trophies: "الكؤوس",
+			showing: "إظهار",
+			of: "من",
+			matches: "مباريات",
+			oneVsOne: "واحد ضد واحد",
+			friendly: "العاب الصديق",
+			tournament: "البطولة"
 		},
+		socialTab:
+		{
+			title: "اجتماعي",
+			friends: "الأصدقاء",
+			friendRequests: "طلبات الصداقة",
+			blockedUsers: "الأعضاء المحظورون",
+			loadingFriendReq: "جاري تحميل طلبات الصداق...",
+			noPendingReq: "لا توجد طلبات صداقة معلقة",
+			noBlocks: "لم تقم بحظر أي مستخدم.",
+			failedToLoad: "فشل في تحميل قائمة الأصدقاء",
+			noFriends: "لم يتم العثور على أصدقاء",
+			friendRemoved: "تم حذف الصديق بنجاح",
+			search: "ابحث عن الأصدقاء...",
+			confirmRemoveFriend: "هل تريد إزالة هذا الصديق من قائمتك؟",
+			accept: "قبول",
+			decline: "رفض",
+			unblock: "إلغاء الحظر",
+			blockedOn: "تم الحظر في",
+			oneVoneMatches: "مباريات فردية",
+			friendlyMatches: "مباريات ودية",
+			tournamentsMatches: "مباريات البطولة",
+
+		}
 	},
 	about: {
 		title: "فريق التطوير",
@@ -272,5 +321,22 @@ export default {
 		online: "متصل",
 		offline: "غير متصل",
 		inGame: "في لعبة",
-	}
+	},
+	time: {
+		ago: "منذ {number} {unit}",
+		second: "ثانية",
+		seconds: "ثواني", 
+		minute: "دقيقة",
+		minutes: "دقائق",
+		hour: "ساعة",
+		hours: "ساعات",
+		day: "يوم", 
+		days: "أيام",
+		week: "أسبوع",
+		weeks: "أسابيع", 
+		month: "شهر",
+		months: "أشهر",
+		year: "سنة",
+		years: "سنوات"
+	},
 };

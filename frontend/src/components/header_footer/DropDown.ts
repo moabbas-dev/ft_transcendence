@@ -14,10 +14,10 @@ export const DropDown = createComponent(() => {
 			</li>
 		` : `
 			<li id="view-profile" class="px-4 py-0.5 hover:text-pongcyan hover:cursor-pointer hover:bg-slate-100">
-				View Profile
+				 ${t("viewProfile")}
 			</li>
 			<li id="logout" class="font-bold px-4 py-0.5 hover:text-pongcyan hover:cursor-pointer hover:bg-slate-100">
-				Logout
+				${t("logout")}
 			</li>
 		`}
 	`
