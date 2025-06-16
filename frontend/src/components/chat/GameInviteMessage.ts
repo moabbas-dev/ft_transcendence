@@ -1,7 +1,6 @@
 import { createComponent } from "../../utils/StateManager.js";
 import chatService from "../../utils/chatUtils/chatWebSocketService.js";
 import store from "../../../store/store.js";
-import { pongGameClient } from "../../main.js";
 
 export interface GameInviteMessageProps {
   messageId: string;
@@ -17,18 +16,8 @@ export const GameInviteMessage = createComponent((props: GameInviteMessageProps)
   const messageElement = document.createElement('div');
   messageElement.className = 'game-invite-message bg-gradient-to-r from-pongcyan/20 to-pongpink/20 border border-pongcyan/50 rounded-lg p-4 my-2';
   
-  // const isReceived = props.to === (parseInt(store.userId || ''));
   const isReceived = Number(props.to) === parseInt(store.userId || '');
-  // console.log(isReceived,props.to,store.userId);
   const isPending = props.status === 'pending';
-  
-  // console.log('Game invite message:', {
-  //   isReceived,
-  //   isPending,
-  //   to: props.to,
-  //   userId: store.userId,
-  //   status: props.status
-  // });
   
   messageElement.innerHTML = `
     <div class="flex items-center justify-between">
@@ -66,11 +55,9 @@ export const GameInviteMessage = createComponent((props: GameInviteMessageProps)
     </div>
   `;
 
-  // Helper function to safely format timestamp
   function formatTimestamp(timestamp: string | number) {
     try {
       const date = new Date(timestamp);
-      // Check if date is valid
       if (isNaN(date.getTime())) {
         return new Date().toLocaleTimeString([], {
           hour: 'numeric',
@@ -100,6 +87,7 @@ export const GameInviteMessage = createComponent((props: GameInviteMessageProps)
     const buttons = messageElement.querySelector('.buttons');
     
     acceptBtn?.addEventListener('click', () => {
+      // FIXED: Only send response via chat service, which will handle matchmaking
       chatService.send("game:invite_response", {
         inviteId: props.inviteId,
         response: 'accept',
@@ -107,14 +95,13 @@ export const GameInviteMessage = createComponent((props: GameInviteMessageProps)
         to: props.to
       });
 
-      chatService.send("messages:unread:get", {
-        userId: props.from,
-      });
-
-      const matchmakingClient = pongGameClient!;
-      matchmakingClient.acceptFriendMatch(props.from.toString());
-
       buttons?.classList.add('hidden');
+      
+      // Show status immediately for better UX
+      const statusDiv = document.createElement('div');
+      statusDiv.className = 'status text-sm text-green-400';
+      statusDiv.textContent = 'Accepted';
+      messageElement.querySelector('.flex')?.appendChild(statusDiv);
     });
     
     declineBtn?.addEventListener('click', () => {
@@ -125,13 +112,13 @@ export const GameInviteMessage = createComponent((props: GameInviteMessageProps)
         to: props.to
       });
 
-      chatService.send("messages:unread:get", {
-        userId: props.from,
-      });
-
-      // chatService.getMessageHistory(`${props.from}-${props.to}`);
       buttons?.classList.add('hidden');
-
+      
+      // Show status immediately for better UX
+      const statusDiv = document.createElement('div');
+      statusDiv.className = 'status text-sm text-red-400';
+      statusDiv.textContent = 'Declined';
+      messageElement.querySelector('.flex')?.appendChild(statusDiv);
     });
   }
   

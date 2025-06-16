@@ -2,7 +2,6 @@ import { t } from "../../../languages/LanguageController.js";
 import chatService from "../../../utils/chatUtils/chatWebSocketService.js";
 import store from "../../../../store/store.js";
 import { createComponent } from "../../../utils/StateManager.js";
-import { pongGameClient } from "../../../main.js";
 
 export interface FriendProps {
   id: string;
@@ -55,27 +54,12 @@ const Friend = createComponent((props: FriendProps) => {
     inviteButton?.addEventListener('click', (e) => {
       e.stopPropagation();
 
-      // Send game invite via chat service instead of matchmaking
-      console.log("from: ", store.userId, "to: ", props.id);
+      // FIXED: Only send game invite via chat service, not both systems
       if (chatService.isConnected()) {
         chatService.send("game:invite", {
           from: store.userId,
           to: props.id,
           gameType: "1v1"
-        });
-
-        // const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        // console.log(`${protocol}//${window.location.hostname}${window.location.port}/matchmaking/`);
-        // console.log(window.location.hostname);
-        // console.log(window.location.port);
-        // const client = new PongGameClient(`${protocol}//${window.location.hostname}${window.location.port}/matchmaking/`, store.userId?.toString() || "");
-
-        const matchmakingClient = pongGameClient!        
-        matchmakingClient.inviteFriend(props.id); // This is the 'friend_match_request' for matchmaking server
-        console.log("friend_match_request sent via matchmakingClient.");
-
-        chatService.send("messages:unread:get", {
-          userId: props.id,
         });
 
         // Update button state
@@ -101,27 +85,25 @@ export function FetchFriendsList() {
   const searchContainer = document.createElement('div');
   searchContainer.className = 'search-container mb-4';
 
-  // Dynamically set classes based on language direction
   const inputClasses = `w-full bg-black/40 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-pongcyan ${isRTL ? 'text-right' : 'text-left'}`;
   const iconClasses = `absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 transform -translate-y-1/2 text-gray-400`;
 
   searchContainer.innerHTML = `
-<div class="relative flex justify-between">
-<input 
-type="text" 
-placeholder="${t('play.onlineGame.searchFriends')}" 
-class="${inputClasses}"
-dir="${isRTL ? 'rtl' : 'ltr'}"
->
-<span class="${iconClasses}">
-<i class="fa-solid fa-search"></i>
-</span>
-</div>
-`;
+    <div class="relative flex justify-between">
+      <input 
+        type="text" 
+        placeholder="${t('play.onlineGame.searchFriends')}" 
+        class="${inputClasses}"
+        dir="${isRTL ? 'rtl' : 'ltr'}"
+      >
+      <span class="${iconClasses}">
+        <i class="fa-solid fa-search"></i>
+      </span>
+    </div>
+  `;
 
   friendsListContainer.appendChild(searchContainer);
 
-  // Friends list wrapper
   const friendsList = document.createElement('div');
   friendsList.className = 'friends-list-wrapper';
   friendsListContainer.appendChild(friendsList);
@@ -140,7 +122,6 @@ dir="${isRTL ? 'rtl' : 'ltr'}"
     const target = e.target as HTMLInputElement;
     const searchValue = target.value.toLowerCase();
 
-    // Filter friends based on search value
     const friendElements = friendsList.querySelectorAll('.friend-item');
     friendElements.forEach(el => {
       const friendName = el.querySelector('.user-info')?.textContent?.toLowerCase() || '';
@@ -157,7 +138,6 @@ dir="${isRTL ? 'rtl' : 'ltr'}"
 
   async function loadFriendsList() {
     try {
-      // Request friends list from server
       if (chatService.isConnected()) {
         chatService.send("friends:get", {
           userId: store.userId,
@@ -184,29 +164,14 @@ dir="${isRTL ? 'rtl' : 'ltr'}"
     }
   }
 
-  // Handle friend invite
-  friendsListContainer.addEventListener('friend-invite', (e: any) => {
-    const friendId = e.detail;
-
-    // Dispatch event to parent component
-    const event = new CustomEvent('friend-selected', {
-      bubbles: true,
-      detail: friendId
-    });
-    friendsListContainer.dispatchEvent(event);
-  });
-
   function handleFriendsReceived(friendsData: FriendProps[]) {
-    // Clear the loading state
     friendsList.innerHTML = '';
 
     if (friendsData && friendsData.length > 0) {
-      // Render each friend
       friendsData.forEach(friend => {
         friendsList.appendChild(Friend(friend));
       });
     } else {
-      // No friends found
       friendsList.innerHTML = `
         <div class="no-friends text-center py-8">
           <i class="fa-solid fa-user-group text-gray-600 text-4xl mb-3"></i>

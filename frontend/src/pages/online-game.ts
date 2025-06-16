@@ -82,9 +82,59 @@ export default {
 			document.getElementById("icon-online")?.classList.toggle("opacity-100");
 			document.getElementById("text-online")?.classList.toggle("opacity-0", isIconVisible);
 		}, 3000);
+		
+		// Function to set up friend match
+		function setupFriendMatch(matchData: any) {
+			console.log("Setting up friend match:", matchData);
+			
+			// Show "Creating match..." message
+			const gameModeDetails = document.getElementById("game-mode-details");
+			if (gameModeDetails) {
+				heading.textContent = 'Friend Match';
+				heading.className = "text-4xl md:text-5xl font-bold text-center text-pongcyan drop-shadow-[0_0_15px_#00f7ff]";
+				
+				gameModeDetails.innerHTML = `
+					<div class="flex flex-col items-center justify-center gap-6">
+						<h2 class="text-2xl text-pongcyan">Creating Friend Match...</h2>
+						<div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pongcyan"></div>
+						<p class="text-white">Setting up match with Player ${matchData.player1 === userId ? matchData.player2 : matchData.player1}</p>
+					</div>
+				`;
+			}
+			
+			// Set up friend match handlers
+			const friendMatchCreatedHandler = (data: any) => {
+				console.log("Friend match created:", data);
+				currentMatchId = data.matchId;
+				currentOpponentId = data.opponent.id;
+				isPlayer1 = data.isPlayer1;
+				
+				showMatchFound(data.opponent);
+			};
+			
+			const gameStartHandler = (data: any) => {
+				console.log(`Friend game started with match ID: ${data.matchId}`);
+				if (currentMatchId && currentOpponentId && currentMatchId === data.matchId) {
+					startGame(currentMatchId, currentOpponentId, isPlayer1);
+				}
+			};
+			
+			client?.on('friend_match_created', friendMatchCreatedHandler);
+			client?.on('game_start', gameStartHandler);
+			
+			// Trigger the friend match creation
+			setTimeout(() => {
+				if (client) {
+					client.send('create_friend_match', {
+						player1: matchData.player1,
+						player2: matchData.player2,
+						initiator: matchData.initiator
+					});
+				}
+			}, 1000); // Give a small delay for UI to update
+		}
 
 		const heading = container.querySelector("h1")!;
-
 
 		// Header
 		const headerNav = container.querySelector(".header");
@@ -100,17 +150,45 @@ export default {
 		const loadingPong = container.querySelector('#loading-pong');
 		loadingPong?.appendChild(PongLoading({text: t('play.onlineGame.or')}));
 		
-		const userId = store.userId?? '0';
+		const userId = store.userId ?? '0';
 		const client = pongGameClient;
 
 		// State for tracking current match
 		let currentMatchId: string | null = null;
 		let currentOpponentId: string | null = null;
 		let isPlayer1 = false;
-		let gameBoard:any | null = null;
+		let gameBoard: any | null = null;
 		
-		const waitingForMatchHandler = (data:any) => {
-			// Update queue position display if we have one
+		// Clean up any existing handlers
+		client?.clearAllHandlers();
+		
+		// Check for pending friend match from chat
+		const pendingMatchData = sessionStorage.getItem('pendingFriendMatch');
+		if (pendingMatchData) {
+			try {
+				const { matchData, timestamp } = JSON.parse(pendingMatchData);
+				
+				// Check if it's recent (within last 30 seconds)
+				if (Date.now() - timestamp < 30000) {
+					console.log("Found pending friend match:", matchData);
+					
+					// Clear the pending match data
+					sessionStorage.removeItem('pendingFriendMatch');
+					
+					// Set up the friend match
+					setupFriendMatch(matchData);
+					return; // Exit early, don't set up normal flow
+				} else {
+					// Remove expired match data
+					sessionStorage.removeItem('pendingFriendMatch');
+				}
+			} catch (error) {
+				console.error("Error parsing pending match data:", error);
+				sessionStorage.removeItem('pendingFriendMatch');
+			}
+		}
+		
+		const waitingForMatchHandler = (data: any) => {
 			const queuePositionElement = document.getElementById('queue-position');
 			if (queuePositionElement) {
 				queuePositionElement.textContent = `Position: ${data.position}`;
@@ -119,71 +197,46 @@ export default {
 		client?.on('waiting_for_match', waitingForMatchHandler);
 
 		const matchFoundHandler = (data: any) => {
-			console.log(data);
+			console.log('Random match found:', data);
 			currentMatchId = data.matchId;
 			currentOpponentId = data.opponent.id;
-			isPlayer1 = data.isPlayer1; // We're player 1 if we initiated
-			console.log(`This is player 1: ${isPlayer1}`);
+			isPlayer1 = data.isPlayer1;
 			
-			// Show match found UI
 			showMatchFound(data.opponent);
 			client?.off('waiting_for_match', waitingForMatchHandler);
 		}
 
-		const matchFoundHandler2 = (data: any) => {
-			console.log("friend_match_created", data);
+		// FIXED: Single handler for friend matches
+		const friendMatchCreatedHandler = (data: any) => {
+			console.log("Friend match created:", data);
 			currentMatchId = data.matchId;
 			currentOpponentId = data.opponent.id;
 			isPlayer1 = data.isPlayer1;
-			console.log(currentMatchId, currentOpponentId, data.matchId);
-			console.log(`This is player 1: ${isPlayer1}`);
+			
+			showMatchFound(data.opponent);
 		}
 
 		client?.on('match_found', matchFoundHandler);
-		client?.on('friend_match_created', matchFoundHandler2);
+		client?.on('friend_match_created', friendMatchCreatedHandler);
 
 		const gameStartHandler = (data: any) => {
 			console.log(`Game started with match ID: ${data.matchId}`);
-			console.log("ISPLAYER 1: ", isPlayer1);
-
-			console.log(currentMatchId, currentOpponentId, data.matchId);
 			if (currentMatchId && currentOpponentId && currentMatchId === data.matchId) {
 				startGame(currentMatchId, currentOpponentId, isPlayer1);
 			}
-			client?.off('match_found', matchFoundHandler)
+			client?.off('match_found', matchFoundHandler);
+			client?.off('friend_match_created', friendMatchCreatedHandler);
 		}
 		client?.on('game_start', gameStartHandler);
 		
-		client?.on('friend_match_invite', (data:any) => {
-			// Show friend invite notification
-			const accept = confirm(`${data.fromId} has invited you to a match. Accept?`);
-			if (accept) {
-				client.acceptFriendMatch(data.fromId);
-			}
-		});
-		
-		client?.on('friend_match_created', (data:any) => {
-			currentMatchId = data.matchId;
-			currentOpponentId = data.opponent.id;
-			isPlayer1 = data.isPlayer1; 
-			
-			// Show match found UI
-			showMatchFound(data.opponent);
-		});
-		
 		const matchResultsHandler = (data: any) => {
 			if (gameBoard) {
-				// Game ended, show results
 				showGameResults(data);
 				gameBoard.cleanup();
 				gameBoard = null;
 			}
 		}
-		client?.on('match_results', (data:any) => {
-			matchResultsHandler(data);
-			client.off('match_results', matchResultsHandler);
-			client.off('game_start', gameStartHandler)
-		});
+		client?.on('match_results', matchResultsHandler);
 
 		// Play with Friend functionality
 		const playWithFriendBtn = document.getElementById("play-with-friend");
@@ -195,19 +248,9 @@ export default {
 				heading.textContent = t('play.onlineGame.findFriend');
 				heading.className = "text-4xl md:text-5xl font-bold text-center text-pongcyan drop-shadow-[0_0_15px_#00f7ff]";
 
-				// Replace the existing FetchFriendsList with one that uses our client
 				gameModeDetails.innerHTML = '';
 				const friendsList = FetchFriendsList();
 				gameModeDetails.appendChild(friendsList);
-				
-				// Add event handler for friend invitation
-				friendsList.addEventListener('friend-selected', (e:any) => {
-					const friendId = e.detail;
-					client?.inviteFriend(friendId);
-					
-					// Show waiting for response UI
-					showWaitingForFriend(friendId);
-				});
 			}
 		});
 
@@ -225,41 +268,10 @@ export default {
 				const findOpponent = FindOpponent({heading, isIconVisible, toggleInterval, client});
 				gameModeDetails.appendChild(findOpponent);
 				isIconVisible = !isIconVisible;
-				
-				// Start matchmaking
-				// client.findMatch();
-				console.log("find_match request sent");
-				
-				// Add cancel button event handler
-				findOpponent.querySelector('#cancel-matchmaking')?.addEventListener('click', () => {
-					client?.cancelMatchmaking();
-					// showMainMenu();
-				});
 			}
 		});
 		
-		function showWaitingForFriend(friendId:string) {
-			const gameModeDetails = document.getElementById("game-mode-details");
-			if (gameModeDetails) {
-				gameModeDetails.innerHTML = `
-					<div class="flex flex-col items-center justify-center gap-6">
-						<h2 class="text-2xl text-pongcyan">${'waiting for Friend'}</h2>
-						<p>${'Invite sent to'} ${friendId}</p>
-						<div class="spinner"></div>
-						<button id="cancel-invite" class="px-6 py-3 bg-red-600 text-white rounded-md">
-							${t('play.onlineGame.cancel')}
-						</button>
-					</div>
-				`;
-				
-				// Add cancel button handler
-				// document.getElementById('cancel-invite')?.addEventListener('click', () => {
-				// 	// showMainMenu();
-				// });
-			}
-		}
-		
-		function showMatchFound(opponent:any) {
+		function showMatchFound(opponent: any) {
 			const gameModeDetails = document.getElementById("game-mode-details");
 			if (gameModeDetails) {
 				gameModeDetails.innerHTML = `
@@ -290,11 +302,12 @@ export default {
 			}
 		}
 		
-		function startGame(matchId:string, opponentId:string, isPlayer1:boolean) {
+		function startGame(matchId: string, opponentId: string, isPlayer1: boolean) {
 			if (gameBoard) {
 				gameBoard.cleanup();
 				gameBoard = null;
 			}
+			
 			// Create game container
 			container.innerHTML = `
 				<div class="content relative flex flex-col items-center sm:justify-around h-screen max-sm:p-2 sm:border-8 bg-pongcyan border-pongdark border-solid">
@@ -317,6 +330,7 @@ export default {
 			const gameHeader = OfflineGameHeader({gameMode: 'online', player1_id: userId, player2_id: opponentId, client });
 			const playerHeader = container.querySelector('.player-header')!;
 			playerHeader.appendChild(gameHeader);
+			
 			// Create game board
 			if (canvas && gameHeader) {
 				gameBoard = new OnlineGameBoard(
@@ -335,15 +349,11 @@ export default {
 		
 		function showGameResults(results: any) {
 			const resultsOverlay = document.createElement('div');
-			if (document.body.contains(resultsOverlay))
-				return;
+			if (document.body.contains(resultsOverlay)) return;
+			
 			resultsOverlay.className = 'game-results fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50';
-			console.log(results);
-			// Determine if player won
+			
 			const isWinner = (results.winner === Number(store.userId));
-			console.log(results.winner, store.userId);
-			console.log(isWinner);			
-			// Calculate ELO change
 			const eloChange = results.eloChange[userId] || 0;
 			const eloChangeDisplay = eloChange >= 0 ? `+${eloChange}` : eloChange;
 			
@@ -363,10 +373,8 @@ export default {
 				</div>
 			`;
 			
-			// Add to DOM
 			document.body.appendChild(resultsOverlay);
 			
-			// Add button event handlers
 			document.getElementById('play-again-btn')?.addEventListener('click', () => {
 				document.body.removeChild(resultsOverlay);
 				gameBoard = null;
@@ -374,10 +382,13 @@ export default {
 			});
 		}
 
+		// Cleanup function
 		return () => {
-			gameBoard.cleanup();
-			gameBoard = null;
-			client?.disconnect();
+			if (gameBoard) {
+				gameBoard.cleanup();
+				gameBoard = null;
+			}
+			client?.clearAllHandlers();
 			clearInterval(toggleInterval);
 		};
 	}

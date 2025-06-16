@@ -8,6 +8,7 @@ import { Profile } from "../profile/UserProfile.js";
 import { t } from "../../languages/LanguageController.js";
 import axios from "axios";
 import { GameInviteMessage } from "./GameInviteMessage.js";
+import Toast from "../../toast/Toast.js";
 // import { _isClickEvent } from "chart.js/helpers";
 
 // interface Message {
@@ -884,10 +885,44 @@ export const Chat = createComponent(
         }
       });
 
-      // Listen for errors
+        // NEW: Handle friend match creation from chat service
+        chatService.on("create_friend_match", (data) => {
+          console.log("Received create_friend_match from chat service:", data);
+          
+          import("../../main.js").then(({ pongGameClient }) => {
+            if (pongGameClient) {
+              console.log("Forwarding to matchmaking service...");
+              pongGameClient.send('create_friend_match', {
+                player1: data.player1,
+                player2: data.player2,
+                initiator: data.initiator
+              });
+            } else {
+              console.error("Matchmaking client not available");
+            }
+          });
+        });
+
+        // NEW: Handle game match creation status from chat
+        chatService.on("game:match_creating", (data) => {
+          console.log("Game match is being created:", data);
+          
+          const notification = document.createElement('div');
+          notification.className = 'fixed top-4 right-4 bg-green-600 text-white p-4 rounded-lg z-50';
+          notification.textContent = 'Creating game match...';
+          document.body.appendChild(notification);
+          
+          // Remove notification after 3 seconds
+          setTimeout(() => {
+            if (document.body.contains(notification)) {
+              document.body.removeChild(notification);
+            }
+          }, 3000);
+        });
+
       chatService.on("error", (data) => {
         console.error("WebSocket error:", data.message);
-        // You might want to show an error message to the user
+        Toast.show(data.message, "error")
       });
     };
 

@@ -103,6 +103,11 @@ export class PongGameClient {
 		this.callbacks = {};
 	}
 
+	// NEW: Check if connected
+	public isConnected(): boolean {
+		return this.ws !== null && this.ws.readyState === WebSocket.OPEN;
+	}
+
 	// Close the connection
 	disconnect(): void {
 	  if (this.ws) {

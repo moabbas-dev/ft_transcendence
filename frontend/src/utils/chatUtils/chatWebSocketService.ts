@@ -1,4 +1,5 @@
         import store from "../../../store/store";
+import { pongGameClient } from "../../main";
 
 class ChatWebSocketService {
   private socket: WebSocket | null = null;
@@ -119,6 +120,8 @@ class ChatWebSocketService {
 
     // Send the message as normal
     this.socket.send(JSON.stringify({ event, payload }));
+    console.log(`send: ${event} with: `, payload);
+    
   }
 
   /**
@@ -411,4 +414,30 @@ public markMessagesAsRead(roomId: string | null): void {
   }
 }
 
-export default new ChatWebSocketService();
+const chatService = new ChatWebSocketService()
+export default chatService;
+
+export function setupGameInviteHandlers() {
+  // Listen for create_friend_match from chat service
+  chatService.on("create_friend_match", (data) => {
+    console.log("Received create_friend_match from chat:", data);
+    
+    // Forward to matchmaking service
+    if (pongGameClient && pongGameClient.isConnected()) {
+      pongGameClient.send('create_friend_match', {
+        player1: data.player1,
+        player2: data.player2,
+        initiator: data.initiator
+      });
+      console.log("Forwarded create_friend_match to matchmaking service");
+    } else {
+      console.error("Matchmaking client not connected");
+    }
+  });
+
+  // Listen for game match creation confirmation from chat
+  chatService.on("game:match_creating", (data) => {
+    console.log("Match is being created:", data);
+    // You can show a loading state here if needed
+  });
+}

@@ -130,9 +130,19 @@ export const initializeTournamentClient = async () => {
 
 async function initializeChatClient() {
 	try {
-		// Connect to WebSocket server
 		await chatService.connect();
-
+		chatService.on("game:navigate_to_match", (data) => {
+			console.log("Received game navigation request:", data);
+			
+			sessionStorage.setItem('pendingFriendMatch', JSON.stringify({
+				matchData: data.matchData,
+				timestamp: Date.now()
+			}));
+			
+			import('./router.js').then(({ navigate }) => {
+				navigate('/play/online-game');
+			});
+		});
 		console.log("Connected to chat service from home");
 	} catch (error) {
 		console.error("Failed to connect to chat service:", error);
