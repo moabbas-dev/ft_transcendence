@@ -139,6 +139,8 @@ async function initializeChatClient() {
 				timestamp: Date.now()
 			}));
 			
+			console.log("Stored pending friend match data:", data.matchData);
+			
 			import('./router.js').then(({ navigate }) => {
 				navigate('/play/online-game');
 			});

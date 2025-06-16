@@ -87,22 +87,10 @@ export default {
 		function setupFriendMatch(matchData: any) {
 			console.log("Setting up friend match:", matchData);
 			
-			// Show "Creating match..." message
-			const gameModeDetails = document.getElementById("game-mode-details");
-			if (gameModeDetails) {
-				heading.textContent = 'Friend Match';
-				heading.className = "text-4xl md:text-5xl font-bold text-center text-pongcyan drop-shadow-[0_0_15px_#00f7ff]";
-				
-				gameModeDetails.innerHTML = `
-					<div class="flex flex-col items-center justify-center gap-6">
-						<h2 class="text-2xl text-pongcyan">Creating Friend Match...</h2>
-						<div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pongcyan"></div>
-						<p class="text-white">Setting up match with Player ${matchData.player1 === userId ? matchData.player2 : matchData.player1}</p>
-					</div>
-				`;
-			}
+			// Clear any existing handlers first
+			client?.clearAllHandlers();
 			
-			// Set up friend match handlers
+			// Set up friend match handlers FIRST
 			const friendMatchCreatedHandler = (data: any) => {
 				console.log("Friend match created:", data);
 				currentMatchId = data.matchId;
@@ -119,21 +107,38 @@ export default {
 				}
 			};
 			
+			// Set up handlers before sending any requests
 			client?.on('friend_match_created', friendMatchCreatedHandler);
 			client?.on('game_start', gameStartHandler);
 			
-			// Trigger the friend match creation
-			setTimeout(() => {
-				if (client) {
-					client.send('create_friend_match', {
-						player1: matchData.player1,
-						player2: matchData.player2,
-						initiator: matchData.initiator
-					});
-				}
-			}, 1000); // Give a small delay for UI to update
+			// Show "Creating match..." message
+			const gameModeDetails = document.getElementById("game-mode-details");
+			if (gameModeDetails) {
+				heading.textContent = 'Friend Match';
+				heading.className = "text-4xl md:text-5xl font-bold text-center text-pongcyan drop-shadow-[0_0_15px_#00f7ff]";
+				
+				gameModeDetails.innerHTML = `
+					<div class="flex flex-col items-center justify-center gap-6">
+						<h2 class="text-2xl text-pongcyan">Creating Friend Match...</h2>
+						<div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pongcyan"></div>
+						<p class="text-white">Setting up match with Player ${matchData.player1 === userId ? matchData.player2 : matchData.player1}</p>
+					</div>
+				`;
+			}
+			
+			// FIXED: Only the initiator should create the match, and do it immediately
+			const isInitiator = matchData.initiator === userId;
+			if (isInitiator && client) {
+				console.log("Sending create_friend_match request...");
+				client.send('create_friend_match', {
+					player1: matchData.player1,
+					player2: matchData.player2,
+					initiator: matchData.initiator
+				});
+			} else {
+				console.log("Waiting for match creation from initiator...");
+			}
 		}
-
 		const heading = container.querySelector("h1")!;
 
 		// Header
@@ -171,15 +176,17 @@ export default {
 				// Check if it's recent (within last 30 seconds)
 				if (Date.now() - timestamp < 30000) {
 					console.log("Found pending friend match:", matchData);
-					
-					// Clear the pending match data
+
+					// Clear the pending match data immediately
 					sessionStorage.removeItem('pendingFriendMatch');
+					
+					// Clear any existing handlers before setting up friend match
+					client?.clearAllHandlers();
 					
 					// Set up the friend match
 					setupFriendMatch(matchData);
-					return; // Exit early, don't set up normal flow
+					return;
 				} else {
-					// Remove expired match data
 					sessionStorage.removeItem('pendingFriendMatch');
 				}
 			} catch (error) {
@@ -217,7 +224,7 @@ export default {
 		}
 
 		client?.on('match_found', matchFoundHandler);
-		client?.on('friend_match_created', friendMatchCreatedHandler);
+		// client?.on('friend_match_created', friendMatchCreatedHandler);
 
 		const gameStartHandler = (data: any) => {
 			console.log(`Game started with match ID: ${data.matchId}`);

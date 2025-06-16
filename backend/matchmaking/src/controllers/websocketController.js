@@ -167,16 +167,16 @@ function registerMessageHandlers(wsAdapter) {
     try {
       const { player1, player2, initiator } = payload;
       console.log(`Creating friend match between ${player1} and ${player2}, initiated by ${initiator}`);
-
+      console.log(`Request received from client: ${clientId}`);
+  
       // Create the match
       const friendMatch = await matchmakingService.createMatch(player1, player2, 'friendly');
-
+      console.log(`Friend match created with ID: ${friendMatch.matchId}`);
+  
       if (friendMatch) {
-        // Determine who is player1 and player2
-        const isPlayer1 = (clientId === player1);
-
         // Send match created event to both players
-        wsAdapter.sendToClient(player1, 'friend_match_created', {
+        console.log(`Sending friend_match_created to player1: ${player1}`);
+        const sent1 = wsAdapter.sendToClient(player1, 'friend_match_created', {
           matchId: friendMatch.matchId,
           opponent: {
             id: player2,
@@ -184,8 +184,9 @@ function registerMessageHandlers(wsAdapter) {
           },
           isPlayer1: true
         });
-
-        wsAdapter.sendToClient(player2, 'friend_match_created', {
+  
+        console.log(`Sending friend_match_created to player2: ${player2}`);
+        const sent2 = wsAdapter.sendToClient(player2, 'friend_match_created', {
           matchId: friendMatch.matchId,
           opponent: {
             id: player1,
@@ -193,16 +194,23 @@ function registerMessageHandlers(wsAdapter) {
           },
           isPlayer1: false
         });
-
+  
+        console.log(`Messages sent - Player1: ${sent1}, Player2: ${sent2}`);
+  
         // Start the match after 3 seconds
         setTimeout(async () => {
+          console.log(`Starting friend match ${friendMatch.matchId} after countdown`);
           await matchmakingService.updateMatchStartTime(friendMatch.matchId);
+          
           wsAdapter.sendToClient(player1, 'game_start', { matchId: friendMatch.matchId });
           wsAdapter.sendToClient(player2, 'game_start', { matchId: friendMatch.matchId });
+          
+          console.log(`Game start messages sent to both players`);
         }, 3000);
-
-        console.log(`Friend match created: ${friendMatch.matchId}`);
+  
+        console.log(`Friend match setup complete: ${friendMatch.matchId}`);
       } else {
+        console.error(`Failed to create friend match`);
         wsAdapter.sendToClient(clientId, 'error', {
           message: 'Failed to create friend match'
         });
