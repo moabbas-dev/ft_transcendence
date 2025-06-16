@@ -59,7 +59,7 @@ const Friend = createComponent((props: FriendProps) => {
         chatService.send("game:invite", {
           from: store.userId,
           to: props.id,
-          gameType: "1v1"
+          gameType: "friendly"
         });
 
         // Update button state

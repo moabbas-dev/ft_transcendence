@@ -317,7 +317,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
 
   wsAdapter.on("game:invite", async ({ clientId, payload }) => {
     try {
-      const { from, to, gameType = "1v1" } = payload;
+      const { from, to, gameType = "friendly" } = payload;
 
       // Check if users are friends
       const friendship = await getFriendshipStatus(from, to);

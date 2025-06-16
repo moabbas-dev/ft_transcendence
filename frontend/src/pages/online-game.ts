@@ -127,7 +127,9 @@ export default {
 			}
 			
 			// FIXED: Only the initiator should create the match, and do it immediately
-			const isInitiator = matchData.initiator === userId;
+			const isInitiator = String(matchData.initiator) === String(userId);
+			console.log(`GGGGGGGGGGGGGGGGGGGGGGG: `, matchData);
+			
 			if (isInitiator && client) {
 				console.log("Sending create_friend_match request...");
 				client.send('create_friend_match', {
