@@ -247,7 +247,7 @@ export default {
 		}
 		client?.on('match_results', matchResultsHandler);
 
-		// Play with Friend functionality
+		// Play with Friend functionality 
 		const playWithFriendBtn = document.getElementById("play-with-friend");
 		playWithFriendBtn?.addEventListener("click", () => {
 			clearInterval(toggleInterval);

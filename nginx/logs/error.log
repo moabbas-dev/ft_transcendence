@@ -29,3 +29,4 @@
 2025/06/16 09:44:19 [error] 30#30: *3720 connect() failed (111: Connection refused) while connecting to upstream, client: 172.18.0.1, server: _, request: "GET / HTTP/1.1", upstream: "http://172.18.0.6:5173/", host: "localhost:4443"
 2025/06/16 09:45:54 [error] 30#30: *3724 connect() failed (111: Connection refused) while connecting to upstream, client: 172.18.0.1, server: _, request: "GET /social/ HTTP/1.1", upstream: "http://172.18.0.4:3002/", host: "localhost:4443"
 2025/06/16 09:45:54 [error] 30#30: *3726 connect() failed (111: Connection refused) while connecting to upstream, client: 172.18.0.1, server: _, request: "GET /social/ HTTP/1.1", upstream: "http://172.18.0.4:3002/", host: "localhost:4443"
+2025/06/17 07:52:06 [error] 30#30: *320 connect() failed (111: Connection refused) while connecting to upstream, client: 172.18.0.1, server: _, request: "GET / HTTP/1.1", upstream: "http://172.18.0.6:5173/", host: "localhost:4443"

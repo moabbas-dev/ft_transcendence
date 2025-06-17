@@ -21,7 +21,7 @@ class JwtController {
 			} catch (error) {
 				reply.clearCookie('refreshToken');
 				if (error.message.includes('expired'))
-					return reply.code(401).send({ message: "Refresh token expired!" });
+					return reply.code(401).send({ message: "No refresh token provided!" });
 				return reply.code(401).send({ message: "Invalid refresh token!" });
 			}
 			const userId = decoded.userId;
@@ -62,7 +62,7 @@ class JwtController {
 				console.log('Token verification failed:', error.message);
 				reply.clearCookie('refreshToken', { path: '/' });
 				if (error.message.includes('expired'))
-					return reply.code(401).send({ message: "Refresh token expired!" });
+					return reply.code(401).send({ message: "No refresh token provided!" });
 				return reply.code(401).send({ message: "Invalid refresh token!" });
 			}
 	
