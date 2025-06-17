@@ -1,3 +1,5 @@
+import store from "../../../../store/store.js";
+import { t } from "../../../languages/LanguageController.js";
 import { navigate, refreshRouter } from "../../../router.js";
 import { GameBoard, gameState } from "../../Offline-Game/components/GameBoard.js";
 import { BallController, Controller, HumanPlayerController } from "../../Offline-Game/components/GameControllers.js";
@@ -67,6 +69,42 @@ export class OnlineGameBoard extends GameBoard {
 		// The opponent's movements will be mapped to right paddle (player2Y)
 		this.player1Controller = new HumanPlayerController({ up: 'w', down: 's' }, 'player1Y');
 		this.player2Controller = new NetworkController();
+	}
+
+	private showGameResults(results: any) {
+		console.log(results);
+		const resultsOverlay = document.createElement('div');
+		if (document.body.contains(resultsOverlay)) return;
+		
+		resultsOverlay.className = 'game-results fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50';
+		
+		const isWinner = (results.winner === Number(store.userId));
+		console.log(isWinner);
+		// const eloChange = results.eloChange[] || 0;
+		// const eloChangeDisplay = eloChange >= 0 ? `+${eloChange}` : eloChange;
+		
+		resultsOverlay.innerHTML = `
+			<div class="results-container bg-black p-8 rounded-xl border-2 ${isWinner ? 'border-pongcyan' : 'border-pongpink'} max-w-md w-full">
+				<h2 class="text-3xl font-bold mb-4 ${isWinner ? 'text-pongcyan' : 'text-pongpink'}">
+					${isWinner ? t('play.onlineGame.youWon') : t('play.onlineGame.youLost')}
+				</h2>
+				<p class="text-white mb-2">${t('play.onlineGame.finalScore')}: ${results.player1Goals} - ${results.player2Goals}</p>
+				
+				<div class="flex gap-4">
+					<button id="play-again-btn" class="flex-1 py-3 px-4 bg-pongcyan text-white rounded-md">
+						${t('play.onlineGame.playAgain')}
+					</button>
+				</div>
+			</div>
+		`;
+		
+		document.body.appendChild(resultsOverlay);
+		
+		document.getElementById('play-again-btn')?.addEventListener('click', () => {
+			document.body.removeChild(resultsOverlay);
+			// gameBoard = null;
+			navigate("/play/online-game");
+		});
 	}
 
 	private initOnlineEventListeners(): void {
@@ -388,6 +426,8 @@ export class OnlineGameBoard extends GameBoard {
 		}, 3000);
 	}
 
+	
+
 	update() {
 		if (this.state.gameEnded) {
 			this.cleanup();
@@ -443,9 +483,16 @@ export class OnlineGameBoard extends GameBoard {
 					player1Goals: this.state.scores.player1,
 					player2Goals: this.state.scores.player2
 				});
+				
 				this.cleanup();
 			}
 			this.updateScoreDisplay();
+			const res = {
+				winner: winnerId,
+				player1Goals: this.state.scores.player1,
+				player2Goals: this.state.scores.player2	
+			}
+			this.showGameResults(res);
 		}
 	}
 

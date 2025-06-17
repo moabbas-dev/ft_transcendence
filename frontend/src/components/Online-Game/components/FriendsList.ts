@@ -168,6 +168,7 @@ export function FetchFriendsList() {
     friendsList.innerHTML = '';
 
     if (friendsData && friendsData.length > 0) {
+      console.log(friendsData);
       friendsData.forEach(friend => {
         friendsList.appendChild(Friend(friend));
       });
