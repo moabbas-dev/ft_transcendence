@@ -4,7 +4,6 @@ import { open } from "sqlite";
 let db = null;
 
 export async function initDatabase() {
-  // Initialize chat database
   db = await open({
     filename: "./data/chat.db",
     driver: sqlite3.Database,

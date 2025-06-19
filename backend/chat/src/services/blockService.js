@@ -41,7 +41,6 @@ export async function getBlockedUsers(userId) {
     [userId]
   );
 
-  // Get user details for each blocked user
   const blockedIds = blocked.map((b) => b.blocked_id);
   return await getUsersFromAuth(blockedIds);
 }

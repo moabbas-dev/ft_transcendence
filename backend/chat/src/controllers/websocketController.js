@@ -1,12 +1,52 @@
 import { blockUser, getBlockedUsers, unblockUser } from "../services/blockService.js";
-import { getUser, createOrUpdateUser, getUserByUsername, createChatRoom, getUsersFromAuth, getMessageRequests } from "../services/userService.js";
+import { getUser, createOrUpdateUser, getUserByUsername, getUsersFromAuth } from "../services/userService.js";
 import { createFriendRequest, cancelFriendRequest, addFriend, getPendingFriendRequests, removeFriend, getFriendshipStatus } from "../services/friendService.js"
-import { saveMessage, getMessages, getUnreadMessageCount, markMessagesAsRead } from "../services/chatService.js";
+import { saveMessage, getMessages, getUnreadMessageCount, markMessagesAsRead, getMessageRequests, createChatRoom } from "../services/chatService.js";
 import { expireOldGameInvites, updateGameInviteStatus, getGameInviteById } from "../services/gameInvitationService.js";
 import { getDatabase } from "../db/initDB.js";
 import axios from 'axios';
 
-// Helper function to send notifications
+/**
+ * 📡 WebSocket Event List - Available Events Handled by This Controller
+ * 
+ * ─── USER EVENTS ─────────────────────────────
+ * - "user:connect"            → Connects a user and registers them as online
+ * - "user:disconnect"         → Handles user disconnection
+ * 
+ * ─── FRIEND REQUEST EVENTS ───────────────────
+ * - "friend:request"          → Sends a friend request
+ * - "friend:decline"          → Declines a friend request
+ * - "friend:cancel_request"   → Cancels a sent friend request
+ * - "friend:accept"           → Accepts a friend request
+ * - "friend:remove"           → Removes a friend from the friend list
+ * - "friends:get"             → Retrieves the friend list with online status
+ * - "friends:get_pending"     → Retrieves pending friend requests
+ * - "friendship:check"        → Checks friendship status between users
+ * 
+ * ─── MESSAGING EVENTS ────────────────────────
+ * - "message:private"         → Sends a private message
+ * - "messages:unread:get"     → Gets count of unread messages
+ * - "messages:mark_read"      → Marks all messages in a room as read
+ * - "messages:history"        → Fetches message history of a room
+ * - "message:requests:get"    → Fetches message requests from non-friends
+ * 
+ * ─── GAME INVITATION EVENTS ──────────────────
+ * - "game:invite"             → Sends a game invite to a friend
+ * - "game:invite_response"    → Responds to a game invite (accept/decline)
+ * 
+ * ─── BLOCKING EVENTS ─────────────────────────
+ * - "user:block"              → Blocks a user and cancels any friend requests
+ * - "user:unblock"            → Unblocks a previously blocked user
+ * - "users:blocked_list"      → Retrieves the list of blocked users
+ * - "user:check_blocked"      → Checks if a user is blocked
+ */
+
+/**
+ * Sends a notification to the external notification service.
+ * @param {string} type - The type of notification (e.g., "friend-request").
+ * @param {object} data - The payload to be sent with the notification.
+ * @returns {Promise<object|undefined>} - The response from the notification service or undefined on failure.
+ */
 async function sendNotification(type, data) {
   const NOTIFICATION_SERVICE_URL = 'http://notifications:3003/api/notifications';
 
@@ -30,11 +70,14 @@ async function sendNotification(type, data) {
   }
 }
 
-// Helper function to communicate with matchmaking service
+/**
+ * Sends matchmaking event data to the internal matchmaking service.
+ * @param {string} event - The type of matchmaking event.
+ * @param {object} data - The event payload.
+ * @returns {Promise<object>} - Response from the matchmaking service.
+ */
 async function sendToMatchmakingService(event, data) {
   try {
-    // In a real implementation, you would use a message queue or direct service call
-    // For now, we'll use HTTP API call to matchmaking service
     const response = await axios.post('http://matchmaking:3001/internal/friend-match', {
       event,
       data
@@ -51,14 +94,17 @@ async function sendToMatchmakingService(event, data) {
   }
 }
 
+/**
+ * Sets up WebSocket event listeners for user actions like connecting,
+ * messaging, friend requests, game invitations, and more.
+ * @param {object} wsAdapter - WebSocket adapter with event handling and messaging capabilities.
+ * @param {object} fastify - Fastify server instance for logging and context.
+ */
 export function setupWebSocketHandlers(wsAdapter, fastify) {
-  // Track online users mapping username to clientId
   const onlineUsers = new Map();
 
-  // Store game invite timers
   const gameInviteTimers = new Map();
 
-  // Set up periodic cleanup of expired invites (run every minute)
   setInterval(async () => {
     try {
       await expireOldGameInvites();
@@ -67,6 +113,9 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
     }
   }, 60000);
 
+  /**
+   * Handles a new user connection by storing their online status and syncing user data.
+  */
   wsAdapter.on("user:connect", async ({ clientId, payload }) => {
     const { username, userId } = payload;
     if (!username || !userId) {
@@ -92,6 +141,9 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
     }
   });
 
+  /**
+   * Handles user disconnection by cleaning up online status and invite timers.
+  */
   wsAdapter.on("user:disconnect", async ({ clientId }) => {
     fastify.log.info(`Disconnected: ${clientId}`);
 
@@ -110,15 +162,18 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
     }
   });
 
+  /**
+   * Handles sending a friend request between users.
+  */
   wsAdapter.on("friend:request", async ({ clientId, payload }) => {
     const { from, to } = payload;
     console.log("friend request from:", from, "to:", to);
-    
+
     try {
       await createFriendRequest(from, to);
       const senderUser = await getUser(from);
       const recipientUser = await getUser(to);
-      
+
       if (senderUser && recipientUser) {
         await sendNotification('friend-request', {
           senderId: parseInt(from),
@@ -145,6 +200,9 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
     }
   });
 
+  /**
+   * Handles the decline of a friend request.
+  */
   wsAdapter.on("friend:decline", async ({ clientId, payload }) => {
     try {
       const { from, to } = payload;
@@ -155,7 +213,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
 
       const fromUser = await getUser(from);
       const toUser = await getUser(to);
-      
+
       await sendNotification('friend-declined', {
         senderId: parseInt(toUser.id),
         recipientId: parseInt(fromUser.id),
@@ -180,6 +238,9 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
     }
   });
 
+  /**
+   * Cancels a previously sent friend request.
+  */
   wsAdapter.on("friend:cancel_request", async ({ clientId, payload }) => {
     try {
       const { from, to } = payload;
@@ -199,6 +260,9 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
     }
   });
 
+  /**
+   * Accepts a friend request and establishes friendship.
+  */
   wsAdapter.on("friend:accept", async ({ clientId, payload }) => {
     const { from, to } = payload;
     console.log("friend request acceptance from:", from, "to:", to);
@@ -212,7 +276,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
         wsAdapter.sendTo(clientId, "error", { message: "Failed to retrieve user data" });
         return;
       }
-      
+
       await sendNotification('friend-accepted', {
         senderId: parseInt(fromUser.id),
         recipientId: parseInt(toUser.id),
@@ -237,6 +301,9 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
     }
   });
 
+  /**
+   * Removes a friend from the user's friend list.
+  */
   wsAdapter.on("friend:remove", async ({ clientId, payload }) => {
     try {
       const { userId, friendId } = payload;
@@ -253,6 +320,9 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
     }
   });
 
+  /**
+   * Sends a private message between users, with checks for blocking and room creation.
+  */
   wsAdapter.on("message:private", async ({ clientId, payload }) => {
     try {
       const { from, to, content, timestamp } = payload;
@@ -266,7 +336,6 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
         return;
       }
 
-      // Check if blocked
       const blockedUsers = await getBlockedUsers(from);
       const isBlocked = blockedUsers.some(user => user.id === parseInt(to));
       const recipientBlockedUsers = await getBlockedUsers(to);
@@ -284,7 +353,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
 
       const roomId = [from, to].sort().join("-");
       await createChatRoom(roomId, [from, to]);
-      
+
       const newMessage = {
         id: Date.now().toString(),
         senderId: from,
@@ -315,11 +384,96 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
     }
   });
 
+  /**
+   * Fetches unread message counts for a given user.
+  */
+  wsAdapter.on("messages:unread:get", async ({ clientId, payload }) => {
+    try {
+      const { userId } = payload;
+      const unreadCounts = await getUnreadMessageCount(userId);
+      wsAdapter.sendTo(clientId, "messages:unread", { unreadCounts });
+    } catch (error) {
+      console.error("Error getting unread message counts:", error);
+      wsAdapter.sendTo(clientId, "error", {
+        message: "Failed to get unread message counts",
+        details: error.message
+      });
+    }
+  });
+
+  /**
+   * Marks all messages in a chat room as read by a user.
+  */
+  wsAdapter.on("messages:mark_read", async ({ clientId, payload }) => {
+    try {
+      const { roomId, userId } = payload;
+      if (!roomId || !userId) {
+        throw new Error('Missing roomId or userId');
+      }
+
+      await markMessagesAsRead(roomId, userId);
+      wsAdapter.sendTo(clientId, "messages:marked_read", { roomId, success: true });
+
+      const unreadCounts = await getUnreadMessageCount(userId);
+      wsAdapter.sendTo(clientId, "messages:unread", { unreadCounts });
+    } catch (error) {
+      console.error("Error marking messages as read:", error);
+      wsAdapter.sendTo(clientId, "error", {
+        message: "Failed to mark messages as read",
+        details: error.message
+      });
+    }
+  });
+
+  /**
+   * Retrieves chat history for a given room.
+  */
+  wsAdapter.on("messages:history", async ({ clientId, payload }) => {
+    try {
+      const { roomId } = payload;
+      if (!roomId || typeof roomId !== 'string') {
+        throw new Error('Invalid room ID');
+      }
+
+      const messages = await getMessages(roomId, 1000);
+      wsAdapter.sendTo(clientId, "messages:history", { roomId, messages });
+    } catch (error) {
+      fastify.log.error("Message history error:", error);
+      wsAdapter.sendTo(clientId, "error", {
+        message: "Failed to retrieve message history",
+        details: error.message
+      });
+    }
+  });
+
+  /**
+   * Retrieves message requests (messages from non-friends).
+  */
+  wsAdapter.on("message:requests:get", async ({ clientId, payload }) => {
+    try {
+      const { userId } = payload;
+      if (!userId) {
+        throw new Error('Missing userId');
+      }
+
+      const messageRequests = await getMessageRequests(userId);
+      wsAdapter.sendTo(clientId, "message:requests", { requests: messageRequests });
+    } catch (error) {
+      console.error("Error fetching message requests:", error);
+      wsAdapter.sendTo(clientId, "error", {
+        message: "Failed to fetch message requests",
+        details: error.message
+      });
+    }
+  });
+
+  /**
+   * Sends a game invitation to a friend, with optional expiration timer.
+  */
   wsAdapter.on("game:invite", async ({ clientId, payload }) => {
     try {
       const { from, to, gameType = "friendly" } = payload;
 
-      // Check if users are friends
       const friendship = await getFriendshipStatus(from, to);
       if (friendship.status !== 'friends') {
         wsAdapter.sendTo(clientId, "error", {
@@ -328,7 +482,6 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
         return;
       }
 
-      // Check if recipient has blocked sender
       const blockedUsers = await getBlockedUsers(to);
       const isBlocked = blockedUsers.some(user => user.id === parseInt(from));
 
@@ -339,11 +492,10 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
         return;
       }
 
-      // Create game invite message
       const inviteId = Date.now().toString();
       const currentTime = Date.now();
       const expirationTime = currentTime + (5 * 60 * 1000); // 5 minutes
-      
+
       const gameInviteMessage = {
         id: inviteId,
         senderId: from,
@@ -364,7 +516,6 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       await createChatRoom(roomId, [from, to]);
       await saveMessage(gameInviteMessage, roomId);
 
-      // Set up expiration timer
       const timer = setTimeout(async () => {
         try {
           await updateGameInviteStatus(inviteId, 'expired');
@@ -384,7 +535,6 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
         content: `${fromUser.nickname} invited you to a 1v1 friendly match`
       });
 
-      // Send to recipient if online
       const recipientClientId = onlineUsers.get(to.toString());
       if (recipientClientId) {
         wsAdapter.sendTo(recipientClientId, "message:private", {
@@ -408,7 +558,9 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
     }
   });
 
-  // FIXED: Simplified game invite response handler
+  /**
+   * Handles a game invitation response (accept/decline) and triggers game navigation if accepted.
+  */
   wsAdapter.on("game:invite_response", async ({ clientId, payload }) => {
     try {
       const { inviteId, response, from, to } = payload;
@@ -462,7 +614,6 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
 
       await saveMessage(responseMessage, roomId);
 
-      // Send response to original sender
       const senderClientId = onlineUsers.get(from.toString());
       if (senderClientId) {
         wsAdapter.sendTo(senderClientId, "message:private", { ...responseMessage, roomId });
@@ -471,12 +622,10 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
 
       wsAdapter.sendTo(clientId, "game:response_sent", { inviteId, response, status: newStatus });
 
-      // FIXED: If accepted, redirect both users to game and trigger matchmaking
       if (response === 'accept') {
         const senderClient = onlineUsers.get(from.toString());
         const accepterClient = onlineUsers.get(to.toString());
 
-        // Send navigation event to both clients to go to online game page
         if (senderClient) {
           wsAdapter.sendTo(senderClient, "game:navigate_to_match", {
             matchData: {
@@ -487,7 +636,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
             }
           });
         }
-        
+
         if (accepterClient) {
           wsAdapter.sendTo(accepterClient, "game:navigate_to_match", {
             matchData: {
@@ -507,60 +656,9 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
     }
   });
 
-  // Add remaining handlers (messages, blocking, etc.) - keeping existing code...
-  wsAdapter.on("messages:unread:get", async ({ clientId, payload }) => {
-    try {
-      const { userId } = payload;
-      const unreadCounts = await getUnreadMessageCount(userId);
-      wsAdapter.sendTo(clientId, "messages:unread", { unreadCounts });
-    } catch (error) {
-      console.error("Error getting unread message counts:", error);
-      wsAdapter.sendTo(clientId, "error", {
-        message: "Failed to get unread message counts",
-        details: error.message
-      });
-    }
-  });
-
-  wsAdapter.on("messages:mark_read", async ({ clientId, payload }) => {
-    try {
-      const { roomId, userId } = payload;
-      if (!roomId || !userId) {
-        throw new Error('Missing roomId or userId');
-      }
-
-      await markMessagesAsRead(roomId, userId);
-      wsAdapter.sendTo(clientId, "messages:marked_read", { roomId, success: true });
-      
-      const unreadCounts = await getUnreadMessageCount(userId);
-      wsAdapter.sendTo(clientId, "messages:unread", { unreadCounts });
-    } catch (error) {
-      console.error("Error marking messages as read:", error);
-      wsAdapter.sendTo(clientId, "error", {
-        message: "Failed to mark messages as read",
-        details: error.message
-      });
-    }
-  });
-
-  wsAdapter.on("messages:history", async ({ clientId, payload }) => {
-    try {
-      const { roomId } = payload;
-      if (!roomId || typeof roomId !== 'string') {
-        throw new Error('Invalid room ID');
-      }
-
-      const messages = await getMessages(roomId, 1000);
-      wsAdapter.sendTo(clientId, "messages:history", { roomId, messages });
-    } catch (error) {
-      fastify.log.error("Message history error:", error);
-      wsAdapter.sendTo(clientId, "error", {
-        message: "Failed to retrieve message history",
-        details: error.message
-      });
-    }
-  });
-
+  /**
+   * Blocks another user, cancelling any existing friend requests.
+  */
   wsAdapter.on("user:block", async ({ clientId, payload }) => {
     try {
       const { from: blockerId, blocked: blockedId } = payload;
@@ -589,6 +687,9 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
     }
   });
 
+  /**
+   * Unblocks a previously blocked user.
+  */
   wsAdapter.on("user:unblock", async ({ clientId, payload }) => {
     try {
       const { from, unblocked } = payload;
@@ -614,81 +715,9 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
     }
   });
 
-  wsAdapter.on("friends:get", async ({ clientId, payload }) => {
-    try {
-      const { userId } = payload;
-      const user = await getUser(userId);
-      if (!user) {
-        wsAdapter.sendTo(clientId, "error", { message: "User not found" });
-        return;
-      }
-
-      const friendsWithStatus = user.friends.map(friend => ({
-        ...friend,
-        status: onlineUsers.has(friend.id.toString()) ? 'online' : 'offline'
-      }));
-
-      wsAdapter.sendTo(clientId, "friends:list", { friends: friendsWithStatus });
-    } catch (error) {
-      fastify.log.error("Error fetching friends:", error);
-      wsAdapter.sendTo(clientId, "error", { message: "Failed to fetch friends" });
-    }
-  });
-
-  wsAdapter.on("friends:get_pending", async ({ clientId, payload }) => {
-    try {
-      const { userId } = payload;
-      const pendingRequests = await getPendingFriendRequests(userId);
-      wsAdapter.sendTo(clientId, "friends:pending", { pending: pendingRequests });
-    } catch (error) {
-      fastify.log.error("Error fetching pending requests:", error);
-      wsAdapter.sendTo(clientId, "error", { message: "Failed to fetch pending requests" });
-    }
-  });
-
-  wsAdapter.on("friendship:check", async ({ clientId, payload }) => {
-    const { currentUserId, targetUserId } = payload;
-    const status = await getFriendshipStatus(currentUserId, targetUserId);
-    wsAdapter.sendTo(clientId, "friendship:status", { status });
-  });
-
-  wsAdapter.on("message:requests:get", async ({ clientId, payload }) => {
-    try {
-      const { userId } = payload;
-      if (!userId) {
-        throw new Error('Missing userId');
-      }
-
-      const messageRequests = await getMessageRequests(userId);
-      wsAdapter.sendTo(clientId, "message:requests", { requests: messageRequests });
-    } catch (error) {
-      console.error("Error fetching message requests:", error);
-      wsAdapter.sendTo(clientId, "error", {
-        message: "Failed to fetch message requests",
-        details: error.message
-      });
-    }
-  });
-
-  wsAdapter.on("users:blocked_list", async ({ clientId, payload }) => {
-    try {
-      const { userId } = payload;
-      if (!userId) {
-        wsAdapter.sendTo(clientId, "error", { message: "User ID is required" });
-        return;
-      }
-
-      const blockedUsers = await getBlockedUsers(userId);
-      wsAdapter.sendTo(clientId, "users:blocked_list", { blockedUsers });
-    } catch (error) {
-      fastify.log.error("Error fetching blocked users:", error);
-      wsAdapter.sendTo(clientId, "error", {
-        message: "Failed to fetch blocked users",
-        details: error.message
-      });
-    }
-  });
-
+  /**
+   * Checks if a user is blocked by another.
+  */
   wsAdapter.on("user:check_blocked", async ({ clientId, payload }) => {
     try {
       const { userId, targetId } = payload;
@@ -711,4 +740,73 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
       });
     }
   });
-}
+
+  /**
+   * Retrieves the list of users blocked by a given user.
+  */
+  wsAdapter.on("users:blocked_list", async ({ clientId, payload }) => {
+    try {
+      const { userId } = payload;
+      if (!userId) {
+        wsAdapter.sendTo(clientId, "error", { message: "User ID is required" });
+        return;
+      }
+
+      const blockedUsers = await getBlockedUsers(userId);
+      wsAdapter.sendTo(clientId, "users:blocked_list", { blockedUsers });
+    } catch (error) {
+      fastify.log.error("Error fetching blocked users:", error);
+      wsAdapter.sendTo(clientId, "error", {
+        message: "Failed to fetch blocked users",
+        details: error.message
+      });
+    }
+  });
+
+  /**
+   * Retrieves a user's friends list, including their online/offline status.
+  */
+  wsAdapter.on("friends:get", async ({ clientId, payload }) => {
+    try {
+      const { userId } = payload;
+      const user = await getUser(userId);
+      if (!user) {
+        wsAdapter.sendTo(clientId, "error", { message: "User not found" });
+        return;
+      }
+
+      const friendsWithStatus = user.friends.map(friend => ({
+        ...friend,
+        status: onlineUsers.has(friend.id.toString()) ? 'online' : 'offline'
+      }));
+
+      wsAdapter.sendTo(clientId, "friends:list", { friends: friendsWithStatus });
+    } catch (error) {
+      fastify.log.error("Error fetching friends:", error);
+      wsAdapter.sendTo(clientId, "error", { message: "Failed to fetch friends" });
+    }
+  });
+
+  /**
+   * Retrieves pending friend requests for a user.
+  */
+  wsAdapter.on("friends:get_pending", async ({ clientId, payload }) => {
+    try {
+      const { userId } = payload;
+      const pendingRequests = await getPendingFriendRequests(userId);
+      wsAdapter.sendTo(clientId, "friends:pending", { pending: pendingRequests });
+    } catch (error) {
+      fastify.log.error("Error fetching pending requests:", error);
+      wsAdapter.sendTo(clientId, "error", { message: "Failed to fetch pending requests" });
+    }
+  });
+
+  /**
+   * Checks the friendship status between two users.
+  */  
+  wsAdapter.on("friendship:check", async ({ clientId, payload }) => {
+    const { currentUserId, targetUserId } = payload;
+    const status = await getFriendshipStatus(currentUserId, targetUserId);
+    wsAdapter.sendTo(clientId, "friendship:status", { status });
+  });
+};
