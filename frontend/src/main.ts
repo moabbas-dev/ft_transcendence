@@ -33,19 +33,6 @@ export const initializeApp = async () => {
 
 initializeApp();
 
-
-// window.addEventListener("contextmenu", (e) => e.preventDefault());
-// window.addEventListener("keydown", (e) => {
-// 	if (
-// 	  e.key === "F12" ||
-// 	  (e.ctrlKey && e.shiftKey && e.key === "I") ||
-// 	  (e.ctrlKey && e.shiftKey && e.key === "J") ||
-// 	  (e.ctrlKey && e.key === "U")
-// 	) {
-// 	  e.preventDefault();
-// 	}
-// });
-
 export const handleLoginWithGoogle = (container: HTMLElement) => {
 	const signBtn: HTMLButtonElement = container.querySelector('#google-sign')!
 	if (!signBtn) {
@@ -63,8 +50,8 @@ export const handleLoginWithGoogle = (container: HTMLElement) => {
 			const failureURL = `${origin}/register`;
 			account.createOAuth2Session(
 				OAuthProvider.Google,
-				successURL, // if success redirect to this url
-				failureURL // if fail redirect to this url
+				successURL,
+				failureURL
 			)
 		} catch (err) {
 			Toast.show("Error: Login failed", "error");

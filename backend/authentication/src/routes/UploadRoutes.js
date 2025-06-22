@@ -5,21 +5,10 @@ const User = require('../models/User');
 module.exports = async (fastify) => {
     fastify.get('/auth/uploads/:id/:dirname', UploadController.getImageUrlsRoute);
     fastify.post('/auth/uploads/:id', UploadController.uploadHandler);
-    // fastify.get('/png;base64,*', async (req, reply) => {
-    //     try {
-    //         const base64String = req.params['*']; // Capture everything after "/png;base64,"
-    //         const buffer = Buffer.from(base64String, 'base64');
 
-    //         reply
-    //             .header('Content-Type', 'image/png')
-    //             .send(buffer);
-    //     } catch (error) {
-    //         reply.status(400).send({ message: 'Invalid Base64 string' });
-    //     }
-    // });
     fastify.get('/png/base64/*', async (req, reply) => {
         try {
-            const base64String = req.params['*']; // everything after /png/base64/
+            const base64String = req.params['*']; 
             const buffer = Buffer.from(base64String, 'base64');
             reply
                 .code(200)
@@ -32,9 +21,6 @@ module.exports = async (fastify) => {
     fastify.post('/auth/google_upload/:sessionUUID', async (req, reply) => {
         try {
             const { sessionUUID } = req.params;
-            // const authHeader = request.headers.authorization;
-            // if (!authHeader || !authHeader.startsWith('Bearer '))
-            // 	return reply.status(401).send({ error: 'Unauthorized: No token provided' });
             const session = await Session.getByUUID(sessionUUID);
             if (!session)
                 return reply.code(404).send({ message: "Session not found!" });

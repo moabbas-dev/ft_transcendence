@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   GmaesHistory.ts                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: afarachi <afarachi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/22 15:35:45 by afarachi          #+#    #+#             */
+/*   Updated: 2025/06/22 15:35:45 by afarachi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 import axios from "axios";
 import { t } from "../../languages/LanguageController.js";
 import { createComponent } from "../../utils/StateManager.js";
@@ -5,7 +17,6 @@ import { HistorySection } from "./HistorySection.js";
 import Toast from "../../toast/Toast.js";
 import store from "../../../store/store.js";
 
-// Interfaces for API response
 interface HistoryItem {
   matchId: number;
   opponent: {
@@ -37,7 +48,6 @@ type MatchType = '1v1' | 'friendly' | 'tournament';
 export const GamesHistory = createComponent((props: { userId: number }) => {
   const container = document.createElement("div");
   
-  // State for each match type
   const state = {
     '1v1': { currentPage: 1, totalMatches: 0, isLoading: false },
     'friendly': { currentPage: 1, totalMatches: 0, isLoading: false },
@@ -116,7 +126,6 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
     </div>
   `;
 
-  // Get DOM elements
   const loadingIndicator = container.querySelector('.loading-indicator') as HTMLElement;
   const errorMessage = container.querySelector('.error-message') as HTMLElement;
   const errorText = container.querySelector('.error-text') as HTMLElement;
@@ -130,7 +139,6 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
   const matchTabs = container.querySelectorAll('.match-tab') as NodeListOf<HTMLButtonElement>;
   const tableHeaderRow = container.querySelector('.table-header-row') as HTMLElement;
 
-  // Update table header based on active tab
   function updateTableHeader() {
     const trophiesHeader = activeTab === "1v1" ? 
       `<th class="px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase tracking-wider">${t('profile.historyTab.trophies')}</th>` : 
@@ -146,7 +154,6 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
     `;
   }
 
-  // Show/hide elements
   function showLoading() {
     state[activeTab].isLoading = true;
     loadingIndicator.classList.remove('hidden');
@@ -169,7 +176,6 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
     errorMessage.classList.add('hidden');
   }
 
-  // Update active tab styling
   function updateTabStyling() {
     matchTabs.forEach(tab => {
       const tabType = tab.dataset.type as MatchType;
@@ -181,19 +187,16 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
     });
   }
 
-  // Switch to a different match type
   function switchMatchType(type: MatchType) {
     if (type === activeTab || state[type].isLoading) return;
     
     activeTab = type;
     updateTabStyling();
-    updateTableHeader(); // Update the table header when switching tabs
+    updateTableHeader();
     
-    // Load the first page of the new match type
     fetchHistory(1);
   }
 
-  // Fetch history data
   async function fetchHistory(page: number = 1): Promise<void> {
     console.log(`fetchHistory called for ${activeTab} page ${page}, userId: ${props.userId}`);
     
@@ -236,11 +239,9 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
     }
   }
 
-  // Render history rows
   function renderHistory(matches: HistoryItem[]): void {
     console.log(`renderHistory called with ${matches.length} ${activeTab} matches`);
     
-    // Clear existing rows
     historyTBody.innerHTML = '';
 
     if (matches.length === 0) {
@@ -254,12 +255,11 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
     historyContent.classList.remove('hidden');
     noMatchesDiv.classList.add('hidden');
 
-    // Add each match
     matches.forEach((match, index) => {
       console.log(`Processing ${activeTab} match ${index}:`, match);
       const historyRow = HistorySection({
         opponentName: match.opponent.nickname,
-        played: match.played.replace(' ago', ''), // Remove 'ago' since HistorySection adds it
+        played: match.played.replace(' ago', ''),
         duration: match.duration,
         outcome: match.outcome,
         result: match.result,
@@ -270,12 +270,10 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
     });
   }
 
-  // Render pagination
   function renderPagination(): void {
     const currentState = state[activeTab];
     const totalPages = Math.ceil(currentState.totalMatches / pageSize);
 
-    // Update pagination info
     const start = ((currentState.currentPage - 1) * pageSize) + 1;
     const end = Math.min(currentState.currentPage * pageSize, currentState.totalMatches);
 
@@ -309,36 +307,26 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
         }
     }
 
-    
-    // paginationInfo.innerHTML = currentState.totalMatches > 0 
-    //   ? `${t('profile.historyTab.showing')} ${start}-${end} ${t('profile.historyTab.of')} ${currentState.totalMatches} ${activeTab} ${t('profile.historyTab.matches')}`
-    //   : '';
-
-    // Clear pagination controls
     paginationControls.innerHTML = '';
 
     if (totalPages <= 1) {
       return;
     }
 
-    // Previous button
     if (currentState.currentPage > 1) {
       const prevBtn = createPaginationButton(currentState.currentPage - 1, 'Previous');
       prevBtn.classList.add('bg-white', 'border', 'border-gray-300', 'text-gray-500', 'hover:bg-gray-50');
       paginationControls.appendChild(prevBtn);
     }
 
-    // Page numbers
     const maxVisiblePages = 5;
     let startPage = Math.max(1, currentState.currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
-    // Adjust if we're near the end
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
 
-    // First page and ellipsis
     if (startPage > 1) {
       paginationControls.appendChild(createPaginationButton(1, '1'));
       if (startPage > 2) {
@@ -349,7 +337,6 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
       }
     }
 
-    // Page numbers
     for (let i = startPage; i <= endPage; i++) {
       const pageBtn = createPaginationButton(i, i.toString());
       if (i === currentState.currentPage) {
@@ -360,7 +347,6 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
       paginationControls.appendChild(pageBtn);
     }
 
-    // Last page and ellipsis
     if (endPage < totalPages) {
       if (endPage < totalPages - 1) {
         const ellipsis = document.createElement('span');
@@ -371,7 +357,6 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
       paginationControls.appendChild(createPaginationButton(totalPages, totalPages.toString()));
     }
 
-    // Next button
     if (currentState.currentPage < totalPages) {
       const nextBtn = createPaginationButton(currentState.currentPage + 1, 'Next');
       nextBtn.classList.add('bg-white', 'border', 'border-gray-300', 'text-gray-500', 'hover:bg-gray-50');
@@ -379,7 +364,6 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
     }
   }
 
-  // Create pagination button
   function createPaginationButton(page: number, text: string): HTMLButtonElement {
     const button = document.createElement('button');
     button.textContent = text;
@@ -392,7 +376,6 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
     return button;
   }
 
-  // Event listeners for tabs
   matchTabs.forEach(tab => {
     tab.addEventListener('click', () => {
       const tabType = tab.dataset.type as MatchType;
@@ -400,12 +383,10 @@ export const GamesHistory = createComponent((props: { userId: number }) => {
     });
   });
 
-  // Event listeners
   retryBtn.addEventListener('click', () => {
     fetchHistory(state[activeTab].currentPage);
   });
 
-  // Initialize table header and load initial data
   updateTableHeader();
   fetchHistory(1);
 

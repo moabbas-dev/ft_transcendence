@@ -100,12 +100,10 @@ export default {
       container.appendChild(loadingContainer);
     }
 
-    //header
     const headerNav = container.querySelector(".header");
     const header = Header();
     headerNav?.appendChild(header);
 
-    //footer
     const footerComp = Footer()
     container.appendChild(footerComp)
 
@@ -140,7 +138,6 @@ export default {
 
     const getGoogleProfilePhoto = async (): Promise<string | null> => {
       try {
-        // Get current session and access token
         const session = await account.getSession('current');
         const accessToken = session.providerAccessToken;
         
@@ -149,7 +146,6 @@ export default {
           throw new Error('No Google access token available');
         }
     
-        // Fetch user profile from Google People API
         const response = await fetch(
           'https://people.googleapis.com/v1/people/me?personFields=photos',
           {
@@ -170,11 +166,10 @@ export default {
 
     const checkUserAfterAuth = async (): Promise<void> => {
       try {
-        // localStorage.removeItem("googleAuth");
         const appwiteUser = await account.get();
         console.log(appwiteUser.$id);
         let photoUrl = await getGoogleProfilePhoto();
-        console.log(photoUrl); // this works 100%
+        console.log(photoUrl);
         const session = await account.getSession('current');
         try {
           const data = await axios.post("/authentication/auth/google/signIn", { email: appwiteUser.email, name: appwiteUser.name, country: session.countryName, image_url: photoUrl});

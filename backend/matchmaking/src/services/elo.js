@@ -1,4 +1,15 @@
-// This is a simplified example - you may need to adjust based on your actual implementation
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   elo.js                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: afarachi <afarachi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/22 17:04:10 by afarachi          #+#    #+#             */
+/*   Updated: 2025/06/22 17:04:10 by afarachi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 class EloService {
   constructor(kFactor = 32) {
     this.kFactor = kFactor;

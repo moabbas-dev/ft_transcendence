@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   FriendsSection.ts                                  :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: afarachi <afarachi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/22 15:35:41 by afarachi          #+#    #+#             */
+/*   Updated: 2025/06/22 15:35:41 by afarachi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 import store from "../../../store/store.js";
 import { t } from "../../languages/LanguageController.js";
 import chatService from "../../utils/chatUtils/chatWebSocketService.js";
@@ -13,7 +25,7 @@ export interface FriendProps {
 export const Friend = createComponent((props: FriendProps) => {
   const friendItem = document.createElement('div');
   friendItem.className = "flex items-center gap-3 p-2 bg-white rounded-lg shadow-sm hover:bg-gray-50";
-  friendItem.dataset.friendId = props.id.toString(); // Store the friend ID in a data attribute
+  friendItem.dataset.friendId = props.id.toString();
   friendItem.innerHTML = `
     <img alt="" src="${props.avatar_url}" class="size-10 rounded-full"/>
     <div>
@@ -27,13 +39,11 @@ export const Friend = createComponent((props: FriendProps) => {
     </div>
   `;
 
-  // Add click event for the remove button
   const removeButton = friendItem.querySelector('.remove-friend-button');
   removeButton?.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
     
-    // Confirm before removing
     if (confirm(t('profile.socialTab.confirmRemoveFriend'))) {
       chatService.removeFriend(props.id);
     }
@@ -62,11 +72,9 @@ export const FriendsSection = createComponent(() => {
   
   async function loadFriendsList() {
     try {
-      // Show loading state
       friendsList.innerHTML = 
         `<div class="loading text-center text-gray-500 py-4">${t('chat.loadingFriends')}</div>`;
       
-      // Request friends list from server
       if (chatService.isConnected()) {
         chatService.send("friends:get", {
           userId: store.userId,
@@ -81,13 +89,10 @@ export const FriendsSection = createComponent(() => {
     }
   }
   
-  // Handle friends data received from server
   function handleFriendsReceived(friendsData: FriendProps[]) {
-    // Clear the loading state
     friendsList.innerHTML = '';
     
     if (friendsData && friendsData.length > 0) {
-      // Render each friend
       friendsData.forEach(friend => {
         var status;
         switch (friend.status) {
@@ -112,43 +117,35 @@ export const FriendsSection = createComponent(() => {
         }));
       });
     } else {
-      // No friends found
       friendsList.innerHTML = 
         `<div class="text-gray-500 text-center py-4">${t('profile.socialTab.noFriends')}</div>`;
     }
   }
   
-  // Set up event listener for friends data
   chatService.on("friends:list", (data) => {
     handleFriendsReceived(data.friends);
   });
   
-  // Set up event listener for friend removal response
   chatService.on("friend:removed", (data) => {
     if (data.success) {
-      // Find and remove the friend element from the DOM
       const friendElement = friendsList.querySelector(`[data-friend-id="${data.friendId}"]`);
       if (friendElement) {
         friendElement.remove();
       }
       
-      // Display a success message (optional)
       const successMessage = document.createElement('div');
       successMessage.className = "bg-green-100 text-green-800 p-2 rounded text-center";
       successMessage.textContent = t('profile.socialTab.friendRemoved');
       
-      // Insert the message at the top of the friends list
       if (friendsList.firstChild) {
         friendsList.insertBefore(successMessage, friendsList.firstChild);
       } else {
         friendsList.appendChild(successMessage);
       }
       
-      // Remove the message after a few seconds
       setTimeout(() => {
         successMessage.remove();
         
-        // Check if there are no friends left
         if (friendsList.children.length === 0) {
           friendsList.innerHTML = 
             `<div class="text-gray-500 text-center py-4">${t('profile.socialTab.noFriends')}</div>`;
@@ -157,10 +154,8 @@ export const FriendsSection = createComponent(() => {
     }
   });
   
-  // Initialize by loading friends
   loadFriendsList();
   
-  // Handle search functionality
   const searchInput = section.querySelector('#friends-search') as HTMLInputElement;
   searchInput.addEventListener('input', (e) => {
     const searchTerm = (e.target as HTMLInputElement).value.toLowerCase();

@@ -62,17 +62,14 @@ export default {
 			<div class="footer"></div>
 		`;
 
-		// Header
 		const headerNav = container.querySelector(".header");
 		const header = Header();
 		headerNav?.appendChild(header);
 
-		// Footer component
 		const footerContainer = container.querySelector(".footer");
 		const footerComp = Footer();
 		footerContainer?.appendChild(footerComp);
 
-		// Loading pong animation
 		const loadingPong = container.querySelector('#loading-pong');
 		loadingPong?.appendChild(PongLoading({text: t('play.onlineGame.or')}));
 
@@ -80,12 +77,10 @@ export default {
 		let toggleInterval = setInterval(() => {
 			isIconVisible = !isIconVisible;
 	
-			// Toggle Join animation
 			document.getElementById("icon-join")?.classList.toggle("opacity-0", !isIconVisible);
 			document.getElementById("icon-join")?.classList.toggle("opacity-100");
 			document.getElementById("text-join")?.classList.toggle("opacity-0", isIconVisible);
 
-			// Toggle Create animation
 			document.getElementById("icon-create")?.classList.toggle("opacity-0", !isIconVisible);
 			document.getElementById("icon-create")?.classList.toggle("opacity-100");
 			document.getElementById("text-create")?.classList.toggle("opacity-0", isIconVisible);
@@ -93,13 +88,11 @@ export default {
 
 		const heading = container.querySelector("h1")!;
 
-		// Create Tournament button
 		const createTournamentBtn = container.querySelector('#create-tournament');
 		createTournamentBtn?.addEventListener('click', () => {
 			navigate('/tournaments/create');
 		});
 
-		// Join Tournament functionality
 		const joinTournamentBtn = document.getElementById("join-tournament");
 		joinTournamentBtn?.addEventListener("click", () => {
 			clearInterval(toggleInterval);

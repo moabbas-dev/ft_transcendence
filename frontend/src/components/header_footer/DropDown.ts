@@ -35,7 +35,6 @@ export const DropDown = createComponent(() => {
 
 	const logout = container.querySelector('#logout');
 	logout?.addEventListener('click', async() => {
-		// handle logout here
 		store.logout();
 	})
 	return container;

@@ -8,7 +8,6 @@ import { registerTournamentMessageHandlers } from './tournamentWsController.js';
  * @param {FastifyInstance} fastify - The Fastify instance
  */
 export function setupWebSocketHandlers(wsAdapter, fastify) {
-  // Initialize the WebSocket adapter with our connection handler
   wsAdapter.initialize(async (socket, request) => {
     try {
       const url = new URL(request.url, `http://${request.headers.host}`);
@@ -86,7 +85,6 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
     }
   });
 
-  // Register message handlers
   registerMessageHandlers(wsAdapter);
   registerTournamentMessageHandlers(wsAdapter);
 }
@@ -96,7 +94,6 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
  * @param {WebSocketAdapter} wsAdapter - The WebSocket adapter instance
  */
 function registerMessageHandlers(wsAdapter) {
-  // Find match handler
   wsAdapter.registerMessageHandler('find_match', async (clientId, payload) => {
     console.log(`Processing find_match request from ${clientId}`);
     const match = await matchmakingService.addToQueue(clientId);
@@ -143,7 +140,6 @@ function registerMessageHandlers(wsAdapter) {
     }
   });
 
-  // Cancel matchmaking handler
   wsAdapter.registerMessageHandler('cancel_matchmaking', async (clientId, payload) => {
     try {
       console.log(`Player ${clientId} is cancelling matchmaking`);
@@ -162,19 +158,16 @@ function registerMessageHandlers(wsAdapter) {
     }
   });
 
-  // FIXED: Simplified friend match creation handler triggered by chat service
   wsAdapter.registerMessageHandler('create_friend_match', async (clientId, payload) => {
     try {
       const { player1, player2, initiator } = payload;
       console.log(`Creating friend match between ${player1} and ${player2}, initiated by ${initiator}`);
       console.log(`Request received from client: ${clientId}`);
   
-      // Create the match
       const friendMatch = await matchmakingService.createMatch(player1, player2, 'friendly');
       console.log(`Friend match created with ID: ${friendMatch.matchId}`);
   
       if (friendMatch) {
-        // Send match created event to both players
         console.log(`Sending friend_match_created to player1: ${player1}`);
         const sent1 = wsAdapter.sendToClient(player1, 'friend_match_created', {
           matchId: friendMatch.matchId,
@@ -197,7 +190,6 @@ function registerMessageHandlers(wsAdapter) {
   
         console.log(`Messages sent - Player1: ${sent1}, Player2: ${sent2}`);
   
-        // Start the match after 3 seconds
         setTimeout(async () => {
           console.log(`Starting friend match ${friendMatch.matchId} after countdown`);
           await matchmakingService.updateMatchStartTime(friendMatch.matchId);
@@ -224,7 +216,6 @@ function registerMessageHandlers(wsAdapter) {
     }
   });
 
-  // Paddle move handler
   wsAdapter.registerMessageHandler('paddle_move', async (clientId, payload) => {
     const { matchId, position } = payload;
     const opponentId = await matchmakingService.getOpponentId(clientId, matchId);
@@ -236,13 +227,11 @@ function registerMessageHandlers(wsAdapter) {
     }
   });
 
-  // Ball update handler
   wsAdapter.registerMessageHandler('ball_update', async (clientId, payload) => {
     const { matchId, position, velocity, scores } = payload;
     const opponentId = await matchmakingService.getOpponentId(clientId, matchId);
 
     if (opponentId) {
-      // Mirror the ball position and velocity for the opponent
       const mirroredPosition = {
         x: 1.0 - position.x,
         y: position.y
@@ -261,7 +250,6 @@ function registerMessageHandlers(wsAdapter) {
     }
   });
 
-  // Score update handler
   wsAdapter.registerMessageHandler('score_update', async (clientId, payload) => {
     const { matchId, player1Score, player2Score } = payload;
     const opponentId = await matchmakingService.getOpponentId(clientId, matchId);
@@ -274,7 +262,6 @@ function registerMessageHandlers(wsAdapter) {
     }
   });
 
-  // Game end handler
   wsAdapter.registerMessageHandler('game_end', async (clientId, payload) => {
     const { matchId, winner, player1Goals, player2Goals } = payload;
 
@@ -290,7 +277,6 @@ function registerMessageHandlers(wsAdapter) {
       }
 
       if (match.match_type === 'tournament') {
-        // Handle tournament matches separately
         return;
       }
 
@@ -320,7 +306,6 @@ function registerMessageHandlers(wsAdapter) {
       let player1EloChange = 0;
       let player2EloChange = 0;
 
-      // Only calculate ELO for non-friendly matches
       if (match.match_type !== 'friendly') {
         player1NewElo = await matchmakingService.calculateNewElo(
           player1OldElo,
@@ -343,7 +328,6 @@ function registerMessageHandlers(wsAdapter) {
         [player2Id]: player2EloChange
       };
 
-      // Notify both players about the result
       wsAdapter.sendToClient(player1Id, 'match_results', {
         winner: winnerId,
         finalScore: {
@@ -373,7 +357,6 @@ function registerMessageHandlers(wsAdapter) {
   });
 }
 
-// Export a function to initialize the WebSocket controller
 export function initializeWebSocketController(server, fastify) {
   const wsAdapter = createWebSocketAdapter(server);
   setupWebSocketHandlers(wsAdapter, fastify);

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   UserProfile.ts                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: afarachi <afarachi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/22 16:34:06 by afarachi          #+#    #+#             */
+/*   Updated: 2025/06/22 16:34:06 by afarachi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 import { createComponent } from "../../utils/StateManager.js";
 import logoUrl from "../../assets/guests.png";
 import { GamesHistory } from "./GmaesHistory.js";
@@ -23,7 +35,6 @@ export const Profile = createComponent((props: ProfileProps) => {
   let currentDirection: any = null;
   let userData: any = null;
 
-  // Modify the existing API call section to request friendship status via WebSocket
   if (props && props.uName) {
     const token = store.accessToken;
 
@@ -36,10 +47,6 @@ export const Profile = createComponent((props: ProfileProps) => {
       .then((response) => {
         userData = response.data;
         updateUIWithUserData(userData, container);
-
-        // Request friendship status via WebSocket
-        // console.log(userData);
-        // console.log(userData.id);
 
         chatService.send('friendship:check', {
           currentUserId: store.userId,
@@ -55,26 +62,14 @@ export const Profile = createComponent((props: ProfileProps) => {
             return;
           }
 
-          // Different actions based on current friendship status
           switch (currentFriendshipStatus) {
             case 'none':
-              // Send friend request
               console.log("Sending friend request");
               chatService.send("friend:request", {
                 from: fromUserId,
                 to: userData.id,
               });
 
-              // const body = {
-              //   senderId: parseInt(fromUserId),
-              //   recipientId: userData.id,
-              //   // content: ,
-              // }
-              // await axios.post('/notifications/api/notifications/friend-request', body).catch(err => {
-              //   console.error("Error sending message:", err);
-              // })
-
-              // Update UI immediately - don't wait for server response
               addFriendButton.textContent = t("profile.requestSent");
               addFriendButton.disabled = true;
               addFriendButton.classList.remove("bg-green-500", "hover:bg-green-600");
@@ -86,14 +81,12 @@ export const Profile = createComponent((props: ProfileProps) => {
 
             case 'pending':
               if (currentInitiator === 'other_user' && currentDirection === 'incoming') {
-                // Accept friend request
                 console.log("Accepting friend request");
                 chatService.send("friend:accept", {
                   from: fromUserId,
                   to: userData.id,
                 });
 
-                // Update UI immediately
                 addFriendButton.textContent = t("profile.removeFriend");
                 addFriendButton.classList.remove("bg-yellow-500", "hover:bg-yellow-600");
                 addFriendButton.classList.add("bg-red-500", "hover:bg-red-600");
@@ -102,12 +95,10 @@ export const Profile = createComponent((props: ProfileProps) => {
               break;
 
             case 'friends':
-              // Remove friend
               console.log("Removing friend");
               console.log(userData);
               chatService.removeFriend(userData.id);
 
-              // Update UI immediately
               addFriendButton.textContent = t("profile.add");
               addFriendButton.classList.remove("bg-red-500", "hover:bg-red-600");
               addFriendButton.classList.add("bg-green-500", "hover:bg-green-600");
@@ -121,22 +112,18 @@ export const Profile = createComponent((props: ProfileProps) => {
           targetId: userData.id
         });
 
-        // Add this event listener
         chatService.on("user:blocked_status", (data) => {
-          // console.log(data);
           if (data.targetId === userData.id) {
             const isBlocked = data.isBlocked;
             const blockButton = container.querySelector("#block-user");
 
             if (isBlocked && blockButton) {
-              // User is blocked, show unblock button
               blockButton.textContent = t("profile.unblock");
               blockButton.classList.remove("bg-red-500", "hover:bg-red-600");
               blockButton.classList.add("bg-gray-500", "hover:bg-gray-600");
               blockButton.id = "unblock-user";
               addFriendButton.classList.add("hidden");
               messageUserButton.classList.add("hidden");
-              // Update event listeners
               blockButton.removeEventListener("click", blockUserHandler);
               blockButton.addEventListener("click", unblockUserHandler);
             }
@@ -146,39 +133,14 @@ export const Profile = createComponent((props: ProfileProps) => {
           }
         });
 
-        // blockUserButton?.addEventListener("click", () => {
-        //   const fromUserId = store.userId;
-        //   const toUsername = props.uName;
-
-        //   if (!fromUserId || !toUsername) {
-        //     console.error("Missing user information for friend request");
-        //     return;
-        //   }
-
-        //   chatService.blockUser(userData.id);
-
-        //   // Update UI immediately
-        //   blockUserButton.textContent = t("Unblock User");
-
-        //   Toast.show(`You have blocked ${userData.nickname}`, "success");
-        //   blockUserButton.removeAttribute('id');
-        //   blockUserButton.id = 'unblock-user';
-        // });
         function blockUserHandler() {
           const fromUserId = store.userId;
-
-
 
           if (!fromUserId || !userData) {
             console.error("Missing user information for blocking user");
             return;
           }
 
-          // Send block request to server
-          // chatService.send("user:block", {
-          //   from: fromUserId,
-          //   blocked: userData.id
-          // });
           chatService.blockUser(userData.id);
 
           chatService.send("user:check_blocked", {
@@ -186,7 +148,6 @@ export const Profile = createComponent((props: ProfileProps) => {
             targetId: userData.id
           });
 
-          // Update UI immediately
           const blockButton = container.querySelector("#block-user");
           if (blockButton) {
            
@@ -195,10 +156,8 @@ export const Profile = createComponent((props: ProfileProps) => {
             blockButton.classList.add("bg-gray-500", "hover:bg-gray-600");
             addFriendButton.classList.add("hidden");
             messageUserButton.classList.add("hidden");
-            // Change the button ID to indicate it's now an unblock button
             blockButton.id = "unblock-user";
 
-            // Remove the old event listener and add a new one for unblocking
             blockButton.removeEventListener("click", blockUserHandler);
             blockButton.addEventListener("click", unblockUserHandler);
           }
@@ -214,19 +173,12 @@ export const Profile = createComponent((props: ProfileProps) => {
             return;
           }
 
-          // Send unblock request to server
-          // chatService.send("user:unblock", {
-          //   from: fromUserId,
-          //   unblocked: userData.id
-          // });
-
           chatService.unblockUser(userData.id);
           chatService.send("user:check_blocked", {
             userId: store.userId,
             targetId: userData.id
           });
 
-          // Update UI immediately
           const unblockButton = container.querySelector("#unblock-user");
           if (unblockButton) {
             unblockButton.textContent = t("profile.block");
@@ -235,10 +187,8 @@ export const Profile = createComponent((props: ProfileProps) => {
             addFriendButton.classList.remove("hidden");
             messageUserButton.classList.remove("hidden");
 
-            // Change the button ID back to block-user
             unblockButton.id = "block-user";
 
-            // Remove the old event listener and add a new one for blocking
             unblockButton.removeEventListener("click", unblockUserHandler);
             unblockButton.addEventListener("click", blockUserHandler);
           }
@@ -246,41 +196,7 @@ export const Profile = createComponent((props: ProfileProps) => {
           Toast.show(`You have unblocked ${userData.nickname}`, "success");
         }
 
-        // Now, let's update the initial event listeners to use these handler functions
-        // Replace the existing block button event listener with:
         blockUserButton?.addEventListener("click", blockUserHandler);
-
-        // blockUserButton?.addEventListener("click", () => {
-        //   const fromUserId = store.userId;
-        //   const toUsername = props.uName;
-
-        //   if (!fromUserId || !toUsername) {
-        //     console.error("Missing user information for blocking user");
-        //     return;
-        //   }
-
-        //   // Send block request to server
-        //   chatService.send("user:block", {
-        //     from: fromUserId,
-        //     blocked: userData.id
-        //   });
-
-        //   // Update UI immediately
-        //   blockUserButton.textContent = t("profile.unblock");
-        //   blockUserButton.classList.remove("bg-red-500", "hover:bg-red-600");
-        //   blockUserButton.classList.add("bg-gray-500", "hover:bg-gray-600");
-
-        //   // Change the button ID to indicate it's now an unblock button
-        //   blockUserButton.id = "unblock-user";
-
-        //   // Remove the old event listener and add a new one for unblocking
-        //   blockUserButton.removeEventListener("click", blockUserHandler);
-        //   blockUserButton.addEventListener("click", unblockUserHandler);
-
-        //   Toast.show(`You have blocked ${userData.nickname}`, "success");
-        // });
-
-
 
         messageUserButton?.addEventListener("click", () => {
           const fromUserId = store.userId;
@@ -289,19 +205,16 @@ export const Profile = createComponent((props: ProfileProps) => {
             console.error("Missing user information for messaging");
             return;
           }
-          // Store the user information in localStorage temporarily, so the chat page can access it
           localStorage.setItem('openChatWithUser', JSON.stringify({
             username: userData.nickname,
             userId: userData.id,
             fullname: userData.full_name || userData.nickname,
             avatar_url: userData.avatar_url,
-            timestamp: Date.now() // Add timestamp to ensure this is a new request
+            timestamp: Date.now()
           }));
 
-          // Close the profile modal
           container.remove();
 
-          // Navigate to the chat page
           navigate("/chat");
         });
 
@@ -312,11 +225,7 @@ export const Profile = createComponent((props: ProfileProps) => {
 
   }
 
-
-  // A wrapper for our popup + overlay
-  // The actual modal container
   const container = document.createElement("div");
-  // Insert modal HTML
   container.innerHTML = `
     <!-- Overlay -->
     <div class="overlay fixed top-0 left-0 w-full h-full z-[80] bg-black/50"></div>
@@ -411,7 +320,6 @@ export const Profile = createComponent((props: ProfileProps) => {
   `;
 
   function updateUIWithUserData(userData: any, container: HTMLDivElement) {
-    // Update nickname
     const nicknameElement = container.querySelector("#name");
     if (nicknameElement) {
       nicknameElement.textContent = userData.nickname || store.nickname;
@@ -419,14 +327,8 @@ export const Profile = createComponent((props: ProfileProps) => {
 
     const avatarElement = container.querySelector("#profile-picture") as HTMLImageElement;
     avatarElement.src = userData.avatar_url || store.avatarUrl || logoUrl;
-    // Update other elements as needed
-    // For example, rank, avatar image, etc.
-
-    // You could also pass this data to your sub-components
-    // For example, when creating UserInfo, UserStatistics, etc.
   }
 
-  // Query elements
   const closeButton = container.querySelector("#close-button")!;
   const statisticsTab = container.querySelector("#statistics-tab")!;
   const historyTab = container.querySelector("#history-tab")!;
@@ -456,9 +358,6 @@ export const Profile = createComponent((props: ProfileProps) => {
         return;
       }
 
-      // console.log('Selected file:', file);
-      // here we will send the file to the server then update the profile picture
-      // console.log(store.accessToken);
       const formData = new FormData();
       formData.append('avatar', file);
       console.log(`Bearer ${store.accessToken}`);
@@ -487,12 +386,10 @@ export const Profile = createComponent((props: ProfileProps) => {
     container.remove();
   });
 
-  // Close the modal on X click
   closeButton?.addEventListener("click", () => {
     container.remove();
   });
 
-  // Helper function to clear active background from all tabs
   function clearActiveTabs() {
     profileTabs?.childNodes.forEach((tab) => {
       if (tab instanceof HTMLElement) {
@@ -502,7 +399,6 @@ export const Profile = createComponent((props: ProfileProps) => {
     })
   }
 
-  // User Profile by default
   contentContainer?.appendChild(
     UserInfo({
       uName: props.uName,
@@ -514,11 +410,9 @@ export const Profile = createComponent((props: ProfileProps) => {
     clearActiveTabs();
     statisticsTab.classList.add("bg-pongcyan", "text-white");
 
-    // Set up the content with three canvases
     contentContainer.innerHTML = "";
     contentContainer?.appendChild(UserStatistics({ userId: userData.id }));
 
-    // Initialize the Elo Rating Line Chart
     const statsCtx = document.getElementById(
       "statsChart"
     ) as HTMLCanvasElement | null;
@@ -543,7 +437,6 @@ export const Profile = createComponent((props: ProfileProps) => {
       new Chart(statsCtx, lineConfig);
     }
 
-    // Initialize the Wins/Losses Bar Chart
     const barCtx = document.getElementById(
       "barChart"
     ) as HTMLCanvasElement | null;
@@ -571,7 +464,6 @@ export const Profile = createComponent((props: ProfileProps) => {
       new Chart(barCtx, barConfig);
     }
 
-    // Initialize the Win Rate Pie Chart
     const pieCtx = document.getElementById(
       "pieChart"
     ) as HTMLCanvasElement | null;
@@ -581,7 +473,7 @@ export const Profile = createComponent((props: ProfileProps) => {
         datasets: [
           {
             label: "Win Rate",
-            data: [70, 30], // For example: 70% wins, 30% losses
+            data: [70, 30],
             backgroundColor: ["rgb(75, 192, 192)", "rgb(255, 99, 132)"],
             hoverOffset: 4,
           },
@@ -626,11 +518,9 @@ export const Profile = createComponent((props: ProfileProps) => {
       toggle.addEventListener("change", (event) => {
         const isChecked = (event.target as HTMLInputElement).checked;
         console.log("2FA Toggle is now:", isChecked ? "Enabled" : "Disabled");
-        // Here you can call an API or handle logic to enable/disable 2FA
       });
     }
   });
-
 
   friendsTab?.addEventListener("click", () => {
     if (!contentContainer) return;
@@ -640,32 +530,25 @@ export const Profile = createComponent((props: ProfileProps) => {
     contentContainer?.appendChild(UserFriends());
   });
 
-
-
-
-  // Add an event listener for friendship status
   chatService.on('friendship:status', (data) => {
     const { status, relationship, initiator, direction } = data.status;
 
-    // Store current status for use in click handlers
     currentFriendshipStatus = status;
     currentInitiator = initiator;
     currentDirection = direction;
 
-    // Get loading and buttons containers
     const loadingElement = container.querySelector("#friendship-loading");
     const buttonsContainer = container.querySelector("#friendship-buttons");
     const addFriendButton: HTMLButtonElement | null = container.querySelector("#add-friend");
 
     console.log("Received Status:", status);
 
-    // Style the button according to status
     switch (status) {
       case 'friends':
         console.log("✅ User is a friend");
         if (addFriendButton) {
           addFriendButton.textContent = t("profile.removeFriend");
-          addFriendButton.disabled = false; // Enable button for removing friend
+          addFriendButton.disabled = false;
           addFriendButton.classList.remove("bg-green-500", "hover:bg-green-600", "bg-gray-400", "bg-yellow-500", "hover:bg-yellow-600");
           addFriendButton.classList.add("bg-red-500", "hover:bg-red-600");
         }
@@ -675,12 +558,12 @@ export const Profile = createComponent((props: ProfileProps) => {
         console.log("⏳ Friend request pending");
         if (initiator === 'current_user' && direction === 'outgoing' && addFriendButton) {
           addFriendButton.textContent = t("profile.requestSent");
-          addFriendButton.disabled = true; // Can't cancel request yet (add this feature later if needed)
+          addFriendButton.disabled = true;
           addFriendButton.classList.remove("bg-green-500", "hover:bg-green-600", "bg-red-500", "hover:bg-red-600", "bg-yellow-500", "hover:bg-yellow-600");
           addFriendButton.classList.add("bg-gray-400");
         } else if (initiator === 'other_user' && direction === 'incoming' && addFriendButton) {
           addFriendButton.innerHTML = `<i class="fa-solid fa-circle-check min-[401px]:mr-1"></i> <span class="max-[402px]:hidden">accept</span>`;
-          addFriendButton.disabled = false; // Enable to accept request
+          addFriendButton.disabled = false;
           addFriendButton.classList.remove("bg-green-500", "hover:bg-green-600", "bg-red-500", "hover:bg-red-600", "bg-gray-400");
           addFriendButton.classList.add("bg-yellow-500", "hover:bg-yellow-600");
         }
@@ -688,7 +571,6 @@ export const Profile = createComponent((props: ProfileProps) => {
 
       case 'none':
         console.log("➕ User can send a friend request");
-        // Default state - allow sending friend request
         if (addFriendButton) {
           addFriendButton.textContent = t("profile.add");
           addFriendButton.disabled = false;
@@ -701,7 +583,6 @@ export const Profile = createComponent((props: ProfileProps) => {
         console.error("🚨 Unhandled status:", status);
     }
 
-    // Hide loading element and show buttons after we've styled them
     if (loadingElement) loadingElement.classList.add('hidden');
     if (buttonsContainer) buttonsContainer.classList.remove('hidden');
   });

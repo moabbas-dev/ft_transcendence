@@ -1,7 +1,6 @@
 import db from "./db.js";
 import axios from "axios";
 
-// helper function to get the total played matches by a player
 export async function getTotalMatchesForPlayer(playerId, matchType = null) {
     try {
         let query = `
@@ -14,7 +13,6 @@ export async function getTotalMatchesForPlayer(playerId, matchType = null) {
         
         let params = [playerId];
         
-        // Add match type filter if specified
         if (matchType) {
             query += ` AND m.match_type = ?`;
             params.push(matchType);
@@ -28,7 +26,6 @@ export async function getTotalMatchesForPlayer(playerId, matchType = null) {
     }
 }
 
-// Function for getting the player's history
 async function getPlayerHistory(playerId, limit = 10, offset = 0, matchType = null) {
     try {
         let query = `
@@ -73,7 +70,6 @@ async function getPlayerHistory(playerId, limit = 10, offset = 0, matchType = nu
 
         let params = [playerId, playerId, playerId];
 
-        // Add match type filter if specified
         if (matchType) {
             query += ` AND m.match_type = ?`;
             params.push(matchType);
@@ -84,9 +80,7 @@ async function getPlayerHistory(playerId, limit = 10, offset = 0, matchType = nu
 
         const rows = await db.query(query, params);
 
-        // Format the results
         const history = rows.map(row => {
-            // Calculate duration in JavaScript
             const startTime = new Date(row.started_at).getTime();
             const endTime = new Date(row.completed_at).getTime();
             const durationSeconds = Math.floor((endTime - startTime) / 1000);
@@ -115,7 +109,6 @@ async function getPlayerHistory(playerId, limit = 10, offset = 0, matchType = nu
     }
 }
 
-// Helper method to format time ago
 function formatTimeAgo(dateString) {
     const now = new Date();
     const completed = new Date(dateString);
@@ -135,7 +128,6 @@ function formatTimeAgo(dateString) {
     }
 }
 
-// Helper method to format duration
 function formatDuration(durationInSeconds) {
 
     if (!durationInSeconds || durationInSeconds <= 0) {
@@ -153,7 +145,6 @@ function formatDuration(durationInSeconds) {
     }
 }
 
-// method to get user's info
 async function getUserInfo(userId) {
     try {
         const user = await axios.get(`http://authentication:8001/auth/users/id/${userId}`);
@@ -164,17 +155,12 @@ async function getUserInfo(userId) {
         return [];
     }
 }
-// Method to get player history with opponent nicknames
 export async function getPlayerHistoryWithNicknames(playerId, limit = 10, offset = 0, match_type = null) {
     try {
-        // First get the basic history
         const history = await getPlayerHistory(playerId, limit, offset, match_type);
 
-        // You'll need to implement db based on how you access your main users database
-        // For example, if you have a method to get user info:
         for (let match of history) {
             try {
-                // Replace db with your actual method to get user info
                 const opponentInfo = await getUserInfo(match.opponent.id);
                 if (opponentInfo) {
                     match.opponent.nickname = opponentInfo.nickname || opponentInfo.fullName || `Player ${match.opponent.id}`;
@@ -193,7 +179,6 @@ export async function getPlayerHistoryWithNicknames(playerId, limit = 10, offset
 
 export async function getPlayerStats(playerId) {
     try {
-        // Overall stats query (existing)
         const overallQuery = `
       SELECT 
         COUNT(*) as total_matches,
@@ -216,7 +201,6 @@ export async function getPlayerStats(playerId) {
         AND m.match_type = '1v1'
     `;
 
-        // Monthly stats query
         const monthlyQuery = `
       SELECT 
         strftime('%Y-%m', m.completed_at) as month,
@@ -234,7 +218,6 @@ export async function getPlayerStats(playerId) {
       ORDER BY month
     `;
 
-        // ELO progression query
         const eloProgressionQuery = `
       SELECT 
         strftime('%Y-%m', m.completed_at) as month,
@@ -251,7 +234,6 @@ export async function getPlayerStats(playerId) {
       ORDER BY m.completed_at ASC
     `;
 
-        // Execute all queries
         const [overallRows, monthlyRows, eloRows] = await Promise.all([
             db.query(overallQuery, [playerId, playerId, playerId, playerId]),
             db.query(monthlyQuery, [playerId, playerId, playerId]),
@@ -260,7 +242,6 @@ export async function getPlayerStats(playerId) {
 
         const overallStats = overallRows[0];
 
-        // Month setup
         const monthNames = [
             'January', 'February', 'March', 'April', 'May', 'June',
             'July', 'August', 'September', 'October', 'November', 'December'
@@ -274,7 +255,6 @@ export async function getPlayerStats(playerId) {
             eloRating: null
         }));
 
-        // Apply wins/losses
         monthlyRows.forEach(row => {
             const monthIndex = parseInt(row.month_number) - 1;
             if (monthIndex >= 0 && monthIndex < 12) {
@@ -283,7 +263,6 @@ export async function getPlayerStats(playerId) {
             }
         });
 
-        // Process ELO
         const monthlyElo = {};
         let currentElo = 1000;
 
@@ -304,12 +283,10 @@ export async function getPlayerStats(playerId) {
             }
         });
 
-        // Calculate total wins/losses for pie
         const totalWins = overallStats.wins || 0;
         const totalLosses = overallStats.losses || 0;
         const totalGames = totalWins + totalLosses;
 
-        // Get last 4 months (including current)
         const now = new Date();
         const currentMonthIndex = now.getMonth();
         const start = Math.max(0, currentMonthIndex - 3);
@@ -328,7 +305,7 @@ export async function getPlayerStats(playerId) {
                 : 'N/A',
             currentElo: overallStats.current_elo || 1000,
 
-            monthlyStats: monthlyStats, // full year for reference
+            monthlyStats: monthlyStats,
 
             chartData: {
                 barChart: recentMonths.map(month => ({

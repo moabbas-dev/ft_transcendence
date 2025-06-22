@@ -21,9 +21,7 @@ class TwoFactorCodeController {
 				return reply.code(404).send({ key: "user", message: "User not found!" });
 			if (user && !user.is_active)
 				return reply.code(403).send({ message: "User not active!" });
-			// Retrieve the secret key from the user's database
 			const secret = user.two_factor_secret;
-			// Verify the TOTP code
 			const verified = speakeasy.totp.verify({
 				secret: secret,
 				encoding: 'base32',
@@ -32,7 +30,6 @@ class TwoFactorCodeController {
 			if (!verified)
 				return reply.code(400).send({ key: "wrong", message: "Invalid code!" });
 
-			// Generate tokens and update session
 			const { accessToken, refreshToken } = await generateTokens(user, reply.server);
 			await Session.updateAccessAndRefresh(session.id, { refreshToken, accessToken });
 			await User.updateUserStatus(userId, { status: "online" });
@@ -78,12 +75,12 @@ class TwoFactorCodeController {
 				return reply.code(403).send({ message: "User not active!" });
 			const secret = speakeasy.generateSecret({ length: 20 });
 			await User.update2faSecret(userId, { twoFASecret: secret.base32 });
-			const otpauthUrl = secret.otpauth_url; // URL for the QR code
+			const otpauthUrl = secret.otpauth_url; 
 			const qrCodeDataUrl = await qrcode.toDataURL(otpauthUrl);
 			return reply.code(200).send({
 				message: "Scan the QR code with Google Authenticator to enable 2FA",
-				qrCodeDataUrl, // Send this to the frontend to display the QR code
-				secret: secret.base32 // For debugging purposes (optional)
+				qrCodeDataUrl, 
+				secret: secret.base32 
 			});
 		} catch (err) {
 			return reply.code(500).send({ message: "Error while enabling 2fa!", error: err.message });
@@ -118,7 +115,6 @@ class TwoFactorCodeController {
 				secret: secret,
 				encoding: 'base32',
 				token: code,
-				// window: 1 // Allow a 30-second window for time drift
 			});
 			if (!verified)
 				return reply.code(400).send({ key: "wrong", message: "Invalid code!" });

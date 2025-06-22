@@ -129,15 +129,11 @@ export const Header = createComponent(() => {
                 withCredentials: true,
             })
             .then((response) => {
-                // Store or use the user data
                 const allUsers = response.data;
-                // console.log(allUsers);
-                // Filter users based on search query
                 const filteredUsers = allUsers.filter((user: { nickname: string; }) =>
                     user.nickname.toLowerCase().includes(searchQuery)
                 );
 
-                // Show or hide results container
                 if (searchQuery.length > 0) {
                     searchResult.classList.remove('hidden');
                     displayResults(filteredUsers, searchResult as HTMLElement);
@@ -180,8 +176,6 @@ export const Header = createComponent(() => {
         languageSelect.value = savedLanguage;
         setLanguage(savedLanguage as Lang);
     }
-
-    // *************************TO BE REVIEWED**********************************
 
     async function fetchUserNotifications(userId: string | null): Promise<NotificationData[] | null> {
         try {
@@ -263,8 +257,6 @@ export const Header = createComponent(() => {
 
     fetchUserNotifications(userId).then(data => {
         if (data) {
-            // console.log('Fetched notifications:', data);
-
             renderNotifications(data);
         }
     });
@@ -273,7 +265,6 @@ export const Header = createComponent(() => {
         notificationContainer?.classList.toggle('hidden');
         markAllNotificationsAsRead();
     });
-    // *************************END**********************************
 
     document.addEventListener('click', (event: any) => {
         const isClickInside = navBtn.contains(event.target) || navbar.contains(event.target);
@@ -356,9 +347,7 @@ export const Header = createComponent(() => {
         }
     });
 
-    // Add real-time notification listeners
     function setupRealTimeNotifications() {
-        // Listen for new notifications
         chatService.on("error", (data) => {
             console.error(`Error!, ${data.message}`);
         })
@@ -366,19 +355,15 @@ export const Header = createComponent(() => {
 
             audioManager.playNotificationSound();
 
-            // Add new notification to UI without full refresh
             addNewNotificationToUI(data);
 
-            // Update count
             const currentCount = parseInt(notificationCount.textContent || '0');
             updateNotificationCount(currentCount + 1);
 
-            // Show brief animation or toast
             notificationBell.classList.add('animate-bounce');
             setTimeout(() => notificationBell.classList.remove('animate-bounce'), 1000);
         });
 
-        // Listen for when notifications are marked as read elsewhere
         chatService.on('notifications:marked_read', () => {
             updateNotificationCount(0);
         });
@@ -395,12 +380,10 @@ export const Header = createComponent(() => {
                 created_at: new Date().toISOString()
             });
 
-            // Add to top of notification list
             notificationContainer.insertBefore(newNotification, notificationContainer.firstChild);
         }
     }
 
-    // Call this function after the existing notification setup
     setupRealTimeNotifications();
 
     return container;

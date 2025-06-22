@@ -2,7 +2,6 @@
  * Matchmaking API routes
  */
 export default async function matchmakingRoutes(fastify, options) {
-    // Get all active matches
     fastify.get('/api/matches', async (request, reply) => {
       try {
         const matchmakingService = fastify.matchmakingService;
@@ -14,7 +13,6 @@ export default async function matchmakingRoutes(fastify, options) {
       }
     });
   
-    // Get match by ID
     fastify.get('/api/matches/:matchId', async (request, reply) => {
       try {
         const { matchId } = request.params;
@@ -32,7 +30,6 @@ export default async function matchmakingRoutes(fastify, options) {
       }
     });
   
-    // Get player stats
     fastify.get('/api/players/:playerId/stats', async (request, reply) => {
       try {
         const { playerId } = request.params;
@@ -50,7 +47,6 @@ export default async function matchmakingRoutes(fastify, options) {
       }
     });
   
-    // Get leaderboard
     fastify.get('/api/leaderboard', async (request, reply) => {
       try {
         const { limit = 10, offset = 0 } = request.query;
@@ -63,7 +59,6 @@ export default async function matchmakingRoutes(fastify, options) {
       }
     });
   
-    // Get match history for a player
     fastify.get('/api/players/:playerId/matches', async (request, reply) => {
       try {
         const { playerId } = request.params;

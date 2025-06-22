@@ -72,25 +72,20 @@ export default {
 		let toggleInterval = setInterval(() => {
 			isIconVisible = !isIconVisible;
 	
-			// Toggle Friends animation
 			document.getElementById("icon-friends")?.classList.toggle("opacity-0", !isIconVisible);
 			document.getElementById("icon-friends")?.classList.toggle("opacity-100");
 			document.getElementById("text-friends")?.classList.toggle("opacity-0", isIconVisible);
 
-			// Toggle Online animation
 			document.getElementById("icon-online")?.classList.toggle("opacity-0", !isIconVisible);
 			document.getElementById("icon-online")?.classList.toggle("opacity-100");
 			document.getElementById("text-online")?.classList.toggle("opacity-0", isIconVisible);
 		}, 3000);
 		
-		// Function to set up friend match
 		function setupFriendMatch(matchData: any) {
 			console.log("Setting up friend match:", matchData);
 			
-			// Clear any existing handlers first
 			client?.clearAllHandlers();
 			
-			// Set up friend match handlers FIRST
 			const friendMatchCreatedHandler = (data: any) => {
 				console.log("Friend match created:", data);
 				currentMatchId = data.matchId;
@@ -107,11 +102,9 @@ export default {
 				}
 			};
 			
-			// Set up handlers before sending any requests
 			client?.on('friend_match_created', friendMatchCreatedHandler);
 			client?.on('game_start', gameStartHandler);
 			
-			// Show "Creating match..." message
 			const gameModeDetails = document.getElementById("game-mode-details");
 			if (gameModeDetails) {
 				heading.textContent = 'Friend Match';
@@ -126,7 +119,6 @@ export default {
 				`;
 			}
 			
-			// FIXED: Only the initiator should create the match, and do it immediately
 			const isInitiator = String(matchData.initiator) === String(userId);
 			console.log(`GGGGGGGGGGGGGGGGGGGGGGG: `, matchData);
 			
@@ -143,49 +135,38 @@ export default {
 		}
 		const heading = container.querySelector("h1")!;
 
-		// Header
 		const headerNav = container.querySelector(".header");
 		const header = Header();
 		headerNav?.appendChild(header);
 
-		// Footer component
 		const footerContainer = container.querySelector(".footer");
 		const footerComp = Footer();
 		footerContainer?.appendChild(footerComp);
 
-		// Loading pong animation
 		const loadingPong = container.querySelector('#loading-pong');
 		loadingPong?.appendChild(PongLoading({text: t('play.onlineGame.or')}));
 		
 		const userId = store.userId ?? '0';
 		const client = pongGameClient;
 
-		// State for tracking current match
 		let currentMatchId: string | null = null;
 		let currentOpponentId: string | null = null;
 		let isPlayer1 = false;
 		let gameBoard: any | null = null;
 		
-		// Clean up any existing handlers
 		client?.clearAllHandlers();
 		
-		// Check for pending friend match from chat
 		const pendingMatchData = sessionStorage.getItem('pendingFriendMatch');
 		if (pendingMatchData) {
 			try {
 				const { matchData, timestamp } = JSON.parse(pendingMatchData);
 				
-				// Check if it's recent (within last 30 seconds)
 				if (Date.now() - timestamp < 30000) {
 					console.log("Found pending friend match:", matchData);
 
-					// Clear the pending match data immediately
 					sessionStorage.removeItem('pendingFriendMatch');
-					
-					// Clear any existing handlers before setting up friend match
 					client?.clearAllHandlers();
 					
-					// Set up the friend match
 					setupFriendMatch(matchData);
 					return;
 				} else {
@@ -215,7 +196,6 @@ export default {
 			client?.off('waiting_for_match', waitingForMatchHandler);
 		}
 
-		// FIXED: Single handler for friend matches
 		const friendMatchCreatedHandler = (data: any) => {
 			console.log("Friend match created:", data);
 			currentMatchId = data.matchId;
@@ -226,7 +206,6 @@ export default {
 		}
 
 		client?.on('match_found', matchFoundHandler);
-		// client?.on('friend_match_created', friendMatchCreatedHandler);
 
 		const gameStartHandler = (data: any) => {
 			console.log(`Game started with match ID: ${data.matchId}`);
@@ -247,7 +226,6 @@ export default {
 		}
 		client?.on('match_results', matchResultsHandler);
 
-		// Play with Friend functionality 
 		const playWithFriendBtn = document.getElementById("play-with-friend");
 		playWithFriendBtn?.addEventListener("click", () => {
 			clearInterval(toggleInterval);
@@ -263,7 +241,6 @@ export default {
 			}
 		});
 
-		// Online Showdown functionality
 		const onlineShowdownBtn = document.getElementById("online-showdown");
 		onlineShowdownBtn?.addEventListener("click", () => {
 			clearInterval(toggleInterval);
@@ -295,7 +272,6 @@ export default {
 					</div>
 				`;
 				
-				// Start countdown
 				let count = 3;
 				const countdownElement = document.querySelector('.countdown');
 				const interval = setInterval(() => {
@@ -317,7 +293,6 @@ export default {
 				gameBoard = null;
 			}
 			
-			// Create game container
 			container.innerHTML = `
 				<div class="content relative flex flex-col items-center sm:justify-around h-screen max-sm:p-2 sm:border-8 bg-pongcyan border-pongdark border-solid">
 					<div class="player-header w-4/5 "></div>
@@ -334,13 +309,11 @@ export default {
 				</div>
 			`;
 			
-			// Get canvas and header
 			const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
 			const gameHeader = OfflineGameHeader({gameMode: 'online', player1_id: userId, player2_id: opponentId, client });
 			const playerHeader = container.querySelector('.player-header')!;
 			playerHeader.appendChild(gameHeader);
 			
-			// Create game board
 			if (canvas && gameHeader) {
 				gameBoard = new OnlineGameBoard(
 					canvas,
@@ -391,7 +364,6 @@ export default {
 			});
 		}
 
-		// Cleanup function
 		return () => {
 			if (gameBoard) {
 				gameBoard.cleanup();

@@ -4,14 +4,12 @@ import axios from "axios";
 
 export default async function historyRoutes(fastify, options) {
 
-    // API route to get player history with type
     fastify.get('/api/player/history/:type/:userId/:playerId', async (request, reply) => {
         try {
             const { type, userId, playerId } = request.params;
             const { limit = 10, offset = 0 } = request.query;
             const authHeader = request.headers.authorization;
 
-            // Validate match type
             const validTypes = ['1v1', 'friendly', 'tournament'];
             if (!validTypes.includes(type)) {
                 return reply.code(400).send({
@@ -25,7 +23,6 @@ export default async function historyRoutes(fastify, options) {
                 return reply.code(401).send({ message: 'Unauthorized: No token provided' });
             const accessToken = authHeader.split(' ')[1];
 
-            // Fixed authentication error handling
             try {
                 await axios.post(`http://authentication:8001/auth/jwt/verify/${userId}`, {
                     accessToken
@@ -39,7 +36,6 @@ export default async function historyRoutes(fastify, options) {
                 }
             }
 
-            // Fixed: Added parseInt() for limit and offset
             const history = await getPlayerHistoryWithNicknames(
                 playerId,
                 parseInt(limit),
@@ -62,7 +58,6 @@ export default async function historyRoutes(fastify, options) {
         }
     });
 
-    // Stats endpoint (separate)
     fastify.get('/api/player/stats/:userId/:playerId', async (request, reply) => {
         try {
             const { userId, playerId } = request.params;
@@ -72,7 +67,6 @@ export default async function historyRoutes(fastify, options) {
                 return reply.code(401).send({ message: 'Unauthorized: No token provided' });
             const accessToken = authHeader.split(' ')[1];
 
-            // Fixed: Use try-catch instead of .catch() for consistency
             try {
                 await axios.post(`http://authentication:8001/auth/jwt/verify/${userId}`, {
                     accessToken
@@ -86,7 +80,6 @@ export default async function historyRoutes(fastify, options) {
                 }
             }
 
-            // Get player stats
             const stats = await getPlayerStats(playerId);
 
             return reply.code(200).send({
@@ -101,7 +94,6 @@ export default async function historyRoutes(fastify, options) {
         }
     });
 
-    // Leaderboard endpoint - Get top 20 players with user details
     fastify.get('/api/leaderboard/:userId', async (request, reply) => {
         try {
             const { userId } = request.params;
@@ -112,7 +104,6 @@ export default async function historyRoutes(fastify, options) {
                 return reply.code(401).send({ message: 'Unauthorized: No token provided' });
             const accessToken = authHeader.split(' ')[1];
 
-            // Verify JWT token
             try {
                 await axios.post(`http://authentication:8001/auth/jwt/verify/${userId}`, {
                     accessToken
@@ -126,10 +117,8 @@ export default async function historyRoutes(fastify, options) {
                 }
             }
 
-            // Get top players from database
             const topPlayers = await db.getTopPlayersWithRank(parseInt(limit));
 
-            // Fetch user details for each player
             const playersWithUserData = await Promise.all(
                 topPlayers.map(async (player) => {
                     try {
@@ -146,7 +135,6 @@ export default async function historyRoutes(fastify, options) {
                         };
                     } catch (userError) {
                         console.error(`Error fetching user data for player ${player.id}:`, userError.message);
-                        // Return player data without user details if user service fails
                         return {
                             rank: player.rank,
                             id: player.id,

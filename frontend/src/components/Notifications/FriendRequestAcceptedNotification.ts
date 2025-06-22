@@ -45,7 +45,6 @@ export const FriendRequestAcceptedNotification = createComponent((props: Notific
         </div>
     `;
 
-    // Fetch and display sender nickname with enhanced styling
     fetchSenderNickname(props.senderId).then(data => {
         if (data) {
             const senderName = notification.querySelector('#sender-name')! as HTMLAnchorElement;
@@ -53,22 +52,17 @@ export const FriendRequestAcceptedNotification = createComponent((props: Notific
             
             senderName.textContent = data.nickname;
 
-            // Function to show profile (reusable for both username and icon)
             const showProfile = (e: Event) => {
                 e.preventDefault();
                 console.log(`Clicked on user: ${data.nickname} (ID: ${props.senderId})`);
-                // Create and show the Profile component
                 const profileComponent = Profile({ uName: data.nickname });
                 document.body.appendChild(profileComponent);
             };
 
-            // Add click event listener to the username anchor
             senderName.addEventListener('click', showProfile);
 
-            // Add click event listener to the friend icon
             friendIcon.addEventListener('click', showProfile);
 
-            // Add a subtle glow effect when name loads
             senderName.classList.add('animate-pulse');
             setTimeout(() => {
                 senderName.classList.remove('animate-pulse');
@@ -77,7 +71,6 @@ export const FriendRequestAcceptedNotification = createComponent((props: Notific
         }
     });
 
-    // Add subtle hover effect
     notification.addEventListener('mouseenter', () => {
         notification.style.transform = 'translateX(2px)';
     });

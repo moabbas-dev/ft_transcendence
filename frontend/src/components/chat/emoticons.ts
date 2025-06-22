@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   emoticons.ts                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: afarachi <afarachi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/22 15:15:16 by afarachi          #+#    #+#             */
+/*   Updated: 2025/06/22 15:15:16 by afarachi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 export const emojis = [
   { title: ":nerd:" , src: "./emojis/28021-nerd.gif" },
   { title: ":cool:" , src: "./emojis/28433-cool.gif" },
@@ -32,7 +44,6 @@ export const emojis = [
   { title: ":yum:" , src: "./emojis/1352-yum.gif" },
 ];
 
-
 export const emojisMap = {
   ":nerd:": "./emojis/28021-nerd.gif",
   ":cool:": "./emojis/28433-cool.gif",
@@ -66,12 +77,6 @@ export const emojisMap = {
   ":crazy:": "./emojis/2587-crazy.gif",
   ":yum:": "./emojis/1352-yum.gif",
 };
-
-// export const emojisMap = emojis.reduce((map, emoji) => {
-//   map[emoji.title] = emoji.src;
-//   return map;
-// }, {});
-
 
 export const emoticons = [
   { title: ":1:", src: "./emoticon/1.gif" },
@@ -177,7 +182,6 @@ export const emoticonsMap = {
   ":49:": "./emoticon/49.gif",
 };
 
-
 export const stickers = [
   { title: ":466:" , src: "./stickers/466.gif" },
   { title: ":477:" , src: "./stickers/477.gif" },
@@ -213,7 +217,6 @@ export const stickers = [
   { title: ":77:" , src: "./stickers/77.gif" },
   { title: ":78:" , src: "./stickers/78.gif" },
 ];
-
 
 export const stickersMap = {
   ":466:": "./stickers/466.gif",

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Chat.ts                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: afarachi <afarachi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/22 15:13:53 by afarachi          #+#    #+#             */
+/*   Updated: 2025/06/22 15:13:53 by afarachi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 import store from "../../../store/store.js";
 import { createComponent } from "../../utils/StateManager.js";
 import chatService from "../../utils/chatUtils/chatWebSocketService.js";
@@ -9,14 +21,6 @@ import { t } from "../../languages/LanguageController.js";
 import axios from "axios";
 import { GameInviteMessage } from "./GameInviteMessage.js";
 import Toast from "../../toast/Toast.js";
-// import { _isClickEvent } from "chart.js/helpers";
-
-// interface Message {
-//   id: number;
-//   senderId: string | null;
-//   content: string;
-//   timestamp: number;
-// }
 
 interface Message {
   id: number | string;
@@ -45,7 +49,6 @@ export const Chat = createComponent(
       document.documentElement.lang === 'ar' ||
       getComputedStyle(document.documentElement).direction === 'rtl';
 
-    // Create the chat UI
     const renderChat = () => {
       container.innerHTML = `
             <div class="flex flex-col bg-black bg-custom-gradient justify-between h-[100svh] w-full z-20 gap-1 md:gap-2 bg-cover bg-center" style="background-image: ${activeUser ? `url(${bgImage})` : `url(${bgImage2})`}">
@@ -140,7 +143,6 @@ export const Chat = createComponent(
             </div>
         `;
 
-      // Add event listeners after the HTML is rendered
       if (activeUser) {
         setupEventListeners();
         renderGameInvites();
@@ -149,12 +151,10 @@ export const Chat = createComponent(
       const friend = document.querySelector('#friend_name');
       if (friend) {
         friend.addEventListener('click', () => {
-          // Check if the profile popup exists, create it if not
           let profilePopUp = document.querySelector(".profile");
           if (!profilePopUp) {
             profilePopUp = document.createElement("div");
             profilePopUp.className = "profile";
-            // Append it to a parent container, e.g. the main container
             container.appendChild(profilePopUp);
           }
 
@@ -162,7 +162,7 @@ export const Chat = createComponent(
             uName: activeUser?.nickname,
           });
           console.log(activeUser?.nickname);
-          profilePopUp.innerHTML = ''; // Clear existing content
+          profilePopUp.innerHTML = '';
           profilePopUp.appendChild(profile);
         });
       }
@@ -187,15 +187,6 @@ export const Chat = createComponent(
         const inviteId = container.getAttribute('data-invite-id');
 
         if (messageId && from && to && timestamp && status && inviteId) {
-          // console.log('Rendering game invite:', {
-          //   messageId,
-          //   from,
-          //   to,
-          //   gameType,
-          //   timestamp,
-          //   status,
-          //   inviteId
-          // });
           const gameInviteElement = GameInviteMessage({
             messageId,
             from,
@@ -206,7 +197,6 @@ export const Chat = createComponent(
             inviteId
           });
 
-          // Clear the container and append the actual component
           container.innerHTML = '';
           container.appendChild(gameInviteElement);
         }
@@ -214,7 +204,6 @@ export const Chat = createComponent(
     };
 
     const formatMessageContent = (content: string): string => {
-      // Replace emoticon codes with images
       const emoticonRegex = /:([\w]+):/g;
 
       return content.replace(emoticonRegex, (match) => {
@@ -222,13 +211,12 @@ export const Chat = createComponent(
         if (emojiUrl) {
           return `<img src="${emojiUrl}" alt="${match}" class="inline-block h-6" />`;
         }
-        // Check emoticons 
+
         const emoticonUrl = emoticonsMap[match as keyof typeof emoticonsMap];
         if (emoticonUrl) {
           return `<img src="${emoticonUrl}" alt="${match}" class="inline-block h-6" />`;
         }
 
-        // Check stickers if not found in emoticons
         const stickerUrl = stickersMap[match as keyof typeof stickersMap];
         if (stickerUrl) {
           return `<img src="${stickerUrl}" alt="${match}" class="inline-block h-16 w-16" />`;
@@ -238,7 +226,6 @@ export const Chat = createComponent(
       });
     };
 
-    // Render messages in the chat
     const renderMessages = () => {
       if (!messages.length && activeUser) {
         return `<div class="text-pongcyan text-center py-4 opacity-50">No messages yet</div>`;
@@ -246,12 +233,7 @@ export const Chat = createComponent(
 
       const currentUserId = store.userId;
 
-      // Group messages by date
       const messagesByDate = messages.reduce((acc, message) => {
-        //         // Ensure timestamp is a number
-        // const timestamp = typeof message.timestamp === 'string' ? 
-        // Date.parse(message.timestamp) : message.timestamp;
-
         const date = new Date(message.timestamp).toLocaleDateString("en-US", {
           month: "long",
           day: "numeric",
@@ -270,22 +252,7 @@ export const Chat = createComponent(
 
           ${dateMessages
               .map((message) => {
-                // console.log("message:", message);
-                // Check if this is a game invite message
                 if (message.messageType === 'game_invite') {
-                  // Ensure timestamp is a number
-                  // const timestamp = typeof message.timestamp === 'string' ? 
-                  // Date.parse(message.timestamp) : message.timestamp;
-
-                  // console.log('Processing game invite message:', {
-                  //   id: message.id,
-                  //   senderId: message.senderId,
-                  //   receiverId: message.receiverId,
-                  //   messageType: message.messageType,
-                  //   fullMessage: message
-                  // });
-
-                  // Create a container for the game invite message
                   return `
                     <div class="game-invite-container" data-message-id="${message.id}" data-from="${message.senderId}" data-to="${message.receiverId}" data-game-type="${message.gameInviteData?.gameType || '1v1'}" data-timestamp="${new Date(
                     message.timestamp
@@ -300,7 +267,6 @@ export const Chat = createComponent(
                   `;
                 }
 
-                // Handle regular messages as before
                 const isCurrentUser = message.senderId == parseInt(currentUserId || '');
 
                 const messageTime = new Date(
@@ -341,7 +307,6 @@ export const Chat = createComponent(
         .join("");
     };
 
-    // Setup event listeners for the chat
     const setupEventListeners = () => {
       const sendButton = container.querySelector("#send-button");
       const messageInput = container.querySelector(
@@ -349,12 +314,10 @@ export const Chat = createComponent(
       ) as HTMLDivElement;
       const blockButton = container.querySelector(".block-btn");
 
-      // Handle send message button click
       sendButton?.addEventListener("click", () => {
         sendMessage();
       });
 
-      // Handle enter key press
       messageInput?.addEventListener("keydown", (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
           e.preventDefault();
@@ -362,11 +325,9 @@ export const Chat = createComponent(
         }
       });
 
-      // Handle block button
       blockButton?.addEventListener("click", () => {
         if (activeUser && chatService.isConnected()) {
           chatService.blockUser(activeUser.nickname);
-          // You might want to update the UI to reflect the blocked status
           alert(`${activeUser.full_name} has been blocked`);
         }
       });
@@ -374,7 +335,6 @@ export const Chat = createComponent(
       const emoticonButton = container.querySelector("#emoticon-button");
       const emoticonContainer = container.querySelector("#emoticon-container");
 
-      // Toggle emoticon container visibility
       emoticonButton?.addEventListener("click", () => {
         if (emoticonContainer) {
           if (emoticonContainer.classList.contains("hidden")) {
@@ -394,14 +354,11 @@ export const Chat = createComponent(
         const emoticonContent = container.querySelector("#emoticon-tab-content");
         const stickerContent = container.querySelector("#sticker-tab-content");
 
-        // Track loaded state to prevent reloading
         let emojisLoaded = false;
         let emoticonsLoaded = false;
         let stickersLoaded = false;
 
-        // Switch to Emojis tab (default)
         emojisTab?.addEventListener("click", () => {
-          // Update tab styles
           emojisTab.classList.add("text-pongcyan", "border-b-2", "border-pongcyan");
           emojisTab.classList.remove("text-gray-400");
           emoticonTab?.classList.remove("text-pongcyan", "border-b-2", "border-pongcyan");
@@ -409,21 +366,17 @@ export const Chat = createComponent(
           stickerTab?.classList.remove("text-pongpink", "border-b-2", "border-pongpink");
           stickerTab?.classList.add("text-gray-400", "hover:border-pongcyan");
 
-          // Show/hide content
           emojisContent?.classList.remove("hidden");
           emoticonContent?.classList.add("hidden");
           stickerContent?.classList.add("hidden");
 
-          // Load emojis if not already loaded
           if (!emojisLoaded) {
             loadEmojis();
             emojisLoaded = true;
           }
         });
 
-        // Switch to Emoticons tab
         emoticonTab?.addEventListener("click", () => {
-          // Update tab styles
           emoticonTab.classList.add("text-pongcyan", "border-b-2", "border-pongcyan");
           emoticonTab.classList.remove("text-gray-400");
           emojisTab?.classList.remove("text-pongcyan", "border-b-2", "border-pongcyan");
@@ -431,21 +384,17 @@ export const Chat = createComponent(
           stickerTab?.classList.remove("text-pongpink", "border-b-2", "border-pongpink");
           stickerTab?.classList.add("text-gray-400", "hover:border-pongcyan");
 
-          // Show/hide content
           emoticonContent?.classList.remove("hidden");
           emojisContent?.classList.add("hidden");
           stickerContent?.classList.add("hidden");
 
-          // Load emoticons if not already loaded
           if (!emoticonsLoaded) {
             loadEmoticons();
             emoticonsLoaded = true;
           }
         });
 
-        // Switch to Stickers tab
         stickerTab?.addEventListener("click", () => {
-          // Update tab styles
           stickerTab.classList.add("text-pongcyan", "border-b-2", "border-pongcyan");
           stickerTab.classList.remove("text-gray-400");
           emoticonTab?.classList.remove("text-pongcyan", "border-b-2", "border-pongcyan");
@@ -453,12 +402,10 @@ export const Chat = createComponent(
           emojisTab?.classList.remove("text-pongcyan", "border-b-2", "border-pongcyan");
           emojisTab?.classList.add("text-gray-400", "hover:text-pongcyan");
 
-          // Show/hide content
           stickerContent?.classList.remove("hidden");
           emoticonContent?.classList.add("hidden");
           emojisContent?.classList.add("hidden");
 
-          // Load stickers if not already loaded
           if (!stickersLoaded) {
             loadStickers();
             stickersLoaded = true;
@@ -467,16 +414,11 @@ export const Chat = createComponent(
       };
 
       const setupEmoticonContainer = () => {
-        // Initialize only the tab events without loading any content yet
         setupTabEvents();
-
-        // By default, only load content for the first tab (emojis) which is active by default
         loadEmojis();
       };
 
-      // Load both emoticons and stickers content
       const loadEmoticonContent = () => {
-        // Remove the erroneous if() statement
         setupEmoticonContainer();
       };
 
@@ -493,7 +435,6 @@ export const Chat = createComponent(
           emojiDiv.title = emo.title;
           emojiDiv.innerHTML = `<img src="${emo.src}" alt="${emo.title}" class="h-6">`;
 
-          // Add click event to insert emoticon
           emojiDiv.addEventListener("click", () => {
             insertEmoticon(emo.title);
             emoticonContainer?.classList.add("hidden");
@@ -503,15 +444,12 @@ export const Chat = createComponent(
         });
       };
 
-      // Load emoticons into the container
       const loadEmoticons = () => {
         const emoticonContent = container.querySelector("#emoticon-tab-content");
         if (!emoticonContent) return;
 
-        // Clear existing emoticons
         emoticonContent.innerHTML = "";
 
-        // Create emoticon elements
         emoticons.forEach((emo) => {
           const emoticonDiv = document.createElement("div");
           emoticonDiv.className =
@@ -519,7 +457,6 @@ export const Chat = createComponent(
           emoticonDiv.title = emo.title;
           emoticonDiv.innerHTML = `<img src="${emo.src}" alt="${emo.title}" class="h-6">`;
 
-          // Add click event to insert emoticon
           emoticonDiv.addEventListener("click", () => {
             insertEmoticon(emo.title);
             emoticonContainer?.classList.add("hidden");
@@ -529,15 +466,12 @@ export const Chat = createComponent(
         });
       };
 
-      // Load stickers into the container
       const loadStickers = () => {
         const stickerContent = container.querySelector("#sticker-tab-content");
         if (!stickerContent) return;
 
-        // Clear existing stickers
         stickerContent.innerHTML = "";
 
-        // Create sticker elements
         stickers.forEach((sticker) => {
           const stickerDiv = document.createElement("div");
           stickerDiv.className =
@@ -545,7 +479,6 @@ export const Chat = createComponent(
           stickerDiv.title = sticker.title;
           stickerDiv.innerHTML = `<img src="${sticker.src}" alt="${sticker.title}" class="w-12 h-12">`;
 
-          // Add click event to insert sticker
           stickerDiv.addEventListener("click", () => {
             insertEmoticon(sticker.title);
             emoticonContainer?.classList.add("hidden");
@@ -555,7 +488,6 @@ export const Chat = createComponent(
         });
       };
 
-      // Insert emoticon or sticker into message input
       const insertEmoticon = (code: string) => {
         const messageInput = container.querySelector(
           "#message-input"
@@ -566,7 +498,6 @@ export const Chat = createComponent(
         messageInput.focus();
       };
 
-      // Close emoticon container when clicking outside
       document.addEventListener("click", (e) => {
         const target = e.target as HTMLElement;
         if (
@@ -586,7 +517,6 @@ export const Chat = createComponent(
 
       if (!content || !activeUser || !chatService.isConnected()) return;
 
-      // Get current user info
       const currentUser = store.userId;
       const currentUsername = store.nickname;
 
@@ -615,29 +545,20 @@ export const Chat = createComponent(
         }
       });
 
-      // Send message to the user
-      // await axios.post('/notifications/api/notifications/user-message', body).catch(err => {
-      //   console.error("Error sending message:", err);
-      // })
-
-      // Create temporary message for optimistic update
       const tempMessage: Message = {
-        id: Date.now(), // Temporary ID (replace with real ID from server later)
+        id: Date.now(),
         senderId: parseInt(currentUser),
         receiverId: activeUser.id,
         content,
         timestamp: Date.now(),
       };
 
-      // Optimistically add message to UI
       messages = [tempMessage, ...messages];
       renderChat();
       scrollToBottom();
 
-      // Clear input
       messageInput.innerText = "";
 
-      // Create proper message payload
       const newMessage = {
         from: currentUser,
         to: activeUser.id,
@@ -646,19 +567,16 @@ export const Chat = createComponent(
       };
       console.log(newMessage);
 
-      // // Send via WebSocket
       chatService.send("message:private", newMessage);
-      // chatService.sendPrivateMessage(activeUser.id, content);
     };
 
     const scrollToBottom = () => {
       const messageContainer = container.querySelector("#message-container");
       if (messageContainer) {
-        messageContainer.scrollTop = 0; // For flex-col-reverse containers
+        messageContainer.scrollTop = 0;
       }
     };
 
-    // Set the active user for chat
     const setActiveUser = (user: {
       nickname: string;
       id: number;
@@ -666,28 +584,21 @@ export const Chat = createComponent(
       avatar_url: string;
     }) => {
       activeUser = user;
-      // console.log(activeUser);
-      // Create room ID (combination of both usernames sorted alphabetically)
       const currentUserId = parseInt(store.userId || '');
       if (currentUserId) {
-        // Use consistent userId format for roomId
         roomId = [currentUserId, user.id]
           .sort((a: number, b: number) => a - b)
           .join("-");
 
-        // Get message history for this room
         if (chatService.isConnected()) {
           chatService.getMessageHistory(roomId);
 
-          // Mark messages as read when opening the chat
           chatService.markMessagesAsRead(roomId);
 
-          // Request updated unread counts after marking messages as read
           chatService.send("messages:unread:get", {
             userId: store.userId
           });
         }
-        // console.log(user.id);
 
         chatService.off("user:blocked_status");
 
@@ -697,16 +608,13 @@ export const Chat = createComponent(
         });
 
         chatService.on("user:blocked_status", (data) => {
-          // console.log(data);
           if (user.id && user.id === data.targetId) {
             const messageContainer = container.querySelector("#message-container");
 
             if (data.isBlocked && messageContainer) {
-              // Check if the blocked message already exists
               const existingBlockedMessage = Array.from(messageContainer.querySelectorAll(".blocked-message"))
                 .find(msg => msg.textContent === "You have blocked this user.");
 
-              // Only add the message if it doesn't already exist
               if (!existingBlockedMessage) {
                 const blockedMessage = document.createElement("div");
                 blockedMessage.className = "text-center text-red-500 my-2 px-4 blocked-message";
@@ -723,7 +631,6 @@ export const Chat = createComponent(
       renderChat();
     };
 
-    // Initialize WebSocket event listeners
     const initWebSocketEvents = () => {
       chatService.off("message:received");
       chatService.off("message:sent");
@@ -732,12 +639,6 @@ export const Chat = createComponent(
       chatService.off("user:blocked");
       chatService.off("error");
 
-      // chatService.send("user:check_blocked", {
-      //   userId: store.userId,
-      //   targetId: props.activeUser?.id
-      // });
-
-      // Listen for received messages
       chatService.on("message:received", (data: any) => {
         console.log("Received message:", data);
 
@@ -748,9 +649,7 @@ export const Chat = createComponent(
 
         const { message, roomId: msgRoomId } = data;
 
-        // Only add message if it's for the current room
         if (msgRoomId === roomId) {
-          // Add the new message to the messages array
           messages = [message, ...messages];
           renderChat();
           scrollToBottom();
@@ -758,7 +657,6 @@ export const Chat = createComponent(
         }
       });
 
-      // Add handler for direct private messages (including game invites)
       chatService.on("message:private", (data: any) => {
         console.log("Private message received:", data);
 
@@ -770,18 +668,13 @@ export const Chat = createComponent(
         const message: Message = data;
         const msgRoomId = data.roomId;
 
-        // Only add message if it's for the current room
         if (msgRoomId === roomId) {
-          // Add the new message to the messages array
           messages = [message, ...messages];
           renderChat();
           scrollToBottom();
           chatService.markMessagesAsRead(roomId);
         }
 
-
-
-        // Request updated unread counts
         chatService.send("messages:unread:get", {
           userId: store.userId
         });
@@ -798,14 +691,11 @@ export const Chat = createComponent(
 
         const { message, roomId: msgRoomId } = data;
 
-        // Check if this message is already in our messages array
-        // (to avoid duplicates from the optimistic update)
         const messageExists = messages.some(m =>
           m.content === message.content &&
           m.timestamp === message.timestamp
         );
 
-        // Only add message if it's for the current room and doesn't already exist
         if (msgRoomId === roomId && !messageExists) {
           messages = [message, ...messages];
           renderChat();
@@ -818,14 +708,10 @@ export const Chat = createComponent(
           console.error("Invalid message history data received");
           return;
         }
-        // console.log("data:", data);
         const { messages: historyMessages, roomId: msgRoomId } = data;
-        // console.log("historyMessages:", historyMessages);
 
-
-        // Only set messages if it's for the current room
         if (msgRoomId === roomId) {
-          messages = historyMessages; // Most recent first
+          messages = historyMessages;
           renderChat();
           scrollToBottom();
         }
@@ -833,8 +719,6 @@ export const Chat = createComponent(
 
       chatService.on("message:blocked", (data: any) => {
         console.log("Message blocked:", data);
-
-        // Show an error message to the user
         const messageContainer = container.querySelector("#message-container");
         if (messageContainer) {
           const blockedMessage = document.createElement("div");
@@ -848,12 +732,10 @@ export const Chat = createComponent(
         console.log("User blocked:", data);
 
         const messageContainer = container.querySelector("#message-container");
-        // If we're currently chatting with the blocked user, show a message
         if (activeUser && activeUser.id === data.userId && messageContainer) {
           const existingBlockedMessage = Array.from(messageContainer.querySelectorAll(".blocked-message"))
             .find(msg => msg.textContent === "You have blocked this user.");
 
-          // Only add the message if it doesn't already exist
           if (!existingBlockedMessage) {
             const blockedMessage = document.createElement("div");
             blockedMessage.className = "text-center text-red-500 my-2 px-4 blocked-message";
@@ -870,7 +752,6 @@ export const Chat = createComponent(
         if (activeUser && activeUser.id === data.userId) {
           const messageContainer = container.querySelector("#message-container");
           if (messageContainer) {
-            // Find and remove the "You have blocked this user" message
             const blockedMessages = messageContainer.querySelectorAll(".blocked-message");
             blockedMessages.forEach(msg => {
               if (msg.textContent === "You have blocked this user.") {
@@ -879,13 +760,11 @@ export const Chat = createComponent(
             });
           }
 
-          // Show the input container again
           const inputContainer = container.querySelector("#message-input-container");
           inputContainer?.classList.remove("hidden");
         }
       });
 
-        // NEW: Handle friend match creation from chat service
         chatService.on("create_friend_match", (data) => {
           console.log("Received create_friend_match from chat service:", data);
           
@@ -903,7 +782,6 @@ export const Chat = createComponent(
           });
         });
 
-        // NEW: Handle game match creation status from chat
         chatService.on("game:match_creating", (data) => {
           console.log("Game match is being created:", data);
           
@@ -912,7 +790,6 @@ export const Chat = createComponent(
           notification.textContent = 'Creating game match...';
           document.body.appendChild(notification);
           
-          // Remove notification after 3 seconds
           setTimeout(() => {
             if (document.body.contains(notification)) {
               document.body.removeChild(notification);
@@ -926,25 +803,20 @@ export const Chat = createComponent(
       });
     };
 
-    // Initialize the component
     const init = () => {
       renderChat();
       initWebSocketEvents();
 
-      // Initialize with activeUser if provided
       if (props.activeUser) {
         setActiveUser(props.activeUser);
       }
     };
 
-    // Initialize the component
     init();
 
-    // Return the component with its public methods
     return Object.assign(container, {
       setActiveUser,
       getCurrentActiveChatId: () => activeUser ? activeUser.id : null
     });
   }
 );
-

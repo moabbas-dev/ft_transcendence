@@ -7,7 +7,6 @@ export class PongGameClient {
 	
 	constructor(private serverUrl: string, userId: string) {
 	  this.userId = userId;
-	//   this.connect();
 	  this.count = 0;
 	}
 	
@@ -26,9 +25,7 @@ export class PongGameClient {
 			this.ws.onmessage = (event) => {
 			  try {
 				const message = JSON.parse(event.data);
-			  //   console.log('Received:', message);
 				
-			  // Trigger all callbacks for this message type
 			  if (this.callbacks[message.type]) {
 				  this.callbacks[message.type].forEach(callback => {
 					  try {
@@ -46,7 +43,6 @@ export class PongGameClient {
 			this.ws.onclose = () => {
 			  console.log('Disconnected from game server');
 			  
-			  // Try to reconnect after a delay
 			  if (this.reconnectTimer !== null) {
 				clearTimeout(this.reconnectTimer);
 			  }
@@ -66,7 +62,6 @@ export class PongGameClient {
 	  }
 	}
 	
-	// Send message to the server
 	send(type: string, payload: any = {}): void {
 	  if (this.ws && this.ws.readyState === WebSocket.OPEN) {
 		this.ws.send(JSON.stringify({ type, payload }));
@@ -75,7 +70,6 @@ export class PongGameClient {
 	  }
 	}
 	
-	// Register a callback for a specific message type
 	on(messageType: string, callback: (data: any) => void): void {
 		this.count++;
 		console.log(this.count, '. Listen for ', messageType, ': ', callback);
@@ -103,12 +97,10 @@ export class PongGameClient {
 		this.callbacks = {};
 	}
 
-	// NEW: Check if connected
 	public isConnected(): boolean {
 		return this.ws !== null && this.ws.readyState === WebSocket.OPEN;
 	}
 
-	// Close the connection
 	disconnect(): void {
 	  if (this.ws) {
 		this.ws.close();
@@ -120,32 +112,26 @@ export class PongGameClient {
 	  }
 	}
 	
-	// Start finding a match
 	findMatch(): void {
 	  this.send('find_match');
 	}
 	
-	// Cancel matchmaking
 	cancelMatchmaking(): void {
 	  this.send('cancel_matchmaking');
 	}
 	
-	// Game-specific methods
 	updatePaddlePosition(matchId: string, position: number): void {
 	  this.send('paddle_move', { matchId, position });
 	}
 	
-	// to be deleted
 	updateBall(matchId: string, ballData: { x: number, y: number, speedX: number, speedY: number }): void {
 	  this.send('ball_update', { matchId, ballData });
 	}
 
-	// to be deleted
 	completeMatch(matchId: string, winner: string, finalScore: { player1: number, player2: number }): void {
 	  this.send('match_complete', { matchId, winner, finalScore });
 	}
 
-	// For playing with friends
 	inviteFriend(friendId: string): void {
 	  this.send('friend_match_request', { friendId });
 	}

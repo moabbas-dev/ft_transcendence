@@ -271,7 +271,6 @@ function showWaitingRoom(container: HTMLElement, data: { tournament: { id: strin
     isCreator: data.tournament.creator_id === userId,
     client,
     onTournamentStart: () => {
-      // Will be handled by tournament_started event
     }
   };
 
@@ -313,10 +312,8 @@ function showTournamentBrackets(container: HTMLElement, data: any, client: Tourn
   const bracketsDisplay = content.querySelector('#brackets-display');
   if (!bracketsDisplay) return;
 
-  // Format the matches data for the TournamentBrackets component
   const formattedMatches = formatMatchesForBrackets(data);
   
-  // Create and render the TournamentBrackets component
   const bracketsComponent = TournamentBrackets({
     playersCount: data.tournament.player_count,
     matches: formattedMatches,
@@ -328,19 +325,16 @@ function showTournamentBrackets(container: HTMLElement, data: any, client: Tourn
   bracketsDisplay.appendChild(bracketsComponent);
 }
 
-// Implement the formatMatchesForBrackets helper function
 function formatMatchesForBrackets(tournamentData: any) {
   if (!tournamentData.matches || !Array.isArray(tournamentData.matches)) {
     return [];
   }
 
   return tournamentData.matches.map((match: any, index: number) => {
-    // Get players for this match
     const matchPlayers = match.players || [];
     const player1Data = matchPlayers[0];
     const player2Data = matchPlayers[1];    
 
-    // Find player details from tournament players list
     const findPlayerDetails = (playerId: string) => {
       return tournamentData.players? tournamentData.players.find((p: any) => 
         String(p.player_id) === String(playerId) || String(p.id) === String(playerId)
@@ -350,7 +344,6 @@ function formatMatchesForBrackets(tournamentData: any) {
     const player1Details = player1Data ? findPlayerDetails(player1Data.player_id) : null;
     const player2Details = player2Data ? findPlayerDetails(player2Data.player_id) : null;
 
-    // Determine winner
     let winner = null;
     if (match.winner_id) {
       const winnerDetails = findPlayerDetails(match.winner_id);
@@ -362,7 +355,6 @@ function formatMatchesForBrackets(tournamentData: any) {
       }
     }
 
-    // Calculate round and position based on tournament structure
     const round = calculateRound(index, tournamentData.tournament.player_count);
     const position = calculatePosition(index, round, tournamentData.tournament.player_count);
 
@@ -388,16 +380,13 @@ function formatMatchesForBrackets(tournamentData: any) {
   });
 }
 
-function calculateRound(matchIndex: number, playerCount: number): number {
-  // For 4 players: Round 0 = semifinals (matches 0,1), Round 1 = final (match 2)
-  // For 8 players: Round 0 = quarterfinals (matches 0-3), Round 1 = semifinals (matches 4,5), Round 2 = final (match 6)
-  
+function calculateRound(matchIndex: number, playerCount: number): number {  
   if (playerCount === 4) {
     return matchIndex < 2 ? 0 : 1;
   } else if (playerCount === 8) {
-    if (matchIndex < 4) return 0; // Quarterfinals
-    if (matchIndex < 6) return 1; // Semifinals
-    return 2; // Final
+    if (matchIndex < 4) return 0;
+    if (matchIndex < 6) return 1;
+    return 2;
   }
   
   return 0;
@@ -535,12 +524,10 @@ function showMatchDetails(match: any, tournamentData: any) {
     </div>
   `;
 
-  // Add event listener to close modal
   modal.querySelector('.close-modal')?.addEventListener('click', () => {
     document.body.removeChild(modal);
   });
 
-  // Close modal when clicking outside
   modal.addEventListener('click', (e) => {
     if (e.target === modal) {
       document.body.removeChild(modal);
@@ -553,12 +540,10 @@ function showMatchDetails(match: any, tournamentData: any) {
 import { TournamentResult, renderResultsTab } from "./TournamentResults.js";
 import Toast from "../../toast/Toast.js";
 
-// Implement showTournamentResults function
 function showTournamentResults(container: HTMLElement, data: any, client: TournamentClient, userId: string) {
   const content = container.querySelector('#tournament-content');
   if (!content) return;
 
-  // Clear the current content and show results
   content.innerHTML = `
     <div class="tournament-results-container size-full flex flex-col gap-3">
       <div class="flex justify-between items-center flex-wrap gap-1">
@@ -591,13 +576,10 @@ function showTournamentResults(container: HTMLElement, data: any, client: Tourna
     </div>
   `;
 
-  // Format results from tournament data
   const results: TournamentResult[] = formatTournamentResults(data);
   
-  // Render the results using the existing component
   renderResultsTab(content as HTMLElement, results);
 
-  // Add event listeners for buttons
   const backButton = content.querySelector('#back-to-tournaments');
   if (backButton) {
     backButton.addEventListener('click', () => {
@@ -613,16 +595,13 @@ function showTournamentResults(container: HTMLElement, data: any, client: Tourna
   }
 }
 
-// Helper function to format tournament results
 function formatTournamentResults(tournamentData: any): TournamentResult[] {
   if (!tournamentData.players || !Array.isArray(tournamentData.players)) {
     return [];
   }
 
-  // Calculate scores for each player based on their match performance
   const playerStats = new Map();
 
-  // Initialize player stats
   tournamentData.players.forEach((player: any) => {
     const playerId = player.player_id || player.id;
     playerStats.set(playerId, {
@@ -635,7 +614,6 @@ function formatTournamentResults(tournamentData: any): TournamentResult[] {
     });
   });
 
-  // Process matches to calculate stats
   if (tournamentData.matches) {
     tournamentData.matches.forEach((match: any) => {
       if (match.status === 'completed' && match.players && match.players.length === 2) {
@@ -670,11 +648,9 @@ function formatTournamentResults(tournamentData: any): TournamentResult[] {
     });
   }
 
-  // Convert to results array and sort by performance
   const results = Array.from(playerStats.values()).map((stats: any) => {
     const player = stats.player;
     
-    // Calculate score (wins * 3 + draws * 1 + goal difference)
     const goalDifference = stats.totalGoals - stats.goalsAgainst;
     const score = (stats.wins * 3) + goalDifference;
     
@@ -682,19 +658,16 @@ function formatTournamentResults(tournamentData: any): TournamentResult[] {
       userId: player.player_id || player.id,
       username: player.nickname || `${t("play.player")} ${player.player_id || player.id}`,
       avatarUrl: player.avatar_url,
-      place: 0, // Will be assigned after sorting
+      place: 0,
       score: score
     };
   });
 
-  // Sort by score (descending) and assign places
   results.sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
-    // If scores are equal, sort by username for consistency
     return a.username.localeCompare(b.username);
   });
 
-  // Assign places
   results.forEach((result, index) => {
     result.place = index + 1;
   });

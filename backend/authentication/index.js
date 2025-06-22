@@ -9,52 +9,39 @@ const path = require('path');
 const fs = require('fs');
 const fastifyMultipart = require('@fastify/multipart');
 
-// const fastify = Fastify({
-// 	logger: true,
-// 	https: {
-// 	  key: fs.readFileSync('./ssl/server.key'),
-// 	  cert: fs.readFileSync('./ssl/server.crt'),
-// 	}
-// })  
-
 fastify.register(fastifyMultipart, {
 	limits: {
-	  fileSize: 10 * 1024 * 1024 // 10 MB limit (change as needed)
+	  fileSize: 10 * 1024 * 1024 // 10 MB limit
 	}
 });
   
 
-// fastify.addHook("preHandler", auth)
 fastify.register(require('@fastify/static'), {
 	root: path.join(__dirname, 'uploads'),
 	prefix: '/uploads/',
 });
 
-// Enable CORS on Fastify
 fastify.register(cors, {
-	origin: process.env.FRONTEND_DOMAIN, // Set this to your specific frontend domain for production
+	origin: process.env.FRONTEND_DOMAIN,
 	methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
 	credentials: true,
 });
 
 createTables();
 
-// Register cookie plugin
 fastify.register(fastifyCookie, {
 	secret: process.env.COOKIE_SECRET,
 	parseOptions: {}
 });
 
-// Register session plugin (must be before oauth2)
 fastify.register(fastifySession, {
 	secret: process.env.FASTIFY_SESSION_SECRET_KEY,
-	cookie: { secure: false }, // Set secure: true when using HTTPS
+	cookie: { secure: false },
 	saveUninitialized: false,
 });
 
-// Register fastify-oauth2
 fastify.register(fastifyOauth2, {
-	name: 'googleOAuth2', // will be available as fastify.googleOAuth2
+	name: 'googleOAuth2', 
 	scope: ['profile', 'email'],
 	credentials: {
 		client: {
@@ -63,13 +50,10 @@ fastify.register(fastifyOauth2, {
 		},
 		auth: fastifyOauth2.GOOGLE_CONFIGURATION,
 	},
-	// This is the path that starts the OAuth flow
 	startRedirectPath: '/auth/google',
-	// The callback URL registered in Google Cloud Console
 	callbackUri: `${process.env.BACKEND_DOMAIN}/auth/google/callback`,
 });
 
-// jwt register
 fastify.register(require('fastify-jwt'), {
 	secret: process.env.JWT_SECRET_KEY,
 });
@@ -81,8 +65,6 @@ fastify.register(require('./src/routes/SessionRoutes'));
 fastify.register(require('./src/routes/TwoFactorRoutes'));
 fastify.register(require('./src/routes/UploadRoutes'));
 
-
-// Test route
 fastify.get('/', async (request, reply) => {
 	return { message: 'Hello from the authentication service!' };
 });
@@ -104,7 +86,6 @@ const handleShutdown = async (signal) => {
 process.on('SIGINT', () => handleShutdown('SIGINT'));
 process.on('SIGTERM', () => handleShutdown('SIGTERM'));
 
-// Start the server
 const start = async () => {
 	try {
 		await fastify.listen({ port: 8001, host: '::' });

@@ -62,16 +62,14 @@ export const TwoFactorSend = createComponent(() => {
 		});
 	}
 
-	// Auto-focus the first input on page load
 	if (inputs.length) {
 		requestAnimationFrame(() => {
 			inputs[0].focus();
-			inputs[0].select(); // Optional: highlight text for better UX
+			inputs[0].select();
 		});
 	}
 
 	inputs.forEach((input, index) => {
-		// Handle input to move to next field
 		input.addEventListener("input", (e: Event) => {
 			const target = e.target as HTMLInputElement;
 			const value = target.value;
@@ -90,7 +88,6 @@ export const TwoFactorSend = createComponent(() => {
 				formElement.requestSubmit();
 		});
 
-		// Handle backspace to move to previous field
 		input.addEventListener("keydown", (e: KeyboardEvent) => {
 			if (e.key === "Backspace" && input.value === "" && index > 0)
 				inputs[index - 1].focus();

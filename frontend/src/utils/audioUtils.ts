@@ -12,7 +12,6 @@ class AudioManager {
 
     private initializeAudio(): void {
         try {
-            // Load notification sound
             this.notificationSound = new Audio('../../sounds/mixkit-positive-notification-951.wav');
             this.notificationSound.volume = this.volume;
             this.notificationSound.preload = 'auto';
@@ -25,14 +24,11 @@ class AudioManager {
         if (!this.isEnabled || !this.notificationSound) return;
 
         try {
-            // Reset audio to beginning
             this.notificationSound.currentTime = 0;
 
-            // Play the sound
             await this.notificationSound.play();
         } catch (error: any) {
             console.error('Failed to play notification sound:', error);
-            // Handle autoplay policy - some browsers block autoplay
             if (error.name === 'NotAllowedError') {
                 console.warn('Audio autoplay blocked by browser');
             }
@@ -68,6 +64,5 @@ class AudioManager {
     }
 }
 
-// Create singleton instance
 export const audioManager = new AudioManager();
 export default audioManager;

@@ -15,7 +15,6 @@ export function createComponent(renderFn: any) {
         currentInstance = instance;
         hookIndices.set(instance, 0);
 
-        // Run cleanup before new render
         if (cleanupFns.has(instance)) {
           const cleanup = cleanupFns.get(instance);
           cleanup();
@@ -23,7 +22,6 @@ export function createComponent(renderFn: any) {
 
         const dom = renderFn(instance.props);
 
-        // Store/update DOM reference
         if (!componentStates.has(instance)) {
           componentStates.set(instance, dom);
         }
@@ -33,7 +31,6 @@ export function createComponent(renderFn: any) {
       }
     };
     
-    // Initial render and DOM storage
     const initialDom = instance.render();
     componentStates.set(instance, initialDom);
     return initialDom;
@@ -54,7 +51,6 @@ export const StateManager = {
     }
 
     const currentHookIndex = hookIndices.get(currentInstance) || 0;
-    // Capture the hook index so it won’t be affected by later calls
     const hookIndex = currentHookIndex;
     hookIndices.set(currentInstance, currentHookIndex + 1);
 
@@ -69,18 +65,15 @@ export const StateManager = {
         state: typeof initialValue === 'function' 
           ? initialValue(instance.props) 
           : initialValue,
-        // In StateManager's setState
         setState: (newValue: any) => {
           const prevState = hooks[hookIndex].state;
           const nextState = typeof newValue === 'function' 
             ? newValue(prevState) 
             : newValue;
 
-          // Only update if state actually changed
           if (prevState !== nextState) {
             hooks[hookIndex].state = nextState;
             
-            // Batch DOM updates
             requestAnimationFrame(() => {
               const oldDom = componentStates.get(instance);
               if (oldDom && document.body.contains(oldDom)) {

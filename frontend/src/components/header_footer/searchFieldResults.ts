@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   searchFieldResults.ts                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: afarachi <afarachi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/22 15:19:10 by afarachi          #+#    #+#             */
+/*   Updated: 2025/06/22 15:19:10 by afarachi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 import { t } from "../../languages/LanguageController";
 import { Profile } from "../profile/UserProfile";
 import defaultAvatar from "../../assets/guests.png";
@@ -27,7 +39,6 @@ export function displayResults(users: {nickname:string, status:string, avatar_ur
 		</div>
 	  `;
 
-		// Add click event to user item
 		userItem.addEventListener('click', () => {
 			let profilePopUp = document.querySelector(".profile");
 				if (!profilePopUp) {
@@ -40,7 +51,6 @@ export function displayResults(users: {nickname:string, status:string, avatar_ur
 				});
 				profilePopUp.innerHTML = '';
 				profilePopUp.appendChild(profile);
-			// Close the results container
 			container.classList.add('hidden');
 		});
 
@@ -48,7 +58,6 @@ export function displayResults(users: {nickname:string, status:string, avatar_ur
 	});
 }
 
-// Helper function to get status color
 function getStatusColor(status: string): string {
 	switch (status) {
 		case 'online':

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   UserInfo.ts                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: afarachi <afarachi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/22 15:39:18 by afarachi          #+#    #+#             */
+/*   Updated: 2025/06/22 15:39:18 by afarachi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 import { createComponent } from "../../utils/StateManager.js";
 import store from "../../../store/store.js";
 import axios from "axios";
@@ -14,7 +26,6 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
   const container = document.createElement("div");
   if (props && props.uName) {
     const token = store.accessToken;
-    // Make the API call with proper authorization headers
     axios
       .get(`/authentication/auth/users/nickname/${props.uName}`, {
         headers: {
@@ -22,10 +33,8 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
         },
       })
       .then((response) => {
-        // Store or use the user data
         const userData = response.data;
         updateUIWithUserData(userData, container);
-        // console.log(userData);
       })
       .catch((error) => {
         console.error("Error fetching user data:", error.response.data.message);
@@ -143,7 +152,6 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
 
 
   function updateUIWithUserData(userData: any, container: HTMLDivElement) {
-    // Update nickname
     const fullNameElement = container.querySelector("#fullName") as HTMLInputElement;
     if (fullNameElement) {
       fullNameElement.value = userData.full_name;
@@ -151,27 +159,21 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
       if (store.nickname !== userData.nickname) {
         fullNameElement.readOnly = true;
       }
-      // fullNameElement.classList.add('bg-gray-200');
     }
-    // Update age
     const ageInput = container.querySelector('input[placeholder="Age"]') as HTMLInputElement;
     if (ageInput) {
       ageInput.value = userData.age?.toString();
       if (store.nickname !== userData.nickname) {
         ageInput.readOnly = true;
       }
-      // ageInput.classList.add('bg-gray-200');
     }
 
-    // Update email
     const emailInput = container.querySelector('input[placeholder="Email"]') as HTMLInputElement;
     if (emailInput) {
       emailInput.value = userData.email;
       if (store.nickname !== userData.nickname) {
         emailInput.readOnly = true;
       }
-      // emailInput.readOnly = true;
-      // emailInput.classList.add('bg-gray-200');
     }
 
     const nicknameInput = container.querySelector('#nickname-value') as HTMLInputElement;
@@ -180,10 +182,8 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
       if (store.nickname !== userData.nickname) {
         nicknameInput.readOnly = true;
       }
-      // nicknameInput.classList.add('bg-gray-200');
     }
 
-    // Update country
     const selectedCountry = countryInput.querySelector(`option[value="${userData.country}"]`) as HTMLOptionElement;
     selectedCountry.selected = true;
     if (store.nickname !== userData.nickname) {
@@ -281,11 +281,9 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
     }
   }
 
-  // 2FA toggle interactions
   if (twoFactorToggle && qrCodeContainer) {
     twoFactorToggle.addEventListener("change", async function () {
       if (this.checked) {
-        // Show QR code when 2FA is enabled
         if (store.is2faEnabled)
           return;
         qrCodeContainer.classList.remove("hidden");
@@ -309,7 +307,6 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
         }
 
       } else {
-        // Hide QR code when 2FA is disabled
         try {
           await axios.put(`/authentication/auth/twoFactor/disable/${store.userId}`, {}, {
             withCredentials: true,
@@ -386,7 +383,6 @@ export const UserInfo = createComponent((props: UserInfoProps) => {
 
     });
 
-    // Handle backspace to move to previous field
     input.addEventListener("keydown", (e: KeyboardEvent) => {
       if (e.key === "Backspace" && input.value === "" && index > 0)
         inputs[index - 1].focus();

@@ -54,7 +54,6 @@ export class AIController implements Controller {
 	}
 
 	private trackBallMovement(state: gameState) {
-		// Store ball positions for trajectory analysis (as ai data)
 		this.ballTrajectory.push(state.ballY);
 		if (this.ballTrajectory.length > 10) {
 		  this.ballTrajectory.shift();
@@ -138,7 +137,7 @@ export class BallController implements Controller {
 		baseSpeed: 8,
 		minSpeed: 5,
 		speedIncrease: 1.001,
-		maxBounceAngle: Math.PI / 4 // 45 degrees
+		maxBounceAngle: Math.PI / 4
 	};
 
 	public resetConfig() {
@@ -146,7 +145,7 @@ export class BallController implements Controller {
 			baseSpeed: 8,
 			minSpeed: 5,
 			speedIncrease: 1.001,
-			maxBounceAngle: Math.PI / 4 // 45 degrees
+			maxBounceAngle: Math.PI / 4 
 		}
 	}
 
@@ -227,7 +226,6 @@ export class BallController implements Controller {
         state.ballSpeedX = Math.cos(bounceAngle) * newSpeed * (side === 'left' ? 1 : -1);
         state.ballSpeedY = Math.sin(bounceAngle) * newSpeed;
 
-        // Ensure minimum vertical speed
         if (Math.abs(state.ballSpeedY) < this.config.minSpeed) {
             state.ballSpeedY = this.config.minSpeed * Math.sign(state.ballSpeedY);
         }

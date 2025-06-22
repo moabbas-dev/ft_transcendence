@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ChatItem.ts                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: afarachi <afarachi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/22 15:14:01 by afarachi          #+#    #+#             */
+/*   Updated: 2025/06/22 15:14:01 by afarachi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 import store from "../../../store/store.js";
 import { createComponent } from "../../utils/StateManager.js";
 import chatService from "../../utils/chatUtils/chatWebSocketService.js";
@@ -17,10 +29,8 @@ export const ChatItem = createComponent((props: ChatItemProps) => {
     chatItem.className = 'user-item flex items-center p-3 rounded-lg transition-all duration-300 hover:bg-ponghover hover:cursor-pointer border-b border-b-gray-800 mx-1 my-1';
     chatItem.dataset.username = props.username;
 
-    // Set data attribute for username to help with selection
     chatItem.setAttribute('data-username', props.username);
 
-    // Set additional styles based on status
     if (props.status) {
         chatItem.classList.add('border-l-4', 'border-l-green-500');
         chatItem.classList.add('shadow-[0_0_5px_rgba(0,247,255,0.3)]');
@@ -55,7 +65,6 @@ export const ChatItem = createComponent((props: ChatItemProps) => {
     };
 
     const attachEventListeners = () => {
-        // Add friend button click
         const addFriend = chatItem.querySelector('.add-friend');
         if (addFriend) {
             addFriend.addEventListener('click', (e) => {
@@ -68,40 +77,28 @@ export const ChatItem = createComponent((props: ChatItemProps) => {
 
                 console.log('Add Friend Clicked');
 
-                // Send friend request via WebSocket
                 if (chatService.isConnected()) {
                     chatService.sendFriendRequest(props.username);
 
-                    // Update UI to show pending status
                     addFriend.firstChild?.remove();
                     addFriend.innerHTML = `<i class="fas fa-user-clock text-pongcyan"></i>`;
                     addFriend.classList.add('bg-black');
                     addFriend.classList.add('border-pongcyan');
-
-                    // Add a subtle animation to indicate the request is pending
                     addFriend.classList.add('animate-pulse');
                     addFriend.classList.add('shadow-[0_0_10px_rgba(0,247,255,0.5)]');
                 }
             });
         }
 
-        // Chat item click (select this chat)
         chatItem.addEventListener('click', () => {
-            // Mark messages as read when clicking on a chat
             if (props.unreadCount > 0) {
-                // Create room ID consistently
                 const currentUserId = store.userId;
-                const roomId = [currentUserId, props.userId].sort().join("-");
-                
-                // Mark messages as read
-                chatService.markMessagesAsRead(roomId);
-                
-                // Update the UI immediately (optimistic update)
+                const roomId = [currentUserId, props.userId].sort().join("-");                
+                chatService.markMessagesAsRead(roomId);                
                 props.unreadCount = 0;
                 render();
             }
             
-            // Highlight the selected chat
             document.querySelectorAll('.user-item').forEach(item => {
                 item.classList.remove('bg-ponghover', 'shadow-[0_0_15px_rgba(255,0,228,0.5)]', 'border-pongpink');
             });
@@ -110,7 +107,6 @@ export const ChatItem = createComponent((props: ChatItemProps) => {
             chatItem.classList.add('shadow-[0_0_15px_rgba(255,0,228,0.5)]');
             chatItem.classList.add('border-pongpink');
         
-            // Call the onChatSelect callback with user info
             if (props.onChatSelect) {
                 props.onChatSelect({
                     nickname: props.username,
@@ -120,7 +116,6 @@ export const ChatItem = createComponent((props: ChatItemProps) => {
                 });
             }
         
-            // Mobile view handling
             if (window.innerWidth < 640) {
                 const chatContainer = document.querySelector('.chat');
                 if (chatContainer) {
@@ -132,8 +127,6 @@ export const ChatItem = createComponent((props: ChatItemProps) => {
         });
     };
 
-    // Initial render
     render();
-
     return chatItem;
 });

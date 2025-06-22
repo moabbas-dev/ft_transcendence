@@ -61,7 +61,6 @@ export default {
       </section>
     `;
     
-    // Add footer
     const footerComp = Footer();
     container.appendChild(footerComp);
     

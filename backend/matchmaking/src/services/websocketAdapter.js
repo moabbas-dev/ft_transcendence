@@ -12,9 +12,9 @@ class WebSocketAdapter {
    */
   constructor(server) {
     this.wss = new WebSocketServer({ server });
-    this.clients = new Map(); // Map of client connections: clientId -> { socket, userData }
-    this.rooms = new Map();   // Map of room connections: roomId -> Set of clients
-    this.messageHandlers = new Map(); // Map of message type handlers
+    this.clients = new Map();
+    this.rooms = new Map();
+    this.messageHandlers = new Map();
   }
 
   /**
@@ -23,7 +23,6 @@ class WebSocketAdapter {
    */
   initialize(onConnection) {
     this.wss.on('connection', (socket, request) => {
-      // Let the controller handle the connection
       if (onConnection) {
         onConnection(socket, request);
       }
@@ -62,7 +61,7 @@ class WebSocketAdapter {
       }
     }
     
-    return false; // Message type not handled
+    return false;
   }
   
   /**
@@ -78,7 +77,6 @@ class WebSocketAdapter {
     this.rooms.get(roomId).add(clientId);
     console.log(`Client ${clientId} joined room: ${roomId}`);
     
-    // Notify room about new client
     this.sendToRoom(roomId, 'client_joined', { clientId }, clientId);
   }
   
@@ -94,12 +92,10 @@ class WebSocketAdapter {
     room.delete(clientId);
     console.log(`Client ${clientId} left room: ${roomId}`);
     
-    // Remove room if empty
     if (room.size === 0) {
       this.rooms.delete(roomId);
       console.log(`Room deleted: ${roomId}`);
     } else {
-      // Notify room about client leaving
       this.sendToRoom(roomId, 'client_left', { clientId });
     }
   }
@@ -143,7 +139,6 @@ class WebSocketAdapter {
    */
   sendToClient(clientId, messageType, payload) {
     const client = this.clients.get(String(clientId)); 
-    // console.log(`Sending message to client ${client}:`, { type: messageType, payload });    
     
     if (!client || client.socket.readyState !== WebSocket.OPEN) {
       return false;
@@ -242,7 +237,6 @@ class WebSocketAdapter {
   }
 }
 
-// Export a factory function to create the adapter
 export function createWebSocketAdapter(server) {
   return new WebSocketAdapter(server);
 }

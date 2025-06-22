@@ -44,7 +44,6 @@ export default {
 			</div>
 		`;
 
-		// Show the create tournament form by default
 		showCreateTournamentForm();
 
 		const tabButtons = container.querySelectorAll('.tab-btn');

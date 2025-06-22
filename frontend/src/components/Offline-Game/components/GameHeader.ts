@@ -171,18 +171,6 @@ export const OfflineGameHeader = createComponent((props: OfflineGameHeader) => {
 
 				updateBackgrounds(data.player1Score, data.player2Score);
 			});
-
-			// props.client.on('goal_scored', (data: any) => {
-			// 	const score1Element = document.getElementById('player-score1')?.querySelector('span');
-			// 	const score2Element = document.getElementById('player-score2')?.querySelector('span');
-
-			// 	if (score1Element) score1Element.textContent = String(data.newScore.player1);
-			// 	if (score2Element) score2Element.textContent = String(data.newScore.player2);
-
-			// 	updateBackgrounds(data.newScore.player1, data.newScore.player2);
-
-			// 	showGoalAnimation(data.scoringPlayer);
-			// });
 		}
 	}
 

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   FriendsList.ts                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: afarachi <afarachi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/22 15:15:47 by afarachi          #+#    #+#             */
+/*   Updated: 2025/06/22 15:15:47 by afarachi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 import { ChatItem } from "./ChatItem.js";
 import { t } from "../../languages/LanguageController.js";
 
@@ -19,12 +31,9 @@ export const FriendsList = (props: FriendsListProps) => {
   const friendsListElement = document.createElement("div");
   friendsListElement.className = "friends-list sm:flex flex-col scroll-pr-4 pl-4 flex-1 overflow-y-auto [scrollbar-width:thin] [scrollbar-color:white_pongdark] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-ponghover [&::-webkit-scrollbar-track]:rounded [&::-webkit-scrollbar-thumb]:bg-pongdark [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb:hover]:bg-[#2d3748]";
   
-  // Initialize with loading state
   friendsListElement.innerHTML = `<div class="loading text-center text-white py-4">${t('chat.loadingFriends')}</div>`;
   
-  // Render friends list
   const renderFriendsList = (friends: User[]) => {
-    // Clear current content
     friendsListElement.innerHTML = "";
     
     if (!friends || friends.length === 0) {
@@ -32,7 +41,6 @@ export const FriendsList = (props: FriendsListProps) => {
       return;
     }
     
-    // Add the search box at the top
     const searchBox = document.createElement("div");
     searchBox.className = "search-box mb-4 px-4";
     searchBox.innerHTML = `
@@ -45,7 +53,6 @@ export const FriendsList = (props: FriendsListProps) => {
     `;
     friendsListElement.appendChild(searchBox);
     
-    // Add section title for online friends
     const onlineFriends = friends.filter(friend => friend.status === "online");
     if (onlineFriends.length > 0) {
       const onlineTitle = document.createElement("div");
@@ -53,7 +60,6 @@ export const FriendsList = (props: FriendsListProps) => {
       onlineTitle.textContent = `${t('chat.on')}`;
       friendsListElement.appendChild(onlineTitle);
       
-      // Render online friends
       onlineFriends.forEach((friend) => {
         const chatItemElement = ChatItem({
           username: friend.nickname,
@@ -73,7 +79,6 @@ export const FriendsList = (props: FriendsListProps) => {
       });
     }
     
-    // Add section title for offline friends
     const offlineFriends = friends.filter(friend => friend.status === "offline");
     if (offlineFriends.length > 0) {
       const offlineTitle = document.createElement("div");
@@ -81,7 +86,6 @@ export const FriendsList = (props: FriendsListProps) => {
       offlineTitle.textContent = `${t('chat.off')}`;
       friendsListElement.appendChild(offlineTitle);
       
-      // Render offline friends
       offlineFriends.forEach((friend) => {
         const chatItemElement = ChatItem({
           username: friend.nickname,
@@ -101,13 +105,11 @@ export const FriendsList = (props: FriendsListProps) => {
       });
     }
     
-    // Setup search functionality
     const searchInput = searchBox.querySelector("input");
     searchInput?.addEventListener("input", (e) => {
       const target = e.target as HTMLInputElement;
       const searchTerm = target.value.toLowerCase();
       
-      // Filter friends list based on search term
       const userItems = friendsListElement.querySelectorAll(".user-item");
       userItems.forEach((item) => {
         const nameElement = item.querySelector(".user-info");
@@ -121,13 +123,11 @@ export const FriendsList = (props: FriendsListProps) => {
         }
       });
       
-      // Hide section titles if all items in that section are hidden
       const sectionTitles = friendsListElement.querySelectorAll(".text-white.text-lg.font-medium");
       sectionTitles.forEach((title) => {
         let nextElement = title.nextElementSibling;
         let hasVisibleItems = false;
         
-        // Check if any items in this section are visible
         while (nextElement && !nextElement.classList.contains("text-white")) {
           if (nextElement.classList.contains("user-item") && !nextElement.classList.contains("hidden")) {
             hasVisibleItems = true;
@@ -145,21 +145,17 @@ export const FriendsList = (props: FriendsListProps) => {
     });
   };
   
-  // Update user online status
   const updateUserStatus = (username: string, isOnline: boolean) => {
     const userItems = friendsListElement.querySelectorAll(".user-item");
     userItems.forEach((item) => {
       if ((item as HTMLElement).dataset.username === username) {
-        // Update status indicator
         const statusIndicator = item.querySelector(".relative");
         if (statusIndicator) {
-          // Remove existing status indicator
           const existingIndicator = statusIndicator.querySelector(".absolute");
           if (existingIndicator) {
             existingIndicator.remove();
           }
           
-          // Add new status indicator if online
           if (isOnline) {
             const indicator = document.createElement("div");
             indicator.className = "absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-pongdark";
@@ -167,7 +163,6 @@ export const FriendsList = (props: FriendsListProps) => {
           }
         }
         
-        // Move the item to the appropriate section (online/offline)
         if (isOnline) {
           const onlineTitle = Array.from(
             friendsListElement.querySelectorAll(".text-white.text-lg.font-medium")
@@ -187,20 +182,17 @@ export const FriendsList = (props: FriendsListProps) => {
     });
   };
   
-  // Update unread message count for a chat item
   const updateUnreadCount = (userId: number, count: number) => {
     const userItems = friendsListElement.querySelectorAll(".user-item");
     userItems.forEach((item) => {
       if ((item as HTMLElement).dataset.userId === userId.toString()) {
         const avatarContainer = item.querySelector(".avatar-container");
         if (avatarContainer) {
-          // Remove existing unread count badge if any
           const existingBadge = avatarContainer.querySelector("div.absolute.top-0.right-0");
           if (existingBadge) {
             existingBadge.remove();
           }
           
-          // Add new badge if count > 0
           if (count > 0) {
             const badge = document.createElement("div");
             badge.className =

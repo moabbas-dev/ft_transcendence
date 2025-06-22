@@ -80,7 +80,6 @@ export default {
     </div>
     `;
 
-    // Add CSS for extra small screens
     const style = document.createElement('style');
     style.textContent = `
       /* Custom 'xs' breakpoint for screens larger than mobile but smaller than sm */
@@ -104,20 +103,16 @@ export default {
     `;
     document.head.appendChild(style);
 
-    // Ensure viewport meta tag exists for proper mobile rendering
     ensureViewportMeta();
 
-    // Add header component
     const headerContainer = container.querySelector(".header");
     const header = Header();
     headerContainer?.appendChild(header);
 
-    // Add footer component
     const footerContainer = container.querySelector(".footer");
     const footerComp = Footer();
     footerContainer?.appendChild(footerComp);
 
-    // Add button interactions with better touch support
     document.querySelectorAll(".game-mode-btn").forEach((button) => {
       button.addEventListener("click", (e: Event) => {
         const target = e.currentTarget as HTMLElement;
@@ -125,7 +120,6 @@ export default {
           navigate(target.dataset.route);
       });
       
-      // Add touch feedback
       button.addEventListener("touchstart", () => {
         button.classList.add("active");
       }, { passive: true });
@@ -135,20 +129,17 @@ export default {
       }, { passive: true });
     });
 
-    // Online multiplayer button handler
     const onlineMuliplayerBtn = container.querySelector('#online-multiplayer')!
     onlineMuliplayerBtn.addEventListener('click', () => {
       navigate('/play/online-game')
     });
 
-    // Initialize Pong animation with responsive adjustments
     const canvas = document.getElementById("pongCanvas") as HTMLCanvasElement;
     if (canvas) {
       setupResponsiveCanvas(canvas);
       new PongAnimation(canvas);
     }
     
-    // Handle orientation changes for mobile
     window.addEventListener('orientationchange', () => {
       setTimeout(() => {
         if (canvas) {
@@ -159,7 +150,6 @@ export default {
   },
 };
 
-// Function to ensure viewport meta tag exists
 function ensureViewportMeta() {
   let viewport = document.querySelector('meta[name="viewport"]');
   if (!viewport) {
@@ -170,22 +160,18 @@ function ensureViewportMeta() {
   }
 }
 
-// Handle canvas size correctly across devices
 function setupResponsiveCanvas(canvas: HTMLCanvasElement) {
   const parent = canvas.parentElement;
   if (parent) {
     const dpr = window.devicePixelRatio || 1;
     const rect = parent.getBoundingClientRect();
     
-    // Set display size
     canvas.style.width = rect.width + 'px';
     canvas.style.height = rect.height + 'px';
     
-    // Set actual size in memory (scaled to account for extra pixel density)
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
     
-    // Normalize coordinate system to use CSS pixels
     const ctx = canvas.getContext('2d');
     if (ctx) {
       ctx.scale(dpr, dpr);

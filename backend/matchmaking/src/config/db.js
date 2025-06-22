@@ -22,7 +22,6 @@ class DatabaseConnection {
   }
 
   initializeTables() {
-    // Update matches table to include winner_id column
     const matchesTable = `
       CREATE TABLE IF NOT EXISTS matches (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -152,7 +151,6 @@ class DatabaseConnection {
     });
   }
 
-  // Rest of the code remains the same
   query(sql, params = []) {
     return new Promise((resolve, reject) => {
       this.db.all(sql, params, (err, rows) => {
@@ -179,7 +177,6 @@ class DatabaseConnection {
     });
   }
 
-  // Get player by ID
   async getPlayerById(playerId) {
     try {
       const rows = await this.query(
@@ -193,7 +190,6 @@ class DatabaseConnection {
     }
   }
 
-  // Update player ELO
   async updatePlayerElo(playerId, newElo) {
     try {
       await this.run(
@@ -206,13 +202,10 @@ class DatabaseConnection {
     }
   }
 
-  // Update match result with ELO information
   async updateMatchResult(matchId, winnerId, player1Id, player2Id, player1Goals, player2Goals, eloData) {
     try {
-      // Begin transaction
       await this.run('BEGIN TRANSACTION');
 
-      // Update match status
       await this.run(
         `UPDATE matches 
          SET status = 'completed', 
@@ -222,7 +215,6 @@ class DatabaseConnection {
         [winnerId, matchId]
       );
 
-      // Update player 1 stats
       await this.run(
         `UPDATE match_players 
          SET goals = ?, 
@@ -238,7 +230,6 @@ class DatabaseConnection {
         ]
       );
 
-      // Update player 2 stats
       await this.run(
         `UPDATE match_players 
          SET goals = ?, 
@@ -254,7 +245,6 @@ class DatabaseConnection {
         ]
       );
 
-      // Update player 1 overall stats
       const isPlayer1Winner = winnerId === player1Id;
       await this.run(
         `UPDATE players 
@@ -273,7 +263,6 @@ class DatabaseConnection {
         ]
       );
 
-      // Update player 2 overall stats
       const isPlayer2Winner = winnerId === player2Id;
       await this.run(
         `UPDATE players 
@@ -292,7 +281,6 @@ class DatabaseConnection {
         ]
       );
 
-      // Commit transaction
       await this.run('COMMIT');
 
       return {
@@ -316,7 +304,6 @@ class DatabaseConnection {
         }
       };
     } catch (error) {
-      // Rollback transaction on error
       await this.run('ROLLBACK');
       console.error('Error updating match result:', error);
       throw error;
@@ -355,7 +342,6 @@ class DatabaseConnection {
     }
   }
 
-  // Alternative version with additional ranking information
   async getTopPlayersWithRank(limit = 20) {
     try {
       const rows = await this.query(

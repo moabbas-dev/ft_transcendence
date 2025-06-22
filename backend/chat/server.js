@@ -22,9 +22,6 @@ fastify.get("/", async (request, reply) => {
   return { status: "Chat microservice running" };
 });
 
-// fastify.addHook("preHandler", auth)
-
-// Initialize the database
 const setupDatabase = async () => {
   try {
     await initDatabase();
@@ -50,7 +47,6 @@ const start = async () => {
   }
 };
 
-// Handle server shutdown
 const closeGracefully = async (signal) => {
   fastify.log.info(`Received ${signal}, closing HTTP server and database connection`);
   
@@ -60,7 +56,6 @@ const closeGracefully = async (signal) => {
   process.exit(0);
 };
 
-// Listen for shutdown signals
 process.on('SIGINT', () => closeGracefully('SIGINT'));
 process.on('SIGTERM', () => closeGracefully('SIGTERM'));
 

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   RequestsList.ts                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: afarachi <afarachi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/22 15:17:03 by afarachi          #+#    #+#             */
+/*   Updated: 2025/06/22 15:17:03 by afarachi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 import { ChatItem } from "./ChatItem.js";
 import { t } from "../../languages/LanguageController.js";
 
@@ -23,12 +35,9 @@ export const RequestsList = (props: RequestsListProps) => {
   const requestsListElement = document.createElement("div");
   requestsListElement.className = "message-requests-list sm:flex flex-col scroll-pr-4 pl-4 flex-1 overflow-y-auto [scrollbar-width:thin] [scrollbar-color:white_pongdark] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-ponghover [&::-webkit-scrollbar-track]:rounded [&::-webkit-scrollbar-thumb]:bg-pongdark [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb:hover]:bg-[#2d3748]";
   
-  // Initialize with loading state
   requestsListElement.innerHTML = `<div class="loading text-center text-white py-4">${t('chat.loadingRequests')}</div>`;
   
-  // Render message requests list
   const renderRequestsList = (requests: RequestItem[]) => {
-    // Clear current content
     requestsListElement.innerHTML = "";
     
     if (!requests || requests.length === 0) {
@@ -36,7 +45,6 @@ export const RequestsList = (props: RequestsListProps) => {
       return;
     }
     
-    // Add the search box at the top
     const searchBox = document.createElement("div");
     searchBox.className = "search-box mb-4 px-4";
     searchBox.innerHTML = `
@@ -49,7 +57,6 @@ export const RequestsList = (props: RequestsListProps) => {
     `;
     requestsListElement.appendChild(searchBox);
     
-    // Add section title for online users
     const onlineUsers = requests.filter((item) => item.user && item.user.status === "online");
     if (onlineUsers.length > 0) {
       const onlineTitle = document.createElement("div");
@@ -57,10 +64,8 @@ export const RequestsList = (props: RequestsListProps) => {
       onlineTitle.textContent = `${t('chat.on')}`;
       requestsListElement.appendChild(onlineTitle);
       
-      // Render online users
       onlineUsers.forEach((item) => {
         const user = item.user;
-        // console.log(user);
         if (!user) return;
         
         const chatItemElement = ChatItem({
@@ -81,7 +86,6 @@ export const RequestsList = (props: RequestsListProps) => {
       });
     }
     
-    // Add section title for offline users
     const offlineUsers = requests.filter((item) => item.user && item.user.status === "offline");
     if (offlineUsers.length > 0) {
       const offlineTitle = document.createElement("div");
@@ -89,7 +93,6 @@ export const RequestsList = (props: RequestsListProps) => {
       offlineTitle.textContent = `${t('chat.off')}`;
       requestsListElement.appendChild(offlineTitle);
       
-      // Render offline users
       offlineUsers.forEach((item) => {
         const user = item.user;
         if (!user) return;
@@ -112,13 +115,11 @@ export const RequestsList = (props: RequestsListProps) => {
       });
     }
     
-    // Setup search functionality
     const searchInput = searchBox.querySelector("input");
     searchInput?.addEventListener("input", (e) => {
       const target = e.target as HTMLInputElement;
       const searchTerm = target.value.toLowerCase();
       
-      // Filter requests list based on search term
       const userItems = requestsListElement.querySelectorAll(".user-item");
       userItems.forEach((item) => {
         const nameElement = item.querySelector(".user-info");
@@ -132,13 +133,11 @@ export const RequestsList = (props: RequestsListProps) => {
         }
       });
       
-      // Hide section titles if all items in that section are hidden
       const sectionTitles = requestsListElement.querySelectorAll(".text-white.text-lg.font-medium");
       sectionTitles.forEach((title) => {
         let nextElement = title.nextElementSibling;
         let hasVisibleItems = false;
         
-        // Check if any items in this section are visible
         while (nextElement && !nextElement.classList.contains("text-white")) {
           if (nextElement.classList.contains("user-item") && !nextElement.classList.contains("hidden")) {
             hasVisibleItems = true;
@@ -156,21 +155,17 @@ export const RequestsList = (props: RequestsListProps) => {
     });
   };
   
-  // Update user online status
   const updateUserStatus = (username: string, isOnline: boolean) => {
     const userItems = requestsListElement.querySelectorAll(".user-item");
     userItems.forEach((item) => {
       if ((item as HTMLElement).dataset.username === username) {
-        // Update status indicator
         const statusIndicator = item.querySelector(".relative");
         if (statusIndicator) {
-          // Remove existing status indicator
           const existingIndicator = statusIndicator.querySelector(".absolute");
           if (existingIndicator) {
             existingIndicator.remove();
           }
           
-          // Add new status indicator if online
           if (isOnline) {
             const indicator = document.createElement("div");
             indicator.className = "absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-pongdark";
@@ -178,7 +173,6 @@ export const RequestsList = (props: RequestsListProps) => {
           }
         }
         
-        // Move the item to the appropriate section (online/offline)
         if (isOnline) {
           const onlineTitle = Array.from(
             requestsListElement.querySelectorAll(".text-white.text-lg.font-medium")
@@ -198,20 +192,17 @@ export const RequestsList = (props: RequestsListProps) => {
     });
   };
   
-  // Update unread message count for a chat item
   const updateUnreadCount = (userId: number, count: number) => {
     const userItems = requestsListElement.querySelectorAll(".user-item");
     userItems.forEach((item) => {
       if ((item as HTMLElement).dataset.userId === userId.toString()) {
         const avatarContainer = item.querySelector(".avatar-container");
         if (avatarContainer) {
-          // Remove existing unread count badge if any
           const existingBadge = avatarContainer.querySelector("div.absolute.top-0.right-0");
           if (existingBadge) {
             existingBadge.remove();
           }
           
-          // Add new badge if count > 0
           if (count > 0) {
             const badge = document.createElement("div");
             badge.className =
