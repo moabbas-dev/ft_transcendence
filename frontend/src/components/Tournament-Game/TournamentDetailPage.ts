@@ -84,7 +84,6 @@ export default {
     `;
 
     container.querySelector('#back-button')?.addEventListener('click', () => navigate('/play/tournaments'));
-    client.getTournamentDetails(tournamentId);
 
     client.on('tournament_details', async (data) => {
       const tourNameElement = container.querySelector('#tour-name');
@@ -252,6 +251,7 @@ export default {
         Toast.show("Tournament not found", "error");
       }
     });
+    client.getTournamentDetails(tournamentId);
   }
 };
 

@@ -158,9 +158,7 @@ export async function fetchTournaments(callback: (tournaments: Tournament[]) => 
       client.disconnect();
     }
   };
-  
   client.on('tournament_list', onTournamentList);
-  
   await client.initialize();
   await client.listTournaments();
 }

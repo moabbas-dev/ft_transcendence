@@ -39,7 +39,7 @@ axios.interceptors.response.use(
             } catch(err) {
                 return Promise.reject(error);
             }
-            Toast.show("Your session has expired", "error");
+            Toast.show("Your session has expired", "warn");
         }
         
         return Promise.reject(error);

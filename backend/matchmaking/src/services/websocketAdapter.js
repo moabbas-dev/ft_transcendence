@@ -142,13 +142,22 @@ class WebSocketAdapter {
    * @returns {boolean} Whether the message was sent successfully
    */
   sendToClient(clientId, messageType, payload) {
-    const client = this.clients.get(String(clientId)); 
-    // console.log(`Sending message to client ${client}:`, { type: messageType, payload });    
+    const normalizedClientId = String(clientId);
+    const client = this.clients.get(normalizedClientId);
     
-    if (!client || client.socket.readyState !== WebSocket.OPEN) {
+    console.log(`[DEBUG] Sending ${messageType} to client ${normalizedClientId}, with type: ${typeof clientId } client exists: ${!!client}`);
+    
+    if (!client) {
+      console.warn(`Client ${normalizedClientId} not found in clients map. Active clients:`, Array.from(this.clients.keys()));
       return false;
     }
-
+    
+    if (client.socket.readyState !== WebSocket.OPEN) {
+      console.warn(`Client ${normalizedClientId} socket not open, state: ${client.socket.readyState}`);
+      this.removeClient(normalizedClientId);
+      return false;
+    }
+  
     try {
       client.socket.send(JSON.stringify({
         type: messageType,
@@ -156,7 +165,8 @@ class WebSocketAdapter {
       }));
       return true;
     } catch (error) {
-      console.error(`Error sending to client ${clientId}:`, error);
+      console.error(`Error sending to client ${normalizedClientId}:`, error);
+      this.removeClient(normalizedClientId);
       return false;
     }
   }

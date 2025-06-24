@@ -10,6 +10,7 @@ import axios from "axios";
 import Toast from "../toast/Toast.js";
 import { jwtDecode } from "jwt-decode";
 import { PongLoading } from "../components/partials/PongLoading.js";
+import { initializeApp } from "../main.js";
 
 export default {
   render: async (container: HTMLElement) => {
@@ -214,6 +215,7 @@ export default {
             console.log(err);
           }
           localStorage.removeItem("googleAuthClicked");
+          await initializeApp();
         } catch (err: any) {
           localStorage.removeItem("googleAuthClicked");
           if (err.response) {

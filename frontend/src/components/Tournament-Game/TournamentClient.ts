@@ -52,18 +52,19 @@ export class TournamentClient {
 				}
 			};
 
-			this.ws.onclose = () => {
-				console.log('Disconnected from tournament server');
+			this.ws.onclose = (event) => {
+				console.log(`Disconnected from tournament server, code: ${event.code}, reason: ${event.reason}`);
 				this.connectionPromise = null;
 				this.isConnecting = false;
-
-				if (this.reconnectTimer !== null) {
+				if (event.code !== 1000 && event.code !== 1001) {
+				  if (this.reconnectTimer !== null) {
 					clearTimeout(this.reconnectTimer);
+				  }
+				  this.reconnectTimer = window.setTimeout(() => this.initialize(), 3000);
 				}
-				this.reconnectTimer = window.setTimeout(() => this.initialize(), 3000);
-
-				reject(new Error('WebSocket connection closed'));
-			};
+		  
+				reject(new Error(`WebSocket connection closed: ${event.code}`));
+			  };
 
 			this.ws.onerror = (error) => {
 				console.error('WebSocket error:', error);
@@ -87,7 +88,7 @@ export class TournamentClient {
 			}
 
 			if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-				console.log("[TOURNAMENT SEND]: ", type);
+				console.log("[TOURNAMENT SEND]: ", type, " from userId: ", this.userId, " type: ", typeof this.userId);
 
 				this.ws.send(JSON.stringify({ type, payload }));
 			} else {

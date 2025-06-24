@@ -114,12 +114,6 @@ export const CreateTournamentForm = createComponent((props: CreateTournamentForm
       
       tournamentClient.on('tournament_created', onCreated);
     }
-
-    tournamentClient.on('tournament_created', (data) => {
-      if (onTournamentCreated) {
-        onTournamentCreated(data.tournament);
-      }
-    });
     
     tournamentClient.createTournament(name, playerCount);
     
