@@ -20,7 +20,7 @@ export class TournamentClient {
 		return this.connectionPromise || Promise.resolve(false);
 	}
 
-	private connect(): Promise<boolean> {
+	public connect(): Promise<boolean> {
 		return new Promise((resolve, reject) => {
 			const wsUrl = `${this.serverUrl}?userId=${encodeURIComponent(this.userId)}`;
 			console.log(`Connecting to: ${wsUrl}`);
@@ -37,6 +37,7 @@ export class TournamentClient {
 			this.ws.onmessage = (event) => {
 				try {
 					const message = JSON.parse(event.data);
+					console.log("[TOURNAMENT EVENT RECEIVED onmessage]: ", event.data, " from userId: ", this.userId, " type: ", typeof this.userId);
 
 					if (this.callbacks[message.type]) {
 						this.callbacks[message.type].forEach(callback => {
@@ -47,6 +48,7 @@ export class TournamentClient {
 							}
 						});
 					}
+
 				} catch (err) {
 					console.error('Error processing message:', err);
 				}
@@ -57,14 +59,14 @@ export class TournamentClient {
 				this.connectionPromise = null;
 				this.isConnecting = false;
 				if (event.code !== 1000 && event.code !== 1001) {
-				  if (this.reconnectTimer !== null) {
-					clearTimeout(this.reconnectTimer);
-				  }
-				  this.reconnectTimer = window.setTimeout(() => this.initialize(), 3000);
+					if (this.reconnectTimer !== null) {
+						clearTimeout(this.reconnectTimer);
+					}
+					this.reconnectTimer = window.setTimeout(() => this.initialize(), 3000);
 				}
-		  
+
 				reject(new Error(`WebSocket connection closed: ${event.code}`));
-			  };
+			};
 
 			this.ws.onerror = (error) => {
 				console.error('WebSocket error:', error);
@@ -76,9 +78,9 @@ export class TournamentClient {
 	}
 
 	private triggerCallbacks(type: string, payload: any): void {
-		if (this.callbacks[type]) {
-			this.callbacks[type].forEach(callback => callback(payload));
-		}
+	  if (this.callbacks[type]) {
+		this.callbacks[type].forEach(callback => callback(payload));
+	  }
 	}
 
 	async send(type: string, payload: any = {}): Promise<void> {
@@ -102,7 +104,7 @@ export class TournamentClient {
 	}
 
 	on(messageType: string, callback: (data: any) => void): void {
-		console.log("[TOURNAMENT EVENT RECEIVED]: ", messageType);
+		console.log("[TOURNAMENT EVENT REGISTER]: ", messageType, " from userId: ", this.userId);
 
 		if (!this.callbacks[messageType]) {
 			this.callbacks[messageType] = [];
@@ -197,6 +199,6 @@ export class TournamentClient {
 	// to be deleted
 	completeMatch(matchId: string, winner: string, finalScore: { player1: number, player2: number }): void {
 		this.send('match_complete', { matchId, winner, finalScore });
-	  }
-  
+	}
+
 }

@@ -370,7 +370,6 @@ export function registerTournamentMessageHandlers(wsAdapter) {
 	wsAdapter.registerMessageHandler('list_tournaments', async (clientId, payload) => {
 		try {
 			const tournaments = await TournamentService.getActiveTournaments();
-
 			wsAdapter.sendToClient(clientId, 'tournament_list', { tournaments });
 		} catch (error) {
 			console.error('Error listing tournaments:', error);

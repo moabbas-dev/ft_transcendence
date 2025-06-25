@@ -151,6 +151,8 @@ export async function fetchTournaments(callback: (tournaments: Tournament[]) => 
   const client = existingClient || new TournamentClient(window.location.origin.replace('http', 'ws'), store.userId as string);
   
   const onTournamentList = (data: any) => {
+    console.log("Received tournament list:", data);
+    
     callback(data.tournaments || []);
     if (!useExistingClient) {
       console.error("NO GLOBAL TOURNAMENT CLIENT");

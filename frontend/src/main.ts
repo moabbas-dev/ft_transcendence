@@ -120,7 +120,7 @@ export const initializeTournamentClient = async () => {
 		tournamentClient = new TournamentClient(wsUrl, store.userId);
 
 		try {
-			await tournamentClient.initialize();
+			await tournamentClient.connect();
 			console.log('Tournament client initialized successfully');
 		} catch (error) {
 			console.error('Failed to initialize tournament client:', error);

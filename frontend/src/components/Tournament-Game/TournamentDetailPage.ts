@@ -57,7 +57,6 @@ export default {
     
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const client = tournamentClient || new TournamentClient(`${protocol}//${window.location.hostname}:${window.location.port}/matchmaking/`, userId as string);
-
     if (!tournamentClient) {
       await client.initialize().catch(err => {
         console.error("Failed to initialize tournament client:", err);
