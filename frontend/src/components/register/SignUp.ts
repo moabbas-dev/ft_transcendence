@@ -145,7 +145,6 @@ export const SignUp = createComponent((props: SignUpProps) => {
 	const ageInput = form.querySelector("#age") as HTMLInputElement;
 	const countryInput = form.querySelector("#country-select") as HTMLSelectElement;
 	handleLoginWithGoogle(form)
-	// fill the coutries <select> automatically through a third party list of coutries
 	const countries = countryList.getNames();
 	countries.forEach(country => {
 		const option = document.createElement("option");
@@ -154,7 +153,6 @@ export const SignUp = createComponent((props: SignUpProps) => {
 		countryInput.appendChild(option);	  
 	})
 
-	//   const 
 	const signUpButton = Button({
 		type: 'submit',
 		text: t('register.signup.signup_btn'),
@@ -174,7 +172,6 @@ export const SignUp = createComponent((props: SignUpProps) => {
 				};
 				await axios.post("/authentication/auth/users", body);
 				Toast.show(`SignUp successful! Go to your email ${emailInput.value} to activate your account`, "success");
-				// navigate('/register'); // You can edit it
 			} catch (err: any) {
 				console.log(err.response.data.message);
 				if (err.response) {
@@ -217,11 +214,6 @@ export const SignUp = createComponent((props: SignUpProps) => {
 			icon.classList.add(isPasswordVisible ? 'bx-hide' : 'bx-show');
 		});
 	};
-
-	// const googleBtn = form.querySelector('#google-sign');
-	// googleBtn?.addEventListener('click', () => {
-	// 	localStorage.setItem("googleAuth", "true");
-	// });
 
 	togglePasswordElements.forEach(element => {
 		element.addEventListener('click', handleTogglePassword);

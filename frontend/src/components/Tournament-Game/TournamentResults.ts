@@ -28,7 +28,6 @@ const TournamentResults = (results: TournamentResult[] = []) => {
         
         let playerInfoHTML = '';
         if (player) {
-            // Avatar HTML
             let avatarHTML = '';
             if (player.avatarUrl) {
                 avatarHTML = `<img src="${player.avatarUrl}" alt="${player.username}" class="w-full h-full object-cover">`;
@@ -106,7 +105,6 @@ const TournamentResults = (results: TournamentResult[] = []) => {
         `;
     }
     
-    // No results message HTML
     let noResultsHTML = '';
     if (results.length === 0) {
         noResultsHTML = `
@@ -118,7 +116,6 @@ const TournamentResults = (results: TournamentResult[] = []) => {
         `;
     }
     
-    // Combine all HTML
     resultsElement.innerHTML = `
         <h2 class="text-pongcyan drop-shadow-pongcyan text-2xl font-semibold">${t("play.tournaments.TournamentResults.tournamentResults")}</h2>
         <div class="size-full relative flex flex-1 gap-4 items-end justify-center">
@@ -131,7 +128,6 @@ const TournamentResults = (results: TournamentResult[] = []) => {
     return resultsElement;
 };
 
-// Function to render the results tab
 export const renderResultsTab = (container: HTMLElement, results: TournamentResult[] = []) => {
     const resultsContent = container.querySelector('#results-content');
     if (resultsContent) {

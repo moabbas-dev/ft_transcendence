@@ -186,7 +186,6 @@ export class TournamentClient {
 		);
 	}
 
-	// to be deleted
 	updateBall(matchId: string, position: any, velocity: any, scores: any): void {
 		this.send('ball_update', {
 			matchId,
@@ -196,7 +195,6 @@ export class TournamentClient {
 		}).catch(err => console.error('Failed to send ball update:', err));
 	}
 
-	// to be deleted
 	completeMatch(matchId: string, winner: string, finalScore: { player1: number, player2: number }): void {
 		this.send('match_complete', { matchId, winner, finalScore });
 	}

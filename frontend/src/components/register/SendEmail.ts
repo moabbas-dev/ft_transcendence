@@ -76,7 +76,6 @@ export const SendEmail = createComponent((props: SendEmailProps) => {
 
 	const resendEmail = form.querySelector('.resend-email')!
 	resendEmail.addEventListener('click', () => {
-		// Resend Email Here
 	})
 	return form;
 })

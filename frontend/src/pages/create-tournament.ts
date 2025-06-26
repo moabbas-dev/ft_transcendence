@@ -262,14 +262,12 @@ export default {
                 { userId: '8', username: '8th Player', avatarUrl: '', place: 8, score: 5 },
             ];
             
-            // Render the results tab content
             renderResultsTab(container, sampleResults);
         });
 
         const leaveButton = document.getElementById('leave-tournament');
         leaveButton?.addEventListener('click', () => {
             alert('Leaving tournament...');
-            // Here you would typically make an API call to leave the tournament
         });
     }
 };

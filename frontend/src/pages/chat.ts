@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   chat.ts                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: afarachi <afarachi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/22 16:40:35 by afarachi          #+#    #+#             */
+/*   Updated: 2025/06/22 16:40:35 by afarachi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 import { Chat } from "../components/chat/Chat.js";
 import { navigate } from "../router.js";
 import chatService from "../utils/chatUtils/chatWebSocketService.js";
@@ -68,10 +80,8 @@ export default {
       </div>
     `;
 
-    // Track unread message counts
     let unreadMessageCounts = new Map<number, number>();
 
-    // Get references to elements
     const friendsTab = container.querySelector("#friends-tab") as HTMLButtonElement;
     const requestsTab = container.querySelector("#requests-tab") as HTMLButtonElement;
     const friendsContainer = container.querySelector("#friends-container") as HTMLElement;
@@ -82,35 +92,27 @@ export default {
     const loadingIndicator = container.querySelector(".loading-indicator") as HTMLElement;
     const requestsLoadingIndicator = container.querySelector(".requests-loading-indicator") as HTMLElement;
 
-    // Initialize chat component
     const chatComponent = Chat();
     chat.appendChild(chatComponent);
 
-    // Initialize WebSocket connection
     window.addEventListener("DOMContentLoaded", async () => {
       await initializeWebSocket();
-      // Load initial data after connection is established
       await loadFriendsList();
-      // Only load message requests if that tab is active
       if (!requestsContainer.classList.contains('hidden')) {
         await loadMessageRequests();
       }
     })
 
-    // Get unread count function
     const getUnreadCount = (userId: number): number => {
       return unreadMessageCounts.get(userId) || 0;
     };
 
-    // Update active chat item (highlight selected chat)
     function updateActiveChatItem(username: string, container: HTMLElement) {
-      // Remove active class from all items in both containers
       const allUserItems = document.querySelectorAll(".user-item");
       allUserItems.forEach((item) => {
         item.classList.remove("bg-ponghover");
       });
 
-      // Add active class to selected item
       const userItems = container.querySelectorAll(".user-item");
       userItems.forEach((item) => {
         if ((item as HTMLElement).dataset.username === username) {
@@ -119,7 +121,6 @@ export default {
       });
     }
 
-    // Initialize friends list component
     const friendsList = FriendsList({
       onChatSelect: (user: any) => {
         (chatComponent as any).setActiveUser(user);
@@ -129,7 +130,6 @@ export default {
     });
     friendsListContent.appendChild(friendsList.element);
 
-    // Initialize message requests component
     const requestsList = RequestsList({
       onChatSelect: (user: any) => {
         (chatComponent as any).setActiveUser(user);
@@ -139,13 +139,10 @@ export default {
     });
     requestsListContent.appendChild(requestsList.element);
 
-    // Setup event handlers
     setupEventHandlers();
 
-    // // Get friends list
     await loadFriendsList();
 
-    // Set up tab switching
     friendsTab.addEventListener("click", async () => {
       friendsTab.classList.add("bg-pongcyan");
       requestsTab.classList.remove("bg-pongpink");
@@ -164,67 +161,53 @@ export default {
       friendsContainer.classList.add("hidden");
       friendsContainer.classList.remove("flex");
 
-      // Load message requests if they haven't been loaded yet
       if (requestsList.element.querySelector(".loading")) {
         loadMessageRequests();
       }
     });
 
-    // Logo click event
     const logoContainer = container.querySelector(".logo") as HTMLElement;
     logoContainer.addEventListener("click", () => {
       navigate("/");
     });
 
-    // Initialize WebSocket connection
     async function initializeWebSocket() {
       try {
         const username = store.nickname;
         const userId = store.userId;
 
         if (!username || !userId) {
-          // console.error("User information not found in localStorage");
           return;
         }
 
-        // Show loading indicator
         loadingIndicator.classList.remove("hidden");
 
-        // Connect to WebSocket server
         await chatService.connect();
 
         console.log("Connected to chat service from chat");
       } catch (error) {
         console.error("Failed to connect to chat service:", error);
       } finally {
-        // Hide loading indicator
         loadingIndicator.classList.add("hidden");
       }
     }
 
-    // Setup WebSocket event handlers
     function setupEventHandlers() {
-      // Handle friends list update
       chatService.on("friends:list", (data: any) => {
-        // console.log(data);
         friendsList.render(data.friends);
       });
 
-      // Handle message requests list update
       chatService.on("message:requests", (data: any) => {
         console.log(data);
         requestsList.render(data.requests);
       });
 
-      // Handle unread message counts
       chatService.on("messages:unread", (data: any) => {
         if (data && data.unreadCounts) {
-          // Convert the data to a Map
           unreadMessageCounts = new Map(
             Object.entries(data.unreadCounts).map(([key, value]) => [parseInt(key), value as number])
           );
 
-          // Update all chat items with new counts
           unreadMessageCounts.forEach((count, userId) => {
             friendsList.updateUnreadCount(userId, count);
             requestsList.updateUnreadCount(userId, count);
@@ -233,13 +216,10 @@ export default {
       });
 
       chatService.on("message:received", (data: any) => {
-        // If the message is for a user we're not currently chatting with, update the unread count
         if (data && data.message) {
           const currentActiveChatId = chatComponent.getCurrentActiveChatId?.() || null;
 
-          // If this message is not for the currently open chat
           if (currentActiveChatId !== data.message.from) {
-            // Request updated unread counts
             chatService.send("messages:unread:get", {
               userId: store.userId
             });
@@ -247,62 +227,51 @@ export default {
         }
       });
 
-      // Handle user online status changes
       chatService.on("user:status", (data: any) => {
         const isOnline = data.status === "online";
         friendsList.updateUserStatus(data.nickname, isOnline);
         requestsList.updateUserStatus(data.nickname, isOnline);
       });
 
-      // Handle blocked user confirmation
       chatService.on("user:blocked", () => {
-        loadFriendsList(); // Reload friends list to update UI
-        loadMessageRequests(); // Reload message requests to update UI
+        loadFriendsList();
+        loadMessageRequests();
       });
 
-      // Handle unblocked user confirmation
       chatService.on("user:unblocked", () => {
-        loadFriendsList(); // Reload friends list to update UI
-        loadMessageRequests(); // Reload message requests to update UI
+        loadFriendsList();
+        loadMessageRequests();
       });
 
-      // Handle user added as friend
       chatService.on("user:friend:added", () => {
-        loadFriendsList(); // Reload friends list
-        loadMessageRequests(); // Reload message requests
+        loadFriendsList();
+        loadMessageRequests();
       });
 
-      // Handle disconnection
       chatService.on("disconnect", () => {
         console.log("Disconnected from chat service");
       });
 
-      // Handle reconnection
       chatService.on("reconnect", () => {
         console.log("Reconnected to chat service");
-        loadFriendsList(); // Reload friends list
-        loadMessageRequests(); // Reload message requests
+        loadFriendsList();
+        loadMessageRequests();
       });
     }
 
-    // Load friends list
     async function loadFriendsList() {
       try {
-        // Show loading indicator
         loadingIndicator.classList.remove("hidden");
     
-        // Make sure we're connected before attempting to send
         if (!chatService.isConnected()) {
           await initializeWebSocket();
         }
     
-        // Now we should be connected
         if (chatService.isConnected()) {
           chatService.send("friends:get", {
             userId: store.userId,
           });
     
-          // Request unread message counts
           chatService.send("messages:unread:get", {
             userId: store.userId
           });
@@ -317,13 +286,10 @@ export default {
       }
     }
 
-    // Load message requests
     async function loadMessageRequests() {
       try {
-        // Show loading indicator
         requestsLoadingIndicator.classList.remove("hidden");
 
-        // Request message requests from server
         if (chatService.isConnected()) {
           chatService.send("message:requests:get", {
             userId: store.userId,
@@ -341,7 +307,6 @@ export default {
       }
     }
 
-    // Add window resize event listener for mobile responsiveness
     window.addEventListener("resize", () => {
       const chatContainer = document.querySelector(".chat");
       if (window.innerWidth >= 640 && chatContainer) {
@@ -359,7 +324,6 @@ export default {
       }
     });
 
-    // Handle opening stored chat if needed
     setTimeout(() => {
       const openChatWithUserData = localStorage.getItem('openChatWithUser');
       if (openChatWithUserData) {
@@ -367,15 +331,11 @@ export default {
           const userData = JSON.parse(openChatWithUserData);
           console.log(userData);
 
-          // Make sure this is a recent request (within the last minute)
           if (Date.now() - userData.timestamp < 60000) {
-            // Remove the stored data to prevent reopening on refresh
             localStorage.removeItem('openChatWithUser');
 
-            // Find the chat component that's already initialized
             if (typeof (chatComponent as any).setActiveUser === 'function') {
               console.log(userData);
-              // Open chat with the user
               const formattedUserData = {
                 nickname: userData.username || userData.nickname,
                 id: userData.userId,
@@ -384,19 +344,15 @@ export default {
               };
               (chatComponent as any).setActiveUser(formattedUserData);
 
-              // Find and highlight the user in the friends list
               const userItems = friendsList.element.querySelectorAll(".user-item");
               userItems.forEach((item) => {
-                // Remove active class from all items
                 item.classList.remove("bg-ponghover");
 
-                // Add active class to the selected user
                 if ((item as HTMLElement).dataset.username === userData.username) {
                   item.classList.add("bg-ponghover");
                 }
               });
 
-              // For mobile: make sure chat is visible
               if (window.innerWidth < 640) {
                 chat.classList.remove("hidden");
                 chat.classList.add("fixed", "bottom-0", "left-0", "w-full", "z-90", "animate-slideUp");

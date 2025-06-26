@@ -42,12 +42,11 @@ const authenticateUser = async (email, password) => {
 };
 
 const generateNickname = async (userId) => {
-	const randomString = Math.random().toString(36).substring(2, 7); // Generates a 5-letter string
+	const randomString = Math.random().toString(36).substring(2, 7);
 	const nickname = `user${userId}${randomString}`;
 
-	// Ensure it passes validation and is unique
 	if (!validateNickname(nickname) || await User.findByNickname(nickname)) {
-		return generateNickname(userId); // Retry if invalid or not unique
+		return generateNickname(userId);
 	}
 	return nickname;
 };
@@ -75,7 +74,6 @@ class AuthController {
 				return reply.code(401).send({ message: "User not found or inactive" });
 			}
 	
-			// Generate new access token
 			const { accessToken } = await generateTokens(user, reply.server);
 			
 			return reply.code(200).send({
@@ -96,7 +94,6 @@ class AuthController {
 		}
 	}
 
-	// Login a user
 	static async login(request, reply) {
 		const { email, password } = request.body;
 		try {
@@ -131,18 +128,15 @@ class AuthController {
 				return reply.code(200).send({ require2FA: true, sessUUID: session.uuid });
 			}
 		} catch (err) {
-			// Handle specific error messages
 			if (err.message === "Incorrect email" || err.message === "Invalid password") {
 				return reply.code(404).send({ message: err.message });
 			}
 			if (err.message === "User not active")
 				return reply.code(403).send({ message: `${err.message}! check your inbox and activate your account` });
-			// Default to 500 for any other server-side error
 			return reply.code(500).send({ message: 'Error with login from the server!', error: err.message });
 		}
 	}
 
-	// Logout a user
 	static async logout(request, reply) {
 		const { sessionUUID } = request.params;
 		try {
@@ -162,8 +156,7 @@ class AuthController {
 	static async verifyResetEmail(request, reply) {
 		const { email } = request.body;
 		const passwordResetEmailMessage = (fullName, uuid) => {
-			// Get the host from the request headers
-			const host = request.headers.host.split(':')[0]; // Remove port if present
+			const host = request.headers.host.split(':')[0];
 			const protocol = request.headers['x-forwarded-proto'] || 'https';
 			return `
 				<div>
@@ -210,15 +203,13 @@ class AuthController {
 				return reply.code(404).send({ message: "Token not found!" });
 			if (tokenRecord.token_type !== "reset_password")
 				return reply.code(403).send({ message: "Token is not for reset password!" });
-			// Check if the token has expired (24 hours expiration)
 			const expiresAt = tokenRecord.expires_at;
 			const userId = tokenRecord.user_id;
-			const tokenExpirationTime = new Date(expiresAt).getTime(); // Get the expiration time in milliseconds
-			const currentTime = new Date().getTime(); // Get the current time in milliseconds
+			const tokenExpirationTime = new Date(expiresAt).getTime();
+			const currentTime = new Date().getTime();
 
-			// Check if the token has expired (24 hours expiration)
 			if (currentTime > tokenExpirationTime) {
-				await UserToken.deleteByToken(UserToken); // Delete expired token
+				await UserToken.deleteByToken(UserToken);
 				return reply.code(400).send({ message: "Token has expired!" });
 			}
 			const user = await User.findById(userId);
@@ -247,15 +238,13 @@ class AuthController {
 				return reply.code(404).send({ message: "Token not found!" });
 			if (tokenRecord.token_type !== "account_activation")
 				return reply.code(403).send({ message: "Token is not for account activation!" });
-			// Check if the token has expired (24 hours expiration)
 			const expiresAt = tokenRecord.expires_at;
 			const userId = tokenRecord.user_id;
-			const tokenExpirationTime = new Date(expiresAt).getTime(); // Get the expiration time in milliseconds
-			const currentTime = new Date().getTime(); // Get the current time in milliseconds
+			const tokenExpirationTime = new Date(expiresAt).getTime();
+			const currentTime = new Date().getTime();
 
-			// Check if the token has expired (24 hours expiration)
 			if (currentTime > tokenExpirationTime) {
-				await UserToken.deleteByToken(token); // Delete expired token
+				await UserToken.deleteByToken(token);
 				await User.delete(userId);
 				return reply.code(400).send({ message: "Token has expired!" });
 			}
@@ -263,11 +252,9 @@ class AuthController {
 			if (!user)
 				return reply.code(404).send({ message: "User not found!" });
 			await User.activateUser(userId);
-			await UserToken.deleteByToken(token); // Delete expired token
-			// Get the host from the request headers
-			const host = request.headers.host.split(':')[0]; // Remove port if present
+			await UserToken.deleteByToken(token);
+			const host = request.headers.host.split(':')[0];
 			const protocol = request.headers['x-forwarded-proto'] || 'https';
-			// return reply.code(200).send({ message: "Account activation complete!" });
 			return reply.redirect(`${protocol}://${host}/account-verified?u=${user.nickname}&e=${user.email}`);
 		} catch (err) {
 			return reply.code(500).send({ message: "Error activating the account!", error: err.message });

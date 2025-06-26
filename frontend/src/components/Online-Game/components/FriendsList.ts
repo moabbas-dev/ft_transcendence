@@ -15,12 +15,10 @@ const Friend = createComponent((props: FriendProps) => {
   const friendElement = document.createElement('div');
   friendElement.className = 'friend-item flex items-center justify-between bg-black/40 p-4 rounded-lg mb-3 border border-gray-800 hover:border-pongcyan transition-all duration-300';
 
-  // Status color
-  let statusColor = 'bg-gray-500'; // offline by default
+  let statusColor = 'bg-gray-500';
   if (props.status === 'online') statusColor = 'bg-green-500';
   if (props.status === 'in-game') statusColor = 'bg-blue-500';
 
-  // Determine if friend is available for invite
   const isAvailable = props.status === 'online';
 
   friendElement.innerHTML = `
@@ -48,13 +46,11 @@ const Friend = createComponent((props: FriendProps) => {
     </button>
   `;
 
-  // Add event listener to the invite button if friend is available
   if (isAvailable) {
     const inviteButton = friendElement.querySelector('.invite-button');
     inviteButton?.addEventListener('click', (e) => {
       e.stopPropagation();
 
-      // FIXED: Only send game invite via chat service, not both systems
       if (chatService.isConnected()) {
         chatService.send("game:invite", {
           from: store.userId,
@@ -62,7 +58,6 @@ const Friend = createComponent((props: FriendProps) => {
           gameType: "friendly"
         });
 
-        // Update button state
         inviteButton.textContent = 'Invite Sent';
         inviteButton.classList.add('bg-gray-600');
         inviteButton.classList.remove('bg-pongcyan', 'hover:bg-pongcyan/80');
@@ -108,7 +103,6 @@ export function FetchFriendsList() {
   friendsList.className = 'friends-list-wrapper';
   friendsListContainer.appendChild(friendsList);
 
-  // Loading state
   friendsList.innerHTML = `
     <div class="loading flex flex-col items-center justify-center py-6">
       <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-pongcyan mb-2"></div>
@@ -116,7 +110,6 @@ export function FetchFriendsList() {
     </div>
   `;
 
-  // Handle search functionality
   const searchInput = searchContainer.querySelector('input');
   searchInput?.addEventListener('input', (e) => {
     const target = e.target as HTMLInputElement;
@@ -133,7 +126,6 @@ export function FetchFriendsList() {
     });
   });
 
-  // Fetch friends list
   loadFriendsList();
 
   async function loadFriendsList() {
@@ -168,6 +160,7 @@ export function FetchFriendsList() {
     friendsList.innerHTML = '';
 
     if (friendsData && friendsData.length > 0) {
+      console.log(friendsData);
       friendsData.forEach(friend => {
         friendsList.appendChild(Friend(friend));
       });
@@ -181,7 +174,6 @@ export function FetchFriendsList() {
     }
   }
 
-  // Set up event listener for friends data
   chatService.on("friends:list", (data) => {
     handleFriendsReceived(data.friends);
   });

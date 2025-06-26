@@ -8,7 +8,6 @@ class TournamentService {
     this.eloService = EloService;
   }
 
-  // Create a new tournament
   async createTournament(name, playerCount) {
     if (playerCount !== 4 && playerCount !== 8) {
       throw new Error('Tournament must have 4 or 8 players');
@@ -39,7 +38,6 @@ class TournamentService {
     }
   }
 
-  // Register a player for a tournament
   async registerPlayer(tournamentId, userId) {
     try {
       const tournament = await new Promise((resolve, reject) => {
@@ -61,7 +59,6 @@ class TournamentService {
         throw new Error('Tournament is not open for registration');
       }
 
-      // Check if user is already registered
       const existing = await new Promise((resolve, reject) => {
         db.get(
           `SELECT * FROM tournament_players 
@@ -75,7 +72,6 @@ class TournamentService {
         throw new Error('Player is already registered for this tournament');
       }
 
-      // Check if tournament is full
       const currentCount = await new Promise((resolve, reject) => {
         db.get(
           `SELECT COUNT(*) as count FROM tournament_players 
@@ -90,14 +86,12 @@ class TournamentService {
         throw new Error('Tournament is already full');
       }
 
-      // Add player to tournament
       await db.run(
         `INSERT INTO tournament_players (tournament_id, player_id) 
          VALUES (?, ?)`,
         [tournamentId, userId]
       );
 
-      // If tournament is now full, we could automatically start it
       if (currentCount.count + 1 === tournament.player_count) {
         await this.startTournament(tournamentId);
       }
@@ -140,7 +134,6 @@ class TournamentService {
     }
   }
 
-  // Start a tournament and create first round matches
   async startTournament(tournamentId) {
     try {
       const tournament = await new Promise((resolve, reject) => {
@@ -159,7 +152,6 @@ class TournamentService {
         throw new Error('Tournament already started or completed');
       }
 
-      // Get all players
       const players = await new Promise((resolve, reject) => {
         db.all(
           `SELECT tp.player_id, p.elo_score
@@ -175,7 +167,6 @@ class TournamentService {
         throw new Error(`Not enough players (${players.length}/${tournament.player_count})`);
       }
 
-      // Update tournament status
       await new Promise((resolve, reject) => {
         db.run(
           `UPDATE tournaments SET status = 'in_progress', started_at = CURRENT_TIMESTAMP 
@@ -185,10 +176,8 @@ class TournamentService {
         );
       });
 
-      // Randomize player order for fair matchmaking
       const shuffledPlayers = this.shufflePlayers(players);
 
-      // Create first round matches
       const matches = [];
       for (let i = 0; i < shuffledPlayers.length; i += 2) {
         const player1 = shuffledPlayers[i];
@@ -214,7 +203,6 @@ class TournamentService {
     }
   }
 
-  // Create a match between two tournament players
   async createTournamentMatch(tournamentId, player1Id, player2Id) {
     try {
       const player1 = await new Promise((resolve, reject) => {
@@ -228,7 +216,6 @@ class TournamentService {
         throw new Error(`Player not found: ${!player1 ? player1Id : player2Id}`);
       }
 
-      // Create match record
       const matchResult = await new Promise((resolve, reject) => {
         db.run(
           `INSERT INTO matches (match_type, status, tournament_id) VALUES (?, ?, ?)`,
@@ -246,7 +233,6 @@ class TournamentService {
       }
       console.log(`Created tournament match ${matchId} for tournament ${tournamentId}`);
 
-      // Add players to match with their current ELO
       await new Promise((resolve, reject) => {
         db.run(
           `INSERT INTO match_players (match_id, player_id, elo_before, elo_after, goals) VALUES (?, ?, ?, ?, ?)`,
@@ -281,7 +267,6 @@ class TournamentService {
     }
   }
 
-  // Handle tournament match result and progress tournament
   async updateTournamentMatchResult(matchId, winnerId, finalScore = null) {
     try {
       console.log(`Processing tournament match result: Match ${matchId}, Winner ${winnerId}`);
@@ -311,7 +296,6 @@ class TournamentService {
       const winnerNewElo = EloService.calculateNewRatings(winner.elo_score, loser.elo_score, 1);
       const loserNewElo = EloService.calculateNewRatings(loser.elo_score, winner.elo_score, 0);
 
-      // Get goals from finalScore or use defaults
       const winnerGoals = finalScore?.winner || 10;
       const loserGoals = finalScore?.loser || 0;
 
@@ -350,7 +334,6 @@ class TournamentService {
 
       console.log(`Match ${matchId} completed. Winner: ${winnerId}`);
 
-      // Progress tournament to next round
       const tournamentId = match.tournament_id;
       const progressResult = await this.progressTournament(tournamentId);
 
@@ -373,7 +356,6 @@ class TournamentService {
     }
   }
 
-  // Progress tournament to next round or complete it
   async progressTournament(tournamentId) {
     try {
       console.log(`Progressing tournament ${tournamentId}`);
@@ -401,7 +383,6 @@ class TournamentService {
         );
       });
 
-      // Group matches by match_id
       const matchesMap = new Map();
       allMatches.forEach(row => {
         if (!matchesMap.has(row.id)) {
@@ -425,11 +406,9 @@ class TournamentService {
 
       console.log(`Tournament ${tournamentId}: ${completedMatches.length} completed, ${pendingMatches.length} pending`);
 
-      // Calculate total matches needed
       const totalMatches = tournament.player_count - 1;
 
       if (completedMatches.length === totalMatches) {
-        // Tournament complete
         const finalMatch = completedMatches[completedMatches.length - 1];
         const champion = finalMatch.winner_id;
 
@@ -443,7 +422,6 @@ class TournamentService {
         };
       }
 
-      // Check if next round can be created
       const winners = completedMatches.map(m => m.winner_id).filter(Boolean);
       const canCreateNextRound = this.canCreateNextRound(
         tournament.player_count,
@@ -478,19 +456,16 @@ class TournamentService {
 
   canCreateNextRound(playerCount, completedCount, pendingCount) {
     if (playerCount === 4) {
-      // 4 players: 2 semifinals -> 1 final
       return completedCount === 2 && pendingCount === 0;
     } else if (playerCount === 8) {
-      // 8 players: 4 quarterfinals -> 2 semifinals -> 1 final
-      if (completedCount === 4 && pendingCount === 0) return true; // Create semifinals
-      if (completedCount === 6 && pendingCount === 0) return true; // Create final
+      if (completedCount === 4 && pendingCount === 0) return true;
+      if (completedCount === 6 && pendingCount === 0) return true;
     }
     return false;
   }
 
   async createNextRoundMatches(tournamentId, winners, completedCount) {
     const nextRoundMatches = [];
-    // Pair winners for next round
     for (let i = 0; i < winners.length; i += 2) {
       if (i + 1 < winners.length) {
         const match = await this.createTournamentMatch(
@@ -519,28 +494,22 @@ class TournamentService {
     });
   }
 
-  // Complete tournament and assign final placements
   async completeTournament(tournamentId, winners) {
     try {
-      // Winner is the last winner (of the final match)
       const champion = winners[winners.length - 1];
 
-      // Update tournament status
       await db.run(
         `UPDATE tournaments SET status = 'completed', completed_at = CURRENT_TIMESTAMP 
          WHERE id = ?`,
         [tournamentId]
       );
 
-      // Set winner's placement to 1
       await db.run(
         `UPDATE tournament_players SET placement = 1
          WHERE tournament_id = ? AND player_id = ?`,
         [tournamentId, champion]
       );
 
-      // We could calculate other placements based on when they lost
-      // For simplicity, let's just mark everyone else as placed 2
       await db.run(
         `UPDATE tournament_players SET placement = 2
          WHERE tournament_id = ? AND player_id != ?`,
@@ -554,7 +523,6 @@ class TournamentService {
     }
   }
 
-  // Get tournament details with matches and players
   async getTournamentDetails(tournamentId) {
     try {
       if (isNaN(tournamentId) || tournamentId <= 0) {
@@ -573,7 +541,6 @@ class TournamentService {
         return null
       }
 
-      // Get all players
       const players = await new Promise((resolve, reject) => {
         db.all(
           `SELECT tp.player_id, tp.placement, tp.joined_at
@@ -584,7 +551,6 @@ class TournamentService {
         );
       });
 
-      // Get all matches
       const matches = await new Promise((resolve, reject) => {
         db.all(
           `SELECT m.*, mp.player_id, mp.elo_before, mp.elo_after, mp.goals
@@ -597,7 +563,6 @@ class TournamentService {
         );
       })
 
-      // Organize matches by round (simplified)
       const groupedMatches = {};
       matches.forEach(match => {
         if (!groupedMatches[match.id]) {
@@ -632,7 +597,6 @@ class TournamentService {
     }
   }
 
-  // Helper to randomize player order for fair matchmaking
   shufflePlayers(players) {
     const shuffled = [...players];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -642,7 +606,6 @@ class TournamentService {
     return shuffled;
   }
 
-  // Add to TournamentService in tournament.js
   async getActiveTournaments() {
     try {
       const tournaments = await new Promise((resolve, reject) => {

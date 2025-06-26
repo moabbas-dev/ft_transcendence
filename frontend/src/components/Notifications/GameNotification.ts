@@ -45,7 +45,6 @@ export const GameChallengeNotification = createComponent((props: NotificationPro
 		}
 	});
 
-    // Add event listener for accept button
     const acceptBtn = notification.querySelector('.accept-btn')!;
     acceptBtn.addEventListener('click', () => {
 

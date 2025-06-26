@@ -5,7 +5,6 @@ const { generateNewAccessToken } = require('../utils/jwtUtils');
 
 class JwtController {
 
-    // refresh an expired access token
 	static async refresh(request, reply) {
         const { sessionId } = request.params;
 		const refreshToken = request.cookies.refreshToken;
@@ -89,7 +88,6 @@ class JwtController {
 		}
 	}
 
-    // validate an access token
     static async validateAccessToken(request, reply) {
         const { userId } = request.params;
         const { accessToken } = request.body;

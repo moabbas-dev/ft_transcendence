@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   UserFriends.ts                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: afarachi <afarachi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/22 15:39:14 by afarachi          #+#    #+#             */
+/*   Updated: 2025/06/22 15:39:14 by afarachi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 import { t } from "../../languages/LanguageController.js";
 import { createComponent } from "../../utils/StateManager.js";
 import { BlockedUsersSection } from "./BlockedUsersSection.js";
@@ -5,7 +17,6 @@ import { FriendsSection } from "./FriendsSection.js";
 import { RequestsSection } from "./RequestsSection.js";
 
 export const UserFriends = createComponent(() => {
-  // Main container
   const container = document.createElement('div');
   container.className = "size-full flex flex-col gap-2 sm:gap-4";
   container.innerHTML = `
@@ -39,7 +50,6 @@ export const UserFriends = createComponent(() => {
   function setActiveSection(sectionId: string) {
     selectedSection = sectionId;
 
-    // Update tab styling
     Array.from(tabNav.children).forEach((tab, index) => {
       if (tabs[index].id === sectionId) {
         tab.className += " border-b-2 border-pongcyan text-pongcyan focus:outline-none";
@@ -62,7 +72,6 @@ export const UserFriends = createComponent(() => {
     }
   }
   
-  // Initialize with the default section
   setActiveSection(selectedSection);
   
   return container;

@@ -7,7 +7,7 @@ interface FindOpponentProps {
 	heading: HTMLElement;
 	isIconVisible: boolean;
 	toggleInterval: NodeJS.Timeout;
-	client?: any; // WebSocket client
+	client?: any;
 }
 
 export const FindOpponent = createComponent((props: FindOpponentProps) => {
@@ -22,7 +22,6 @@ export const FindOpponent = createComponent((props: FindOpponentProps) => {
 	const loadingOnline = container.querySelector("#loading-online");
 	loadingOnline?.appendChild(PongLoading({ text: t('play.onlineGame.searching')}));
 
-	// Handle opponent found
 	const showOpponentFound = (opponent: any) => {
 		container.innerHTML = `
 			<div class="w-full h-full flex flex-col items-center justify-center gap-6 py-8">
@@ -47,7 +46,6 @@ export const FindOpponent = createComponent((props: FindOpponentProps) => {
 		
 		props.heading.textContent = t('play.onlineGame.oponentFound');
 		
-		// Countdown timer
 		let countdown = 3;
 		const countdownElement = container.querySelector("#countdown");
 		const countdownInterval = setInterval(() => {
@@ -58,12 +56,10 @@ export const FindOpponent = createComponent((props: FindOpponentProps) => {
 			
 			if (countdown <= 0) {
 				clearInterval(countdownInterval);
-				// Game starts automatically from the WebSocket handler
 			}
 		}, 1000);
 	};
 
-	// Set up WebSocket event handlers if client is provided
 	if (props.client) {
 		props.client.on('match_found', (data: any) => {
 			console.log('Match found:', data);

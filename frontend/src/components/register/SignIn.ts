@@ -168,10 +168,6 @@ export const SignIn = createComponent((props: SignInProps) => {
 		eyeIcon.classList.add(wasPassword ? 'bx-show' : 'bx-hide');
 	};
 
-	// const googleBtn = form.querySelector('#google-sign');
-	// googleBtn?.addEventListener('click', () => {
-	// 	localStorage.setItem("googleAuthClicked", "true");
-	// });
 	handleLoginWithGoogle(form)
 	togglePassword.addEventListener('click', handleTogglePassword);
 	useCleanup(() => togglePassword.removeEventListener('click', handleTogglePassword))

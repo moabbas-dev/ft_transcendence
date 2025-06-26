@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   GameInviteMessage.ts                               :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: afarachi <afarachi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/22 15:16:33 by afarachi          #+#    #+#             */
+/*   Updated: 2025/06/22 15:16:33 by afarachi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 import { createComponent } from "../../utils/StateManager.js";
 import chatService from "../../utils/chatUtils/chatWebSocketService.js";
 import store from "../../../store/store.js";
@@ -80,14 +92,12 @@ export const GameInviteMessage = createComponent((props: GameInviteMessageProps)
     }
   }
   
-  // Add event listeners for accept/decline buttons
   if (isPending && isReceived) {
     const acceptBtn = messageElement.querySelector('.accept-btn');
     const declineBtn = messageElement.querySelector('.decline-btn');
     const buttons = messageElement.querySelector('.buttons');
     
     acceptBtn?.addEventListener('click', () => {
-      // FIXED: Only send response via chat service, which will handle matchmaking
       chatService.send("game:invite_response", {
         inviteId: props.inviteId,
         response: 'accept',
@@ -97,7 +107,6 @@ export const GameInviteMessage = createComponent((props: GameInviteMessageProps)
 
       buttons?.classList.add('hidden');
       
-      // Show status immediately for better UX
       const statusDiv = document.createElement('div');
       statusDiv.className = 'status text-sm text-green-400';
       statusDiv.textContent = 'Accepted';
@@ -114,7 +123,6 @@ export const GameInviteMessage = createComponent((props: GameInviteMessageProps)
 
       buttons?.classList.add('hidden');
       
-      // Show status immediately for better UX
       const statusDiv = document.createElement('div');
       statusDiv.className = 'status text-sm text-red-400';
       statusDiv.textContent = 'Declined';

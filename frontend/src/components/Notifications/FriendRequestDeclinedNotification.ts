@@ -1,46 +1,3 @@
-// import { formatDistanceToNow } from "date-fns";
-// import { createComponent } from "../../utils/StateManager.js";
-// import { NotificationProps } from "./Notification.js";
-// import axios from "axios";
-
-// export const FriendRequestDeclinedNotification = createComponent((props: NotificationProps) => {
-//     const fetchSenderNickname = async (senderId:number) => {
-// 		try {
-// 			const response = await axios.get(`/authentication/auth/users/id/${senderId}`)
-// 			return response.data
-// 		} catch(err) {
-// 			console.error(err);
-// 			return null
-// 		}
-// 	}	
-    
-//     const notification = document.createElement('li');
-//     notification.className = 'w-full flex flex-col gap-2 text-black border-b bg-green-50';
-//     notification.innerHTML = `
-//         <div class="flex justify-between items-center">
-//             <span class="text-lg font-bold">System</span>
-//             <div class="flex items-center gap-2">
-//                 ${!props.is_read? '<div class="size-1.5 bg-red-600 rounded-full"></div>' : ''}
-//                 <span class="text-sm text-gray-600">${formatDistanceToNow(props.created_at, { addSuffix: false })}</span>
-//             </div>
-//         </div>
-//         <div>
-//             <p class="text-gray-700">
-//                 <span id="sender-name" class="text-pongcyan font-semibold cursor-pointer hover:underline hover:opacity-90">Loading...</span>
-//                 declined your friend invitation
-//             </p>
-//         </div>
-//     `;
-//     fetchSenderNickname(props.senderId).then(data => {
-// 		if (data) {
-// 			const senderName = notification.querySelector('#sender-name')!
-// 			senderName.textContent = data.nickname
-// 		}
-// 	});
-
-//     return notification;
-// });
-
 import { formatDistanceToNow } from "date-fns";
 import { createComponent } from "../../utils/StateManager.js";
 import { NotificationProps } from "./Notification.js";
@@ -88,7 +45,6 @@ export const FriendRequestDeclinedNotification = createComponent((props: Notific
         </div>
     `;
 
-    // Fetch and display sender nickname with enhanced styling
     fetchSenderNickname(props.senderId).then(data => {
         if (data) {
             const senderName = notification.querySelector('#sender-name')! as HTMLAnchorElement;
@@ -96,22 +52,17 @@ export const FriendRequestDeclinedNotification = createComponent((props: Notific
             
             senderName.textContent = data.nickname;
 
-            // Function to show profile (reusable for both username and icon)
             const showProfile = (e: Event) => {
                 e.preventDefault();
                 console.log(`Clicked on user: ${data.nickname} (ID: ${props.senderId})`);
-                // Create and show the Profile component
                 const profileComponent = Profile({ uName: data.nickname });
                 document.body.appendChild(profileComponent);
             };
 
-            // Add click event listener to the username anchor
             senderName.addEventListener('click', showProfile);
 
-            // Add click event listener to the friend icon
             friendIcon.addEventListener('click', showProfile);
 
-            // Add a subtle glow effect when name loads
             senderName.classList.add('animate-pulse');
             setTimeout(() => {
                 senderName.classList.remove('animate-pulse');
@@ -120,7 +71,6 @@ export const FriendRequestDeclinedNotification = createComponent((props: Notific
         }
     });
 
-    // Add subtle hover effect
     notification.addEventListener('mouseenter', () => {
         notification.style.transform = 'translateX(2px)';
     });

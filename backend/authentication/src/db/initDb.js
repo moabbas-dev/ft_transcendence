@@ -63,27 +63,6 @@ const createTables = () => {
 	});
 };
 
-// Cleanup expired sessions from the Sessions table
-// const cleanupExpiredSessions = () => {
-// 	const query = `
-// 	  DELETE FROM Sessions
-// 	  WHERE expires_at < DATETIME('now')
-// 		AND refresh_expires_at < DATETIME('now')
-// 		AND DATETIME('now') > DATETIME(expires_at, '+1 hour');
-// 	`;
-// 	db.run(query, function (err) {
-// 		if (err) {
-// 			console.error('Error cleaning up expired sessions:', err);
-// 		} else {
-// 			console.log('Expired sessions cleaned up successfully');
-// 		}
-// 	});
-// };
-
-// // Periodically clean up expired sessions every 10 minutes
-// setInterval(cleanupExpiredSessions, 10 * 60 * 1000); // 10 minutes
-
-// Graceful shutdown handling
 const closeDatabase = () => {
 	return new Promise((resolve, reject) => {
 		db.close(err => {

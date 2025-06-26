@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   footer.ts                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: afarachi <afarachi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/22 15:18:16 by afarachi          #+#    #+#             */
+/*   Updated: 2025/06/22 15:18:16 by afarachi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 import { t } from "../../languages/LanguageController.js";
 import { navigate } from "../../router.js";
 import { createComponent } from "../../utils/StateManager.js";

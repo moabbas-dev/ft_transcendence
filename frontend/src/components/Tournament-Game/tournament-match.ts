@@ -44,7 +44,6 @@ const TournamentMatchPage: Page = {
       </div>
     `;
 
-    // Create game header
     const gameHeaderContainer = container.querySelector('#game-header') as HTMLElement;
     const gameHeader = OfflineGameHeader({
       gameMode: "online",
@@ -54,7 +53,6 @@ const TournamentMatchPage: Page = {
     });
     gameHeaderContainer.appendChild(gameHeader);
 
-    // Get canvas and initialize game
     const canvas = container.querySelector('#tournament-game-canvas') as HTMLCanvasElement;
     let gameBoard: OnlineGameBoard | null = null;
 
@@ -77,8 +75,6 @@ const TournamentMatchPage: Page = {
     }
     startNewGame();
 
-
-    // Handle forfeit button
     const leaveButton = container.querySelector('#leave-match-btn');
     leaveButton?.addEventListener('click', () => {
       if (confirm('Are you sure you want to forfeit this match? This will count as a loss.')) {
@@ -91,21 +87,17 @@ const TournamentMatchPage: Page = {
       }
     });
 
-    // Handle match completion
     client.on('tournament_match_completed', (data: any) => {
       if (String(data.matchId) === String(matchId)) {
         setTimeout(() => navigate(`/tournaments/${tournamentId}`), 3000);
       }
     });
 
-    // Handle tournament completion
     client.on('tournament_completed', (data: any) => {
       setTimeout(() => navigate(`/tournaments/${tournamentId}`), 5000);
     });
 
-    // Cleanup
     window.addEventListener('beforeunload', () => {
-      // Cleanup logic
     });
   }
 };

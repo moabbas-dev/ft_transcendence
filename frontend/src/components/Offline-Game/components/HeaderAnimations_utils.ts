@@ -1,5 +1,16 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   HeaderAnimations_utils.ts                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: afarachi <afarachi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/22 15:29:10 by afarachi          #+#    #+#             */
+/*   Updated: 2025/06/22 15:29:10 by afarachi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 export const createDivider = () => {
-  // Add central divider with animated effect
   const dividerContainer = document.createElement("div");
   dividerContainer.className =
     "absolute top-1/2 left-1/2 h-full z-20 flex items-center justify-center";
@@ -26,13 +37,12 @@ export const createParticles = () => {
     const particle = document.createElement("div");
     const size = Math.random() * 6 + 2;
 
-    particle.className = "absolute rounded-full animate-particle"; // Apply Tailwind animation class
+    particle.className = "absolute rounded-full animate-particle";
 
     particle.style.width = `${size}px`;
     particle.style.height = `${size}px`;
     particle.style.opacity = `${Math.random() * 0.5 + 0.3}`;
 
-    // Side-based color and position
     if (Math.random() > 0.5) {
       particle.style.left = `${Math.random() * 40}%`;
       particle.style.background = `rgba(59, 130, 246, ${
@@ -47,7 +57,6 @@ export const createParticles = () => {
 
     particle.style.top = `${Math.random() * 100}%`;
 
-    // Random movement using CSS variables (which the keyframes will read)
     const tx = (Math.random() - 0.5) * 100;
     const ty = (Math.random() - 0.5) * 100;
     particle.style.setProperty("--tx", `${tx}px`);
@@ -95,13 +104,11 @@ export function updateBackgrounds(playerScore: number, aiScore: number) {
     rightWidth = 100 - leftWidth;
   }
 
-  // Update background widths with easing
   leftBg.style.transition = "width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)";
   rightBg.style.transition = "width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)";
   leftBg.style.width = `${leftWidth}%`;
   rightBg.style.width = `${rightWidth}%`;
 
-  // Update score display
   const playerScoreElem = document.querySelector("#player-score1");
   const aiScoreElem = document.querySelector("#player-score2");
   

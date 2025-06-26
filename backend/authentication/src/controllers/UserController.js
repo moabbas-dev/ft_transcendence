@@ -12,8 +12,7 @@ class UserController {
 	static async createUser(request, reply) {
 		const { email, password, nickname, full_name, age, country, google_id } = request.body;
 		const activationEmailHtml = (activationToken, full_name) => {
-			// Get the host from the request headers
-			const host = request.headers.host.split(':')[0]; // Remove port if present
+			const host = request.headers.host.split(':')[0];
 			const protocol = request.headers['x-forwarded-proto'] || 'https';
 			return `
 				<div>

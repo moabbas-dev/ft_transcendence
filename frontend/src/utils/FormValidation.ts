@@ -2,10 +2,9 @@ function createErrorMessage(input: HTMLInputElement, message: string) {
 	if (input.nextElementSibling)
 		return ;
 	const errorDiv = document.createElement('div');
-	errorDiv.className = 'text-red-700 text-sm'; // Tailwind CSS classes for styling
+	errorDiv.className = 'text-red-700 text-sm';
 	errorDiv.textContent = message;
   
-	// Insert the error message div after the input element
 	input.insertAdjacentElement('afterend', errorDiv);
   }
 

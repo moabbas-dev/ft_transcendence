@@ -1,4 +1,16 @@
-        import store from "../../../store/store";
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   chatWebSocketService.ts                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: afarachi <afarachi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/22 16:47:48 by afarachi          #+#    #+#             */
+/*   Updated: 2025/06/22 16:47:48 by afarachi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+import store from "../../../store/store";
 import { pongGameClient } from "../../main";
 
 class ChatWebSocketService {
@@ -13,15 +25,10 @@ class ChatWebSocketService {
   private userId: any;
   private messageQueue: Array<{ event: string, payload: any }> = [];
 
-  // constructor(serverUrl: string = "wss://192.168.1.13/social/") {
-  //   this.serverUrl = serverUrl;
-  // }
-
   constructor(serverUrl: string | null = null) {
-    // Dynamically determine the WebSocket URL based on the current page's protocol and hostname
     if (!serverUrl) {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const hostname = window.location.hostname; // This will be "localhost" or the IP address
+      const hostname = window.location.hostname;
       const port = window.location.port ? `:${window.location.port}` : '';
       this.serverUrl = `${protocol}//${hostname}${port}/social/`;
       console.log("server url is ", this.serverUrl);
@@ -49,13 +56,11 @@ class ChatWebSocketService {
           this.reconnectAttempts = 0;
           this.connected = true;
 
-          // Process any queued messages
           while (this.messageQueue.length > 0) {
-            const msg = this.messageQueue.shift(); // This removes the first item from the queue
+            const msg = this.messageQueue.shift();
             if (msg) this.send(msg.event, msg.payload);
           }
 
-          // Send the initial connection message with user data
           if (!this.username || !this.userId) {
             console.error("Username or userId is missing!");
             return Promise.reject("Missing username or userId");
@@ -94,34 +99,14 @@ class ChatWebSocketService {
     });
   }
 
-  /**
-   * Send a message to the server
-   */
-  // public send(event: string, payload: any): void {
-  //   if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
-  //     if (!this.socket)
-  //       console.error("hahahaah");
-  //     console.error("WebSocket not connected");
-  //     return;
-  //   }
-
-  //   this.socket.send(
-  //     JSON.stringify({
-  //       event,
-  //       payload,
-  //     })
-  //   );
-  // }
   public send(event: string, payload: any): void {
     if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
-      // console.error("WebSocket not connected");
       return;
     }
 
-    // Send the message as normal
     this.socket.send(JSON.stringify({ event, payload }));
     console.log(`send: ${event} with: `, payload);
-    
+
   }
 
   /**
@@ -135,35 +120,18 @@ class ChatWebSocketService {
     this.eventListeners.get(event)?.push(callback);
   }
 
-  /**
-   * Unsubscribe from an event
-   */
-  // public off(event: string, callback: (data: any) => void): void {
-  //   if (!this.eventListeners.has(event)) return;
-
-  //   const listeners = this.eventListeners.get(event) || [];
-  //   const index = listeners.indexOf(callback);
-
-  //   if (index !== -1) {
-  //     listeners.splice(index, 1);
-  //     this.eventListeners.set(event, listeners);
-  //   }
-  // }
-
   public off(event: string, callback?: (data: any) => void): void {
     if (!this.eventListeners.has(event)) return;
-  
+
     if (callback) {
-      // Remove specific callback
       const listeners = this.eventListeners.get(event) || [];
       const index = listeners.indexOf(callback);
-  
+
       if (index !== -1) {
         listeners.splice(index, 1);
         this.eventListeners.set(event, listeners);
       }
     } else {
-      // Remove all listeners for this event
       this.eventListeners.delete(event);
     }
   }
@@ -240,57 +208,34 @@ class ChatWebSocketService {
     }, backoffTime);
   }
 
-  // Chat specific methods
-
-  /**
-   * Send a private message to another user
-   */
-  // public sendPrivateMessage(toUserId: number, content: string): void {
-  //   if (!this.userId || !this.username) {
-  //     console.error("Not authenticated");
-  //     return;
-  //   }
-
-  //   this.send("message:private", {
-  //     from: this.userId,
-  //     to: toUserId,
-  //     content,
-  //     timestamp: Date.now(),
-  //   });
-  // }
-
   /**
  * Mark all messages in a room as read
  */
-public markMessagesAsRead(roomId: string | null): void {
-  if (!this.isConnected()) {
-    console.error("WebSocket not connected");
-    return;
+  public markMessagesAsRead(roomId: string | null): void {
+    if (!this.isConnected()) {
+      console.error("WebSocket not connected");
+      return;
+    }
+
+    if (!roomId) {
+      console.error("Invalid roomId");
+      return;
+    }
+
+    const userId = this.userId;
+
+    if (!userId) {
+      console.error("User ID not available");
+      return;
+    }
+
+    this.send("messages:mark_read", {
+      roomId,
+      userId
+    });
+
+    console.log(`Sent request to mark messages as read in room ${roomId} for user ${userId}`);
   }
-  
-  // Check if roomId is valid
-  if (!roomId) {
-    console.error("Invalid roomId");
-    return;
-  }
-  
-  // Get the current user ID (assuming it's stored in the class or accessible)
-  const userId = this.userId; // Replace with how you actually get the user ID
-  
-  if (!userId) {
-    console.error("User ID not available");
-    return;
-  }
-  
-  // Send the mark_read event to the WebSocket server
-  this.send("messages:mark_read", {
-    roomId,
-    userId
-  });
-  
-  // Optionally, you could update the UI immediately before server confirmation
-  console.log(`Sent request to mark messages as read in room ${roomId} for user ${userId}`);
-}
 
   /**
    * Get list of pending friend requests
@@ -394,7 +339,7 @@ public markMessagesAsRead(roomId: string | null): void {
 
     this.send('friendship:check', {
       currentUserId: this.userId,
-      targetUserId: blockedUserId    
+      targetUserId: blockedUserId
     });
   }
 
@@ -418,11 +363,9 @@ const chatService = new ChatWebSocketService()
 export default chatService;
 
 export function setupGameInviteHandlers() {
-  // Listen for create_friend_match from chat service
   chatService.on("create_friend_match", (data) => {
     console.log("Received create_friend_match from chat:", data);
-    
-    // Forward to matchmaking service
+
     if (pongGameClient && pongGameClient.isConnected()) {
       pongGameClient.send('create_friend_match', {
         player1: data.player1,
@@ -435,9 +378,7 @@ export function setupGameInviteHandlers() {
     }
   });
 
-  // Listen for game match creation confirmation from chat
   chatService.on("game:match_creating", (data) => {
     console.log("Match is being created:", data);
-    // You can show a loading state here if needed
   });
 }
