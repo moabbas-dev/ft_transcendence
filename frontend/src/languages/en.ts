@@ -112,6 +112,7 @@ export default {
 			opponent: "Opponent",
 			opponentElo: "Opponent ELO",
 			startingIn: "Starting in",
+			matchFound: "Match Found!",
 		},
 		"tournaments": {
 			"title": "Tournaments",
@@ -170,7 +171,8 @@ export default {
 			},
 			
 			"myTournaments": {
-			  "loading": "Loading your tournaments..."
+			  "loading": "Loading your tournaments...",
+			  "noTournaments": "No tournaments available",
 			},
 			
 			"matchNotification": {
@@ -224,6 +226,7 @@ export default {
 		loadingFriends: "Loading friends...",
 		loadingRequests: "Loading chats...",
 		noFriends: "No friends yet",
+		noFriendsFound: "No friends found",
 		noRequests: "No message requests",
 		searchFriends: "Search friends...",
 		searchRequests: "Search requests...",

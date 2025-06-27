@@ -112,6 +112,7 @@ export default {
 			opponent: "Adversaire",
 			opponentElo: "ELO de l'adversaire",
 			startingIn: "Démarrage dans",
+			matchFound: "Match trouvé !",
 		},
 		"tournaments": {
 			"title": "Tournois",
@@ -170,7 +171,8 @@ export default {
 			},
 
 			"myTournaments": {
-				"loading": "Chargement de vos tournois..."
+				"loading": "Chargement de vos tournois...",
+				"noTournaments": "Aucun tournoi disponible",
 			},
 
 			"matchNotification": {
@@ -224,6 +226,7 @@ export default {
 		loadingFriends: "Chargement des amis...",
 		loadingRequests: "Chargement des demandes...",
 		noFriends: "Aucun ami",
+		noFriendsFound: "Aucun ami trouvé",
 		noRequests: "Aucune demande",
 		searchFriends: "Rechercher des amis...",
 		searchRequests: "Rechercher des demandes...",

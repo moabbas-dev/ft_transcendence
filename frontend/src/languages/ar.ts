@@ -112,6 +112,7 @@ export default {
 			opponent: "الخصم",
 			opponentElo: "تقييم الخصم",
 			startingIn: "سيبدأ في",
+			matchFound: "تم العثور على مباراة!",
 		},
 		"tournaments": {
 			"title": "البطولات",
@@ -170,7 +171,8 @@ export default {
 			},
 
 			"myTournaments": {
-				"loading": "جارٍ تحميل بطولاتك..."
+				"loading": "جارٍ تحميل بطولاتك...",
+				"noTournaments": "لا توجد بطولات متاحة",
 			},
 
 			"matchNotification": {
@@ -225,6 +227,7 @@ export default {
 		loadingFriends: "جاري تحميل الأصدقاء...",
 		loadingRequests: "جاري تحميل المحادثات...",
 		noFriends: "لا يوجد أصدقاء بعد",
+		noFriendsFound: "لم يتم العثور على أصدقاء",
 		noRequests: "لا يوجد طلبات للدردشة",
 		searchFriends: "ابحث عن أصدقاء...",
 		searchRequests: "ابحث عن طلبات الدردشة...",
