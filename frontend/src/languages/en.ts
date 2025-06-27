@@ -173,6 +173,7 @@ export default {
 			"myTournaments": {
 			  "loading": "Loading your tournaments...",
 			  "noTournaments": "No tournaments available",
+			  createOrJoin: "Create or join a tournament to start playing!",
 			},
 			
 			"matchNotification": {

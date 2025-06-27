@@ -173,6 +173,7 @@ export default {
 			"myTournaments": {
 				"loading": "جارٍ تحميل بطولاتك...",
 				"noTournaments": "لا توجد بطولات متاحة",
+				"createOrJoin": "أنشئ أو انضم إلى بطولة لبدء اللعب!",
 			},
 
 			"matchNotification": {
