@@ -22,6 +22,7 @@ export default {
 			  console.error("NO GLOBAL TOURNAMENT CLIENT:", err);
 			});
 		}
+		client.connect()
 
 		let currentTournamentId: string | null = null;
 		let currentView: 'list' | 'create' | 'waiting' | 'brackets' | 'results' = 'list';

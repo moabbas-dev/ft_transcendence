@@ -540,6 +540,34 @@ class MatchmakingService {
             throw error;
         }
     }
+
+    /**
+ * Update match status to completed with all necessary data
+ * @param {number} matchId - The match ID
+ * @param {number} winnerId - The winner's ID
+ */
+async updateMatchStatus(matchId, winnerId) {
+    try {
+      await new Promise((resolve, reject) => {
+        db.run(
+          `UPDATE matches 
+           SET status = 'completed', 
+               winner_id = ?, 
+               completed_at = DATETIME('now') 
+           WHERE id = ?`,
+          [winnerId, matchId],
+          (err) => {
+            if (err) reject(err);
+            else resolve();
+          }
+        );
+      });
+      console.log(`Successfully updated match ${matchId} status to completed`);
+    } catch (error) {
+      console.error(`Error updating match status for match ${matchId}:`, error);
+      throw error;
+    }
+  }
 }
 
 export default new MatchmakingService();

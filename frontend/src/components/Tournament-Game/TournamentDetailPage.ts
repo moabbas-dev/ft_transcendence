@@ -62,6 +62,8 @@ export default {
         console.error("Failed to initialize tournament client:", err);
       });
     }
+    await new Promise(resolve => setTimeout(resolve, 100));
+    await client.connect()
 
     container.className = "bg-ponghover w-full h-dvh flex flex-col items-center justify-center";
     container.innerHTML = `

@@ -323,6 +323,8 @@ function registerMessageHandlers(wsAdapter) {
         player2EloChange = player2NewElo - player2OldElo;
       }
 
+      await matchmakingService.updateMatchStatus(matchId, winnerId);
+
       const eloChanges = {
         [player1Id]: player1EloChange,
         [player2Id]: player2EloChange
