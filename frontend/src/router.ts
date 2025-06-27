@@ -73,7 +73,7 @@ export async function refreshRouter() {
 	if (store.isLoggedIn && matchesRestrictedPattern(path)) {
 		page = NotFound;
 	}
-	else if (!store.isLoggedIn && !matchesRestrictedPattern(path) && path !== "/") {
+	else if (!store.isLoggedIn && !matchesRestrictedPattern(path) && path !== "/" && path !== "/play/local-multi" && path !== "/play/local-ai") {
 		page = NotFound;
 	}
 	else {

@@ -63,7 +63,7 @@ export const FindOpponent = createComponent((props: FindOpponentProps) => {
 	if (props.client) {
 		props.client.on('match_found', (data: any) => {
 			console.log('Match found:', data);
-			showOpponentFound(data.opponent);
+			// showOpponentFound(data.opponent);
 		});
 				
 		props.client.on('waiting_for_match', (data: any) => {

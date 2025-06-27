@@ -432,7 +432,7 @@ export class OnlineGameBoard extends GameBoard {
 		this.clampPaddlePosition('player2Y');
 
 		this.updateScoreDisplay();
-
+		
 		if (Math.max(this.state.scores.player1, this.state.scores.player2) >= 10) {
 			this.state.gameEnded = true;
 
@@ -463,12 +463,12 @@ export class OnlineGameBoard extends GameBoard {
 				this.cleanup();
 			}
 			this.updateScoreDisplay();
-			const res = {
-				winner: winnerId,
-				player1Goals: this.state.scores.player1,
-				player2Goals: this.state.scores.player2	
-			}
-			this.showGameResults(res);
+			// const res = {
+			// 	winner: winnerId,
+			// 	player1Goals: this.state.scores.player1,
+			// 	player2Goals: this.state.scores.player2	
+			// }
+			// this.showGameResults(res);
 		}
 	}
 

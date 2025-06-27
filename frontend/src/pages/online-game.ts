@@ -83,7 +83,6 @@ export default {
 		
 		function setupFriendMatch(matchData: any) {
 			console.log("Setting up friend match:", matchData);
-			
 			client?.clearAllHandlers();
 			
 			const friendMatchCreatedHandler = (data: any) => {
@@ -93,6 +92,7 @@ export default {
 				isPlayer1 = data.isPlayer1;
 				
 				showMatchFound(data.opponent);
+				// client?.on('match_results', matchResultsHandler);
 			};
 			
 			const gameStartHandler = (data: any) => {
@@ -122,6 +122,13 @@ export default {
 			const isInitiator = String(matchData.initiator) === String(userId);
 			console.log(`GGGGGGGGGGGGGGGGGGGGGGG: `, matchData);
 			
+			const matchResultsHandler2 = (data: any) => {
+				if (gameBoard) {
+					showGameResults(data);
+					gameBoard.cleanup();
+					gameBoard = null;
+				}
+			}
 			if (isInitiator && client) {
 				console.log("Sending create_friend_match request...");
 				client.send('create_friend_match', {
@@ -132,6 +139,8 @@ export default {
 			} else {
 				console.log("Waiting for match creation from initiator...");
 			}
+			client?.on("match_results", matchResultsHandler2);
+			
 		}
 		const heading = container.querySelector("h1")!;
 
