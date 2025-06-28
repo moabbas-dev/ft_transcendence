@@ -1,5 +1,5 @@
 import { getDatabase } from "../db/initDB.js";
-
+import { getUserFromAuth } from './userService.js'
 /**
  * Save a message in the database
  * @param {Object} message - The message object

@@ -6,11 +6,12 @@ import store from "../../../store/store.js";
 import { displayResults } from "./searchFieldResults.js";
 import axios from "axios";
 import { Notification } from "../Notifications/Notification.js";
-import { formatInTimeZone } from 'date-fns-tz';
 import { NotificationData } from "../../types/types.js";
 import defaultImage from "../../assets/guests.png";
 import chatService from "../../utils/chatUtils/chatWebSocketService.js";
 import audioManager from "../../utils/audioUtils.js";
+import { formatTimestamp } from "../../utils/formatTime.js";
+import { formatInTimeZone } from "date-fns-tz";
 
 export const Header = createComponent(() => {
     const container = document.createElement("header");
@@ -233,11 +234,7 @@ export const Header = createComponent(() => {
 
             notifications.forEach(notification => {
                 const createdAt = notification.created_at
-                    ? formatInTimeZone(
-                        new Date(notification.created_at + ' UTC'),
-                        'Asia/Beirut',
-                        'yyyy-MM-dd HH:mm:ss'
-                    )
+                    ? formatInTimeZone(new Date(notification.created_at.toString().concat(' UTC')), 'Asia/Beirut', 'yyyy-MM-dd HH:mm:ss')
                     : null;
                 const body = {
                     senderId: notification.sender_id,

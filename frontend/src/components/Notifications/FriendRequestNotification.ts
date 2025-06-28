@@ -1,8 +1,10 @@
-import { formatDistanceToNow } from "date-fns";
 import { createComponent } from "../../utils/StateManager.js";
 import { NotificationProps } from "./Notification.js";
 import { Profile } from "../profile/UserProfile.js";
 import axios from "axios";
+import { formatTimestamp } from "../../utils/formatTime.js";
+import { formatDistanceToNow } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 
 export const FriendRequestNotification = createComponent((props: NotificationProps) => {
     console.log(props.senderId);
@@ -35,7 +37,6 @@ export const FriendRequestNotification = createComponent((props: NotificationPro
                     ${!props.is_read ? `
                         <div class="w-1.5 h-1.5 bg-pongpink rounded-full animate-pulse shadow-[0_0_6px_rgba(255,0,228,0.5)] flex-shrink-0"></div>
                     ` : ''}
-                    <span class="text-gray-400 text-xs whitespace-nowrap">${formatDistanceToNow(props.created_at, { addSuffix: true })}</span>
                 </div>
             </div>
             

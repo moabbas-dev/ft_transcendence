@@ -29,6 +29,7 @@ export class OnlineGameBoard extends GameBoard {
         event: string;
         handler: (data: any) => void;
     }> = [];
+	private winnerId: string;
 
 	constructor(
 		canvas: HTMLCanvasElement,
@@ -42,6 +43,7 @@ export class OnlineGameBoard extends GameBoard {
 		super("online", canvas, gameHeader);
 		this.canvas = canvas;
 		this.gameHeader = gameHeader;
+		this.winnerId = ''
 
 		const ctx = canvas.getContext('2d');
 		if (ctx === null) {
@@ -117,12 +119,56 @@ export class OnlineGameBoard extends GameBoard {
             { target: window, type: 'keyup', listener: keyupHandler },
             { target: this.canvas, type: 'touchstart', listener: this.handleTouchStart.bind(this) },
             { target: this.canvas, type: 'touchmove', listener: this.handleTouchMove.bind(this) },
-            { target: this.canvas, type: 'touchend', listener: this.handleTouchEnd.bind(this) }
+            { target: this.canvas, type: 'touchend', listener: this.handleTouchEnd.bind(this) },
+			{ target: window, type: 'beforeunload', listener: this.handleNavigation.bind(this)},
+			{ target: window, type: 'hashchange', listener: this.handleNavigation.bind(this)},
+			{ target: window, type: 'popstate', listener: this.handleNavigation.bind(this)},
         );
 
         this.eventListeners.forEach(({ target, type, listener }) => {
             target.addEventListener(type, listener);
         });
+	}
+
+	handleNavigation() {
+		this.state.gameEnded = true;
+
+		const winnerId = this.state.scores.player1 > this.state.scores.player2
+			? (this.isPlayer1 ? this.playerId : this.opponentId)
+			: (this.isPlayer1 ? this.opponentId : this.playerId);
+		this.winnerId = winnerId;
+		console.log("HHHHHHHHH: ", this.winnerId);
+		
+		this.client.send('game_end', {
+			matchId: this.matchId,
+			winner: this.winnerId,
+			player1Goals: this.state.scores.player1,
+			player2Goals: this.state.scores.player2
+		});
+
+		if (this.client instanceof TournamentClient) {
+			console.log("Sending tournament_match_result");
+			this.client.send('tournament_match_result', {
+				matchId: this.matchId,
+				winnerId: winnerId,
+				finalScore: {
+					winner: Math.max(this.state.scores.player1, this.state.scores.player2),
+					loser: Math.min(this.state.scores.player1, this.state.scores.player2)
+				}
+			});
+		}
+		else {
+			console.log("Sending game_end message");
+			this.client.send('game_end', {
+				matchId: this.matchId,
+				winner: winnerId,
+				player1Goals: this.state.scores.player1,
+				player2Goals: this.state.scores.player2
+			});
+			
+			this.cleanup();
+		}
+		this.updateScoreDisplay();
 	}
 
 	startGame() {
@@ -439,6 +485,9 @@ export class OnlineGameBoard extends GameBoard {
 			const winnerId = this.state.scores.player1 > this.state.scores.player2
 				? (this.isPlayer1 ? this.playerId : this.opponentId)
 				: (this.isPlayer1 ? this.opponentId : this.playerId);
+			this.winnerId = winnerId;
+			console.log("HHHHHHHHH: ", this.winnerId);
+			
 
 			if (this.client instanceof TournamentClient) {
 				console.log("Sending tournament_match_result");

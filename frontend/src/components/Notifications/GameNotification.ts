@@ -1,7 +1,9 @@
 import { formatDistanceToNow } from "date-fns";
+import { formatTimestamp } from "../../utils/formatTime.js";
 import { createComponent } from "../../utils/StateManager.js";
 import { NotificationProps } from "./Notification.js";
 import axios from "axios";
+import { formatInTimeZone } from "date-fns-tz";
 
 export const GameChallengeNotification = createComponent((props: NotificationProps) => {
     const fetchSenderNickname = async (senderId:number) => {
@@ -22,7 +24,6 @@ export const GameChallengeNotification = createComponent((props: NotificationPro
             <span id="sender-name" class="text-lg font-bold text-pongcyan cursor-pointer hover:opacity-90 hover:underline">Loading...</span>
             <div class="flex items-center gap-2">
                 ${!props.is_read? '<div class="size-1.5 bg-red-600 rounded-full"></div>' : ''}
-                <span class="text-sm text-gray-600">${formatDistanceToNow(props.created_at, { addSuffix: false })}</span>
             </div>
         </div>
         <div class="flex flex-col gap-1">
