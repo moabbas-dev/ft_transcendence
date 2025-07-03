@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Chat.ts                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: afarachi <afarachi@student.42.fr>          +#+  +:+       +#+        */
+/*   By: moabbas <moabbas@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 15:13:53 by afarachi          #+#    #+#             */
-/*   Updated: 2025/06/22 15:13:53 by afarachi         ###   ########.fr       */
+/*   Updated: 2025/06/28 13:28:27 by moabbas          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ import { t } from "../../languages/LanguageController.js";
 import axios from "axios";
 import { GameInviteMessage } from "./GameInviteMessage.js";
 import Toast from "../../toast/Toast.js";
+import DOMPurify from 'dompurify';
 
 interface Message {
   id: number | string;
@@ -203,28 +204,54 @@ export const Chat = createComponent(
       });
     };
 
-    const formatMessageContent = (content: string): string => {
-      const emoticonRegex = /:([\w]+):/g;
+    // const formatMessageContent = (content: string): string => {
+    //   const emoticonRegex = /:([\w]+):/g;
 
-      return content.replace(emoticonRegex, (match) => {
-        const emojiUrl = emojisMap[match as keyof typeof emojisMap];
-        if (emojiUrl) {
-          return `<img src="${emojiUrl}" alt="${match}" class="inline-block h-6" />`;
-        }
+    //   return content.replace(emoticonRegex, (match) => {
+    //     const emojiUrl = emojisMap[match as keyof typeof emojisMap];
+    //     if (emojiUrl) {
+    //       return `<img src="${emojiUrl}" alt="${match}" class="inline-block h-6" />`;
+    //     }
 
-        const emoticonUrl = emoticonsMap[match as keyof typeof emoticonsMap];
-        if (emoticonUrl) {
-          return `<img src="${emoticonUrl}" alt="${match}" class="inline-block h-6" />`;
-        }
+    //     const emoticonUrl = emoticonsMap[match as keyof typeof emoticonsMap];
+    //     if (emoticonUrl) {
+    //       return `<img src="${emoticonUrl}" alt="${match}" class="inline-block h-6" />`;
+    //     }
 
-        const stickerUrl = stickersMap[match as keyof typeof stickersMap];
-        if (stickerUrl) {
-          return `<img src="${stickerUrl}" alt="${match}" class="inline-block h-16 w-16" />`;
-        }
+    //     const stickerUrl = stickersMap[match as keyof typeof stickersMap];
+    //     if (stickerUrl) {
+    //       return `<img src="${stickerUrl}" alt="${match}" class="inline-block h-16 w-16" />`;
+    //     }
 
-        return match;
-      });
-    };
+    //     return match;
+    //   });
+    // };
+
+
+const formatMessageContent = (content: string): string => {
+  const emoticonRegex = /:([\w]+):/g;
+  const formatted = content.replace(emoticonRegex, (match) => {
+    const emojiUrl = emojisMap[match as keyof typeof emojisMap];
+    if (emojiUrl) {
+      return `<img src="${emojiUrl}" alt="${match}" class="inline-block h-6" />`;
+    }
+    const emoticonUrl = emoticonsMap[match as keyof typeof emoticonsMap];
+    if (emoticonUrl) {
+      return `<img src="${emoticonUrl}" alt="${match}" class="inline-block h-6" />`;
+    }
+    const stickerUrl = stickersMap[match as keyof typeof stickersMap];
+    if (stickerUrl) {
+      return `<img src="${stickerUrl}" alt="${match}" class="inline-block h-16 w-16" />`;
+    }
+    return match;
+  });
+  
+	// Sanitize the final HTML
+	return DOMPurify.sanitize(formatted, {
+		ALLOWED_TAGS: ['img'],
+		ALLOWED_ATTR: ['src', 'alt', 'class']
+	});
+};
 
     const renderMessages = () => {
       if (!messages.length && activeUser) {
@@ -276,6 +303,8 @@ export const Chat = createComponent(
                   minute: "2-digit",
                   hour12: true,
                 });
+				// const messageContent = container.querySelector(".message-content")!
+				// messageContent.textContent = formatMessageContent(message.content)
 
                 return `
                   <div class="flex w-full ${isCurrentUser ? "justify-end" : "justify-start"}">
@@ -306,6 +335,7 @@ export const Chat = createComponent(
         })
         .join("");
     };
+
 
     const setupEventListeners = () => {
       const sendButton = container.querySelector("#send-button");

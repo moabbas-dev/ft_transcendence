@@ -283,7 +283,7 @@ export function setupWebSocketHandlers(wsAdapter, fastify) {
         nickname: toUser.nickname
       });
 
-      const recipientClientId = onlineUsers.get(toUser.id.toString());
+      const recipientClientId = onlineUsers.get(fromUser.id.toString());
       if (recipientClientId) {
         wsAdapter.sendTo(recipientClientId, "notification:new", {
           type: 'FRIEND_ACCEPTED',

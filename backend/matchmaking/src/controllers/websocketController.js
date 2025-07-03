@@ -295,7 +295,9 @@ function registerMessageHandlers(wsAdapter) {
       const winnerId = Number(winner);
       const player1 = await matchmakingService.getUserWithElo(player1Id);
       const player2 = await matchmakingService.getUserWithElo(player2Id);
-
+	  console.log("OOOOOO 1:", player1?.elo_score);
+	  console.log("OOOOOO 2:", player2?.elo_score);
+	  
       const player1OldElo = player1?.elo_score || 1000;
       const player2OldElo = player2?.elo_score || 1000;
 
@@ -352,6 +354,9 @@ function registerMessageHandlers(wsAdapter) {
       const player2MatchResult = player2Goals > player1Goals? 'win' : player1Goals === player2Goals? 'draw' : 'loss'
       await matchmakingService.updateUserStats(player1Id, matchId, player1OldElo, player1NewElo, player1MatchResult, player1Goals)
       await matchmakingService.updateUserStats(player2Id, matchId, player2OldElo, player2NewElo, player2MatchResult, player2Goals)
+
+	  matchmakingService.updateUserElo(player1Id, player1NewElo);
+	  matchmakingService.updateUserElo(player2Id, player2NewElo);
 
       console.log(`Match ${matchId} completed. Winner: ${winnerId}. ELO updates: P1 ${player1OldElo}->${player1NewElo} (${player1EloChange}), P2 ${player2OldElo}->${player2NewElo} (${player2EloChange})`);
     } catch (error) {

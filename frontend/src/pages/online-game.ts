@@ -201,6 +201,8 @@ export default {
 			currentOpponentId = data.opponent.id;
 			isPlayer1 = data.isPlayer1;
 			
+			console.log("KKKKKKKKKKKKKKKKKKKKK: ", data);
+			
 			showMatchFound(data.opponent);
 			client?.off('waiting_for_match', waitingForMatchHandler);
 		}
