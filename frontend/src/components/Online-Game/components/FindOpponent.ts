@@ -12,7 +12,7 @@ interface FindOpponentProps {
 
 export const FindOpponent = createComponent((props: FindOpponentProps) => {
 	const container = document.createElement('div');
-	container.className = 'w-full h-full flex flex-col items-center justify-center gap-8 py-8';
+	container.className = 'w-full h-full flex flex-col items-center justify-start sm:justify-center sm:gap-8 sm:py-8';
 	container.innerHTML = `
 	<div id="loading-online" class="max-[460px]:scale-75 md:scale-150"></div>
 	<p class="text-xl text-pongcyan drop-shadow-[0_0_5px_#00f7ff]">${t('play.onlineGame.searchingForRivals')}</p>
@@ -24,7 +24,7 @@ export const FindOpponent = createComponent((props: FindOpponentProps) => {
 
 	const showOpponentFound = (opponent: any) => {
 		container.innerHTML = `
-			<div class="w-full h-full flex flex-col items-center justify-center gap-6 py-8">
+			<div class="w-full h-full flex flex-col items-center justify-start sm:justify-center sm:gap-6 sm:py-8">
 				<div class="text-center">
 					<p class="text-2xl mb-4 text-pongcyan font-bold drop-shadow-[0_0_10px_#00f7ff]">${t('play.onlineGame.oponentFound')}</p>
 					<div class="flex items-center justify-center gap-4 mb-6 bg-black/40 p-6 border-2 border-pongcyan rounded-xl shadow-[0_0_15px_rgba(0,247,255,0.4)] animate-fade-up animate-once animate-duration-500">

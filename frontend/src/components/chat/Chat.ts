@@ -255,7 +255,7 @@ const formatMessageContent = (content: string): string => {
 
     const renderMessages = () => {
       if (!messages.length && activeUser) {
-        return `<div class="text-pongcyan text-center py-4 opacity-50">No messages yet</div>`;
+        return `<div class="text-pongcyan text-center py-4 opacity-50">${t('chat.noMessages')}</div>`;
       }
 
       const currentUserId = store.userId;

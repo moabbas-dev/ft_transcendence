@@ -9,7 +9,9 @@ export default {
 			leaderBoard: "Classement",
 			chat: "Chat",
 			search: "rechercher ici...",
-			noUsersFound: "Aucun utilisateur trouvé"
+			noUsersFound: "Aucun utilisateur trouvé",
+			noNotif: 'Aucune notification pour le moment !',
+
 		},
 		title: "Neon Pong",
 		tagline: "Affrontez • Chattez • Dominez<br>L'Expérience Pong Ultime vous attend !",
@@ -66,6 +68,17 @@ export default {
 			verifyBtn: "Vérifier",
 			back: "Retour à la connexion",
 		},
+		validation: {
+			email: "Entrez une adresse e-mail valide (ex: utilisateur@exemple.com)",
+			password: "Le mot de passe doit contenir au moins 8 caractères et inclure 1 majuscule, 1 minuscule et 1 caractère spécial.",
+			passNotMatch: "Les mots de passe ne correspondent pas.",
+			nickname: "Le pseudo doit contenir 3 à 16 caractères et ne peut contenir que des lettres, des chiffres, _ ou -",
+			fullName: "Le nom complet doit contenir au moins 3 caractères.",
+			fullName2: "Veuillez entrer exactement deux noms : prénom et nom de famille.",
+			fullName3: "Chaque nom doit contenir au moins 3 caractères.",
+			names: 'Les noms ne doivent contenir que des caractères alphabétiques.',
+			age: 'L\'âge doit être un nombre entre 1 et 100.',
+		},
 		or: "OU",
 		continueGoogle: "Continuer avec Google"
 	},
@@ -121,6 +134,7 @@ export default {
 			"myTournamentsTab": "Mes tournois",
 			"backToTournaments": "Retour aux tournois",
 			"loading": "Chargement des détails du tournoi...",
+			alert: 'Alerte de Tournoi',
 
 			"createTournament": {
 				"title": "Créer un nouveau tournoi",
@@ -237,6 +251,8 @@ export default {
 		errorLoadingRequests: "Erreur lors du chargement des demandes",
 		retry: "Réessayer",
 		typeMessage: "Taper votre message ici...",
+		noMessages: 'Aucun message pour le moment',
+		
 	},
 	profile: {
 		rank: "Rang : ",

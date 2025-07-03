@@ -9,7 +9,8 @@ export default {
 			leaderBoard: "Leaderboard",
 			chat: "Chat",
 			search: "search here...",
-			noUsersFound: "No users found"
+			noUsersFound: "No users found",
+			noNotif: 'No notifications yet!',
 		},
 		title: "Neon Pong",
 		tagline: "Compete • Chat • Dominate<br>The Ultimate Pong Experience Awaits!",
@@ -66,6 +67,17 @@ export default {
 			verifyBtn: "Verify",
 			back: "Back to sign In",
 		},
+		validation: {
+			email: "Enter a valid email address (e.g., user@example.com)",
+			password: "Password must be at least 8 characters and include 1 uppercase, 1 lowercase, and 1 special character.",
+			passNotMatch: "Passwords do not match.",
+			nickname: "Nickname must be 3-16 characters long and can only contain letters, numbers, _, or -",
+			fullName: "Full name must be at least 3 characters.",
+			fullName2: "Please enter exactly two names: first and last name.",
+			fullName3: "Each name must be at least 3 characters long.",
+			names: 'Names should only contain alphabetical characters.',
+			age: 'Age should be a number between 1 and 100.'
+		},
 		or: "OR",
 		continueGoogle: "Continue with google"
 	},
@@ -121,6 +133,7 @@ export default {
 			"myTournamentsTab": "My Tournaments",
 			"backToTournaments": "Back to Tournaments",
 			"loading": "Loading tournament details...",
+			alert: 'Tournament Alert',
 			
 			"createTournament": {
 			  "title": "Create New Tournament",
@@ -237,6 +250,7 @@ export default {
 		errorLoadingRequests: "Error loading requests",
 		retry: "Retry",
 		typeMessage: "Type your message...",
+		noMessages: 'No messages yet',
 	},
 	profile: {
 		rank: "Rank: ",

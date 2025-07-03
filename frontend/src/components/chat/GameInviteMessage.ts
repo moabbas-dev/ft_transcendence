@@ -13,6 +13,7 @@
 import { createComponent } from "../../utils/StateManager.js";
 import chatService from "../../utils/chatUtils/chatWebSocketService.js";
 import store from "../../../store/store.js";
+import { t } from "../../languages/LanguageController.js";
 
 export interface GameInviteMessageProps {
   messageId: string;
@@ -48,10 +49,10 @@ export const GameInviteMessage = createComponent((props: GameInviteMessageProps)
       ${isPending && isReceived ? `
         <div class="buttons flex space-x-2">
           <button class="accept-btn bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">
-            Accept
+            ${t('profile.socialTab.accept')}
           </button>
           <button class="decline-btn bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">
-            Decline
+            ${t('profile.socialTab.decline')}
           </button>
         </div>
       ` : `

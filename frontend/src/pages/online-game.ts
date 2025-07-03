@@ -21,8 +21,8 @@ export default {
 				<!-- Neon glow effects -->
 				<div class="absolute inset-0 bg-gradient-to-br from-transparent via-pongcyan/5 to-transparent opacity-20 z-5 pointer-events-none"></div>
 				
-				<div id="content" class="flex max-sm:flex-col max-sm:items-center max-sm:justify-around max-sm:py-4 flex-1 container mx-auto px-4 w-full text-white z-10 relative h-full">
-					<div class="flex flex-col items-center justify-center gap-5 sm:gap-10 w-full sm:w-1/2 py-8">
+				<div id="content" class="flex max-sm:flex-col max-sm:items-center max-sm:justify-start gap-4 max-sm:py-4 flex-1 container mx-auto px-4 w-full text-white z-10 relative h-full">
+					<div class="flex flex-col items-center justify-center gap-3 sm:gap-10 w-full sm:w-1/2 sm:py-8">
 						<h1 class="text-4xl md:text-5xl font-bold text-center text-pongcyan drop-shadow-[0_0_15px_#00f7ff] animate-fade-down animate-once animate-duration-700">
 							${t('play.title')}
 						</h1>
@@ -49,8 +49,8 @@ export default {
 						</div>
 					</div>
 					
-					<div id="game-mode-details" class="flex flex-col items-center justify-center gap-10 w-full sm:w-1/2 py-8">
-						<div class="relative w-full flex items-center justify-center">
+					<div id="game-mode-details" class="flex flex-col items-center justify-start sm:justify-center sm:gap-10 w-full sm:w-1/2 sm:py-8">
+						<div class="relative w-full flex items-center justify-start sm:justify-center">
 							<div class="animation-container relative w-full max-w-md">
 								<i id="icon-friends" class="fa-solid fa-users text-7xl md:text-8xl absolute top-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-100 bg-gradient-to-r from-pongcyan via-[rgba(100,100,255,0.8)] to-pongcyan text-transparent bg-clip-text"></i>
 								<span id="text-friends" class="text-3xl md:text-4xl text-center font-bold absolute top-1/4 left-1/2 -translate-x-1/2 transition-opacity duration-500 opacity-0">${t('play.onlineGame.vsFriend')}</span>
@@ -111,7 +111,7 @@ export default {
 				heading.className = "text-4xl md:text-5xl font-bold text-center text-pongcyan drop-shadow-[0_0_15px_#00f7ff]";
 				
 				gameModeDetails.innerHTML = `
-					<div class="flex flex-col items-center justify-center gap-6">
+					<div class="flex flex-col items-center justify-start sm:justify-center gap-6">
 						<h2 class="text-2xl text-pongcyan">Creating Friend Match...</h2>
 						<div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pongcyan"></div>
 						<p class="text-white">Setting up match with Player ${matchData.player1 === userId ? matchData.player2 : matchData.player1}</p>

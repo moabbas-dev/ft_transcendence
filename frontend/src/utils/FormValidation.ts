@@ -1,3 +1,5 @@
+import { t } from "../languages/LanguageController";
+
 function createErrorMessage(input: HTMLInputElement, message: string) {
 	if (input.nextElementSibling)
 		return ;
@@ -20,7 +22,7 @@ export function validateEmail(emailInput: HTMLInputElement) {
 	const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 	if (!emailRegex.test(email)) {
-		createErrorMessage(emailInput, "Enter a valid email address (e.g., user@example.com)");
+		createErrorMessage(emailInput, t('register.validation.email'));
 		return false;
 	} else {
 		removeErrorMessage(emailInput);
@@ -33,7 +35,7 @@ export function validatePassword(passwordInput: HTMLInputElement) {
 	const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
 
 	if (!passwordRegex.test(password)) {
-		createErrorMessage(passwordInput, "Password must be at least 8 characters and include 1 uppercase, 1 lowercase, and 1 special character.");
+		createErrorMessage(passwordInput, t('register.validation.password'));
 		return false;
 	} else {
 		removeErrorMessage(passwordInput);
@@ -46,7 +48,7 @@ export function validateConfirmPassword(passwordInput: HTMLInputElement, confirm
 	const confPassword = confirmPasswordInput.value;
 
 	if (password !== confPassword) {
-		createErrorMessage(confirmPasswordInput, "Passwords do not match.");
+		createErrorMessage(confirmPasswordInput, t('register.validation.passNotMatch'));
 		return false;
 	} else {
 		removeErrorMessage(confirmPasswordInput);
@@ -62,7 +64,7 @@ export function validateNickname(nicknameInput: HTMLInputElement) {
 	if (!nicknamePattern.test(nickname)) {
 	  createErrorMessage(
 		nicknameInput,
-		"Nickname must be 3-16 characters long and can only contain letters, numbers, _, or -"
+		t('register.validation.nickname')
 	  );
 	  return false;
 	}
@@ -75,26 +77,26 @@ export function validateFullName(fullNameInput: HTMLInputElement) {
 	const fullName = fullNameInput.value.trim();
 
 	if (fullName.length < 3) {
-		createErrorMessage(fullNameInput, "Full name must be at least 3 characters.");
+		createErrorMessage(fullNameInput, t('register.validation.fullName'));
 		return false;
 	} 
 	
 	const nameParts = fullName.split(/\s+/);
 	if (nameParts.length !== 2) {
-		createErrorMessage(fullNameInput, "Please enter exactly two names: first and last name.");
+		createErrorMessage(fullNameInput, t('register.validation.fullName2'));
 		return false;
 	}
 
 	for (const part of nameParts) {
 		if (part.length < 3) {
-		  createErrorMessage(fullNameInput, "Each name must be at least 3 characters long.");
+		  createErrorMessage(fullNameInput, t('register.validation.fullName3'));
 		  return false;
 		}
 	}
 
 	const nameRegex = /^[A-Za-z]+$/;
 	if (!nameRegex.test(nameParts[0]) || !nameRegex.test(nameParts[1])) {
-	  createErrorMessage(fullNameInput, "Names should only contain alphabetical characters.");
+	  createErrorMessage(fullNameInput, t('register.validation.names'));
 	  return false;
 	}
 
@@ -106,7 +108,7 @@ export function validateAge(ageInput: HTMLInputElement) {
 	const age = ageInput.value.trim();
 
 	if (age.length === 0 || isNaN(Number(age)) || Number(age) < 1 || Number(age) > 100) {
-		createErrorMessage(ageInput, "Age should be a number between 1 and 100.");
+		createErrorMessage(ageInput, t('register.validation.age'));
 		return false;
 	} else {
 		removeErrorMessage(ageInput);
