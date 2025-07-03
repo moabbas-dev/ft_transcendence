@@ -1,3 +1,4 @@
+import elo from '../services/elo.js';
 import matchmakingService from '../services/matchmaking.js';
 import { createWebSocketAdapter } from '../services/websocketAdapter.js';
 import { registerTournamentMessageHandlers } from './tournamentWsController.js';
@@ -347,6 +348,10 @@ function registerMessageHandlers(wsAdapter) {
         },
         eloChange: eloChanges
       });
+      const player1MatchResult = player1Goals > player2Goals? 'win' : player1Goals === player2Goals? 'draw' : 'loss'
+      const player2MatchResult = player2Goals > player1Goals? 'win' : player1Goals === player2Goals? 'draw' : 'loss'
+      await matchmakingService.updateUserStats(player1Id, matchId, player1OldElo, player1NewElo, player1MatchResult, player1Goals)
+      await matchmakingService.updateUserStats(player2Id, matchId, player2OldElo, player2NewElo, player2MatchResult, player2Goals)
 
       console.log(`Match ${matchId} completed. Winner: ${winnerId}. ELO updates: P1 ${player1OldElo}->${player1NewElo} (${player1EloChange}), P2 ${player2OldElo}->${player2NewElo} (${player2EloChange})`);
     } catch (error) {

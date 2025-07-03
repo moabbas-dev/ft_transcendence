@@ -276,7 +276,7 @@ class MatchmakingService {
      * @param {number} goals - The number of goals scored by the user
      * @returns {Promise<void>}
      */
-    async updateUserStats(playerId, newElo, result, goals) {
+    async updateUserStats(playerId, matchId, oldElo, newElo, result, goals) {
         try {
             let winIncrement = 0;
             let lossIncrement = 0;
@@ -307,6 +307,15 @@ class MatchmakingService {
                 WHERE id = ?`,
                 [newElo, winIncrement, lossIncrement, drawIncrement, goals, playerId]
             );
+
+            await db.run(`
+                UPDATE match_players SET 
+                elo_before = ?,
+                elo_after = ?,
+                goals = ?
+                WHERE player_id = ? AND match_id = ?`,
+                [oldElo, newElo, goals, playerId, matchId]
+            )
 
             console.log(`Updated stats for user ${playerId}: new ELO ${newElo}, result: ${result}, goals: ${goals}`);
         } catch (error) {
