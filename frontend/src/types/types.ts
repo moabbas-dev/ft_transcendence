@@ -1,5 +1,5 @@
 export interface Page {
-	render: (container: HTMLElement, params?: { [key: string]: string }) => void;
+	render: (container: HTMLElement, params?: { [key: string]: string }, state?: any) => void;
 }
 
 export type AIDifficulty = "easy" | "medium" | "hard";
@@ -13,3 +13,5 @@ export interface NotificationData {
 	created_at: Date;
 	is_read: boolean;
 }
+
+export type GameType = "AI" | "Local" | "online";

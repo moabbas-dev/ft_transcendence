@@ -3,15 +3,17 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        pongblue: "#0F6292",
-        pongdark: "rgb(17, 24, 39)",
+        pongcyan: "#00f7ff",
+        pongpink: "#ff00e4",
+        pongdark: "black",
         ponghover: "rgb(26, 36, 58)",
         // Podium colors
         gold: '#FFD700',
         silver: '#C0C0C0',
         bronze: '#CD7F32',
       },
-      boxShadow: {
+      dropShadow: {
+        pongcyan: '0 0 5px #00f7ff',
       },
       fontFamily: {
         flux: ["Flux", "sans-serif"],

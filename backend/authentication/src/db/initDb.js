@@ -20,9 +20,12 @@ const createTables = () => {
 					full_name TEXT NOT NULL,
 					age INT,
 					country TEXT,
+					language TEXT DEFAULT 'en' CHECK (language IN ('en', 'fr', 'ar')),
 					status TEXT NOT NULL DEFAULT 'offline' CHECK (status IN ('offline', 'online', 'in_game')),
 					elo INTEGER NOT NULL DEFAULT 1000,
-					avatar_url TEXT DEFAULT 'https://localhost:8001/uploads/binary.jpg',
+					wins INTEGER DEFAULT 0,
+  					losses INTEGER DEFAULT 0,
+					avatar_url TEXT DEFAULT '/authentication/uploads/binary.png',
 					google_id TEXT UNIQUE,
 					is_2fa_enabled BOOLEAN DEFAULT 0,
 					is_active BOOLEAN DEFAULT 0,
@@ -32,6 +35,7 @@ const createTables = () => {
 				);`,
 		`CREATE TABLE IF NOT EXISTS Sessions (
 					id INTEGER PRIMARY KEY AUTOINCREMENT,
+					uuid TEXT NOT NULL UNIQUE,
 					user_id INTEGER NOT NULL,
 					access_token TEXT,
 					refresh_token TEXT,
@@ -46,7 +50,7 @@ const createTables = () => {
 					user_id INTEGER NOT NULL,
 					activation_token TEXT NOT NULL UNIQUE,
 					token_type TEXT NOT NULL CHECK (token_type IN ('account_activation', 'reset_password')),
-					expires_at TIMESTAMP NOT NULL DEFAULT (DATETIME('now' + '24 hours')),
+					expires_at TIMESTAMP NOT NULL DEFAULT (DATETIME('now', '+24 hours')),
 					created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 					FOREIGN KEY (user_id) REFERENCES Users(id)
 				);`
@@ -59,27 +63,6 @@ const createTables = () => {
 	});
 };
 
-// Cleanup expired sessions from the Sessions table
-const cleanupExpiredSessions = () => {
-	const query = `
-	  DELETE FROM Sessions
-	  WHERE expires_at < DATETIME('now')
-		AND refresh_expires_at < DATETIME('now')
-		AND DATETIME('now') > DATETIME(expires_at, '+1 hour');
-	`;
-	db.run(query, function (err) {
-		if (err) {
-			console.error('Error cleaning up expired sessions:', err);
-		} else {
-			console.log('Expired sessions cleaned up successfully');
-		}
-	});
-};
-
-// Periodically clean up expired sessions every 10 minutes
-setInterval(cleanupExpiredSessions, 10 * 60 * 1000); // 10 minutes
-
-// Graceful shutdown handling
 const closeDatabase = () => {
 	return new Promise((resolve, reject) => {
 		db.close(err => {

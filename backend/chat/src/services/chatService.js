@@ -1,5 +1,5 @@
 import { getDatabase } from "../db/initDB.js";
-
+import { getUserFromAuth } from './userService.js'
 /**
  * Save a message in the database
  * @param {Object} message - The message object
@@ -12,17 +12,19 @@ export async function saveMessage(message, roomId) {
   try {
     await db.run('BEGIN TRANSACTION');
 
-    // Insert the message
     await db.run(
-      `INSERT INTO messages (id, room_id, sender_id, content, timestamp, read_status) 
-      VALUES (?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO messages (id, room_id, sender_id, receiver_id, content, timestamp, read_status, message_type, extra_data) 
+      VALUES (?, ?, ?, ?,?, ?, ?, ?, ?)`,
       [
         message.id,
         roomId,
-        message.from,
+        message.senderId,
+        message.receiverId,
         message.content,
         message.timestamp,
-        message.read_status || 0
+        message.read_status || 0,
+        message.messageType || null,
+        message.gameInviteData ? JSON.stringify(message.gameInviteData) : null
       ]
     );
 
@@ -50,9 +52,12 @@ export async function getMessages(roomId, limit = 1000) {
       `SELECT 
         id, 
         sender_id as senderId, 
+        receiver_id as receiverId,
         content, 
         timestamp,
         read_status,
+        message_type,
+        extra_data,
         created_at as createdAt 
        FROM messages 
        WHERE room_id = ? 
@@ -61,11 +66,12 @@ export async function getMessages(roomId, limit = 1000) {
       [roomId, limit]
     );
 
-    // Convert SQLite timestamp strings to JS timestamps
     return messages.map(message => ({
       ...message,
       createdAt: new Date(message.createdAt).getTime(),
-      timestamp: parseInt(message.timestamp)
+      timestamp: parseInt(message.timestamp),
+      messageType: message.message_type,
+      gameInviteData: message.extra_data ? JSON.parse(message.extra_data) : undefined
     }));
 
   } catch (error) {
@@ -74,56 +80,42 @@ export async function getMessages(roomId, limit = 1000) {
   }
 }
 
-// ///////////////////////////////////////////////////////
-
-
 /**
  * Get the count of unread messages for a user
  * @param {number} userId - The ID of the user
  * @returns {Promise<Object>} - Returns an object with unread message counts per user
  */
-
-// // working on displayin the un-read messages  
-// // ⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️⬇️
-
-// ///////////////////////////////////////////////////////
-
-// export async function getUnreadMessageCount(userId) {
-//   const db = await getDatabase();
+export async function getUnreadMessageCount(userId) {
+  const db = await getDatabase();
   
-//   // Get all rooms the user is part of
-//   const rooms = await db.all(
-//     `SELECT room_id FROM room_participants WHERE user_id = ?`,
-//     [userId]
-//   );
+  const rooms = await db.all(
+    `SELECT room_id FROM room_participants WHERE user_id = ?`,
+    [userId]
+  );
   
-//   const unreadCounts = {};
+  const unreadCounts = {};
   
-//   // For each room, count unread messages
-//   for (const room of rooms) {
-//     const roomId = room.room_id;
+  for (const room of rooms) {
+    const roomId = room.room_id;
     
-//     // Get the other participant in this room
-//     const otherUser = await db.get(
-//       `SELECT user_id FROM room_participants 
-//        WHERE room_id = ? AND user_id != ?`,
-//       [roomId, userId]
-//     );
+    const otherUser = await db.get(
+      `SELECT user_id FROM room_participants 
+       WHERE room_id = ? AND user_id != ?`,
+      [roomId, userId]
+    );
     
-//     if (otherUser) {
-//       // Count unread messages from the other user
-//       const count = await db.get(
-//         `SELECT COUNT(*) as count FROM messages 
-//          WHERE room_id = ? AND sender_id != ? AND read_status = 0`,
-//         [roomId, userId]
-//       );
+    if (otherUser) {
+      const count = await db.get(
+        `SELECT COUNT(*) as count FROM messages 
+         WHERE room_id = ? AND sender_id != ? AND read_status = 0`,
+        [roomId, userId]
+      );
       
-//       unreadCounts[otherUser.user_id] = count.count;
-//     }
-//   }
-  
-//   return unreadCounts;
-// }
+      unreadCounts[otherUser.user_id] = count.count;
+    }
+  }
+  return unreadCounts;
+}
 
 /**
  * Mark all messages in a room as read for a user
@@ -131,16 +123,113 @@ export async function getMessages(roomId, limit = 1000) {
  * @param {number} userId - The ID of the user marking messages as read
  * @returns {Promise<boolean>} - Returns true if messages were successfully marked as read
  */
-// // Add a function to mark messages as read
-// export async function markMessagesAsRead(roomId, userId) {
-//   const db = await getDatabase();
+export async function markMessagesAsRead(roomId, userId) {
+  const db = await getDatabase();
   
-//   await db.run(
-//     `UPDATE messages 
-//      SET read_status = 1 
-//      WHERE room_id = ? AND sender_id != ?`,
-//     [roomId, userId]
-//   );
+  await db.run(
+    `UPDATE messages 
+     SET read_status = 1 
+     WHERE room_id = ? AND sender_id != ?`,
+    [roomId, userId]
+  );
   
-//   return true;
-// }
+  return true;
+}
+
+
+/**
+ * Get all message requests from non-friends
+ * @param {number} userId - The ID of the user to check for
+ * @returns {Promise<Array>} - Array of users who have sent messages but aren't friends
+ */
+export async function getMessageRequests(userId) {
+  try {
+    const db = await getDatabase();
+
+    // Get all rooms where the user is a participant
+    const rooms = await db.all(
+      `SELECT rp.room_id
+       FROM room_participants rp
+       WHERE rp.user_id = ?`,
+      [userId]
+    );
+
+    const messageRequests = [];
+
+    // For each room, check if it's with a non-friend
+    for (const room of rooms) {
+      const roomId = room.room_id;
+
+      // Get the other user in this chat room
+      const otherUser = await db.get(
+        `SELECT user_id FROM room_participants
+         WHERE room_id = ? AND user_id != ?`,
+        [roomId, userId]
+      );
+
+      if (!otherUser) continue;
+
+      // Check if they are friends
+      const isFriend = await db.get(
+        `SELECT 1 FROM friends
+         WHERE user_id = ? AND friend_id = ?`,
+        [userId, otherUser.user_id]
+      );
+
+      // If not friends, add to requests
+      if (!isFriend) {
+        // Get user details
+        const userDetails = await getUserFromAuth(otherUser.user_id);
+
+        if (userDetails) {
+          messageRequests.push({
+            user: userDetails,
+          });
+        }
+      }
+    }
+
+    return messageRequests;
+
+  } catch (error) {
+    console.error("Error getting message requests:", error);
+    throw new Error(`Failed to get message requests: ${error.message}`);
+  }
+}
+
+/**
+ * Creates a chat room and adds users as participants.
+ *
+ * Ensures the chat room and participant entries exist. Uses transactions for consistency.
+ *
+ * @param {string} roomId - The ID of the chat room.
+ * @param {Array<number>} participants - List of user IDs to include in the room.
+ * @returns {Promise<boolean>} - Returns true on success, throws on failure.
+*/
+export async function createChatRoom(roomId, participants) {
+  const db = await getDatabase();
+
+  try {
+    await db.run('BEGIN TRANSACTION');
+
+    await db.run(
+      `INSERT OR IGNORE INTO chat_rooms (id) VALUES (?)`,
+      [roomId]
+    );
+
+    for (const userId of participants) {
+      await db.run(
+        `INSERT OR IGNORE INTO room_participants (room_id, user_id) VALUES (?, ?)`,
+        [roomId, userId]
+      );
+    }
+
+    await db.run('COMMIT');
+    return true;
+
+  } catch (error) {
+    await db.run('ROLLBACK');
+    console.error('Error creating chat room:', error);
+    throw new Error('Failed to create chat room');
+  }
+};

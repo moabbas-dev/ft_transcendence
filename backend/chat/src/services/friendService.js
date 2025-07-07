@@ -11,7 +11,6 @@ export async function createFriendRequest(fromUser, toUser) {
   const db = await getDatabase();
   
   try {
-    // First, check if a request already exists in either direction
     const existingRequest = await db.get(
       `SELECT 1 FROM friend_requests 
        WHERE (from_user = ? AND to_user = ?) 
@@ -19,7 +18,6 @@ export async function createFriendRequest(fromUser, toUser) {
       [fromUser, toUser, toUser, fromUser]
     );
 
-    // Check if they are already friends
     const existingFriendship = await db.get(
       `SELECT 1 FROM friends 
        WHERE (user_id = ? AND friend_id = ?) 
@@ -35,7 +33,6 @@ export async function createFriendRequest(fromUser, toUser) {
       throw new Error('Friend request already exists');
     }
 
-    // Insert the friend request
     await db.run(
       `INSERT INTO friend_requests (from_user, to_user) VALUES (?, ?)`,
       [fromUser, toUser]
@@ -114,7 +111,6 @@ export async function removeFriend(userId, friendId) {
   const db = await getDatabase();
   
   try {
-    // Remove friendship in both directions
     await db.run(
       `DELETE FROM friends 
        WHERE (user_id = ? AND friend_id = ?) 
@@ -137,8 +133,10 @@ export async function removeFriend(userId, friendId) {
  */
 export async function getFriendshipStatus(userId, friendId) {
   const db = await getDatabase();
+
+  userId   = Number(userId);
+  friendId = Number(friendId);
   
-  // First check if they are friends
   const isFriend = await db.get(
     `SELECT 1 FROM friends 
      WHERE (user_id = ? AND friend_id = ?)
@@ -153,14 +151,13 @@ export async function getFriendshipStatus(userId, friendId) {
     };
   }
 
-  // Check for pending requests
   const request = await db.get(
     `SELECT from_user, to_user FROM friend_requests 
      WHERE (from_user = ? AND to_user = ?)
         OR (from_user = ? AND to_user = ?)`,
     [userId, friendId, friendId, userId]
   );
-
+  console.log(request, "userId:", userId, "friendId:", friendId);
   if (request) {
     return {
       status: 'pending',
@@ -169,7 +166,6 @@ export async function getFriendshipStatus(userId, friendId) {
     };
   }
 
-  // No relationship
   return { status: 'none' };
 }
 
@@ -185,7 +181,6 @@ export async function getPendingFriendRequests(userId) {
     [userId]
   );
 
-  // Get user details for each request
   const requestIds = requests.map((r) => r.from_user);
   return await getUsersFromAuth(requestIds);
 }

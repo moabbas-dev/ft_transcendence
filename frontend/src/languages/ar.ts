@@ -1,21 +1,30 @@
 export default {
+	statusOn: "متصل",
+	statusOf: "غير متصل",
+	viewProfile: "عرض الملف",
+	logout: "تسجيل الخروج",
 	home: {
 		header: {
 			play: "العب",
 			leaderBoard: "لوحة المتصدرين",
 			chat: "الدردشة",
 			search: "ابحث هنا...",
-			noUsersFound: "لم يتم العثور على مستخدمين"
+			noUsersFound: "لم يتم العثور على مستخدمين",
+			noNotif: 'لا توجد إشعارات بعد!',
+
 		},
 		title: "Neon Pong",
 		tagline: "تنافس • دردش • سيطر<br>تجربة البونج النهائية تنتظرك!",
 		register: "سجل الآن!",
 		playAI: "العب ضد الذكاء الاصطناعي",
 		playLocaly: "العب محليًا",
+		startTournament: "إنشاء بطولة",
+		playOnline: "العب عبر الإنترنت",
+		chatWithFriends: "الدردشة مع الأصدقاء",
 		footer: {
 			developed: "طور بواسطة",
 			rights: "جميع حقوق الملكية الفكرية محفوظة."
-		}
+		},
 	},
 	register: {
 		signin: {
@@ -57,6 +66,19 @@ export default {
 			title: "المصادقة الثنائية",
 			info: "أدخل الرمز المكون من 6 أرقام من تطبيق المصادقة الخاص بك",
 			verifyBtn: "تحقق",
+			back: "العودة لتسجيل الدخول"
+		},
+		validation: {
+			email: "أدخل عنوان بريد إلكتروني صالح (مثل: user@example.com)",
+			password: "يجب أن تحتوي كلمة المرور على 8 أحرف على الأقل وتشمل حرفاً كبيراً وحرفاً صغيراً ورمزاً خاصاً",
+			passNotMatch: "كلمتا المرور غير متطابقتين",
+			nickname: "يجب أن يحتوي اسم المستخدم على 3-16 حرفاً ويمكن أن يحتوي فقط على أحرف وأرقام و _ أو -",
+			fullName: "يجب أن يحتوي الاسم الكامل على 3 أحرف على الأقل",
+			fullName2: "يرجى إدخال اسمين بالضبط: الاسم الأول واسم العائلة",
+			fullName3: "يجب أن يحتوي كل اسم على 3 أحرف على الأقل",
+			names: 'يجب أن تحتوي الأسماء على أحرف أبجدية فقط',
+			age: 'يجب أن يكون العمر رقماً بين 1 و 100',
+			
 		},
 		or: "أو",
 		continueGoogle: "المتابعة باستخدام جوجل"
@@ -71,6 +93,7 @@ export default {
 		tournamentInfo: "تنافس في بطولة إقصائية",
 		online: "العب عبر الإنترنت",
 		onlineInfo: "تحدى اللاعبين حول العالم",
+		tapToSelect: "اضغط للاختيار",
 		localAI: {
 			difficultyPopup: {
 				title: "اختر الصعوبة",
@@ -93,44 +116,107 @@ export default {
 			searchingForRivals: "جاري البحث عن خصوم...",
 			oponentFound: "تم العثور على خصم!",
 			cancel: "إلغاء",
+			invite: "دعوة",
+			positionInQueue: "الموقع في الصف",
+			playAgain: "العب مجددًا",
+			youWon: "انتصرت!",
+			youLost: "خسرت!",
+			finalScore: "النتيجة النهائية",
+			eloChange: "تغير التقييم",
+			opponent: "الخصم",
+			opponentElo: "تقييم الخصم",
+			startingIn: "سيبدأ في",
+			matchFound: "تم العثور على مباراة!",
 		},
-		tournaments: {
-			joinBtn: "انضم إلى البطولة",
-			createBtn: "إنشاء بطولة",
-			join: "ادخل الساحة",
-			create: "إطلاق المعركة",
-			createTournament: {
-				title: "بطولة نيون بونغ",
-				submitTitle: "إرسال",
-				nameTooshort: "الاسم قصير جداً",
-				nameToolong: "الاسم طويل جداً",
-				waiting: "بانتظار اللاعبين",
-				launch: "إطلاق البطولة",
-				players: "اللاعبين",
-				waitingRoom: "غرفة الانتظار",
-				currentParticipants: "اللاعبين الحاليين",
-				remove: "إزالة",
-				rank: "الترتيب:",
-				leaveTournament: "مغادرة البطولة",
-				tournamentStart: "تبدأ البطولة عندما",
-				tournamentStartContinue: "ينضم لاعبون",
-				waitingForPlayers: "بانتظار اللاعب...",
-				bracket: "التصنيف",
-				tournamentBracket: "تصنيف البطولة",
-				round: "الجولة",
-				final: "النهائي",
-				startSoon: "سيبدأ قريباً",
-				matchCompleted: "انتهت المباراة",
-				info: "مدة المباراة: 5 دقائق أو أول من يسجل 10 أهداف",
-				TBD: "لم يحدد بعد",
-				results: "النتائج",
-				tournamentResults: "نتائج البطولة",
-				pts: "نقاط",
-				first: "الأول",
-				second: "الثاني",
-				third: "الثالث",
+		"tournaments": {
+			"title": "البطولات",
+			"createTab": "إنشاء بطولة",
+			"joinTab": "الانضمام إلى بطولة",
+			"myTournamentsTab": "بطولاتي",
+			"backToTournaments": "العودة إلى البطولات",
+			"loading": "جارٍ تحميل تفاصيل البطولة...",
+			alert: 'تنبيه البطولة',
+
+			"createTournament": {
+				"title": "إنشاء بطولة جديدة",
+				"name": "اسم البطولة",
+				"namePlaceholder": "أدخل اسم البطولة",
+				"nameError": "يجب أن يكون اسم البطولة 3 أحرف على الأقل",
+				"playerCount": "عدد اللاعبين",
+				"players": "اللاعبون",
+				"createButton": "إنشاء البطولة",
+				"creating": "جارٍ الإنشاء...",
+				"waitingRoom": "غرفة الانتظار",
+				"currentParticipants": "المشاركون الحاليون",
+				"tournamentStart": "ستبدأ البطولة عند",
+				"tournamentStartContinue": "انضمام اللاعبين",
+				"startTournament": "بدء البطولة",
+				"leaveTournament": "مغادرة البطولة",
+				"leaveConfirmation": "هل أنت متأكد أنك تريد مغادرة هذه البطولة؟",
+				"leaveError": "فشل في مغادرة البطولة. حاول مرة أخرى.",
+				"waitingForPlayers": "في انتظار اللاعبين...",
+				"rank": "الترتيب",
+				"round": "الجولة",
+				"final": "النهائي",
+				"matchCompleted": "اكتملت المباراة",
+				"startSoon": "ستبدأ المباراة قريبًا",
+				"TBD": "لم يُحدد بعد",
+				"pts": "نقطة"
 			},
-		},		
+
+			"joinTournament": {
+				"loading": "جارٍ تحميل البطولات...",
+				"searchPlaceholder": "ابحث عن البطولات...",
+				"noTournaments": "لا توجد بطولات متاحة",
+				"registering": "جارٍ التسجيل",
+				"inProgress": "قيد التنفيذ",
+				"join": "انضمام",
+				"full": "ممتلئة"
+			},
+
+			"inTournament": {
+				"clickToViewMatch": "انقر على مباراة لعرض التفاصيل. ستصبح المباريات قابلة للعب عند دورك.",
+				"tournamentInProgress": "البطولة جارية",
+				"status": "الحالة",
+				"matchDetails": "تفاصيل المباراة",
+				"vs": "ضد",
+				"winner": "الفائز",
+				"tbd": "لم يُحدد بعد",
+				"viewFinalBrackets": "عرض الجدول النهائي"
+			},
+
+			"myTournaments": {
+				"loading": "جارٍ تحميل بطولاتك...",
+				"noTournaments": "لا توجد بطولات متاحة",
+				"createOrJoin": "أنشئ أو انضم إلى بطولة لبدء اللعب!",
+			},
+
+			"matchNotification": {
+				"title": "مباراة البطولة جاهزة!",
+				"message": "مباراة البطولة التالية جاهزة للبدء.",
+				"elo": "تقييم ELO",
+				"accept": "قبول المباراة"
+			},
+
+			"matchResult": {
+				"victory": "انتصار!",
+				"defeat": "هزيمة",
+				"you": "أنت",
+				"eloChange": "تغير التقييم",
+				"continue": "متابعة"
+			},
+			"TournamentResults": {
+				"tournamentResults": "نتائج البطولة",
+				"tournamentCompleted": "اكتملت البطولة",
+				"tournamentFinished": "انتهت البطولة",
+				"inProgress": "قيد التنفيذ",
+				"completed": "مكتملة",
+				"first": "الأول",
+				"second": "الثاني",
+				"third": "الثالث"
+			}
+		},
+
 		paused: "اللعبة متوقفة",
 		resultsPopup: {
 			title: "يفوز!",
@@ -138,26 +224,48 @@ export default {
 			playAgain: "العب مجددًا",
 		},
 		game: "اللعبة",
-		player: "اللاعب"
+		player: "اللاعب",
+		unranked: "غير مصنّف",
+		"unknownPlayer": "لاعب غير معروف",
+		"ai": "الذكاء الاصطناعي"
 	},
 	leaderBoard: {
 		title: "الأبطال",
 		rank: "المرتبة",
 		player: "اللاعب",
-		wins: "الانتصارات",
+		wins: "مرّات الفوز",
 		score: "النقاط"
 	},
 	chat: {
 		nochat: "اختر محادثة",
 		friends: "الأصدقاء",
+		messageRequests: "طلبات الرسائل",
 		loadingFriends: "جاري تحميل الأصدقاء...",
+		loadingRequests: "جاري تحميل المحادثات...",
+		noFriends: "لا يوجد أصدقاء بعد",
+		noFriendsFound: "لم يتم العثور على أصدقاء",
+		noRequests: "لا يوجد طلبات للدردشة",
+		searchFriends: "ابحث عن أصدقاء...",
+		searchRequests: "ابحث عن طلبات الدردشة...",
+		on: "متصل",
+		off: "غير متصل",
+		errorLoadingFriends: "خطأ في تحميل الأصدقاء",
+		errorLoadingRequests: "خطأ في تحميل المحادثات",
+		retry: "إعادة تحميل",
+		typeMessage: "اكتب رسالتك هنا...",
+		noMessages: 'لا توجد رسائل بعد',
+
 	},
 	profile: {
 		rank: "المرتبة: ",
 		message: "رسالة",
-		add: "إضافة", 
+		add: "إضافة",
+		removeFriend: "إزالة الصديق",
 		block: "حظر",
+		unblock: "الغاء الحظر",
+		requestSent: "تم إرسال الطلب",
 		infoTab: {
+			nickname: "الاسم المستعار:",
 			title: "المعلومات",
 			fullname: "الاسم الكامل:",
 			age: "العمر:",
@@ -170,6 +278,9 @@ export default {
 			saveBtn: "حفظ",
 		},
 		statisticsTab: {
+			EloProgression: "تطوّر التقييم",
+			monthly: "الانتصارات مقابل الهزائم الشهرية",
+			overall: "معدل الفوز الإجمالي",
 			title: "الإحصائيات",
 		},
 		historyTab: {
@@ -182,7 +293,37 @@ export default {
 			win: "فوز",
 			lose: "خسارة",
 			draw: "تعادل",
+			trophies: "الكؤوس",
+			showing: "إظهار",
+			of: "من",
+			matches: "مباريات",
+			oneVsOne: "واحد ضد واحد",
+			friendly: "العاب الصديق",
+			tournament: "البطولة"
 		},
+		socialTab:
+		{
+			title: "اجتماعي",
+			friends: "الأصدقاء",
+			friendRequests: "طلبات الصداقة",
+			blockedUsers: "الأعضاء المحظورون",
+			loadingFriendReq: "جاري تحميل طلبات الصداق...",
+			noPendingReq: "لا توجد طلبات صداقة معلقة",
+			noBlocks: "لم تقم بحظر أي مستخدم.",
+			failedToLoad: "فشل في تحميل قائمة الأصدقاء",
+			noFriends: "لم يتم العثور على أصدقاء",
+			friendRemoved: "تم حذف الصديق بنجاح",
+			search: "ابحث عن الأصدقاء...",
+			confirmRemoveFriend: "هل تريد إزالة هذا الصديق من قائمتك؟",
+			accept: "قبول",
+			decline: "رفض",
+			unblock: "إلغاء الحظر",
+			blockedOn: "تم الحظر في",
+			oneVoneMatches: "مباريات فردية",
+			friendlyMatches: "مباريات ودية",
+			tournamentsMatches: "مباريات البطولة",
+
+		}
 	},
 	about: {
 		title: "فريق التطوير",
@@ -201,5 +342,22 @@ export default {
 		online: "متصل",
 		offline: "غير متصل",
 		inGame: "في لعبة",
-	}
+	},
+	time: {
+		ago: "منذ {number} {unit}",
+		second: "ثانية",
+		seconds: "ثواني", 
+		minute: "دقيقة",
+		minutes: "دقائق",
+		hour: "ساعة",
+		hours: "ساعات",
+		day: "يوم", 
+		days: "أيام",
+		week: "أسبوع",
+		weeks: "أسابيع", 
+		month: "شهر",
+		months: "أشهر",
+		year: "سنة",
+		years: "سنوات"
+	},
 };

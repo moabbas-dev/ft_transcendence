@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   AIDifficultyPopup.ts                               :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: afarachi <afarachi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/22 15:26:44 by afarachi          #+#    #+#             */
+/*   Updated: 2025/06/22 15:26:44 by afarachi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 import { createComponent } from "../../../utils/StateManager.js";
 import { AIDifficulty } from "../../../types/types.js";
 import { t } from "../../../languages/LanguageController.js";
@@ -33,16 +45,14 @@ export const DifficultyPopup = createComponent((props: DifficultyPopupProps) => 
   `;
 
 	const selectDifficulty = (difficulty: AIDifficulty) => {
-		// Add exit animation
 		const popupContent = container.querySelector("div");
 		if (popupContent) {
 		popupContent.className = "animate-fadeOut";
 		}
 
-		// Delay removal to allow animation to complete
 		setTimeout(() => {
 		props.onSelect(difficulty);
-		container.remove(); // Remove popup after selection
+		container.remove();
 		}, 50);
 	};
 

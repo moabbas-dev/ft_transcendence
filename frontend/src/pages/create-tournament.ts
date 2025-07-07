@@ -9,11 +9,11 @@ export default {
         container.className = "flex flex-col h-dvh bg-pongdark"
         container.innerHTML = `
             <div class="profile"></div>
-            <div class="header bg-pongblue w-full h-fit"></div>
+            <div class="header bg-bal w-full h-fit"></div>
             <div class="w-full overflow-x-hidden overflow-y-auto">
             <div id="content" class="flex flex-col flex-1 container mx-auto px-4 gap-6 w-full text-white py-6">
                 <!-- Tournament Status Bar -->
-                <div id="tournament-status" class="bg-gradient-to-r from-pongblue to-[rgba(100,100,255,0.8)] rounded-lg p-4 shadow-lg">
+                <div id="tournament-status" class="bg-gradient-to-r from-pongcyan to-[rgba(100,100,255,0.8)] rounded-lg p-4 shadow-lg">
                     <div class="flex justify-between items-center flex-wrap gap-4">
                         <div class="flex flex-col flex-1 gap-2">
                             <div class="flex flex-wrap items-center gap-2">
@@ -58,8 +58,8 @@ export default {
 
                 <!-- Tournament Content Tabs -->
                 <div>
-                    <div class="flex max-sm:justify-center gap-4 border-b border-pongblue">
-                        <button id="tab-waiting" class="px-2 sm:px-4 py-1 sm:py-2 text-lg font-medium border-b-2 border-pongblue">${t('play.tournaments.createTournament.waitingRoom')}</button>
+                    <div class="flex max-sm:justify-center gap-4 border-b border-pongcyan">
+                        <button id="tab-waiting" class="px-2 sm:px-4 py-1 sm:py-2 text-lg font-medium border-b-2 border-pongcyan">${t('play.tournaments.createTournament.waitingRoom')}</button>
                         <button id="tab-bracket" class="px-2 sm:px-4 py-1 sm:py-2 text-lg font-medium text-gray-300">${t('play.tournaments.createTournament.bracket')}</button>
                         <button id="tab-results" class="px-2 sm:px-4 py-1 sm:py-2 text-lg font-medium text-gray-300">${t('play.tournaments.createTournament.results')}</button>
                     </div>
@@ -226,7 +226,7 @@ export default {
         function switchTab(activeTab: HTMLElement | null, activeContent: HTMLElement | null) {
             // Reset all tabs
             [tabBracket, tabWaiting, tabResults].forEach(tab => {
-                tab?.classList.remove('border-b-2', 'border-pongblue');
+                tab?.classList.remove('border-b-2', 'border-pongcyan');
                 tab?.classList.add('text-gray-300');
             });
 
@@ -238,7 +238,7 @@ export default {
 
             // Activate selected tab
             activeTab?.classList.remove('text-gray-300');
-            activeTab?.classList.add('border-b-2', 'border-pongblue');
+            activeTab?.classList.add('border-b-2', 'border-pongcyan');
 
             // Show selected content
             activeContent?.classList.remove('hidden');
@@ -262,14 +262,12 @@ export default {
                 { userId: '8', username: '8th Player', avatarUrl: '', place: 8, score: 5 },
             ];
             
-            // Render the results tab content
             renderResultsTab(container, sampleResults);
         });
 
         const leaveButton = document.getElementById('leave-tournament');
         leaveButton?.addEventListener('click', () => {
             alert('Leaving tournament...');
-            // Here you would typically make an API call to leave the tournament
         });
     }
 };

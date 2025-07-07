@@ -1,14 +1,15 @@
 import { getDatabase } from "../db/initDB.js";
 import axios from "axios";
 
-
-// Configure authentication service API URL
-const AUTH_API_URL = "https://localhost:8001";
-
-// Helper function to get user from auth service API
+/**
+ * Fetches user information from the authentication service using user ID.
+ *
+ * @param {number|string} userId - The ID of the user to fetch.
+ * @returns {Promise<object|null>} - The user data or null if not found.
+*/
 export async function getUserFromAuth(userId) {
   try {
-    const response = await axios.get(`${AUTH_API_URL}/auth/users/id/${userId}`);
+    const response = await axios.get(`http://authentication:8001/auth/users/id/${userId}`);
     return response.data;
   } catch (error) {
     console.error(
@@ -19,9 +20,15 @@ export async function getUserFromAuth(userId) {
   }
 }
 
+/**
+ * Fetches a user from the authentication service using their username (nickname).
+ *
+ * @param {string} username - The nickname/username of the user to look up.
+ * @returns {Promise<object|null>} - The user data or null if not found.
+*/
 export async function getUserByUsername(username) {
   try {
-    const response = await axios.get(`${AUTH_API_URL}/auth/users/username/${username}`);
+    const response = await axios.get(`http://authentication:8001/auth/users/nickname/${username}`);
     return response.data;
   } catch (error) {
     console.error(`Error fetching user ${username}:`, error.message);
@@ -29,14 +36,17 @@ export async function getUserByUsername(username) {
   }
 }
 
-// Get multiple users from auth service API
+/**
+ * Fetches a list of users by their IDs from the authentication service.
+ *
+ * @param {Array<number>} userIds - List of user IDs to fetch.
+ * @returns {Promise<Array<object>>} - List of user data.
+*/
 export async function getUsersFromAuth(userIds) {
   if (!userIds || userIds.length === 0) return [];
 
   try {
-    // Get all users and filter locally - this could be optimized with a
-    // custom endpoint in the auth service that accepts multiple IDs
-    const response = await axios.get(`${AUTH_API_URL}/auth/users`);
+    const response = await axios.get(`http://authentication:8001/auth/users`);
     const allUsers = response.data;
     return allUsers.filter((user) => userIds.includes(user.id));
   } catch (error) {
@@ -45,6 +55,14 @@ export async function getUsersFromAuth(userIds) {
   }
 }
 
+/**
+ * Retrieves a user by ID, along with their friends, pending friend requests, and blocked users.
+ *
+ * Combines data from the authentication service and local database.
+ *
+ * @param {number} userId - The ID of the user to fetch.
+ * @returns {Promise<object|null>} - A full user profile with friends and blocked users.
+*/
 export async function getUser(userId) {
   const db = await getDatabase();
   const user = await getUserFromAuth(userId);
@@ -64,15 +82,12 @@ export async function getUser(userId) {
     [userId]
   );
 
-  // Get friend details from auth service
   const friendIds = friends.map((f) => f.friend_id);
   const friendDetails = await getUsersFromAuth(friendIds);
 
-  // Get pending request details from auth service
   const pendingIds = pendingRequests.map((p) => p.from_user);
   const pendingDetails = await getUsersFromAuth(pendingIds);
 
-  // Get blocked user details from auth service
   const blockedIds = blockedUsers.map((b) => b.blocked_id);
   const blockedDetails = await getUsersFromAuth(blockedIds);
 
@@ -82,18 +97,29 @@ export async function getUser(userId) {
     pendingFriends: pendingDetails,
     blockedUsers: blockedDetails,
   };
-}
+};
 
+/**
+ * Fetches all users from the authentication service.
+ *
+ * @returns {Promise<Array<object>>} - A list of all users.
+*/
 export async function getAllUsers() {
   try {
-    const response = await axios.get(`${AUTH_API_URL}/auth/users`);
+    const response = await axios.get(`http://authentication:8001/auth/users`);
     return response.data;
   } catch (error) {
     console.error("Error fetching all users from auth service:", error.message);
     return [];
   }
-}
+};
 
+/**
+ * Retrieves a list of pending friend requests sent to the given user.
+ *
+ * @param {number} userId - The ID of the user receiving friend requests.
+ * @returns {Promise<Array<object>>} - List of requests from other users.
+*/
 export async function getPendingFriendRequests(userId) {
   const db = await getDatabase();
   const requests = await db.all(
@@ -101,41 +127,8 @@ export async function getPendingFriendRequests(userId) {
     [userId]
   );
   return requests;
-}
-
-// In chatService.js
-export async function createChatRoom(roomId, participants) {
-  const db = await getDatabase();
-  
-  try {
-    await db.run('BEGIN TRANSACTION');
-
-    // 1. Create the chat room if it doesn't exist
-    await db.run(
-      `INSERT OR IGNORE INTO chat_rooms (id) VALUES (?)`,
-      [roomId]
-    );
-
-    // 2. Add participants to the room
-    for (const userId of participants) {
-      await db.run(
-        `INSERT OR IGNORE INTO room_participants (room_id, user_id) VALUES (?, ?)`,
-        [roomId, userId]
-      );
-    }
-
-    await db.run('COMMIT');
-    return true;
-    
-  } catch (error) {
-    await db.run('ROLLBACK');
-    console.error('Error creating chat room:', error);
-    throw new Error('Failed to create chat room');
-  }
-}
+};
 
 export async function createOrUpdateUser(userData) {
-  // This is a placeholder since user creation is handled by auth service
-  // We might add local caching or other functionality here if needed
   return userData;
 }

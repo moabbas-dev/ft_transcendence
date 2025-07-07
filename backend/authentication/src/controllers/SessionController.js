@@ -12,9 +12,9 @@ class SessionController {
 	}
 
 	static async getSessionById(request, reply) {
-		const { id } = request.params;
+		const { uuid } = request.params;
 		try {
-			const session = await Session.getById(id);
+			const session = await Session.getByUUID(uuid);
 			if (!session) reply.code(404).send({ message: 'Session not found!' });
 			else reply.code(200).send(session);
 		} catch (err) {
@@ -23,9 +23,9 @@ class SessionController {
 	}
 
 	static async deleteSession(request, reply) {
-		const { id } = request.params;
+		const { uuid } = request.params;
 		try {
-			const changes = await Session.deleteById(id);
+			const changes = await Session.deleteByUUID(uuid);
 			if (changes == 0) reply.code(404).send({ message: 'Session not found!' });
 			else reply.code(200).send({ message: 'Session deleted succesfully!' });
 		} catch (err) {

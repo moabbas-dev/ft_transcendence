@@ -3,10 +3,14 @@ import fastifyCors from "@fastify/cors";
 import { registerWebSocketAdapter } from "./src/services/WebSocketAdapter.js";
 import { setupWebSocketHandlers } from "./src/controllers/websocketController.js";
 import { initDatabase, closeDatabase } from "./src/db/initDB.js";
+import fs from 'fs'
+import { auth } from './src/middlewares/auth.js'
 
 const fastify = Fastify({
-  logger: true,
-});
+	logger: true,
+})
+
+fastify.addHook("preHandler", auth);
 
 fastify.register(fastifyCors, {
   origin: true,
@@ -18,7 +22,6 @@ fastify.get("/", async (request, reply) => {
   return { status: "Chat microservice running" };
 });
 
-// Initialize the database
 const setupDatabase = async () => {
   try {
     await initDatabase();
@@ -32,7 +35,7 @@ const setupDatabase = async () => {
 const start = async () => {
   try {
     await setupDatabase();
-    await fastify.listen({ port: 3002, host: "0.0.0.0" });
+    await fastify.listen({ port: 3002, host: "::" });
 
     const wsAdapter = registerWebSocketAdapter(fastify);
     setupWebSocketHandlers(wsAdapter, fastify);
@@ -44,7 +47,6 @@ const start = async () => {
   }
 };
 
-// Handle server shutdown
 const closeGracefully = async (signal) => {
   fastify.log.info(`Received ${signal}, closing HTTP server and database connection`);
   
@@ -54,7 +56,6 @@ const closeGracefully = async (signal) => {
   process.exit(0);
 };
 
-// Listen for shutdown signals
 process.on('SIGINT', () => closeGracefully('SIGINT'));
 process.on('SIGTERM', () => closeGracefully('SIGTERM'));
 

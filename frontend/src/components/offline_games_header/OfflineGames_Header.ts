@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   OfflineGames_Header.ts                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: afarachi <afarachi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/22 15:26:08 by afarachi          #+#    #+#             */
+/*   Updated: 2025/06/22 15:26:08 by afarachi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 import { createComponent } from "../../utils/StateManager.js";
 import playerPic from "/src/assets/afarachi.jpg";
 import player2Pic from "/src/assets/moabbas.jpg";
@@ -8,22 +20,20 @@ import {
   initBackgrounds,
 } from "./HeaderAnimations_utils.js";
 
-// Explicitly import all AI images
 import aiPic1 from "/src/assets/ai/pic1.jpg";
 import aiPic2 from "/src/assets/ai/pic2.jpg";
 import aiPic3 from "/src/assets/ai/pic3.jpg";
 import aiPic4 from "/src/assets/ai/pic4.jpg";
 import aiPic5 from "/src/assets/ai/pic5.jpg";
+import { t } from "../../languages/LanguageController.js";
 
 interface GameHraderProps {
   gameMode: string;
   keyScores: string;
 }
 
-// Store AI images in an array
 const aiImages = [aiPic1, aiPic2, aiPic3, aiPic4, aiPic5];
 
-// Function to select a random AI image
 const getRandomAIImage = () =>
   aiImages[Math.floor(Math.random() * aiImages.length)];
 
@@ -35,19 +45,16 @@ export const PlayerHeader = createComponent((props: GameHraderProps) => {
     border border-yellow-500 md:border-2
   `;
 
-  // Create and add particles
   const particleContainer = createParticles();
   container.appendChild(particleContainer);
 
   const dividerContainer = createDivider();
   container.appendChild(dividerContainer);
 
-  // Main content container
   const content = document.createElement("div");
   content.className =
     "rounded-lg md:rounded-2xl relative z-30 grid grid-cols-3 items-center w-full px-2 sm:px-4 md:px-8";
 
-  // Create HTML structure
   content.innerHTML = `
     <!-- Player 1 Info -->
     <div class="flex items-center gap-1 sm:gap-2 md:gap-4 justify-self-start">
@@ -55,7 +62,7 @@ export const PlayerHeader = createComponent((props: GameHraderProps) => {
         <img src="${playerPic}" alt="Player 1" class="w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 rounded-full border border-blue-300 md:border-2">
       </div>
       <div>
-        <p class="font-bold text-sm sm:text-base md:text-xl text-blue-200">${props.gameMode === "ai" ? "Player" : "Player 1"}</p>
+        <p class="font-bold text-sm sm:text-base md:text-xl text-blue-200">${props.gameMode === "ai" ? t("play.player") : `${t("play.player")} 1`}</p>
         <div class="flex items-center">
           <p id="player-score1" class="text-lg sm:text-xl md:text-2xl font-bold relative">
             <span class="relative z-10 text-white">0</span>
@@ -83,7 +90,7 @@ export const PlayerHeader = createComponent((props: GameHraderProps) => {
     <!-- Player 2 Info -->
     <div class="flex items-center gap-1 sm:gap-2 md:gap-4 justify-self-end">
       <div class="text-right">
-        <p class="font-bold text-sm sm:text-base md:text-xl text-red-200">${props.gameMode === "ai" ? "AI" : "Player 2"}</p>
+        <p class="font-bold text-sm sm:text-base md:text-xl text-red-200">${props.gameMode === "ai" ? t("play.ai") : `${t("play.player")} 2`}</p>
         <div class="flex items-center justify-end">
           <p id="player-score2" class="text-lg sm:text-xl md:text-2xl font-bold relative">
             <span class="relative z-10 text-white">0</span>
@@ -98,12 +105,10 @@ export const PlayerHeader = createComponent((props: GameHraderProps) => {
     </div>
   `;
 
-  // Append the player frame to the avatar container after content is added to DOM
   container.appendChild(content);
   initBackgrounds(container);
 
   if (props.keyScores === "aiPongScores") {
-    // Load scores from Local Storage
     const savedScores = localStorage.getItem("aiPongScores");
     if (savedScores) {
       const { player, ai } = JSON.parse(savedScores);
@@ -115,7 +120,6 @@ export const PlayerHeader = createComponent((props: GameHraderProps) => {
       updateBackgrounds(event.detail.player, event.detail.ai);
     });
   } else if (props.keyScores === "pongScores") {
-    // Load scores from Local Storage
     const savedScores = localStorage.getItem("pongScores");
     if (savedScores) {
       const { player1, player2 } = JSON.parse(savedScores);

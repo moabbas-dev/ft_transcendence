@@ -1,59 +1,80 @@
-import { formatDistanceToNow } from "date-fns";
 import { createComponent } from "../../utils/StateManager.js";
 import { NotificationProps } from "./Notification.js";
+import { Profile } from "../profile/UserProfile.js";
 import axios from "axios";
+import { formatTimestamp } from "../../utils/formatTime.js";
+import { formatDistanceToNow } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 
 export const FriendRequestNotification = createComponent((props: NotificationProps) => {
-    const fetchSenderNickname = async (senderId:number) => {
-		try {
-			const response = await axios.get(`https://localhost:8001/auth/users/id/${senderId}`)
-			return response.data
-		} catch(err) {
-			console.error(err);
-			return null
-		}
-	}	
-    
+    console.log(props.senderId);
+    console.log(props.recipientId);
+
+    const fetchSenderNickname = async (senderId: number) => {
+        try {
+            const response = await axios.get(`/authentication/auth/users/id/${senderId}`)
+            return response.data
+        } catch (err) {
+            console.error(err);
+            return null
+        }
+    }
+
     const notification = document.createElement('li');
-    notification.className = 'w-full flex flex-col gap-1 text-black border-b bg-blue-50';
-    
+    notification.className = 'flex items-center gap-2 sm:gap-3 p-2 sm:p-2.5 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 border-l-2 border-pongcyan hover:border-pongpink transition-all duration-300 hover:shadow-[0_0_15px_rgba(0,247,255,0.2)] group cursor-pointer min-w-0 w-full max-w-full';
+
     notification.innerHTML = `
-        <div class="flex justify-between items-center">
-            <span class="text-lg font-bold">System</span>
-            <div class="flex items-center gap-2">
-                ${!props.is_read? '<div class="size-1.5 bg-red-600 rounded-full"></div>' : ''}
-                <span class="text-sm text-gray-600">${formatDistanceToNow(props.created_at, { addSuffix: false })}</span>
+        <div class="flex-shrink-0">
+            <div class="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-pongcyan to-pongpink rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(0,247,255,0.3)] group-hover:shadow-[0_0_15px_rgba(255,0,228,0.3)] transition-all duration-300">
+                <i class="fas fa-user-plus text-white text-xs sm:text-sm group-hover:scale-110 transition-transform duration-300"></i>
             </div>
         </div>
-        <div class="flex flex-col">
-            <p class="text-gray-700">
-                <span id="sender-name" class="text-pongblue font-semibold hover:cursor-pointer hover:underline hover:opacity-90">Loading...</span>
-                Sent you a friend request
+        
+        <div class="flex-grow min-w-0 overflow-hidden">
+            <div class="flex items-center justify-between mb-1 flex-wrap sm:flex-nowrap gap-1">
+                <h4 class="text-pongcyan font-semibold text-xs tracking-wide uppercase flex-shrink-0">Friend Request</h4>
+                <div class="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+                    ${!props.is_read ? `
+                        <div class="w-1.5 h-1.5 bg-pongpink rounded-full animate-pulse shadow-[0_0_6px_rgba(255,0,228,0.5)] flex-shrink-0"></div>
+                    ` : ''}
+                </div>
+            </div>
+            
+            <p class="text-xs sm:text-sm text-white leading-snug break-words overflow-hidden">
+                <a id="sender-name" class="text-pongcyan font-medium hover:text-pongpink transition-colors duration-200 hover:cursor-pointer break-all hover:underline focus:outline-none focus:ring-2 focus:ring-pongcyan focus:ring-opacity-50 rounded-sm">
+                    Loading...
+                </a>
+                <span class="text-gray-300 ml-1">sent you a friend request</span>
             </p>
-            <div class="flex justify-between gap-2">
-                <button class="accept-btn w-1/2 bg-green-500 text-white py-1 rounded hover:bg-green-600 transition-colors">Accept</button>
-                <button class="decline-btn w-1/2 bg-red-500 text-white py-1 rounded hover:bg-red-600 transition-colors">Decline</button>
-            </div>
         </div>
-        <div class="h-[0.1rem]"></div>
     `;
 
-	fetchSenderNickname(props.senderId).then(data => {
-		if (data) {
-			const senderName = notification.querySelector('#sender-name')!
-			senderName.textContent = data.nickname
-		}
-	});
+    fetchSenderNickname(props.senderId).then(data => {
+        if (data) {
+            const senderName = notification.querySelector('#sender-name')! as HTMLAnchorElement;
+            senderName.textContent = data.nickname;
 
-    const acceptBtn = notification.querySelector('.accept-btn')!;
-    const declineBtn = notification.querySelector('.decline-btn')!;
+            senderName.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log(`Clicked on user: ${data.nickname} (ID: ${props.senderId})`);
+                const profileComponent = Profile({ uName: data.nickname });
+                document.body.appendChild(profileComponent);
+            });
 
-    acceptBtn.addEventListener('click', () => {
-
+            senderName.classList.add('animate-pulse');
+            setTimeout(() => {
+                senderName.classList.remove('animate-pulse');
+                senderName.classList.add('drop-shadow-[0_0_8px_rgba(0,247,255,0.3)]');
+            }, 1000);
+        }
     });
 
-    declineBtn.addEventListener('click', () => {
-        
+    notification.addEventListener('mouseenter', () => {
+        notification.style.transform = 'translateX(2px)';
+    });
+
+    notification.addEventListener('mouseleave', () => {
+        notification.style.transform = 'translateX(0)';
     });
 
     return notification;

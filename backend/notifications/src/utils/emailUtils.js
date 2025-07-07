@@ -1,4 +1,6 @@
-const nodemailer = require("nodemailer");
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
+dotenv.config()
 
 const transporter = nodemailer.createTransport({
 	host: process.env.SMTP_HOST,
@@ -8,6 +10,7 @@ const transporter = nodemailer.createTransport({
 		user: process.env.SMTP_USER,
 		pass: process.env.SMTP_PASS,
 	},
+
 });
 
 /**
@@ -17,7 +20,9 @@ const transporter = nodemailer.createTransport({
  * @param {string} text Plain text body
  * @param {string} html html HTML body
  */
-async function sendEmail(to, subject, text = null, html) {
+export async function sendEmail(to, subject, text = null, html) {
+	console.log(to);
+	console.log(subject);
 	try {
 		const info = await transporter.sendMail({
 			from: process.env.EMAIL_FROM,
@@ -29,9 +34,7 @@ async function sendEmail(to, subject, text = null, html) {
 		console.log(`Email sent:, ${info.messageId}`);
 		return info;
 	} catch (error) {
-		console.error("Error sending email:", error);
+		console.error("Error sending email message:", error);
 		throw error;
 	}
 }
-
-module.exports = { sendEmail };

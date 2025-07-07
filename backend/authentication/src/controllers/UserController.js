@@ -5,7 +5,6 @@ const saltRounds = 10;
 const SECRET_KEY = process.env.JWT_SECRET_KEY;
 const { validateEmail, validatePassword, validateNickname, validateFullName, validateAge, capitalizeFullName } = require('../utils/validationUtils');
 const UserToken = require('../models/UserToken');
-const { v4: uuidv4 } = require('uuid');
 const axios = require('axios');
 
 class UserController {
@@ -13,15 +12,18 @@ class UserController {
 	static async createUser(request, reply) {
 		const { email, password, nickname, full_name, age, country, google_id } = request.body;
 		const activationEmailHtml = (activationToken, full_name) => {
+			const host = request.headers.host.split(':')[0];
+			const protocol = request.headers['x-forwarded-proto'] || 'https';
 			return `
 				<div>
 					<h1>Welcome ${full_name} to our website!</h1>
 					<p>Please click on the link below to activate your account</p>
-					<p>${process.env.BACKEND_DOMAIN}/auth/activate/${activationToken}</p>
+					${protocol}://${host}:4443/authentication/auth/activate/${activationToken}
 					<p>Have a nice day!</p>
 				</div>
 			`;
 		}
+		console.log(JSON.stringify(request.body, null, 2));
 		try {
 			if (!validateEmail(email))
 				return reply.code(400).send({ message: "Invalid email address!" });
@@ -39,10 +41,13 @@ class UserController {
 			const activationToken = crypto.randomUUID();
 			await UserToken.create({ userId, activationToken, tokenType: "account_activation" });
 			try {
-				await axios.post(`https://localhost:8000/notifications/email/${userId}`, {
-					email: email,
-					subject: "New account is here!",
-					body: activationEmailHtml(activationToken, full_name),
+				await axios.post(`http://notifications:3003/api/notifications/email`, {
+					recipientId: userId,
+					content: {
+						subject: "New account is here!",
+						email,
+						body: activationEmailHtml(activationToken, full_name)
+					}
 				});
 
 				return reply.code(201).send({ userId });
@@ -178,6 +183,97 @@ class UserController {
 			}
 		} catch (err) {
 			reply.code(500).send({ message: 'Error deleting the user', error: err.message });
+		}
+	}
+
+	static async patchUser(request, reply) {
+		const activationEmailHtml = (activationToken, email, full_name) => {
+			// Get the host from the request headers
+			const host = request.headers.host.split(':')[0]; // Remove port if present
+			const protocol = request.headers['x-forwarded-proto'] || 'https';
+			return `
+				<div>
+					<h1>Welcome ${full_name} to our website!</h1>
+					<p>After updating your email to ${email}, please click on the link below to activate your account</p>
+					${protocol}://${host}:4443/authentication/auth/activate/${activationToken}
+					<p>Have a nice day!</p>
+				</div>
+			`;
+		}
+		try {
+			const { id } = request.params;
+			const updates = Object.keys(request.body);
+			const allowedUpdates = ['nickname', 'full_name', 'age', 'country', 'email', 'language'];
+			const isValidOperation = updates.every((update) => allowedUpdates.includes(update));
+			const authHeader = request.headers.authorization;
+			if (!authHeader || !authHeader.startsWith('Bearer '))
+				return reply.status(401).send({ error: 'Unauthorized: No token provided' });
+			const accessToken = authHeader.split(' ')[1];
+			let decoded;
+			try {
+				decoded = request.server.jwt.verify(accessToken, SECRET_KEY);
+			} catch (err) {
+				if (err.name === 'TokenExpiredError')
+					return reply.code(401).send({ message: "Access token expired!" });
+				return reply.code(401).send({ message: "Invalid access token" });
+			}
+			if (!isValidOperation) {
+				return reply.code(400).send({ message: 'Invalid updates!' });
+			}
+			if (decoded.userId != id)
+				return reply.code(403).send({ message: "Token does not belong to this user!" });
+			const user = await User.findById(id);
+			if (!user)
+				return reply.code(404).send({ message: "User not found!" });
+			const { email, nickname, full_name, age, country, language } = request.body;
+			if (typeof language !== 'undefined' && !['en', 'fr', 'ar'].includes(language))
+				return reply.code(400).send({ message: "Invalid language! Must be 'en', 'fr', or 'ar'" });		
+			if (typeof email !== 'undefined' && !validateEmail(email))
+				return reply.code(400).send({ message: "Invalid email address!" });
+			if (typeof nickname !== 'undefined' && !validateNickname(nickname))
+				return reply.code(400).send({ message: "Invalid nickname!" });
+			if (typeof full_name !== 'undefined' && !validateFullName(full_name))
+				return reply.code(400).send({ message: "Invalid full name!" });
+			if (typeof age !== 'undefined' && !validateAge(Number(age)))
+				return reply.code(400).send({ message: "Invalid age!" });
+			if (typeof country !== 'undefined' && !country)
+				return reply.code(400).send({ message: "Invalid country!" });
+
+			const updateData = {};
+			if (email !== undefined) updateData.email = email;
+			if (nickname !== undefined) updateData.nickname = nickname;
+			if (full_name !== undefined) updateData.full_name = capitalizeFullName(full_name);
+			if (age !== undefined) updateData.age = age;
+			if (country !== undefined) updateData.country = country;
+			if (language !== undefined) updateData.language = language;
+			if (updateData.email !== undefined) {
+				const activationToken = crypto.randomUUID();
+				await UserToken.create({ userId: id, activationToken, tokenType: "account_activation" });
+				try {
+					const fullName = typeof full_name !== 'undefined' ? full_name : user.full_name;
+					await axios.post(`http://notifications:3003/api/notifications/email`, {
+						recipientId: id,
+						content: {
+							subject: "Activating your account due to email changing",
+							email,
+							body: activationEmailHtml(activationToken, updateData.email, fullName)
+						}
+					});
+				} catch (err) {
+					return reply.code(500).send({ message: "Error sending email request!", error: err.message });
+				}
+			}
+			const changes = await User.updateProfile(id, updateData);
+			if (changes == 0)
+				reply.code(404).send({ message: 'User not found!' });
+			else
+				reply.code(200).send({ message: 'User updated successfully!' });
+		} catch (err) {
+			if (err.message.includes('Users.nickname'))
+				return reply.code(409).send({ key: "nickname", message: "Nickname is already in use!", error: err.message });
+			if (err.message.includes('Users.email'))
+				return reply.code(409).send({ key: "email", message: "Email is already in use!", error: err.message });
+			reply.code(500).send({ message: 'Error Editing User info', error: err.message });
 		}
 	}
 }

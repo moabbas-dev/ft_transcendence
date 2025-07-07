@@ -1,21 +1,30 @@
 export default {
+	statusOn: "en ligne",
+	statusOf: "hors ligne",
+	viewProfile: "Voir le profil",
+	logout: "Déconnexion",
 	home: {
 		header: {
 			play: "Jouer",
 			leaderBoard: "Classement",
 			chat: "Chat",
 			search: "rechercher ici...",
-			noUsersFound: "Aucun utilisateur trouvé"
+			noUsersFound: "Aucun utilisateur trouvé",
+			noNotif: 'Aucune notification pour le moment !',
+
 		},
 		title: "Neon Pong",
 		tagline: "Affrontez • Chattez • Dominez<br>L'Expérience Pong Ultime vous attend !",
 		register: "S'inscrire maintenant !",
 		playAI: "Jouer contre l'IA",
 		playLocaly: "Jouer en local",
+		startTournament: "Créer un tournoi",
+		playOnline: "Jouer en ligne",
+		chatWithFriends: "Discuter avec des amis",
 		footer: {
 			developed: "Développé par",
 			rights: "Tous droits de propriété intellectuelle réservés."
-		}
+		},
 	},
 	register: {
 		signin: {
@@ -56,7 +65,19 @@ export default {
 		twoFactor: {
 			title: "Authentification à deux facteurs",
 			info: "Entrez le code à 6 chiffres de votre application d'authentification",
-			verifyBtn: "Vérifier"
+			verifyBtn: "Vérifier",
+			back: "Retour à la connexion",
+		},
+		validation: {
+			email: "Entrez une adresse e-mail valide (ex: utilisateur@exemple.com)",
+			password: "Le mot de passe doit contenir au moins 8 caractères et inclure 1 majuscule, 1 minuscule et 1 caractère spécial.",
+			passNotMatch: "Les mots de passe ne correspondent pas.",
+			nickname: "Le pseudo doit contenir 3 à 16 caractères et ne peut contenir que des lettres, des chiffres, _ ou -",
+			fullName: "Le nom complet doit contenir au moins 3 caractères.",
+			fullName2: "Veuillez entrer exactement deux noms : prénom et nom de famille.",
+			fullName3: "Chaque nom doit contenir au moins 3 caractères.",
+			names: 'Les noms ne doivent contenir que des caractères alphabétiques.',
+			age: 'L\'âge doit être un nombre entre 1 et 100.',
 		},
 		or: "OU",
 		continueGoogle: "Continuer avec Google"
@@ -71,6 +92,7 @@ export default {
 		tournamentInfo: "Participez à un tournoi à élimination directe",
 		online: "Multijoueur en ligne",
 		onlineInfo: "Affrontez des joueurs du monde entier",
+		tapToSelect: "Appuyez pour sélectionner",
 		localAI: {
 			difficultyPopup: {
 				title: "CHOISIR LA DIFFICULTÉ",
@@ -93,44 +115,106 @@ export default {
 			searchingForRivals: "Recherche de rivaux...",
 			oponentFound: "Adversaire trouvé !",
 			cancel: "Annuler",
+			invite: "Inviter",
+			positionInQueue: "Position dans la file d'attente",
+			playAgain: "Rejouer",
+			youWon: "Vous avez gagné !",
+			youLost: "Vous avez perdu !",
+			finalScore: "Score final",
+			eloChange: "Changement d'ELO",
+			opponent: "Adversaire",
+			opponentElo: "ELO de l'adversaire",
+			startingIn: "Démarrage dans",
+			matchFound: "Match trouvé !",
 		},
-		tournaments: {
-			joinBtn: "Rejoindre un tournoi",
-			createBtn: "Créer un tournoi",
-			join: "Entrer dans l'arène",
-			create: "Lancer la bataille",
-			createTournament: {
-				title: "Tournoi Neon Pong",
-				submitTitle: "Soumettre",
-				nameTooshort: "Le nom est trop court",
-				nameToolong: "Le nom est trop long",
-				waiting: "En attente des joueurs",
-				launch: "Lancer le tournoi",
-				players: "Joueurs",
-				waitingRoom: "Salle d'attente",
-				currentParticipants: "Joueurs actuels",
-				remove: "Supprimer",
-				rank: "Rang :",
-				leaveTournament: "Quitter le tournoi",
-				tournamentStart: "Le tournoi commence lorsque",
-				tournamentStartContinue: "les joueurs rejoignent",
-				waitingForPlayers: "En attente d'un joueur...",
-				bracket: "Tableau",
-				tournamentBracket: "Tableau du tournoi",
-				round: "Tour",
-				final: "Finale",
-				startSoon: "Commence bientôt",
-				matchCompleted: "Match terminé",
-				info: "Durée du match : 5 minutes ou le premier à 10 buts",
-				TBD: "À déterminer",
-				results: "Résultats",
-				tournamentResults: "Résultats du tournoi",
-				pts: "pts",
-				first: "1er",
-				second: "2ème",
-				third: "3ème",
+		"tournaments": {
+			"title": "Tournois",
+			"createTab": "Créer un tournoi",
+			"joinTab": "Rejoindre un tournoi",
+			"myTournamentsTab": "Mes tournois",
+			"backToTournaments": "Retour aux tournois",
+			"loading": "Chargement des détails du tournoi...",
+			alert: 'Alerte de Tournoi',
+
+			"createTournament": {
+				"title": "Créer un nouveau tournoi",
+				"name": "Nom du tournoi",
+				"namePlaceholder": "Entrez le nom du tournoi",
+				"nameError": "Le nom du tournoi doit contenir au moins 3 caractères",
+				"playerCount": "Nombre de joueurs",
+				"players": "Joueurs",
+				"createButton": "Créer le tournoi",
+				"creating": "Création...",
+				"waitingRoom": "Salle d'attente",
+				"currentParticipants": "Participants actuels",
+				"tournamentStart": "Le tournoi commencera lorsque",
+				"tournamentStartContinue": "les joueurs auront rejoint",
+				"startTournament": "Démarrer le tournoi",
+				"leaveTournament": "Quitter le tournoi",
+				"leaveConfirmation": "Êtes-vous sûr de vouloir quitter ce tournoi ?",
+				"leaveError": "Échec de la sortie du tournoi. Veuillez réessayer.",
+				"waitingForPlayers": "En attente des joueurs...",
+				"rank": "Rang",
+				"round": "Manche",
+				"final": "Finale",
+				"matchCompleted": "Match terminé",
+				"startSoon": "Le match commencera bientôt",
+				"TBD": "À déterminer",
+				"pts": "pts"
 			},
-		},		
+
+			"joinTournament": {
+				"loading": "Chargement des tournois...",
+				"searchPlaceholder": "Rechercher des tournois...",
+				"noTournaments": "Aucun tournoi disponible",
+				"registering": "Inscription",
+				"inProgress": "En cours",
+				"join": "Rejoindre",
+				"full": "Complet"
+			},
+
+			"inTournament": {
+				"clickToViewMatch": "Cliquez sur un match pour voir les détails. Les matchs seront jouables lorsque ce sera votre tour.",
+				"tournamentInProgress": "Tournoi en cours",
+				"status": "Statut",
+				"matchDetails": "Détails du match",
+				"vs": "VS",
+				"winner": "Vainqueur",
+				"tbd": "À déterminer",
+				"viewFinalBrackets": "Voir le tableau final"
+			},
+
+			"myTournaments": {
+				"loading": "Chargement de vos tournois...",
+				"noTournaments": "Aucun tournoi disponible",
+				createOrJoin: "Créez ou rejoignez un tournoi pour commencer à jouer !"
+			},
+
+			"matchNotification": {
+				"title": "Match de tournoi prêt !",
+				"message": "Votre prochain match de tournoi est prêt à commencer.",
+				"elo": "ELO",
+				"accept": "Accepter le match"
+			},
+
+			"matchResult": {
+				"victory": "Victoire !",
+				"defeat": "Défaite",
+				"you": "Vous",
+				"eloChange": "Changement d'ELO",
+				"continue": "Continuer"
+			},
+			"TournamentResults": {
+				"tournamentResults": "Résultats du tournoi",
+				"tournamentCompleted": "Tournoi terminé",
+				"tournamentFinished": "Tournoi achevé",
+				"inProgress": "En cours",
+				"completed": "Terminé",
+				"first": "1er",
+				"second": "2e",
+				"third": "3e"
+			}
+		},
 		paused: "Jeu en pause",
 		resultsPopup: {
 			title: "Gagne !",
@@ -138,10 +222,13 @@ export default {
 			playAgain: "Rejouer"
 		},
 		game: "Partie",
-		player: "Joueur"
+		player: "Joueur",
+		unranked: "Non classé",
+		"unknownPlayer": "Joueur inconnu",
+		"ai": "IA"
 	},
 	leaderBoard: {
-		title: "Champions",
+		title: "Champions",	
 		rank: "Rang",
 		player: "Joueur",
 		wins: "Victoires",
@@ -150,19 +237,38 @@ export default {
 	chat: {
 		nochat: "Sélectionnez un chat",
 		friends: "Amis",
-		loadingFriends: "Chargement des amis..."
+		messageRequests: "Demandes de messages",
+		loadingFriends: "Chargement des amis...",
+		loadingRequests: "Chargement des demandes...",
+		noFriends: "Aucun ami",
+		noFriendsFound: "Aucun ami trouvé",
+		noRequests: "Aucune demande",
+		searchFriends: "Rechercher des amis...",
+		searchRequests: "Rechercher des demandes...",
+		on: "En ligne",
+		off: "Hors ligne",
+		errorLoadingFriends: "Erreur lors du chargement des amis",
+		errorLoadingRequests: "Erreur lors du chargement des demandes",
+		retry: "Réessayer",
+		typeMessage: "Taper votre message ici...",
+		noMessages: 'Aucun message pour le moment',
+		
 	},
 	profile: {
 		rank: "Rang : ",
 		message: "Message",
 		add: "Ajouter",
+		removeFriend: "Supprimer l'ami",
 		block: "Bloquer",
+		unblock: "Débloquer",
+		requestSent: "demande envoyée",
 		infoTab: {
+			nickname: "Surnom:",
 			title: "Infos",
-			fullname: "Nom complet :",
+			fullname: "Nom complet:",
 			age: "Âge :",
-			country: "Pays :",
-			memberSince: "Membre depuis :",
+			country: "Pays:",
+			memberSince: "Membre depuis:",
 			enable2fa: "Activer 2FA",
 			qrcodeScan: "Scannez ce code QR avec votre application d'authentification",
 			generating: "Génération en cours...",
@@ -170,6 +276,9 @@ export default {
 			saveBtn: "Sauvegarder"
 		},
 		statisticsTab: {
+			EloProgression: "Progression du classement ELO",
+			monthly: "Victoires vs Défaites mensuelles",
+			overall: "Taux de victoire global",
 			title: "Statistiques"
 		},
 		historyTab: {
@@ -181,7 +290,36 @@ export default {
 			duration: "DURÉE",
 			win: "Victoire",
 			lose: "Défaite",
-			draw: "Match nul"
+			draw: "Match nul",
+			trophies: "TROPHÉES",
+			showing: "Afficher",
+			of: "de",
+			matches: "matches",
+			oneVsOne: "1v1",
+			friendly: "Amical",
+			tournament: "Tournoi"
+		},
+		socialTab:
+		{
+			title: "sociale",
+			friends: "amis",
+			friendRequests: "Demandes d'amis",
+			blockedUsers: "utilisateurs bloqués",
+			loadingFriendReq: "Chargement des demandes d'ami...",
+			noPendingReq: "Aucune demande d'ami en attente",
+			noBlocks: "Vous n'avez bloqué aucun utilisateur.",
+			failedToLoad: "Échec du chargement des amis",
+			noFriends: "Aucun ami trouvé",
+			friendRemoved: "Ami supprimé avec succès",
+			search: "Rechercher des amis...",
+			confirmRemoveFriend: "Le retirer de votre liste d'amis ?",
+			accept: "Accepter",
+			decline: "Refuser",
+			unblock: "Débloquer",
+			blockedOn: "Bloqué le",
+			oneVoneMatches: "Matchs 1 contre 1",
+			friendlyMatches: "Matchs amicaux",
+			tournamentsMatches: "Matchs de tournoi",
 		}
 	},
 	about: {
@@ -201,5 +339,22 @@ export default {
 		online: "En ligne",
 		offline: "Hors ligne",
 		inGame: "En jeu",
+	},
+	time: {
+		ago: "il y a {number} {unit}",
+		second: "seconde",
+		seconds: "secondes",
+		minute: "minute",
+		minutes: "minutes",
+		hour: "heure",
+		hours: "heures",
+		day: "jour",
+		days: "jours",
+		week: "semaine",
+		weeks: "semaines",
+		month: "mois",
+		months: "mois",
+		year: "année",
+		years: "années"
 	}
 };  

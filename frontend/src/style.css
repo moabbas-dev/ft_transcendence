@@ -13,6 +13,14 @@
 	text-decoration: none;
 }
 
+.animation-delay-75 {
+	animation-delay: 0.075s;
+}
+  
+.animation-delay-150 {
+	animation-delay: 0.15s;
+}
+
 @font-face {
 	font-family: 'Flux';
 	src: url('/fonts/static/AfacadFlux-Regular.ttf') format('truetype');

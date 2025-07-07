@@ -32,18 +32,17 @@ class Toast {
         toast.id = toastId;
         toast.className = `toast ${type}`;
         
-        // Toast styles
         Object.assign(toast.style, {
-            minWidth: "350px", // Increased from 300px
-            maxWidth: "400px", // Increased from 350px
+            minWidth: "350px",
+            maxWidth: "400px",
             margin: "0 1em",
-            padding: "16px 24px", // Increased padding for better spacing
-            borderRadius: "6px", // Slightly larger border radius
+            padding: "16px 24px",
+            borderRadius: "6px",
             boxShadow: "0 1px 10px 0 rgba(0, 0, 0, 0.1), 0 2px 15px 0 rgba(0, 0, 0, 0.05)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            fontSize: "16px", // Increased font size from 14px
+            fontSize: "16px",
             fontFamily: "inherit",
             color: "#fff",
             opacity: "0",
@@ -55,20 +54,18 @@ class Toast {
             overflow: "hidden",
         });
 
-        // Progress bar styles
         Object.assign(progressBar.style, {
             position: "absolute",
             bottom: "0",
             left: "0",
             width: "100%",
-            height: "4px", // Slightly thicker progress bar
+            height: "4px",
             backgroundColor: "rgba(255, 255, 255, 0.4)",
             transformOrigin: "left",
             transform: "scaleX(1)",
             transition: `transform linear ${duration}ms`,
         });
 
-        // Type-specific styles
         const typeStyles = {
             success: { background: "#4CAF50" },
             warn: { background: "#FFA000" },
@@ -76,19 +73,17 @@ class Toast {
         };
         Object.assign(toast.style, typeStyles[type]);
 
-        // Message element
         const messageSpan = document.createElement("span");
         messageSpan.textContent = message;
         toast.appendChild(messageSpan);
 
-        // Close button
         const closeButton = document.createElement("button");
         closeButton.innerHTML = "&times;";
         Object.assign(closeButton.style, {
             border: "none",
             background: "transparent",
             color: "inherit",
-            fontSize: "24px", // Increased close button size
+            fontSize: "24px",
             cursor: "pointer",
             marginLeft: "20px",
             padding: "0",
@@ -96,7 +91,6 @@ class Toast {
             alignSelf: "flex-start",
         });
         
-        // Hover effects
         closeButton.onmouseenter = () => closeButton.style.opacity = "1";
         closeButton.onmouseleave = () => closeButton.style.opacity = "0.8";
         closeButton.onclick = () => this.removeToast(toast);
@@ -105,20 +99,17 @@ class Toast {
         toast.appendChild(progressBar);
         this.container.appendChild(toast);
 
-        // Animate in
         requestAnimationFrame(() => {
             toast.style.opacity = "1";
             toast.style.transform = "translateY(0)";
             progressBar.style.transform = "scaleX(0)";
         });
 
-        // Auto-dismiss
         let timeoutId: ReturnType<typeof setTimeout>;
         const startTimeout = () => {
             timeoutId = setTimeout(() => this.removeToast(toast), duration);
         };
 
-        // Pause on hover
         toast.addEventListener("mouseenter", () => {
             clearTimeout(timeoutId);
             progressBar.style.transition = "none";

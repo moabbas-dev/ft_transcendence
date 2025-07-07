@@ -2,13 +2,12 @@ const { db } = require('../db/initDb');
 const bcrypt = require('bcrypt');
 const Session = require('../models/Session');
 const User = require('../models/User');
-const SECRET_KEY = process.env.JWT_SECRET_KEY;
 const { generateTokens } = require('../utils/jwtUtils');
 const UserToken = require('../models/UserToken');
 const axios = require('axios');
 const { validatePassword, validateNickname, capitalizeFullName } = require('../utils/validationUtils');
-const { OAuth2Client } = require('google-auth-library');
-const client = new OAuth2Client(process.env.CLIENT_ID);
+
+const SECRET_KEY = process.env.JWT_SECRET_KEY;
 
 const authenticateUser = async (email, password) => {
 	const query = `SELECT * FROM Users WHERE email = ?`;
@@ -42,28 +41,59 @@ const authenticateUser = async (email, password) => {
 	});
 };
 
-async function verifyGoogleToken(idToken) {
-	const ticket = await client.verifyIdToken({
-		idToken: idToken,
-		audience: process.env.CLIENT_ID, // Must match your Google OAuth2 client ID
-	});
-	return ticket.getPayload();
-}
-
 const generateNickname = async (userId) => {
-	const randomString = Math.random().toString(36).substring(2, 7); // Generates a 5-letter string
+	const randomString = Math.random().toString(36).substring(2, 7);
 	const nickname = `user${userId}${randomString}`;
 
-	// Ensure it passes validation and is unique
 	if (!validateNickname(nickname) || await User.findByNickname(nickname)) {
-		return generateNickname(userId); // Retry if invalid or not unique
+		return generateNickname(userId);
 	}
 	return nickname;
 };
 
 class AuthController {
 
-	// Login a user
+	static async getCurrentUser(request, reply) {
+		try {
+			const refreshToken = request.cookies.refreshToken;
+			if (!refreshToken) {
+				return reply.code(401).send({ message: "No session found" });
+			}
+	
+			let decoded;
+			try {
+				decoded = request.server.jwt.verify(refreshToken, SECRET_KEY);
+			} catch (err) {
+				reply.clearCookie('refreshToken');
+				return reply.code(401).send({ message: "Invalid session" });
+			}
+	
+			const user = await User.findById(decoded.userId);
+			if (!user || !user.is_active) {
+				reply.clearCookie('refreshToken');
+				return reply.code(401).send({ message: "User not found or inactive" });
+			}
+	
+			const { accessToken } = await generateTokens(user, reply.server);
+			
+			return reply.code(200).send({
+				userId: user.id,
+				nickname: user.nickname,
+				email: user.email,
+				fullName: user.full_name,
+				age: user.age,
+				country: user.country,
+				language: user.language || 'en',
+				avatarUrl: user.avatar_url,
+				is2faEnabled: user.is_2fa_enabled,
+				createdAt: user.created_at,
+				accessToken: accessToken
+			});
+		} catch (err) {
+			return reply.code(500).send({ message: "Error validating session", error: err.message });
+		}
+	}
+
 	static async login(request, reply) {
 		const { email, password } = request.body;
 		try {
@@ -72,38 +102,49 @@ class AuthController {
 			if (!user.is_2fa_enabled) {
 				const { accessToken, refreshToken } = await generateTokens(user, reply.server);
 				const sessId = await Session.create({ userId, accessToken, refreshToken });
+				const session = await Session.getById(sessId);
 				await User.updateUserStatus(userId, { status: "online" });
+
+				console.log('Refresh token (first 20 chars):', refreshToken.substring(0, 20));
+				
+				reply.setCookie('refreshToken', refreshToken, {
+					httpOnly: true,
+					secure: false,
+					sameSite: 'strict',
+					maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+					path: '/',
+					domain: undefined
+				});
+				
+				
 				return reply.code(200).send({
-					require2FA: false, sessionId: sessId, accessToken: accessToken, refreshToken: refreshToken,
-					// userId: user.id, email: user.email, nickname: user.nickname, fullName: user.full_name,
-					// avatarUrl: user.avatar_url
+					require2FA: false, 
+					sessUUID: session.uuid, 
+					accessToken: accessToken
 				});
 			} else {
 				const sessId = await Session.create({ userId, accessToken: null, refreshToken: null });
-				reply.server.log.info(`sessId: ${sessId}`);
-				return reply.code(200).send({ require2FA: true, sessionId: sessId });
+				const session = await Session.getById(sessId);
+				return reply.code(200).send({ require2FA: true, sessUUID: session.uuid });
 			}
 		} catch (err) {
-			// Handle specific error messages
 			if (err.message === "Incorrect email" || err.message === "Invalid password") {
 				return reply.code(404).send({ message: err.message });
 			}
 			if (err.message === "User not active")
 				return reply.code(403).send({ message: `${err.message}! check your inbox and activate your account` });
-			// Default to 500 for any other server-side error
 			return reply.code(500).send({ message: 'Error with login from the server!', error: err.message });
 		}
 	}
 
-	// Logout a user
 	static async logout(request, reply) {
-		const { sessionId } = request.params;
+		const { sessionUUID } = request.params;
 		try {
-			const session = await Session.getById(sessionId);
+			const session = await Session.getByUUID(sessionUUID);
 			if (!session)
 				return reply.code(404).send({ message: "Session not found!" });
 			else {
-				await Session.deleteById(session.id);
+				await Session.deleteByUUID(sessionUUID);
 				await User.updateUserStatus(session.user_id, { status: "offline" });
 				return reply.code(200).send({ message: "User logged out successfully!" });
 			}
@@ -115,11 +156,13 @@ class AuthController {
 	static async verifyResetEmail(request, reply) {
 		const { email } = request.body;
 		const passwordResetEmailMessage = (fullName, uuid) => {
+			const host = request.headers.host.split(':')[0];
+			const protocol = request.headers['x-forwarded-proto'] || 'https';
 			return `
 				<div>
 					<p>Dear ${fullName}, </p>
 					<p>Please follow the below link to reset your password. </p>
-					<p>${process.env.FRONTEND_DOMAIN}/reset_password/${uuid} </p>
+					<p>${protocol}://${host}:4443/reset_password/${uuid} </p>
 					<p>Have a nice day! </p>
 				</div>
 			`;
@@ -133,10 +176,13 @@ class AuthController {
 			const userId = user.id;
 			const uuid = crypto.randomUUID();
 			try {
-				await axios.post(`https://localhost:8000/notifications/email/${userId}`, {
-					email: user.email,
-					subject: "Reset password email",
-					body: passwordResetEmailMessage(user.full_name, uuid),
+				await axios.post(`http://notifications:3003/api/notifications/email`, {
+					recipientId: userId,
+					content: {
+						subject: "Reset password email",
+						email: user.email,
+						body: passwordResetEmailMessage(user.full_name, uuid)
+					}
 				});
 				await UserToken.create({ userId, activationToken: uuid, tokenType: "reset_password" });
 				return reply.code(200).send({ message: "Email sent successfully!" });
@@ -157,15 +203,13 @@ class AuthController {
 				return reply.code(404).send({ message: "Token not found!" });
 			if (tokenRecord.token_type !== "reset_password")
 				return reply.code(403).send({ message: "Token is not for reset password!" });
-			// Check if the token has expired (24 hours expiration)
 			const expiresAt = tokenRecord.expires_at;
 			const userId = tokenRecord.user_id;
-			const tokenExpirationTime = new Date(expiresAt).getTime(); // Get the expiration time in milliseconds
-			const currentTime = new Date().getTime(); // Get the current time in milliseconds
+			const tokenExpirationTime = new Date(expiresAt).getTime();
+			const currentTime = new Date().getTime();
 
-			// Check if the token has expired (24 hours expiration)
 			if (currentTime > tokenExpirationTime) {
-				await UserToken.deleteByToken(UserToken); // Delete expired token
+				await UserToken.deleteByToken(UserToken);
 				return reply.code(400).send({ message: "Token has expired!" });
 			}
 			const user = await User.findById(userId);
@@ -194,15 +238,13 @@ class AuthController {
 				return reply.code(404).send({ message: "Token not found!" });
 			if (tokenRecord.token_type !== "account_activation")
 				return reply.code(403).send({ message: "Token is not for account activation!" });
-			// Check if the token has expired (24 hours expiration)
 			const expiresAt = tokenRecord.expires_at;
 			const userId = tokenRecord.user_id;
-			const tokenExpirationTime = new Date(expiresAt).getTime(); // Get the expiration time in milliseconds
-			const currentTime = new Date().getTime(); // Get the current time in milliseconds
+			const tokenExpirationTime = new Date(expiresAt).getTime();
+			const currentTime = new Date().getTime();
 
-			// Check if the token has expired (24 hours expiration)
 			if (currentTime > tokenExpirationTime) {
-				await UserToken.deleteByToken(UserToken); // Delete expired token
+				await UserToken.deleteByToken(token);
 				await User.delete(userId);
 				return reply.code(400).send({ message: "Token has expired!" });
 			}
@@ -210,44 +252,29 @@ class AuthController {
 			if (!user)
 				return reply.code(404).send({ message: "User not found!" });
 			await User.activateUser(userId);
-			await UserToken.deleteByToken(UserToken); // Delete expired token
-			// return reply.code(200).send({ message: "Account activation complete!" });
-			return reply.redirect(`${process.env.FRONTEND_DOMAIN}/`);
+			await UserToken.deleteByToken(token);
+			const host = request.headers.host.split(':')[0];
+			const protocol = request.headers['x-forwarded-proto'] || 'https';
+			return reply.redirect(`${protocol}://${host}/account-verified?u=${user.nickname}&e=${user.email}`);
 		} catch (err) {
 			return reply.code(500).send({ message: "Error activating the account!", error: err.message });
 		}
 	}
 
-	static async googleRemoteAuthenticate(request, reply) {
+	static async googlesignIn(request, reply) {
+		const { email, name, country, image_url } = request.body;
 		try {
-			const token = await request.server.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(request);
-			const googleUser = await verifyGoogleToken(token.token.id_token);  // Verifies authenticity
-
-			if (!googleUser.email_verified) {
-				return reply.code(400).send({ message: "Google email is not verified" });
-			}
-			// Fetch user info from Google
-			const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-				headers: {
-					Authorization: `Bearer ${token.token.access_token}`,
-				},
-			});
-
-			const userInfo = await userInfoResponse.json();
-
-			// Send response with user info
-			let user = await User.findByEmail(userInfo.email);
-			const hashedGoogleId = await bcrypt.hash(userInfo.id, 10);
+			let user = await User.findByEmail(email);
 			if (!user) {
 				const userData = {
-					email: userInfo.email,
+					email: email,
 					password: null,
 					nickname: null,
-					full_name: capitalizeFullName(userInfo.name),
+					full_name: capitalizeFullName(name),
 					age: null,
-					country: null,
-					google_id: hashedGoogleId
-				}
+					image_url: image_url,
+					country: country,
+				};
 				const newUserId = await User.create(userData);
 				if (!newUserId) {
 					throw new Error("Failed to create user");
@@ -257,49 +284,35 @@ class AuthController {
 				user = await User.findById(newUserId);
 			}
 			const userId = user.id;
-			if (!user.googleId)
-				await User.updateUserGoogleID(userId, { googleId: hashedGoogleId });
 			if (!user.is_active)
 				await User.activateUser(userId);
-			let sessId;
 			if (!user.is_2fa_enabled) {
-				const { accessToken, refreshToken } = await generateTokens(user, request.server);
-				sessId = await Session.create({ userId, accessToken, refreshToken });
+				const { accessToken, refreshToken } = await generateTokens(user, reply.server);
+				const sessId = await Session.create({ userId, accessToken, refreshToken });
+				const session = await Session.getById(sessId);
 				await User.updateUserStatus(userId, { status: "online" });
-			} else
-				sessId = await Session.create({ userId, accessToken: null, refreshToken: null });
-			reply.setCookie('sessionId', sessId, {
-				httpOnly: true,  // Prevents client-side JS access
-				secure: false,    // Ensures cookie is sent over HTTPS only
-				sameSite: 'Strict',  // Prevents cross-site request forgery (CSRF)
-				path: '/',       // Cookie accessible across the entire site
-				maxAge: 60 * 60 * 24 // Expires in 24 hours
-			});
-			if (!user.is_2fa_enabled)
-				return reply.redirect(`${process.env.FRONTEND_DOMAIN}/play`);
-			else
-				return reply.redirect(`${process.env.FRONTEND_DOMAIN}/register/twofactor`);
+				reply.setCookie('refreshToken', refreshToken, {
+					httpOnly: true,
+					secure: false,
+					sameSite: 'strict',
+					maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+					path: '/',
+					domain: undefined
+				});
+				
+				return reply.code(200).send({ 
+					require2FA: false, 
+					sessUUID: session.uuid, 
+					accessToken 
+				});
+			}
+			else {
+				const sessId = await Session.create({ userId, accessToken: null, refreshToken: null });
+				const session = await Session.getById(sessId);
+				return reply.code(200).send({ require2FA: true, sessUUID: session.uuid });
+			}
 		} catch (err) {
-			request.log.error(err);
-			return reply.code(500).send({ message: 'Authentication failed', error: err.message });
-		}
-	}
-
-	static async googlesignIn(request, reply) {
-		try {
-			console.log("Received cookies:", request.cookies);
-			const sessionId = request.cookies.sessionId;
-			if (!sessionId)
-				return reply.code(401).send({ key: "cookie", message: "No session ID found. Please log in." });
-			const session = await Session.getById(sessionId);
-			if (!session)
-				return reply.code(401).send({ key: "not-found", message: "Invalid session id! please login again" });
-			if (!session.access_token && !session.refresh_token)
-				return reply.code(200).send({ sessionId });
-			else
-				return reply.code(200).send({ sessionId, accessToken: session.access_token, refreshToken: session.refresh_token });
-		} catch (err) {
-			return reply.code(500).send({ message: "Error with google sign in!", error: err.message });
+			return reply.code(500).send({ message: "Error with remote authentication", error: err.message });
 		}
 	}
 }

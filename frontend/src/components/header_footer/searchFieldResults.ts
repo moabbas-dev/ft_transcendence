@@ -1,7 +1,20 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   searchFieldResults.ts                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: afarachi <afarachi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/22 15:19:10 by afarachi          #+#    #+#             */
+/*   Updated: 2025/06/22 15:19:10 by afarachi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 import { t } from "../../languages/LanguageController";
 import { Profile } from "../profile/UserProfile";
+import defaultAvatar from "../../assets/guests.png";
 
-export function displayResults(users: {nickname:string, status:string, avatar:string}[], container: HTMLElement): void {
+export function displayResults(users: {nickname:string, status:string, avatar_url:string}[], container: HTMLElement): void {
 	container.innerHTML = '';
 
 	if (users.length === 0) {
@@ -9,7 +22,7 @@ export function displayResults(users: {nickname:string, status:string, avatar:st
 		return;
 	}
 
-	users.forEach(user => {
+	users.forEach(user => {		
 		const userItem = document.createElement('div');
 		userItem.className = 'flex items-center rounded-md gap-3 p-3 hover:bg-gray-100 cursor-pointer';
 
@@ -17,7 +30,7 @@ export function displayResults(users: {nickname:string, status:string, avatar:st
 
 		userItem.innerHTML = `
 		<div class="w-10 h-10 rounded-full relative" id="user">
-		  <img src="${user.avatar}" alt="${user.nickname}" class="w-full h-full rounded-full object-cover">
+		  <img src="${user.avatar_url || defaultAvatar}" alt="${user.nickname}" class="w-full h-full rounded-full object-cover" referrerpolicy="no-referrer">
 		  <span class="absolute bottom-0 right-0 w-3 h-3 ${statusColor} rounded-full border-2 border-white"></span>
 		</div>
 		<div>
@@ -26,7 +39,6 @@ export function displayResults(users: {nickname:string, status:string, avatar:st
 		</div>
 	  `;
 
-		// Add click event to user item
 		userItem.addEventListener('click', () => {
 			let profilePopUp = document.querySelector(".profile");
 				if (!profilePopUp) {
@@ -39,7 +51,6 @@ export function displayResults(users: {nickname:string, status:string, avatar:st
 				});
 				profilePopUp.innerHTML = '';
 				profilePopUp.appendChild(profile);
-			// Close the results container
 			container.classList.add('hidden');
 		});
 
@@ -47,7 +58,6 @@ export function displayResults(users: {nickname:string, status:string, avatar:st
 	});
 }
 
-// Helper function to get status color
 function getStatusColor(status: string): string {
 	switch (status) {
 		case 'online':

@@ -1,6 +1,9 @@
 import { formatDistanceToNow } from "date-fns";
+import { formatTimestamp } from "../../utils/formatTime.js";
 import { createComponent } from "../../utils/StateManager.js";
 import { NotificationProps } from "./Notification.js";
+import { formatInTimeZone } from "date-fns-tz";
+import { t } from "../../languages/LanguageController.js";
 
 export const TournamentAlertNotification = createComponent((props: NotificationProps) => {
 	props;
@@ -8,10 +11,9 @@ export const TournamentAlertNotification = createComponent((props: NotificationP
 	notification.className = 'w-full flex flex-col gap-1 text-black border-b bg-yellow-50';
 	notification.innerHTML = `
 		<div class="flex justify-between items-center">
-			<span class="text-lg font-bold hover:underline hover:opacity-90 cursor-pointer text-orange-600">Tournament Alert</span>
+			<span class="text-lg font-bold hover:underline hover:opacity-90 cursor-pointer text-orange-600">${t('play.tournaments.alert')}</span>
 			<div class="flex items-center gap-2">
 				${!props.is_read? '<div class="size-1.5 bg-red-600 rounded-full"></div>' : ''}
-				<span class="text-sm text-gray-600">${formatDistanceToNow(props.created_at, { addSuffix: false })}</span>
 			</div>
 		</div>
 		<div>
