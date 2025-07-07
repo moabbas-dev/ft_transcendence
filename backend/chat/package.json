@@ -16,6 +16,7 @@
     "@fastify/cors": "^11.0.0",
     "axios": "^1.9.0",
     "chat": "file:",
+    "dompurify": "^3.2.6",
     "dotenv": "^16.4.7",
     "fastify": "^5.2.2",
     "fastify-websocket": "^4.2.2",
@@ -24,6 +25,7 @@
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
+    "@types/dompurify": "^3.0.5",
     "nodemon": "^3.1.9"
   }
 }
