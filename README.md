@@ -4,6 +4,19 @@
 
 ---
 
+🚀 Quick Start
+Get up and running in minutes:
+bash# Clone the repository
+git clone https://github.com/moabbas-dev/ft_transcendence.git
+cd ft_transcendence
+
+# Start the application
+docker compose up --build
+
+# Access the application
+open https://localhost:4443
+
+---
 ## ⚙️ Tech Stack
 
 - **Frontend:** TypeScript, TailwindCSS
